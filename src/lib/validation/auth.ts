@@ -1,0 +1,32 @@
+import { z } from "zod";
+
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1, "Password is required"),
+});
+
+export const registerSchema = z.object({
+  email: z.string().email(),
+  phone: z.string().max(32).optional(),
+  role: z.enum(["patient", "doctor"]),
+  password: z.string().min(8),
+});
+
+export const emailSchema = z.object({
+  email: z.string().email(),
+});
+
+export const passwordResetConfirmSchema = z.object({
+  token: z.string().min(1).max(128),
+  new_password: z.string().min(8),
+});
+
+export const emailVerifySchema = z.object({
+  token: z.string().min(1).max(128),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type EmailInput = z.infer<typeof emailSchema>;
+export type PasswordResetConfirmInput = z.infer<typeof passwordResetConfirmSchema>;
+export type EmailVerifyInput = z.infer<typeof emailVerifySchema>;
