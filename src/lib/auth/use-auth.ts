@@ -27,8 +27,12 @@ export function useLogin() {
     mutationFn: authApi.login,
     onSuccess: async (tokens) => {
       setTokens(tokens);
+      const user = await queryClient.fetchQuery({
+        queryKey: authKeys.me,
+        queryFn: authApi.me,
+      });
       await queryClient.invalidateQueries({ queryKey: authKeys.me });
-      router.replace("/dashboard");
+      router.replace(user.role === "patient" ? "/triage" : "/dashboard");
     },
   });
 }

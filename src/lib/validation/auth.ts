@@ -22,7 +22,8 @@ export const passwordResetConfirmSchema = z.object({
 });
 
 export const emailVerifySchema = z.object({
-  token: z.string().min(1).max(128),
+  email: z.string().email(),
+  code: z.string().regex(/^\d{6}$/, "Enter the 6-digit code from your email."),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

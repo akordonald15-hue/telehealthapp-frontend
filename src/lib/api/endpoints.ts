@@ -10,6 +10,7 @@ import type {
   MedicalFileUploadInit,
   MedicalRecord,
   Message,
+  MessageAttachmentUploadInit,
   PatientProfile,
   Payment,
   PaymentInitiation,
@@ -33,25 +34,33 @@ import type {
 
 type PublicRegistrationRole = Extract<UserRole, "patient" | "doctor">;
 
+function authPath(path: string) {
+  return typeof window === "undefined" ? path : `/api${path}`;
+}
+
 export const authApi = {
   register: (body: { email: string; phone?: string; role: PublicRegistrationRole; password: string }) =>
-    apiRequest<RegisterResponse>("/auth/register/", { method: "POST", body, auth: false }),
+    apiRequest<RegisterResponse>(authPath("/auth/register/"), { method: "POST", body, auth: false }),
   login: (body: { email: string; password: string }) =>
-    apiRequest<TokenPair>("/auth/login/", { method: "POST", body, auth: false }),
+    apiRequest<TokenPair>(authPath("/auth/login/"), { method: "POST", body, auth: false }),
   refresh: (body: { refresh: string }) =>
-    apiRequest<TokenPair>("/auth/refresh/", { method: "POST", body, auth: false }),
-  logout: (body: { refresh: string }) => apiRequest<DetailResponse>("/auth/logout/", { method: "POST", body }),
-  me: () => apiRequest<User>("/auth/me/"),
+    apiRequest<TokenPair>(authPath("/auth/refresh/"), { method: "POST", body, auth: false }),
+  logout: (body: { refresh: string }) => apiRequest<DetailResponse>(authPath("/auth/logout/"), { method: "POST", body }),
+  me: () => apiRequest<User>(authPath("/auth/me/")),
   updateMe: (body: Partial<Pick<User, "email" | "phone">>) =>
-    apiRequest<User>("/auth/me/", { method: "PATCH", body }),
+    apiRequest<User>(authPath("/auth/me/"), { method: "PATCH", body }),
   passwordResetRequest: (body: { email: string }) =>
-    apiRequest<DetailResponse>("/auth/password-reset/request/", { method: "POST", body, auth: false }),
+    apiRequest<DetailResponse>(authPath("/auth/password-reset/request/"), { method: "POST", body, auth: false }),
   passwordResetConfirm: (body: { token: string; new_password: string }) =>
-    apiRequest<DetailResponse>("/auth/password-reset/confirm/", { method: "POST", body, auth: false }),
+    apiRequest<DetailResponse>(authPath("/auth/password-reset/confirm/"), { method: "POST", body, auth: false }),
+  otpRequest: (body: { email: string }) =>
+    apiRequest<DetailResponse>(authPath("/auth/otp/request/"), { method: "POST", body, auth: false }),
+  otpVerify: (body: { email: string; code: string }) =>
+    apiRequest<DetailResponse>(authPath("/auth/otp/verify/"), { method: "POST", body, auth: false }),
   emailVerificationRequest: (body: { email: string }) =>
-    apiRequest<DetailResponse>("/auth/email/verify/request/", { method: "POST", body: body, auth: false }),
-  emailVerificationConfirm: (body: { token: string }) =>
-    apiRequest<DetailResponse>("/auth/email/verify/confirm/", { method: "POST", body, auth: false }),
+    apiRequest<DetailResponse>(authPath("/auth/otp/request/"), { method: "POST", body: body, auth: false }),
+  emailVerificationConfirm: (body: { email: string; code: string }) =>
+    apiRequest<DetailResponse>(authPath("/auth/otp/verify/"), { method: "POST", body, auth: false }),
 };
 
 export const profilesApi = {
@@ -94,6 +103,14 @@ export const messagingApi = {
     apiList<Message>(`/messages/threads/${threadId}/messages/`, query),
   createMessage: (threadId: number, body: { body: string; attachment_url?: string }) =>
     apiRequest<Message>(`/messages/threads/${threadId}/messages/`, { method: "POST", body }),
+  initAttachmentUpload: (
+    threadId: number,
+    body: { filename: string; content_type?: string; size_bytes?: number },
+  ) =>
+    apiRequest<MessageAttachmentUploadInit>(`/messages/threads/${threadId}/attachments/init/`, {
+      method: "POST",
+      body,
+    }),
 };
 
 export const paymentsApi = {

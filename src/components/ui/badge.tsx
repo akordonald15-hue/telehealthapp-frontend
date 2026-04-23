@@ -1,11 +1,11 @@
 import { cn } from "@/lib/utils";
 
 const tones = {
-  neutral: "bg-zinc-100 text-zinc-800",
-  green: "bg-emerald-100 text-emerald-900",
-  amber: "bg-amber-100 text-amber-900",
-  rose: "bg-rose-100 text-rose-900",
-  cyan: "bg-cyan-100 text-cyan-900",
+  neutral: "bg-[#F3F4F6] text-[#374151]",
+  green: "bg-[#ECFDF5] text-[#047857]",
+  amber: "bg-[#FFFBEB] text-[#B45309]",
+  rose: "bg-[#FEF2F2] text-[#BE123C]",
+  cyan: "bg-[#ECFEFF] text-[#0F766E]",
 };
 
 export function Badge({
@@ -15,5 +15,5 @@ export function Badge({
   children: React.ReactNode;
   tone?: keyof typeof tones;
 }) {
-  return <span className={cn("inline-flex rounded px-2 py-1 text-xs font-semibold", tones[tone])}>{children}</span>;
+  return <span className={cn("inline-flex rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.08em]", tones[tone])}>{children}</span>;
 }

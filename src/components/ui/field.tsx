@@ -12,11 +12,11 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <label className="grid gap-1.5">
-      <span className="text-sm font-medium text-zinc-800">{label}</span>
+    <label className="grid gap-2">
+      <span className="text-sm font-bold text-[#334155]">{label}</span>
       {children}
-      {hint && !error ? <span className="text-xs text-zinc-500">{hint}</span> : null}
-      {error ? <span className="text-xs font-medium text-rose-700">{error}</span> : null}
+      {hint && !error ? <span className="text-xs text-[#64748B]">{hint}</span> : null}
+      {error ? <span className="text-xs font-semibold text-rose-700">{error}</span> : null}
     </label>
   );
 }

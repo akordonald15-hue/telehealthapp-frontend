@@ -2,47 +2,64 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
-import { ApiError } from "@/lib/api/client";
 import { useLogin } from "@/lib/auth/use-auth";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 
 export function LoginForm() {
   const login = useLogin();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") ?? "";
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      email,
       password: "",
     },
   });
 
   return (
-    <form className="grid gap-4" onSubmit={form.handleSubmit((values) => login.mutate(values))}>
+    <form className="grid gap-5" onSubmit={form.handleSubmit((values) => login.mutate(values))}>
+      <Notice title="Welcome back" tone="neutral">
+        Sign in to continue to your secure LifeFirst workspace.
+      </Notice>
       {login.error ? (
-        <Notice title="Sign in failed">
-          {login.error instanceof ApiError ? login.error.message : "Check your email and password."}
-        </Notice>
+        <div className="grid gap-3">
+          <ErrorMessage error={login.error} context="auth" />
+          {login.error instanceof Error && login.error.message.toLowerCase().includes("email not verified") ? (
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-slate-200 bg-white px-4 text-sm font-extrabold text-[#2563EB]"
+              href="/verify-email"
+            >
+              Confirm email
+            </Link>
+          ) : null}
+        </div>
       ) : null}
-      <Field label="Email" error={form.formState.errors.email?.message}>
-        <Input type="email" autoComplete="email" {...form.register("email")} />
+      <Field label="Email" error={form.formState.errors.email?.message} hint="Use the email tied to your LifeFirst account.">
+        <Input type="email" autoComplete="email" placeholder="you@example.com" {...form.register("email")} />
       </Field>
       <Field label="Password" error={form.formState.errors.password?.message}>
-        <Input type="password" autoComplete="current-password" {...form.register("password")} />
+        <Input type="password" autoComplete="current-password" placeholder="Enter your password" {...form.register("password")} />
       </Field>
       <Button type="submit" disabled={login.isPending}>
         {login.isPending ? "Signing in..." : "Sign in"}
       </Button>
-      <div className="flex flex-wrap justify-between gap-3 text-sm text-zinc-600">
-        <Link className="font-medium text-[#2563EB]" href="/register">
-          Create account
-        </Link>
-        <Link className="font-medium text-[#2563EB]" href="/password-reset">
+      <div className="flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+        <p>
+          New here?{" "}
+          <Link className="font-semibold text-[#2563EB]" href="/register">
+            Create account
+          </Link>
+        </p>
+        <Link className="font-semibold text-[#2563EB]" href="/password-reset">
           Reset password
         </Link>
       </div>

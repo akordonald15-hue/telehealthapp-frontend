@@ -1,21 +1,40 @@
-"use client";
+﻿"use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { ArrowRight, CalendarClock, CreditCard, FileText, MessageSquareText, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { appointmentsApi, messagingApi, paymentsApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
+import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
+import { appointmentCompanionLabel } from "@/lib/ui/humanize";
 import type { PaginatedResponse } from "@/lib/types/backend";
 import { formatDateTime, formatMoney } from "@/lib/utils";
 
-function Metric({ label, value, href }: { label: string; value: string | number; href: string }) {
+function Metric({ label, value, href, icon: Icon, description }: { label: string; value: string | number; href: string; icon: React.ComponentType<{ className?: string }>; description: string }) {
   return (
-    <Link href={href} className="rounded-md border border-zinc-200 bg-white p-4 shadow-sm transition hover:border-emerald-300">
-      <span className="text-sm text-zinc-500">{label}</span>
-      <strong className="mt-2 block text-2xl font-semibold text-zinc-950">{value}</strong>
+    <Link
+      href={href}
+      className="group rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_28px_70px_-42px_rgba(37,99,235,0.28)]"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <span className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-[#DBEAFE] text-[#2563EB]">
+          <Icon className="h-5 w-5" />
+        </span>
+        <span className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Now</span>
+      </div>
+      <span className="mt-5 block text-sm font-semibold text-slate-500">{label}</span>
+      <strong className="mt-2 block font-heading text-3xl font-semibold tracking-tight text-[#1F2937]">{value}</strong>
+      <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
+      <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">
+        Open {label.toLowerCase()}
+        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+      </span>
     </Link>
   );
 }
@@ -26,10 +45,6 @@ type ListQuery<T> = {
   isError: boolean;
   isLoading: boolean;
 };
-
-function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Request failed.";
-}
 
 function listMetric<T>(query: ListQuery<T>) {
   if (query.isLoading) {
@@ -54,88 +69,267 @@ export function DashboardClient() {
   const referrals = useQuery({ queryKey: ["referrals", "dashboard"], queryFn: () => referralsApi.list({ page_size: 5 }) });
 
   const user = userQuery.data;
-  const paymentMetric = user?.role === "doctor" ? "Doctor role" : listMetric(payments);
+  const threadMetric = listMetric(threads);
+  const referralMetric = listMetric(referrals);
+  const paymentMetric = user?.role === "doctor" ? "Not shown" : listMetric(payments);
+  const patientHasConsultation = typeof threadMetric === "number" && threadMetric > 0;
+  const patientHasCarePlan = typeof referralMetric === "number" && referralMetric > 0;
+  const nextPatientStep = patientHasConsultation
+    ? {
+        title: "Continue your consultation",
+        description: "Your conversation space is ready for updates, questions, and follow-up from your doctor.",
+        href: "/messages",
+        cta: "Open consultation",
+      }
+    : {
+        title: "Start your care check-in",
+        description: "Share your symptoms first so we can guide you toward the right doctor and the right next step.",
+        href: "/triage",
+        cta: "Start triage",
+      };
   const dashboardErrors = [
-    appointments.isError ? `Appointments: ${errorMessage(appointments.error)}` : null,
-    threads.isError ? `Messages: ${errorMessage(threads.error)}` : null,
-    referrals.isError ? `Referrals: ${errorMessage(referrals.error)}` : null,
-    payments.isError ? `Payments: ${errorMessage(payments.error)}` : null,
+    appointments.isError ? `Appointments: ${getFriendlyErrorMessage(appointments.error, "dashboard")}` : null,
+    threads.isError ? `Messages: ${getFriendlyErrorMessage(threads.error, "dashboard")}` : null,
+    referrals.isError ? `Referrals: ${getFriendlyErrorMessage(referrals.error, "dashboard")}` : null,
+    payments.isError ? `Payments: ${getFriendlyErrorMessage(payments.error, "dashboard")}` : null,
   ].filter(Boolean);
 
   return (
     <Section
-      title="Dashboard"
-      description="Your workspace reflects the backend role and ownership rules for the signed-in account."
+      title={user?.role === "patient" ? "Your care journey" : "Dashboard"}
+      description={
+        user?.role === "patient"
+          ? "Move from care check-in to consultation and follow-up with clear next steps at every stage."
+          : "A simple view of your appointments, conversations, payments, and next steps."
+      }
+      action={
+        user ? (
+          <div className="flex items-center gap-2">
+            <Badge tone={user.role === "admin" ? "rose" : user.role === "doctor" ? "cyan" : "green"}>{user.role}</Badge>
+          </div>
+        ) : null
+      }
     >
-      {dashboardErrors.length ? (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          {dashboardErrors.join(" ")}
-        </div>
-      ) : null}
+      {user?.role === "patient" ? (
+        <>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+            <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.65)] sm:p-8">
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-100">Guided care journey</p>
+              <h2 className="font-heading mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">{nextPatientStep.title}</h2>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">{nextPatientStep.description}</p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href={nextPatientStep.href} className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[#2563EB] shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5">
+                  {nextPatientStep.cta}
+                </Link>
+                <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-white/25 bg-white/10 px-5 text-sm font-extrabold text-white transition hover:bg-white/16">
+                  Review appointments
+                </Link>
+              </div>
+            </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" />
-        <Metric label="Message threads" value={listMetric(threads)} href="/messages" />
-        <Metric label="Referrals" value={listMetric(referrals)} href="/referrals" />
-        <Metric label="Payments" value={paymentMetric} href="/payments" />
-      </div>
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <div className="flex items-start gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-emerald-50 text-[#10B981]">
+                  <Sparkles className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">What happens next</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Follow the same care path each time, with a clear next action.</p>
+                </div>
+              </div>
+              <div className="mt-6 grid gap-3 text-sm text-slate-600">
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">1. Care check-in</p>
+                  <p className="mt-1 leading-6">Share your symptoms so your doctor gets the right context before the conversation starts.</p>
+                </div>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">2. Doctor match</p>
+                  <p className="mt-1 leading-6">We guide you toward the doctor best placed to help with your concern.</p>
+                </div>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">3. Consultation and care plan</p>
+                  <p className="mt-1 leading-6">Continue the conversation, review your doctor&apos;s notes, and keep follow-up care close.</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-md border border-zinc-200 bg-white p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold text-zinc-950">Next appointments</h2>
-            {user ? <Badge>{user.role}</Badge> : null}
+          {dashboardErrors.length ? (
+            <Notice title="We're having trouble loading some parts of your journey." tone="warning">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <span>Some details may be missing for a moment. Please try again.</span>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="inline-flex min-h-10 items-center justify-center rounded-[12px] border border-amber-200 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-50"
+                >
+                  Try again
+                </button>
+              </div>
+            </Notice>
+          ) : null}
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+              <p className="text-sm font-semibold text-slate-500">Care check-in</p>
+              <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Done" : "Next"}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Start with symptoms and a short guided review before your consultation.</p>
+              <Link href="/triage" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open care check-in <ArrowRight className="h-4 w-4" /></Link>
+            </div>
+            <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+              <p className="text-sm font-semibold text-slate-500">Consultation</p>
+              <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Ready" : "Waiting"}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Your matched doctor and conversation space will guide the next clinical step.</p>
+              <Link href="/messages" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open consultation <ArrowRight className="h-4 w-4" /></Link>
+            </div>
+            <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+              <p className="text-sm font-semibold text-slate-500">Care plan</p>
+              <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasCarePlan ? "Available" : "Coming next"}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Doctor notes, instructions, referrals, and next steps come together in one follow-up view.</p>
+              <Link href="/care-plan" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open care plan <ArrowRight className="h-4 w-4" /></Link>
+            </div>
           </div>
-          <div className="grid gap-3">
-            {appointments.isLoading ? (
-              <p className="text-sm text-zinc-600">Loading appointments...</p>
-            ) : appointments.isError ? (
-              <p className="text-sm text-red-700">{errorMessage(appointments.error)}</p>
-            ) : appointments.data?.results.length ? (
-              appointments.data.results.map((item) => (
-                <div key={item.id} className="flex items-center justify-between gap-3 rounded-md bg-stone-50 p-3">
-                  <div>
-                    <p className="text-sm font-medium text-zinc-950">{formatDateTime(item.scheduled_at)}</p>
-                    <p className="text-xs text-zinc-500">Doctor #{item.doctor}</p>
-                  </div>
-                  <StatusBadge value={item.status} />
+
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Keep upcoming visits and booking details close." />
+            <Metric label="Consultations" value={threadMetric} href="/messages" icon={MessageSquareText} description="Follow up with your doctor in one secure conversation." />
+            <Metric label="Care Plans" value={referralMetric} href="/care-plan" icon={FileText} description="Review doctor notes, instructions, and referrals when they are ready." />
+            <Metric label="Payments" value={paymentMetric} href="/payments" icon={CreditCard} description="Complete checkout and keep payment updates in one place." />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+            <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.65)] sm:p-8">
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-100">LifeFirst workspace</p>
+              <h2 className="font-heading mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Everything important in one calm view.</h2>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">
+                Keep up with visits, conversations, records, and referrals without bouncing between disconnected tools.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[#2563EB] shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5">
+                  Book or review visits
+                </Link>
+                <Link href="/messages" className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-white/25 bg-white/10 px-5 text-sm font-extrabold text-white transition hover:bg-white/16">
+                  Open messages
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <div className="flex items-start gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-emerald-50 text-[#10B981]">
+                  <Sparkles className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Today at a glance</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">A quick read on what needs attention next.</p>
                 </div>
-              ))
-            ) : (
-              <p className="text-sm text-zinc-600">No appointments returned.</p>
-            )}
-          </div>
-        </div>
-        <div className="rounded-md border border-zinc-200 bg-white p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold text-zinc-950">Recent payments</h2>
-            <Link className="text-sm font-semibold text-emerald-800" href="/payments">
-              Open
-            </Link>
-          </div>
-          <div className="grid gap-3">
-            {user?.role === "doctor" ? (
-              <p className="text-sm text-zinc-600">Payment listing is not exposed for doctors.</p>
-            ) : userQuery.isLoading || payments.isLoading ? (
-              <p className="text-sm text-zinc-600">Loading payments...</p>
-            ) : payments.isError ? (
-              <p className="text-sm text-red-700">{errorMessage(payments.error)}</p>
-            ) : payments.data?.results.length ? (
-              payments.data.results.map((item) => (
-                <div key={item.id} className="flex items-center justify-between gap-3 rounded-md bg-stone-50 p-3">
-                  <div>
-                    <p className="text-sm font-medium text-zinc-950">{formatMoney(item.amount, item.currency)}</p>
-                    <p className="text-xs text-zinc-500">{item.provider}</p>
-                  </div>
-                  <StatusBadge value={item.status} />
+              </div>
+              <div className="mt-6 grid gap-3 text-sm text-slate-600">
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">Appointments</p>
+                  <p className="mt-1 leading-6">{appointments.isLoading ? "Loading your upcoming visits..." : `${listMetric(appointments)} appointment${listMetric(appointments) === 1 ? "" : "s"} to review.`}</p>
                 </div>
-              ))
-            ) : (
-              <p className="text-sm text-zinc-600">No payments returned.</p>
-            )}
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">Messages</p>
+                  <p className="mt-1 leading-6">{threads.isLoading ? "Loading your conversations..." : `${listMetric(threads)} conversation${listMetric(threads) === 1 ? "" : "s"} available.`}</p>
+                </div>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">Payments</p>
+                  <p className="mt-1 leading-6">{user?.role === "doctor" ? "Payment details are only shown where they are needed." : `${paymentMetric} payment update${paymentMetric === 1 ? "" : "s"} available.`}</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+
+          {dashboardErrors.length ? (
+            <Notice title="We're having trouble loading some parts of your dashboard." tone="warning">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <span>Some details may be missing for a moment. Please try again.</span>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="inline-flex min-h-10 items-center justify-center rounded-[12px] border border-amber-200 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-50"
+                >
+                  Try again
+                </button>
+              </div>
+            </Notice>
+          ) : null}
+
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Track upcoming visits and booking activity." />
+            <Metric label="Conversations" value={listMetric(threads)} href="/messages" icon={MessageSquareText} description="Stay close to patient and care-team communication." />
+            <Metric label="Referrals" value={listMetric(referrals)} href="/referrals" icon={FileText} description="Review outbound and visible referral activity." />
+            <Metric label="Payments" value={paymentMetric} href="/payments" icon={CreditCard} description="See checkout activity and payment history where permitted." />
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Next appointments</h2>
+                  <p className="mt-1 text-sm text-slate-500">Your upcoming visits at a glance.</p>
+                </div>
+                {user ? <Badge tone={user.role === "admin" ? "rose" : user.role === "doctor" ? "cyan" : "green"}>{user.role}</Badge> : null}
+              </div>
+              <div className="grid gap-3">
+                {appointments.isLoading ? (
+                  <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading your appointments...</div>
+                ) : appointments.isError ? (
+                  <div className="rounded-[20px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(appointments.error, "appointments")}</div>
+                ) : appointments.data?.results.length ? (
+                  appointments.data.results.map((item) => (
+                    <div key={item.id} className="flex flex-col gap-3 rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
+                        <p className="mt-1 text-sm text-slate-600">{appointmentCompanionLabel(user?.role)}</p>
+                      </div>
+                      <StatusBadge value={item.status} />
+                    </div>
+                  ))
+                ) : (
+                  <EmptyState title="No appointments yet" description="Your upcoming visits will appear here once they are scheduled." action={<Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[#2563EB] px-4 text-sm font-extrabold text-white">Go to appointments</Link>} />
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Recent payments</h2>
+                  <p className="mt-1 text-sm text-slate-500">A quick look at your recent payment activity.</p>
+                </div>
+                <Link className="text-sm font-semibold text-[#2563EB]" href="/payments">
+                  Open
+                </Link>
+              </div>
+              <div className="grid gap-3">
+                {user?.role === "doctor" ? (
+                  <EmptyState title="Payments are not shown here" description="This view keeps the focus on the parts of care you need most." />
+                ) : userQuery.isLoading || payments.isLoading ? (
+                  <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading your payment history...</div>
+                ) : payments.isError ? (
+                  <div className="rounded-[20px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(payments.error, "payments")}</div>
+                ) : payments.data?.results.length ? (
+                  payments.data.results.map((item) => (
+                    <div key={item.id} className="flex flex-col gap-3 rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-[#1F2937]">{formatMoney(item.amount, item.currency)}</p>
+                        <p className="mt-1 text-sm text-slate-600">{item.provider}</p>
+                      </div>
+                      <StatusBadge value={item.status} />
+                    </div>
+                  ))
+                ) : (
+                  <EmptyState title="No payments yet" description="Checkout activity and completed payments will appear here when available." action={<Link href="/payments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[#2563EB] px-4 text-sm font-extrabold text-white">Open payments</Link>} />
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </Section>
   );
 }

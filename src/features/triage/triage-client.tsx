@@ -1,188 +1,551 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import type { z } from "zod";
+import {
+  AlertTriangle,
+  BrainCircuit,
+  ClipboardList,
+  HeartPulse,
+  LoaderCircle,
+  Mic,
+  SendHorizonal,
+  ShieldAlert,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import type { ComponentType, ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Field } from "@/components/ui/field";
-import { Input, Select, Textarea } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { triageApi } from "@/lib/api/endpoints";
-import { triageMessageSchema, triageSymptomsSchema } from "@/lib/validation/features";
+import { messagingApi, triageApi } from "@/lib/api/endpoints";
+import { useCurrentUser } from "@/lib/auth/use-auth";
+import type {
+  TriageConversationResult,
+  TriageProcessingResponse,
+  TriageQuestion,
+  TriageSeverity,
+} from "@/lib/types/backend";
+import { cn } from "@/lib/utils";
 
-type TriageSymptomsFormValues = z.input<typeof triageSymptomsSchema>;
-type TriageSymptomsInput = z.output<typeof triageSymptomsSchema>;
-type TriageMessageFormValues = z.input<typeof triageMessageSchema>;
-type TriageMessageInput = z.output<typeof triageMessageSchema>;
+type TriageResultData = TriageConversationResult | TriageProcessingResponse;
+
+const severityOptions: Array<{ value: TriageSeverity; label: string }> = [
+  { value: "mild", label: "Mild" },
+  { value: "moderate", label: "Moderate" },
+  { value: "severe", label: "Severe" },
+];
+
+function isConversationResult(data: TriageResultData): data is TriageConversationResult {
+  return "summary_preview" in data || "risk_level" in data || "extracted_symptoms" in data;
+}
+
+function toReadableList(items: unknown[]): string[] {
+  return items
+    .flatMap((item) => {
+      if (typeof item === "string") {
+        return [item];
+      }
+      if (item && typeof item === "object") {
+        const record = item as Record<string, unknown>;
+        return [record.name, record.symptom, record.value, record.label]
+          .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+          .map((value) => value.trim());
+      }
+      return [];
+    })
+    .filter((value, index, array) => array.indexOf(value) === index);
+}
+
+function formatDepartment(value?: string | null) {
+  if (!value) {
+    return "your care team";
+  }
+
+  return value
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatSeverity(value?: string | null) {
+  if (!value) {
+    return "Being reviewed";
+  }
+
+  const normalized = value.toLowerCase();
+  if (normalized === "low") {
+    return "Low concern";
+  }
+  if (normalized === "medium" || normalized === "moderate") {
+    return "Moderate concern";
+  }
+  if (normalized === "high" || normalized === "severe") {
+    return "High concern";
+  }
+  return value;
+}
+
+function hasEmergencyFlag(emergency: Record<string, unknown> | null | undefined) {
+  if (!emergency) {
+    return false;
+  }
+
+  return Object.values(emergency).some((value) => value === true || value === "true" || value === "yes");
+}
+
+function recommendedAction(data: TriageResultData) {
+  if (isConversationResult(data) && hasEmergencyFlag(data.emergency)) {
+    return "Please seek urgent medical care right away or contact emergency services if you feel unsafe.";
+  }
+
+  if (isConversationResult(data) && data.next_question) {
+    return `Answer the next question about ${data.next_question.symptom.toLowerCase()} so we can guide you more clearly.`;
+  }
+
+  if (isConversationResult(data) && data.department) {
+    return `Follow up with ${formatDepartment(data.department)} for the next step in your care.`;
+  }
+
+  if (data.status === "processing") {
+    return "We are reviewing your answers and preparing your guidance.";
+  }
+
+  return "Keep watching your symptoms and contact your care team if anything changes.";
+}
+
+function questionPrompt(question: TriageQuestion | null | undefined) {
+  return question?.question_text ?? null;
+}
+
+function summaryText(data: TriageResultData) {
+  if (isConversationResult(data) && data.summary_preview) {
+    return data.summary_preview;
+  }
+
+  if (!isConversationResult(data) && data.detail) {
+    return data.detail;
+  }
+
+  if (data.status === "processing") {
+    return "We have your latest answers and are preparing the next update.";
+  }
+
+  return "Your latest triage guidance will appear here.";
+}
+
+function ResultPanel({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-4">
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white text-[#2563EB] shadow-sm">
+          <Icon className="h-5 w-5" />
+        </span>
+        <div className="min-w-0">
+          <p className="font-semibold text-[#1F2937]">{title}</p>
+          <div className="mt-2 text-sm leading-7 text-slate-600">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResultCard({ data }: { data: TriageResultData }) {
+  const symptoms = isConversationResult(data) ? toReadableList(data.extracted_symptoms) : [];
+  const severity = isConversationResult(data) ? formatSeverity(data.risk_level) : "Being reviewed";
+  const nextQuestion = isConversationResult(data) ? questionPrompt(data.next_question) : null;
+  const disclaimer = data.disclaimer;
+
+  if (data.status === "processing") {
+    return (
+      <Notice title="Thanks, let me take a look at that..." tone="neutral">
+        <div className="space-y-2">
+          <p>{summaryText(data)}</p>
+          <p>{recommendedAction(data)}</p>
+          {disclaimer ? <p>{disclaimer}</p> : null}
+        </div>
+      </Notice>
+    );
+  }
+
+  if (isConversationResult(data) && data.status === "failed") {
+    return (
+      <Notice title="We could not finish this review" tone="warning">
+        <div className="space-y-2">
+          <p>{data.error || "Please try again in a moment."}</p>
+          {disclaimer ? <p>{disclaimer}</p> : null}
+        </div>
+      </Notice>
+    );
+  }
+
+  return (
+    <div className="grid gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <ResultPanel icon={ClipboardList} title="Summary">
+          <p>{summaryText(data)}</p>
+        </ResultPanel>
+        <ResultPanel icon={AlertTriangle} title="Severity">
+          <p>{severity}</p>
+        </ResultPanel>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <ResultPanel icon={HeartPulse} title="Possible causes">
+          {symptoms.length ? (
+            <ul className="list-disc space-y-1 pl-5">
+              {symptoms.map((symptom) => (
+                <li key={symptom}>{symptom}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>We are still narrowing this down based on your answers.</p>
+          )}
+        </ResultPanel>
+        <ResultPanel icon={ShieldAlert} title="Recommended action">
+          <div className="space-y-2">
+            <p>{recommendedAction(data)}</p>
+            {nextQuestion ? <p className="font-medium text-[#1F2937]">Next question: {nextQuestion}</p> : null}
+          </div>
+        </ResultPanel>
+      </div>
+      {disclaimer ? (
+        <Notice title="Medical disclaimer" tone="neutral">
+          {disclaimer}
+        </Notice>
+      ) : null}
+    </div>
+  );
+}
+
+function AssistantBubble({
+  speaker,
+  children,
+}: {
+  speaker: "assistant" | "user";
+  children: ReactNode;
+}) {
+  return (
+    <div className={cn("flex", speaker === "user" ? "justify-end" : "justify-start")}>
+      <div
+        className={cn(
+          "max-w-[88%] rounded-[24px] px-4 py-3 text-sm leading-7 shadow-sm sm:max-w-[80%]",
+          speaker === "user"
+            ? "bg-[linear-gradient(135deg,#2563EB,#60A5FA)] text-white"
+            : "border border-slate-200 bg-white text-slate-700",
+        )}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export function TriageClient() {
+  const userQuery = useCurrentUser();
+  const user = userQuery.data;
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const startSession = useMutation({
-    mutationFn: triageApi.start,
-    onSuccess: (data) => setSessionId(data.id),
+  const [symptomText, setSymptomText] = useState("");
+  const [submittedSymptomText, setSubmittedSymptomText] = useState("");
+  const [selectedSeverity, setSelectedSeverity] = useState<TriageSeverity | null>(null);
+  const autoStartedRef = useRef(false);
+
+  const consultations = useQuery({
+    queryKey: ["threads", "triage-journey"],
+    queryFn: () => messagingApi.threads({ page_size: 5 }),
+    enabled: user?.role === "patient",
   });
-  const submitSymptoms = useMutation({
-    mutationFn: (values: TriageSymptomsInput) =>
-      triageApi.submitSymptoms(sessionId as number, {
-        symptoms: values.symptoms
-          .split(",")
-          .map((symptom) => symptom.trim())
-          .filter(Boolean),
-        severity: values.severity,
-        duration: values.duration,
-        age: values.age === "" ? undefined : values.age,
-        gender: values.gender,
-        location: values.location,
-      }),
-  });
-  const requestAnalyze = useMutation({
-    mutationFn: () => triageApi.requestAnalyze(sessionId as number),
-  });
+
   const startConversation = useMutation({
-    mutationFn: () => triageApi.startConversation(sessionId ? { session_id: sessionId } : undefined),
+    mutationFn: (id: number) => triageApi.startConversation({ session_id: id }),
     onSuccess: (data) => setConversationId(data.conversation.id),
   });
+
+  const startSession = useMutation({
+    mutationFn: triageApi.start,
+    onSuccess: (data) => {
+      setSessionId(data.id);
+      startConversation.mutate(data.id);
+    },
+  });
+
   const sendMessage = useMutation({
-    mutationFn: (values: TriageMessageInput) =>
+    mutationFn: (values: { message: string; severity: TriageSeverity }) =>
       triageApi.sendConversationMessage(conversationId as string, {
         session_id: sessionId || undefined,
         message: values.message,
         severity: values.severity,
       }),
   });
+
   const result = useQuery({
     queryKey: ["triage", "conversation-result", conversationId],
     queryFn: () => triageApi.conversationResult(conversationId as string),
-    enabled: Boolean(conversationId),
+    enabled: Boolean(conversationId) && sendMessage.isSuccess,
     refetchInterval: (query) => {
       const data = query.state.data;
       return data && "status" in data && data.status === "processing" ? 3000 : false;
     },
   });
-  const symptomsForm = useForm<TriageSymptomsFormValues, unknown, TriageSymptomsInput>({
-    resolver: zodResolver(triageSymptomsSchema),
-    defaultValues: {
-      symptoms: "",
-      severity: "moderate",
-      duration: "",
-      age: "",
-      gender: "",
-      location: "",
-    },
-  });
-  const messageForm = useForm<TriageMessageFormValues, unknown, TriageMessageInput>({
-    resolver: zodResolver(triageMessageSchema),
-    defaultValues: {
-      message: "",
-      severity: "moderate",
-    },
-  });
+
+  const hasConsultation = (consultations.data?.results.length ?? 0) > 0;
+  const consultationsReady = user?.role !== "patient" || consultations.isSuccess;
+
+  useEffect(() => {
+    if (
+      user?.role !== "patient" ||
+      !consultationsReady ||
+      hasConsultation ||
+      autoStartedRef.current ||
+      sessionId ||
+      conversationId
+    ) {
+      return;
+    }
+
+    autoStartedRef.current = true;
+    startSession.mutate();
+  }, [consultationsReady, conversationId, hasConsultation, sessionId, startSession, user?.role]);
+
+  const bootError = startSession.error || startConversation.error;
+  const booting = startSession.isPending || startConversation.isPending || (sessionId !== null && !conversationId);
+  const waitingForSymptomText = Boolean(conversationId) && !submittedSymptomText;
+  const waitingForSeverity = Boolean(conversationId) && Boolean(submittedSymptomText) && !sendMessage.isPending && !sendMessage.isSuccess;
+  const processingResult = sendMessage.isPending || result.isLoading || result.data?.status === "processing";
+  const resultData = result.data;
+  const finishedResult = resultData?.status != null && resultData.status !== "processing";
+
+  const canSubmitSymptomText = symptomText.trim().length > 0 && Boolean(conversationId);
+
+  const assistantOpen = user?.role === "patient" && consultationsReady && !hasConsultation;
+
+  function handleSymptomSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canSubmitSymptomText) {
+      return;
+    }
+
+    setSubmittedSymptomText(symptomText.trim());
+    setSymptomText("");
+  }
+
+  function handleSeveritySelect(severity: TriageSeverity) {
+    if (!conversationId || !submittedSymptomText || sendMessage.isPending) {
+      return;
+    }
+
+    setSelectedSeverity(severity);
+    sendMessage.mutate({ message: submittedSymptomText, severity });
+  }
+
+  const nextStepLabel = hasConsultation ? "Continue to doctor" : "We've matched you with a doctor";
+  const pageDescription = hasConsultation
+    ? "Your latest check-in and conversation are ready in one calm place."
+    : "A quick care check-in helps us guide you to the right next step.";
 
   return (
-    <Section
-      title="AI triage"
-      description="The backend returns a medical disclaimer with triage responses and processes analysis asynchronously."
-    >
-      <div className="grid gap-4 rounded-md border border-zinc-200 bg-white p-4">
-        <ErrorMessage error={startSession.error || submitSymptoms.error || requestAnalyze.error} />
-        <div className="flex flex-wrap items-center gap-3">
-          <Button onClick={() => startSession.mutate()} disabled={startSession.isPending}>
-            {startSession.isPending ? "Starting..." : "Start session"}
-          </Button>
-          {sessionId ? <StatusBadge value={`Session #${sessionId}`} /> : null}
-          {startSession.data?.disclaimer ? <span className="text-sm text-zinc-600">{startSession.data.disclaimer}</span> : null}
+    <Section title="Care check-in" description={pageDescription}>
+      {!consultationsReady ? (
+        <div className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+          <div className="flex items-center gap-3 text-slate-600">
+            <LoaderCircle className="h-5 w-5 animate-spin text-[#2563EB]" />
+            <p className="text-sm font-medium">Preparing your care check-in...</p>
+          </div>
         </div>
-        <form
-          className="grid gap-4"
-          onSubmit={symptomsForm.handleSubmit((values) => submitSymptoms.mutate(values))}
-        >
-          <Field label="Symptoms" error={symptomsForm.formState.errors.symptoms?.message} hint="Comma-separated list">
-            <Textarea disabled={!sessionId} {...symptomsForm.register("symptoms")} />
-          </Field>
-          <div className="grid gap-4 md:grid-cols-4">
-            <Field label="Severity" error={symptomsForm.formState.errors.severity?.message}>
-              <Select disabled={!sessionId} {...symptomsForm.register("severity")}>
-                <option value="mild">Mild</option>
-                <option value="moderate">Moderate</option>
-                <option value="severe">Severe</option>
-              </Select>
-            </Field>
-            <Field label="Duration">
-              <Input disabled={!sessionId} {...symptomsForm.register("duration")} />
-            </Field>
-            <Field label="Age">
-              <Input disabled={!sessionId} type="number" min={0} max={120} {...symptomsForm.register("age")} />
-            </Field>
-            <Field label="Location">
-              <Input disabled={!sessionId} {...symptomsForm.register("location")} />
-            </Field>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button type="submit" disabled={!sessionId || submitSymptoms.isPending}>
-              Save symptoms
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={!sessionId || requestAnalyze.isPending}
-              onClick={() => requestAnalyze.mutate()}
-            >
-              Request analysis
-            </Button>
-          </div>
-          {submitSymptoms.data ? (
-            <Notice title={`${submitSymptoms.data.symptoms_saved} symptoms saved`} tone="success">
-              {submitSymptoms.data.disclaimer}
-            </Notice>
-          ) : null}
-          {requestAnalyze.data ? <Notice title={requestAnalyze.data.status}>{requestAnalyze.data.disclaimer}</Notice> : null}
-        </form>
-      </div>
+      ) : assistantOpen ? (
+        <div className="fixed inset-0 z-40 bg-[linear-gradient(180deg,rgba(15,23,42,0.26),rgba(15,23,42,0.38))] backdrop-blur-sm">
+          <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-6 sm:px-6">
+            <div className="grid w-full max-w-5xl gap-4 rounded-[34px] border border-white/60 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_100%)] p-4 shadow-[0_35px_90px_-38px_rgba(15,23,42,0.5)] sm:p-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.85fr)]">
+              <div className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.22)] sm:p-6">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
+                    <BrainCircuit className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="font-heading text-xl font-semibold text-[#1F2937]">LifeFirst Assistant</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">A quick, guided intake before we connect you with care.</p>
+                  </div>
+                </div>
 
-      <div className="grid gap-4 rounded-md border border-zinc-200 bg-white p-4">
-        <ErrorMessage error={startConversation.error || sendMessage.error || result.error} />
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="secondary" onClick={() => startConversation.mutate()} disabled={startConversation.isPending}>
-            Start conversation
-          </Button>
-          {conversationId ? <StatusBadge value={`Conversation ${conversationId}`} /> : null}
-        </div>
-        <form className="grid gap-4" onSubmit={messageForm.handleSubmit((values) => sendMessage.mutate(values))}>
-          <Field label="Message" error={messageForm.formState.errors.message?.message}>
-            <Textarea disabled={!conversationId} {...messageForm.register("message")} />
-          </Field>
-          <Field label="Severity" error={messageForm.formState.errors.severity?.message}>
-            <Select disabled={!conversationId} {...messageForm.register("severity")}>
-              <option value="mild">Mild</option>
-              <option value="moderate">Moderate</option>
-              <option value="severe">Severe</option>
-            </Select>
-          </Field>
-          <Button className="w-fit" type="submit" disabled={!conversationId || sendMessage.isPending}>
-            Send to triage
-          </Button>
-        </form>
-        {sendMessage.data ? (
-          <Notice title={sendMessage.data.status}>
-            Result URL: <span className="font-mono">{sendMessage.data.result_url}</span>
-          </Notice>
-        ) : null}
-        {result.data ? (
-          <div className="rounded-md bg-stone-50 p-4">
-            <p className="font-semibold text-zinc-950">Conversation result</p>
-            <pre className="mt-3 max-h-80 overflow-auto text-xs leading-5 text-zinc-700">
-              {JSON.stringify(result.data, null, 2)}
-            </pre>
+                <ErrorMessage error={bootError || sendMessage.error || result.error} context="triage" />
+
+                <div className="grid gap-3">
+                  <AssistantBubble speaker="assistant">
+                    <p className="font-semibold text-[#1F2937]">Hi 👋</p>
+                    <p>How are you feeling today?</p>
+                  </AssistantBubble>
+
+                  {submittedSymptomText ? (
+                    <AssistantBubble speaker="user">
+                      <p>{submittedSymptomText}</p>
+                    </AssistantBubble>
+                  ) : null}
+
+                  {waitingForSeverity || processingResult || finishedResult ? (
+                    <AssistantBubble speaker="assistant">
+                      <p>How would you describe the severity?</p>
+                    </AssistantBubble>
+                  ) : null}
+
+                  {selectedSeverity ? (
+                    <AssistantBubble speaker="user">
+                      <p>{severityOptions.find((option) => option.value === selectedSeverity)?.label ?? selectedSeverity}</p>
+                    </AssistantBubble>
+                  ) : null}
+
+                  {processingResult ? (
+                    <AssistantBubble speaker="assistant">
+                      <div className="flex items-center gap-2">
+                        <LoaderCircle className="h-4 w-4 animate-spin" />
+                        <span>Thanks, let me take a look at that…</span>
+                      </div>
+                    </AssistantBubble>
+                  ) : null}
+                </div>
+
+                {booting ? (
+                  <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+                    Preparing your care check-in...
+                  </div>
+                ) : null}
+
+                {startSession.data?.disclaimer && !submittedSymptomText ? (
+                  <Notice title="Medical disclaimer" tone="neutral">
+                    {startSession.data.disclaimer}
+                  </Notice>
+                ) : null}
+
+                {waitingForSymptomText ? (
+                  <form className="grid gap-3" onSubmit={handleSymptomSubmit}>
+                    <div className="relative">
+                      <textarea
+                        value={symptomText}
+                        onChange={(event) => setSymptomText(event.target.value)}
+                        placeholder="Describe what you are feeling in your own words"
+                        className="min-h-32 w-full rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 pr-28 text-sm text-[#1F2937] outline-none transition shadow-[0_6px_20px_rgba(31,41,55,0.03)] placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                      />
+                      <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                        <button
+                          type="button"
+                          disabled
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-400"
+                          aria-label="Voice support coming soon"
+                          title="Voice support coming soon"
+                        >
+                          <Mic className="h-4 w-4" />
+                        </button>
+                        <Button type="submit" disabled={!canSubmitSymptomText} className="min-h-10 rounded-full px-4">
+                          <SendHorizonal className="mr-2 h-4 w-4" />
+                          Continue
+                        </Button>
+                      </div>
+                    </div>
+                  </form>
+                ) : null}
+
+                {waitingForSeverity ? (
+                  <div className="flex flex-wrap gap-3">
+                    {severityOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => handleSeveritySelect(option.value)}
+                        className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#D1D5DB] bg-white px-5 text-sm font-bold text-[#1F2937] transition hover:border-[#93C5FD] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.22)] sm:p-6">
+                <div>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Your guidance</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">We&apos;ll summarize what you shared and guide you to the right next step.</p>
+                </div>
+
+                {finishedResult && resultData ? (
+                  <div className="grid gap-4">
+                    <ResultCard data={resultData} />
+                    <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-5">
+                      <p className="font-heading text-xl font-semibold text-[#1F2937]">Next step</p>
+                      <p className="mt-2 text-sm leading-7 text-slate-600">
+                        Your care summary is ready for the doctor, so you can continue the conversation with the right context already in place.
+                      </p>
+                      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                        <Link
+                          href="/messages"
+                          className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] px-4 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(37,99,235,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(37,99,235,0.3)]"
+                        >
+                          {nextStepLabel}
+                        </Link>
+                        <Link
+                          href="/appointments"
+                          className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white px-4 text-sm font-extrabold text-[#1F2937] shadow-[0_8px_24px_rgba(31,41,55,0.05)] transition duration-200 hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:bg-[#F8FBFF]"
+                        >
+                          Review appointments
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid gap-3">
+                    <div className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-sm font-semibold text-[#1F2937]">Summary</p>
+                      <p className="mt-2 text-sm leading-7 text-slate-600">
+                        Tell us what you are feeling and we&apos;ll prepare a concise summary for your doctor.
+                      </p>
+                    </div>
+                    <div className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-sm font-semibold text-[#1F2937]">Recommended action</p>
+                      <p className="mt-2 text-sm leading-7 text-slate-600">
+                        We&apos;ll quickly review your symptoms, flag urgency where needed, and guide you toward the right next step.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : (
+        <div className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+          <div className="flex items-start gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
+              <HeartPulse className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="font-heading text-xl font-semibold text-[#1F2937]">Your consultation is already in motion</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                You already have an active conversation with your care team, so the next best step is to continue there.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/messages"
+              className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] px-4 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(37,99,235,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(37,99,235,0.3)]"
+            >
+              Continue to doctor
+            </Link>
+            <Link
+              href="/care-plan"
+              className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white px-4 text-sm font-extrabold text-[#1F2937] shadow-[0_8px_24px_rgba(31,41,55,0.05)] transition duration-200 hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:bg-[#F8FBFF]"
+            >
+              Open care plan
+            </Link>
+          </div>
+        </div>
+      )}
     </Section>
   );
 }

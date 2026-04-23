@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
@@ -30,25 +31,33 @@ export function PasswordResetForm() {
 
   return (
     <div className="grid gap-6">
-      <form className="grid gap-4" onSubmit={requestForm.handleSubmit((values) => requestReset.mutate(values))}>
+      <form className="grid gap-4 rounded-[22px] border border-slate-200 bg-slate-50/80 p-5" onSubmit={requestForm.handleSubmit((values) => requestReset.mutate(values))}>
+        <div>
+          <p className="font-heading text-xl font-semibold text-[#1F2937]">Request reset link</p>
+          <p className="mt-1 text-sm text-slate-600">We will send reset instructions to the email linked to your account.</p>
+        </div>
         {requestReset.isSuccess ? <Notice title={requestReset.data.detail} tone="success" /> : null}
-        {requestReset.error ? <Notice title="Request failed">{requestReset.error.message}</Notice> : null}
+        <ErrorMessage error={requestReset.error} context="auth" />
         <Field label="Email" error={requestForm.formState.errors.email?.message}>
-          <Input type="email" autoComplete="email" {...requestForm.register("email")} />
+          <Input type="email" autoComplete="email" placeholder="you@example.com" {...requestForm.register("email")} />
         </Field>
         <Button type="submit" disabled={requestReset.isPending}>
           {requestReset.isPending ? "Sending..." : "Send reset link"}
         </Button>
       </form>
-      <div className="h-px bg-zinc-200" />
-      <form className="grid gap-4" onSubmit={confirmForm.handleSubmit((values) => confirmReset.mutate(values))}>
+
+      <form className="grid gap-4 rounded-[22px] border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.45)]" onSubmit={confirmForm.handleSubmit((values) => confirmReset.mutate(values))}>
+        <div>
+          <p className="font-heading text-xl font-semibold text-[#1F2937]">Set a new password</p>
+          <p className="mt-1 text-sm text-slate-600">Paste the reset code from your email, then choose a new secure password.</p>
+        </div>
         {confirmReset.isSuccess ? <Notice title={confirmReset.data.detail} tone="success" /> : null}
-        {confirmReset.error ? <Notice title="Password reset failed">{confirmReset.error.message}</Notice> : null}
-        <Field label="Reset token" error={confirmForm.formState.errors.token?.message}>
-          <Input {...confirmForm.register("token")} />
+        <ErrorMessage error={confirmReset.error} context="auth" />
+        <Field label="Reset code" error={confirmForm.formState.errors.token?.message}>
+          <Input placeholder="Paste code" {...confirmForm.register("token")} />
         </Field>
         <Field label="New password" error={confirmForm.formState.errors.new_password?.message}>
-          <Input type="password" autoComplete="new-password" {...confirmForm.register("new_password")} />
+          <Input type="password" autoComplete="new-password" placeholder="Enter new password" {...confirmForm.register("new_password")} />
         </Field>
         <Button type="submit" variant="secondary" disabled={confirmReset.isPending}>
           {confirmReset.isPending ? "Updating..." : "Update password"}

@@ -40,14 +40,14 @@ export function ProfileClient() {
   const isDoctor = user?.role === "doctor";
 
   return (
-    <Section title="Profile" description="Profile fields are the exact fields exposed by `/profiles/me/`.">
+    <Section title="Profile" description="Keep your personal details up to date.">
       <div className="grid gap-4 lg:grid-cols-2">
         <form className="grid gap-4 rounded-md border border-zinc-200 bg-white p-4" onSubmit={(event) => {
           event.preventDefault();
           updateUser.mutate();
         }}>
-          <ErrorMessage error={updateUser.error} />
-          {updateUser.isSuccess ? <Notice title="User updated" tone="success" /> : null}
+          <ErrorMessage error={updateUser.error} context="profile" />
+          {updateUser.isSuccess ? <Notice title="Details saved" tone="success" /> : null}
           <Field label="Email">
             <Input value={user?.email || ""} disabled />
           </Field>
@@ -58,7 +58,7 @@ export function ProfileClient() {
             <Input value={phone} onChange={(event) => setPhoneDraft(event.target.value)} />
           </Field>
           <Button className="w-fit" type="submit" disabled={updateUser.isPending}>
-            Save user
+            Save details
           </Button>
         </form>
 
@@ -66,9 +66,9 @@ export function ProfileClient() {
           event.preventDefault();
           updateProfile.mutate();
         }}>
-          <ErrorMessage error={updateProfile.error} />
-          {updateProfile.isSuccess ? <Notice title="Profile updated" tone="success" /> : null}
-          {profile.isLoading ? <p className="text-sm text-zinc-600">Loading profile...</p> : null}
+          <ErrorMessage error={updateProfile.error} context="profile" />
+          {updateProfile.isSuccess ? <Notice title="Profile saved" tone="success" /> : null}
+          {profile.isLoading ? <p className="text-sm text-zinc-600">Loading your profile...</p> : null}
           {isDoctor ? (
             <>
               <Field label="License number">

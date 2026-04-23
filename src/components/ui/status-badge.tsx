@@ -2,6 +2,14 @@ import { Badge } from "@/components/ui/badge";
 
 export function StatusBadge({ value }: { value: string }) {
   const normalized = value.toLowerCase();
+  const label =
+    normalized === "processing"
+      ? "In progress"
+      : normalized === "pending"
+        ? "In review"
+        : normalized === "draft"
+          ? "Not yet sent"
+          : value;
   const tone =
     normalized.includes("success") || normalized.includes("scheduled") || normalized.includes("completed")
       ? "green"
@@ -11,5 +19,5 @@ export function StatusBadge({ value }: { value: string }) {
           ? "rose"
           : "neutral";
 
-  return <Badge tone={tone}>{value}</Badge>;
+  return <Badge tone={tone}>{label}</Badge>;
 }

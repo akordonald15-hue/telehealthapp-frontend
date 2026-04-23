@@ -30,7 +30,13 @@ type RequestOptions = Omit<RequestInit, "body"> & {
 
 function buildUrl(path: string, query?: Record<string, string | number | undefined | null>) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const url = new URL(`${API_BASE_URL}${normalizedPath}`);
+  const url =
+    typeof window !== "undefined"
+      ? new URL(
+          normalizedPath.startsWith("/api/") ? normalizedPath : `/api${normalizedPath}`,
+          window.location.origin,
+        )
+      : new URL(`${API_BASE_URL}${normalizedPath}`);
   Object.entries(query || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
       url.searchParams.set(key, String(value));
@@ -130,8 +136,16 @@ export async function apiList<T>(
   query?: Record<string, string | number | undefined | null>,
 ) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const url = buildUrl(normalizedPath, query).replace(API_BASE_URL, "");
-  return apiRequest<PaginatedResponse<T>>(url);
+  const params = new URLSearchParams();
+
+  Object.entries(query || {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      params.set(key, String(value));
+    }
+  });
+
+  const requestPath = params.size ? `${normalizedPath}?${params.toString()}` : normalizedPath;
+  return apiRequest<PaginatedResponse<T>>(requestPath);
 }
 
 export async function uploadToPresignedUrl(url: string, file: File, contentType: string) {

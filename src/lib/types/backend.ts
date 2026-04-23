@@ -124,6 +124,12 @@ export type Message = {
   read_at: string | null;
 };
 
+export type MessageAttachmentUploadInit = {
+  upload_url: string;
+  attachment_id: number;
+  attachment_url: string;
+};
+
 export type PaymentProvider = "paystack" | "flutterwave";
 export type PaymentStatus = "pending" | "success" | "failed" | "refunded";
 
