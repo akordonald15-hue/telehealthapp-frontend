@@ -11,7 +11,7 @@ export function MarketingHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/70 bg-white/85 backdrop-blur-xl">
-      <nav className="lf-shell flex min-h-[76px] items-center justify-between gap-6" aria-label="Main navigation">
+      <nav className="lf-shell flex min-h-[72px] items-center justify-between gap-4 sm:min-h-[76px] sm:gap-6" aria-label="Main navigation">
         <Link href="/" className="inline-flex items-center gap-3" aria-label="LifeFirst home">
           <span className="grid h-11 w-11 place-items-center rounded-[14px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] text-sm font-black text-white shadow-[0_12px_28px_rgba(37,99,235,0.24)]">
             LF
@@ -31,10 +31,7 @@ export function MarketingHeader() {
           <Link href="/login" className="text-sm font-bold text-[#475467] transition hover:text-[#2563EB]">
             Sign in
           </Link>
-          <Link
-            href="/register"
-            className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] px-5 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(37,99,235,0.26)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(37,99,235,0.34)]"
-          >
+          <Link href="/register" className="lf-btn lf-btn-primary min-h-[48px] px-5 text-sm">
             Get Started
           </Link>
         </div>
@@ -44,7 +41,7 @@ export function MarketingHeader() {
           aria-expanded={open}
           aria-controls="mobile-nav"
           onClick={() => setOpen((value) => !value)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white text-[#1F2937] lg:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white text-[#1F2937] shadow-[0_8px_20px_rgba(15,23,42,0.05)] lg:hidden"
         >
           <span className="sr-only">Toggle navigation</span>
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -71,11 +68,7 @@ export function MarketingHeader() {
             >
               Sign in
             </Link>
-            <Link
-              href="/register"
-              onClick={() => setOpen(false)}
-              className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] px-4 text-sm font-extrabold text-white"
-            >
+            <Link href="/register" onClick={() => setOpen(false)} className="lf-btn lf-btn-primary text-sm">
               Get Started
             </Link>
           </div>
