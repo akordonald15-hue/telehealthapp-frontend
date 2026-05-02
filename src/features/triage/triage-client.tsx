@@ -144,12 +144,12 @@ function ResultPanel({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-4">
+    <div className="min-w-0 rounded-[22px] border border-slate-200 bg-slate-50 p-4">
       <div className="flex items-start gap-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white text-[#2563EB] shadow-sm">
           <Icon className="h-5 w-5" />
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 break-words">
           <p className="font-semibold text-[#1F2937]">{title}</p>
           <div className="mt-2 text-sm leading-7 text-slate-600">{children}</div>
         </div>
@@ -346,7 +346,7 @@ export function TriageClient() {
     sendMessage.mutate({ message: submittedSymptomText, severity });
   }
 
-  const nextStepLabel = hasConsultation ? "Continue to doctor" : "We've matched you with a doctor";
+  const nextStepLabel = hasConsultation ? "Continue to doctor" : "Book a consultation";
   const pageDescription = hasConsultation
     ? "Your latest check-in and conversation are ready in one calm place."
     : "A quick care check-in helps us guide you to the right next step.";
@@ -361,10 +361,10 @@ export function TriageClient() {
           </div>
         </div>
       ) : assistantOpen ? (
-        <div className="fixed inset-0 z-40 bg-[linear-gradient(180deg,rgba(15,23,42,0.26),rgba(15,23,42,0.38))] backdrop-blur-sm">
-          <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-6 sm:px-6">
-            <div className="grid w-full max-w-5xl gap-4 rounded-[34px] border border-white/60 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_100%)] p-4 shadow-[0_35px_90px_-38px_rgba(15,23,42,0.5)] sm:p-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.85fr)]">
-              <div className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.22)] sm:p-6">
+        <div className="fixed inset-0 z-40 overflow-y-auto bg-[linear-gradient(180deg,rgba(15,23,42,0.26),rgba(15,23,42,0.38))] backdrop-blur-sm">
+          <div className="mx-auto flex min-h-full w-full max-w-6xl items-start justify-center px-3 py-4 sm:px-6 sm:py-6">
+            <div className="grid w-full min-w-0 max-w-5xl gap-4 rounded-[26px] border border-white/60 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_100%)] p-3 shadow-[0_35px_90px_-38px_rgba(15,23,42,0.5)] sm:rounded-[34px] sm:p-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.85fr)]">
+              <div className="grid min-w-0 gap-4 rounded-[22px] border border-white/70 bg-white p-4 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.22)] sm:rounded-[28px] sm:p-6">
                 <div className="flex items-start gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
                     <BrainCircuit className="h-5 w-5" />
@@ -379,7 +379,7 @@ export function TriageClient() {
 
                 <div className="grid gap-3">
                   <AssistantBubble speaker="assistant">
-                    <p className="font-semibold text-[#1F2937]">Hi 👋</p>
+                    <p className="font-semibold text-[#1F2937]">Hi</p>
                     <p>How are you feeling today?</p>
                   </AssistantBubble>
 
@@ -405,7 +405,7 @@ export function TriageClient() {
                     <AssistantBubble speaker="assistant">
                       <div className="flex items-center gap-2">
                         <LoaderCircle className="h-4 w-4 animate-spin" />
-                        <span>Thanks, let me take a look at that…</span>
+                        <span>Thanks, let me take a look at that...</span>
                       </div>
                     </AssistantBubble>
                   ) : null}
@@ -467,7 +467,7 @@ export function TriageClient() {
                 ) : null}
               </div>
 
-              <div className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.22)] sm:p-6">
+              <div className="grid min-w-0 gap-4 rounded-[22px] border border-white/70 bg-white p-4 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.22)] sm:rounded-[28px] sm:p-6">
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">Your guidance</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">We&apos;ll summarize what you shared and guide you to the right next step.</p>
@@ -476,14 +476,14 @@ export function TriageClient() {
                 {finishedResult && resultData ? (
                   <div className="grid gap-4">
                     <ResultCard data={resultData} />
-                    <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-5">
+                    <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-4 sm:p-5">
                       <p className="font-heading text-xl font-semibold text-[#1F2937]">Next step</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
                         Your care summary is ready for the doctor, so you can continue the conversation with the right context already in place.
                       </p>
-                      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                      <div className="sticky bottom-3 mt-4 flex flex-col gap-3 rounded-[18px] border border-slate-200 bg-white/96 p-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.55)] backdrop-blur sm:static sm:flex-row sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
                         <Link
-                          href="/messages"
+                          href={hasConsultation ? "/messages" : "/appointments"}
                           className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] px-4 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(37,99,235,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(37,99,235,0.3)]"
                         >
                           {nextStepLabel}

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { homeCareApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
@@ -27,6 +28,46 @@ import {
   type VerificationOutcomeOption,
   verificationOutcomeOptions,
 } from "@/features/nurse/nurse-utils";
+
+const workflowSteps = [
+  { key: "accepted", label: "Verify", description: "Confirm patient and address." },
+  { key: "confirmed", label: "Start trip", description: "Travel unlocks after verification." },
+  { key: "in_transit", label: "Arrive", description: "Mark arrival after trip starts." },
+  { key: "arrived", label: "Start care", description: "Begin care on site." },
+  { key: "care_in_progress", label: "Complete", description: "Close care after service." },
+  { key: "care_completed", label: "Done", description: "Wait for patient confirmation." },
+] as const;
+
+const workflowOrder: string[] = workflowSteps.map((step) => step.key);
+
+function WorkflowStep({ step, status }: { step: (typeof workflowSteps)[number]; status: string }) {
+  const effectiveStatus = status === "verification_in_progress" ? "accepted" : status;
+  const currentIndex = workflowOrder.indexOf(effectiveStatus);
+  const stepIndex = workflowOrder.indexOf(step.key);
+  const completed = currentIndex > stepIndex || status === "patient_confirmed";
+  const current = effectiveStatus === step.key;
+
+  return (
+    <div
+      className={[
+        "rounded-[18px] border px-4 py-3",
+        current
+          ? "border-[rgba(66,107,179,0.2)] bg-[var(--primary-soft)]"
+          : completed
+            ? "border-emerald-100 bg-emerald-50"
+            : "border-slate-200 bg-slate-50",
+      ].join(" ")}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-[#1F2937]">{step.label}</p>
+        <span className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">
+          {current ? "Now" : completed ? "Done" : "Locked"}
+        </span>
+      </div>
+      <p className="mt-1 text-sm leading-6 text-slate-600">{step.description}</p>
+    </div>
+  );
+}
 
 export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
   const queryClient = useQueryClient();
@@ -218,15 +259,31 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
               <div className="mt-6 grid gap-3 text-sm text-slate-600">
                 <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">Assignment</p>
-                  <p className="mt-1">{assignment ? homeCareStatusLabel(assignment.status) : "No active assignment available."}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    {assignment ? <StatusBadge value={assignment.status} /> : null}
+                    <span>{assignment ? homeCareStatusLabel(assignment.status) : "No active assignment available."}</span>
+                  </div>
                 </div>
                 <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">Trip status</p>
-                  <p className="mt-1">{homeCareStatusLabel(request.status)}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <StatusBadge value={request.status} />
+                    <span>{homeCareStatusLabel(request.status)}</span>
+                  </div>
                 </div>
                 <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">Last update</p>
                   <p className="mt-1">{formatDateTime(request.updated_at)}</p>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <p className="font-heading text-lg font-semibold text-[#1F2937]">State-machine progress</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">Each action unlocks only after the previous visit step is complete.</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {workflowSteps.map((step) => (
+                    <WorkflowStep key={step.key} step={step} status={request.status} />
+                  ))}
                 </div>
               </div>
             </div>
@@ -402,7 +459,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                     <p className="text-sm font-semibold text-[#1F2937]">
                       {point.latitude}, {point.longitude}
                     </p>
-                    <p className="mt-1 text-sm text-slate-600">{point.accuracy_meters}m accuracy • {point.source}</p>
+                    <p className="mt-1 text-sm text-slate-600">{point.accuracy_meters}m accuracy - {point.source}</p>
                     <p className="mt-1 text-xs text-slate-500">{formatDateTime(point.created_at)}</p>
                   </div>
                 ))}

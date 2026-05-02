@@ -2,7 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarPlus2 } from "lucide-react";
+import { CalendarPlus2, MessageSquareText, Stethoscope } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -55,15 +56,24 @@ export function AppointmentsClient() {
     },
   });
   const user = userQuery.data;
+  const isDoctor = user?.role === "doctor";
 
   return (
     <Section
-      title="Appointments"
-      description="Book visits, keep up with changes, and see what matters next."
+      title={isDoctor ? "Consultations" : "Appointments"}
+      description={
+        isDoctor
+          ? "Review patient consultations, open appointment details, and continue the care conversation."
+          : "Book visits, keep up with changes, and see what matters next."
+      }
       action={
         user?.role === "patient" ? (
           <div className="rounded-full border border-blue-100 bg-[#EFF6FF] px-4 py-2 text-sm font-semibold text-[#2563EB]">
             Patients can create appointments
+          </div>
+        ) : isDoctor ? (
+          <div className="rounded-full border border-cyan-100 bg-[#ECFEFF] px-4 py-2 text-sm font-semibold text-[#0F766E]">
+            Doctor schedule
           </div>
         ) : null
       }
@@ -106,6 +116,10 @@ export function AppointmentsClient() {
             {createAppointment.isPending ? "Booking..." : "Book appointment"}
           </Button>
         </form>
+      ) : isDoctor ? (
+        <Notice title="Doctor consultation queue" tone="neutral">
+          This page shows appointments assigned to your doctor profile. Patient booking tools are hidden from doctor accounts.
+        </Notice>
       ) : (
         <Notice title="Appointment creation is patient-led" tone="neutral">
           Patients can book visits here, while the care team keeps the schedule up to date.
@@ -118,8 +132,8 @@ export function AppointmentsClient() {
         isLoading={appointments.isLoading}
         errorContext="appointments"
         loadingLabel="Loading your appointments..."
-        emptyTitle="No appointments yet"
-        empty="Your appointments will appear here once they are booked."
+        emptyTitle={isDoctor ? "No consultations yet" : "No appointments yet"}
+        empty={isDoctor ? "Assigned patient consultations will appear here once patients book care." : "Your appointments will appear here once they are booked."}
         emptyAction={
           user?.role === "patient" ? (
             <button
@@ -140,10 +154,30 @@ export function AppointmentsClient() {
                 <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
                 <p className="mt-2 text-sm text-slate-600">{appointmentCompanionLabel(user?.role)}</p>
                 {item.reason ? <p className="mt-3 text-sm leading-7 text-slate-600">{item.reason}</p> : null}
+                {isDoctor ? (
+                  <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                    <span className="inline-flex items-center gap-2">
+                      <Stethoscope className="h-4 w-4 text-[#0F766E]" />
+                      Patient profile #{item.patient}
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <MessageSquareText className="h-4 w-4 text-[#0F766E]" />
+                      Consultation #{item.id}
+                    </span>
+                  </div>
+                ) : null}
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge value={item.status} />
-                {item.status !== "cancelled" ? (
+                {isDoctor ? (
+                  <Link
+                    href={`/appointments/${item.id}`}
+                    className="inline-flex min-h-10 items-center justify-center rounded-[12px] bg-[#0F766E] px-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5"
+                  >
+                    View consultation
+                  </Link>
+                ) : null}
+                {user?.role === "patient" && item.status !== "cancelled" ? (
                   <Button variant="secondary" onClick={() => cancelAppointment.mutate(item.id)} disabled={cancelAppointment.isPending}>
                     Cancel
                   </Button>

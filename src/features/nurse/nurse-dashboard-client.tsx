@@ -82,11 +82,11 @@ export function NurseDashboardClient() {
         <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,var(--primary-strong)_0%,var(--primary)_55%,var(--accent)_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(66,107,179,0.65)] sm:p-8">
           <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-100">Today&apos;s care journey</p>
           <h2 className="font-heading mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-            {activeRequest ? `Next visit: ${homeCareStatusLabel(activeRequest.status)}` : "You’re ready for the next request"}
+            {activeRequest ? `Next visit: ${homeCareStatusLabel(activeRequest.status)}` : "You're ready for the next request"}
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">
             {activeRequest
-              ? `${activeRequest.contact_name_snapshot || "Patient"} • ${activeRequest.service_address_snapshot || "Address pending"}`
+              ? `${activeRequest.contact_name_snapshot || "Patient"} - ${activeRequest.service_address_snapshot || "Address pending"}`
               : "Accepted requests, travel updates, and visit completion all stay connected here."}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -136,7 +136,7 @@ export function NurseDashboardClient() {
         <MetricCard label="Completed visits" value={completedCount} description="Visits finished and ready for patient confirmation or closure." icon={CheckCircle2} />
         <MetricCard label="Pending offers" value={pendingOffers} description="Requests waiting for your accept or decline decision." icon={Clock3} />
         <MetricCard label="Active request" value={activeRequest ? 1 : 0} description="Your current visit in progress or awaiting the next step." icon={CalendarClock} />
-        <MetricCard label="Rating" value="—" description="Patient ratings will appear here once they are added to the nurse summary." icon={Star} />
+        <MetricCard label="Rating" value="--" description="Patient ratings will appear here once they are added to the nurse summary." icon={Star} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">

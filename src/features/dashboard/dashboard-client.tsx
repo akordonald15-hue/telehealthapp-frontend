@@ -15,6 +15,7 @@ import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { appointmentCompanionLabel } from "@/lib/ui/humanize";
 import type { PaginatedResponse } from "@/lib/types/backend";
 import { formatDateTime, formatMoney } from "@/lib/utils";
+import { DoctorDashboardClient } from "@/features/dashboard/doctor-dashboard-client";
 import { NurseDashboardClient } from "@/features/nurse/nurse-dashboard-client";
 
 function Metric({ label, value, href, icon: Icon, description }: { label: string; value: string | number; href: string; icon: React.ComponentType<{ className?: string }>; description: string }) {
@@ -88,9 +89,13 @@ export function DashboardClient() {
     return <NurseDashboardClient />;
   }
 
+  if (user?.role === "doctor") {
+    return <DoctorDashboardClient />;
+  }
+
   const threadMetric = listMetric(threads);
   const referralMetric = listMetric(referrals);
-  const paymentMetric = user?.role === "doctor" ? "Not shown" : listMetric(payments);
+  const paymentMetric = listMetric(payments);
   const patientHasConsultation = typeof threadMetric === "number" && threadMetric > 0;
   const patientHasCarePlan = typeof referralMetric === "number" && referralMetric > 0;
   const nextPatientStep = patientHasConsultation
@@ -124,7 +129,7 @@ export function DashboardClient() {
       action={
         user ? (
           <div className="flex items-center gap-2">
-            <Badge tone={user.role === "admin" ? "rose" : user.role === "doctor" ? "cyan" : "green"}>{user.role}</Badge>
+            <Badge tone={user.role === "admin" ? "rose" : "green"}>{user.role}</Badge>
           </div>
         ) : null
       }
@@ -256,7 +261,7 @@ export function DashboardClient() {
                 </div>
                 <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">Payments</p>
-                  <p className="mt-1 leading-6">{user?.role === "doctor" ? "Payment details are only shown where they are needed." : `${paymentMetric} payment update${paymentMetric === 1 ? "" : "s"} available.`}</p>
+                  <p className="mt-1 leading-6">{`${paymentMetric} payment update${paymentMetric === 1 ? "" : "s"} available.`}</p>
                 </div>
               </div>
             </div>
@@ -291,7 +296,7 @@ export function DashboardClient() {
                   <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Next appointments</h2>
                   <p className="mt-1 text-sm text-slate-500">Your upcoming visits at a glance.</p>
                 </div>
-                {user ? <Badge tone={user.role === "admin" ? "rose" : user.role === "doctor" ? "cyan" : "green"}>{user.role}</Badge> : null}
+                {user ? <Badge tone={user.role === "admin" ? "rose" : "green"}>{user.role}</Badge> : null}
               </div>
               <div className="grid gap-3">
                 {appointments.isLoading ? (
@@ -325,9 +330,7 @@ export function DashboardClient() {
                 </Link>
               </div>
               <div className="grid gap-3">
-                {user?.role === "doctor" ? (
-                  <EmptyState title="Payments are not shown here" description="This view keeps the focus on the parts of care you need most." />
-                ) : userQuery.isLoading || payments.isLoading ? (
+                {userQuery.isLoading || payments.isLoading ? (
                   <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading your payment history...</div>
                 ) : payments.isError ? (
                   <div className="rounded-[20px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(payments.error, "payments")}</div>

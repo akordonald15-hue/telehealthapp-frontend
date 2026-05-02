@@ -13,6 +13,7 @@ import {
   MessageSquare,
   ShieldCheck,
   UserRound,
+  UserRoundCheck,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -29,21 +30,22 @@ type NavItem = {
   href: string;
   label: string;
   patientLabel?: string;
+  doctorLabel?: string;
   icon: React.ComponentType<{ className?: string }>;
   roles: readonly string[];
 };
 
 const navItems: readonly NavItem[] = [
   { href: "/dashboard", label: "Dashboard", patientLabel: "Journey", icon: LayoutDashboard, roles: ["patient", "doctor", "admin", "nurse"] },
-  { href: "/triage", label: "Care check-in", patientLabel: "Start Triage", icon: HeartPulse, roles: ["patient", "doctor", "admin"] },
+  { href: "/triage", label: "Care check-in", patientLabel: "Start Triage", icon: HeartPulse, roles: ["patient", "admin"] },
   { href: "/messages", label: "Messages", patientLabel: "Consultation", icon: MessageSquare, roles: ["patient", "doctor", "admin"] },
   { href: "/care-plan", label: "Care Plan", patientLabel: "Care Plan", icon: ClipboardList, roles: ["patient"] },
   { href: "/home-care/book", label: "Book Nurse", patientLabel: "Book Nurse", icon: Home, roles: ["patient"] },
   { href: "/home-care/requests", label: "Home Care", patientLabel: "Home Care", icon: ClipboardList, roles: ["patient"] },
-  { href: "/appointments", label: "Appointments", icon: CalendarDays, roles: ["patient", "doctor", "admin"] },
+  { href: "/appointments", label: "Appointments", doctorLabel: "Consultations", icon: CalendarDays, roles: ["patient", "doctor", "admin"] },
   { href: "/nurse/requests", label: "Requests", icon: ClipboardList, roles: ["nurse"] },
   { href: "/nurse/history", label: "History", icon: FileText, roles: ["nurse"] },
-  { href: "/records", label: "Records", icon: FileText, roles: ["patient", "doctor", "admin"] },
+  { href: "/records", label: "Records", doctorLabel: "Patients / Care Plans", icon: UserRoundCheck, roles: ["patient", "doctor", "admin"] },
   { href: "/payments", label: "Payments", icon: CreditCard, roles: ["patient", "admin"] },
   { href: "/referrals", label: "Referrals", icon: ClipboardList, roles: ["doctor", "admin"] },
   { href: "/profile", label: "Profile", icon: UserRound, roles: ["patient", "doctor", "admin", "nurse"] },
@@ -57,6 +59,16 @@ function roleTone(role: string | undefined) {
   return "green" as const;
 }
 
+function navLabelForRole(item: NavItem, role: string | undefined) {
+  if (role === "patient") {
+    return item.patientLabel ?? item.label;
+  }
+  if (role === "doctor") {
+    return item.doctorLabel ?? item.label;
+  }
+  return item.label;
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const userQuery = useCurrentUser();
@@ -66,6 +78,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const visibleNav = useMemo(() => {
     const filtered = navItems.filter((item) => !user || (item.roles as readonly string[]).includes(user.role));
+    if (user?.role === "doctor") {
+      const doctorOrder = ["/dashboard", "/appointments", "/messages", "/referrals", "/records", "/profile"];
+      return [...filtered].sort((left, right) => doctorOrder.indexOf(left.href) - doctorOrder.indexOf(right.href));
+    }
+
     if (user?.role !== "patient") {
       return filtered;
     }
@@ -86,13 +103,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   const activeItem = visibleNav.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
-  const activeLabel = user?.role === "patient" ? activeItem?.patientLabel ?? activeItem?.label ?? "Journey" : activeItem?.label ?? "Workspace";
+  const activeLabel = activeItem ? navLabelForRole(activeItem, user?.role) : user?.role === "patient" ? "Journey" : "Workspace";
 
-  const workspaceTitle = user?.role === "nurse" ? "Your home care workspace" : "Everything you need for your care journey";
+  const workspaceTitle =
+    user?.role === "nurse"
+      ? "Your home care workspace"
+      : user?.role === "doctor"
+        ? "Doctor clinical workspace"
+        : "Everything you need for your care journey";
   const workspaceDescription =
     user?.role === "nurse"
       ? "Requests, travel updates, visit progress, and history stay in one clean workflow."
-      : "Appointments, messages, records, and payments are organized here so you can move through your care with ease.";
+      : user?.role === "doctor"
+        ? "Consultations, patient messages, referrals, and care-plan notes stay focused on your clinical work."
+        : "Appointments, messages, records, and payments are organized here so you can move through your care with ease.";
 
   const navigation = (
     <>
@@ -128,7 +152,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               >
                 <Icon className="h-4 w-4" />
               </span>
-              <span className="flex-1">{user?.role === "patient" ? item.patientLabel ?? item.label : item.label}</span>
+              <span className="flex-1">{navLabelForRole(item, user?.role)}</span>
             </Link>
           );
         })}
@@ -204,7 +228,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
               <div className="flex items-center gap-3">
                 <div className="hidden text-right md:block">
-                  <p className="text-sm font-semibold text-[#1F2937]">{user?.role === "nurse" ? "Care visits, all in one place" : "Your care, all in one place"}</p>
+                  <p className="text-sm font-semibold text-[#1F2937]">
+                    {user?.role === "nurse"
+                      ? "Care visits, all in one place"
+                      : user?.role === "doctor"
+                        ? "Patient care, all in one place"
+                        : "Your care, all in one place"}
+                  </p>
                   <p className="text-xs text-slate-500">Responsive, clear, and tailored to your account</p>
                 </div>
                 {user ? <Badge tone={roleTone(user.role)}>{user.role}</Badge> : null}
