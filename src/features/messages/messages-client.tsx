@@ -308,7 +308,7 @@ function ConsultationListHeader({
   return (
     <div className="border-b border-[#E5E7EB] p-4">
       <div className="flex items-center gap-3">
-        <Avatar label="LF" tone="blue" />
+        <Avatar label="CT" tone="blue" />
         <div>
           <p className="font-heading text-lg font-bold text-[#1F2937]">
             {role === "patient" ? "Consultations" : "Conversations"}

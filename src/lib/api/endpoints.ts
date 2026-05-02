@@ -6,11 +6,19 @@ import type {
   AvailabilitySlot,
   DetailResponse,
   DoctorProfile,
+  HomeCareAssignment,
+  HomeCareRating,
+  HomeCareRequestCreate,
+  HomeCareRequestDetail,
+  HomeCareRequestEvent,
+  HomeCareRequestListItem,
+  HomeCareTrackingPoint,
   MedicalFileDownload,
   MedicalFileUploadInit,
   MedicalRecord,
   Message,
   MessageAttachmentUploadInit,
+  NurseProfile,
   PatientProfile,
   Payment,
   PaymentInitiation,
@@ -64,8 +72,8 @@ export const authApi = {
 };
 
 export const profilesApi = {
-  me: <T extends PatientProfile | DoctorProfile>() => apiRequest<T>("/profiles/me/"),
-  updateMe: <T extends PatientProfile | DoctorProfile>(body: Partial<T>) =>
+  me: <T extends PatientProfile | DoctorProfile | NurseProfile>() => apiRequest<T>("/profiles/me/"),
+  updateMe: <T extends PatientProfile | DoctorProfile | NurseProfile>(body: Partial<T>) =>
     apiRequest<T>("/profiles/me/", { method: "PATCH", body }),
   doctors: (query?: { page?: number; page_size?: number }) => apiList<DoctorProfile>("/profiles/doctors/", query),
   medicalRecords: (query?: { page?: number; page_size?: number }) =>
@@ -111,6 +119,47 @@ export const messagingApi = {
       method: "POST",
       body,
     }),
+};
+
+export const homeCareApi = {
+  requests: (query?: { page?: number; page_size?: number }) => apiList<HomeCareRequestListItem>("/home-care/requests/", query),
+  createRequest: (body: HomeCareRequestCreate) =>
+    apiRequest<HomeCareRequestDetail>("/home-care/requests/", { method: "POST", body }),
+  requestDetail: (id: number) => apiRequest<HomeCareRequestDetail>(`/home-care/requests/${id}/`),
+  requestEvents: (id: number) => apiList<HomeCareRequestEvent>(`/home-care/requests/${id}/events/`),
+  requestTracking: (id: number) => apiList<HomeCareTrackingPoint>(`/home-care/requests/${id}/tracking/`),
+  cancelRequest: (id: number, body: { reason: string }) =>
+    apiRequest<DetailResponse>(`/home-care/requests/${id}/cancel/`, { method: "POST", body }),
+  confirmCompletion: (id: number) =>
+    apiRequest<DetailResponse>(`/home-care/requests/${id}/patient-confirm/`, { method: "POST" }),
+  submitRating: (id: number, body: { score: number; feedback?: string }) =>
+    apiRequest<HomeCareRating>(`/home-care/requests/${id}/rating/`, { method: "POST", body }),
+  assignments: (query?: { page?: number; page_size?: number }) => apiList<HomeCareAssignment>("/home-care/assignments/", query),
+  acceptAssignment: (id: number) => apiRequest<DetailResponse>(`/home-care/assignments/${id}/accept/`, { method: "POST" }),
+  declineAssignment: (id: number, body: { reason: string }) =>
+    apiRequest<DetailResponse>(`/home-care/assignments/${id}/decline/`, { method: "POST", body }),
+  submitVerificationAttempt: (
+    id: number,
+    body: {
+      patient_is_real: boolean;
+      phone_number_active: boolean;
+      address_is_clear: boolean;
+      patient_available: boolean;
+      request_still_valid: boolean;
+      outcome: "confirmed" | "needs_clarification" | "no_answer" | "request_cancelled";
+      notes?: string;
+      call_started_at?: string;
+      call_ended_at?: string;
+    },
+  ) => apiRequest<DetailResponse>(`/home-care/assignments/${id}/verification-attempts/`, { method: "POST", body }),
+  startTrip: (id: number) => apiRequest<DetailResponse>(`/home-care/assignments/${id}/trip-start/`, { method: "POST" }),
+  sendTracking: (
+    id: number,
+    body: { latitude: number; longitude: number; accuracy_meters?: number; source?: string },
+  ) => apiRequest<DetailResponse & { tracking_point_id?: number }>(`/home-care/assignments/${id}/tracking/`, { method: "POST", body }),
+  markArrived: (id: number) => apiRequest<DetailResponse>(`/home-care/assignments/${id}/arrive/`, { method: "POST" }),
+  startCare: (id: number) => apiRequest<DetailResponse>(`/home-care/assignments/${id}/care-start/`, { method: "POST" }),
+  completeCare: (id: number) => apiRequest<DetailResponse>(`/home-care/assignments/${id}/care-complete/`, { method: "POST" }),
 };
 
 export const paymentsApi = {

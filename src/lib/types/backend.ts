@@ -1,4 +1,4 @@
-export type UserRole = "patient" | "doctor" | "admin";
+export type UserRole = "patient" | "doctor" | "nurse" | "admin";
 
 export type User = {
   id: number;
@@ -57,6 +57,18 @@ export type DoctorProfile = {
   bio: string;
   years_experience: number;
   specialties: Specialty[];
+};
+
+export type NurseProfile = {
+  id: number;
+  license_no: string;
+  onboarding_status: "pending" | "approved" | "suspended";
+  availability_status: "available" | "busy" | "offline";
+  service_radius_km: number;
+  base_address: string;
+  base_latitude: string | null;
+  base_longitude: string | null;
+  active_for_dispatch: boolean;
 };
 
 export type MedicalFile = {
@@ -128,6 +140,120 @@ export type MessageAttachmentUploadInit = {
   upload_url: string;
   attachment_id: number;
   attachment_url: string;
+};
+
+export type HomeCareBookingSource = "direct" | "doctor_referral";
+export type HomeCareRequestStatus =
+  | "requested"
+  | "matching"
+  | "assigned"
+  | "accepted"
+  | "verification_in_progress"
+  | "confirmed"
+  | "in_transit"
+  | "arrived"
+  | "care_in_progress"
+  | "care_completed"
+  | "patient_confirmed"
+  | "match_failed"
+  | "awaiting_patient_confirmation"
+  | "unreachable"
+  | "cancelled";
+
+export type HomeCareAssignmentStatus = "pending" | "accepted" | "declined" | "reassigned" | "cancelled" | "completed";
+
+export type HomeCareNurseSummary = {
+  id: number;
+  user_email: string;
+  license_no: string;
+  availability_status: NurseProfile["availability_status"];
+  active_for_dispatch: boolean;
+};
+
+export type HomeCareAssignment = {
+  id: number;
+  request: number;
+  nurse: HomeCareNurseSummary;
+  status: HomeCareAssignmentStatus;
+  status_reason: string;
+  match_score: string;
+  accepted_at: string | null;
+  declined_at: string | null;
+  trip_started_at: string | null;
+  arrived_at: string | null;
+  care_started_at: string | null;
+  care_completed_at: string | null;
+  closed_at: string | null;
+  is_current: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HomeCareRequestListItem = {
+  id: number;
+  booking_source: HomeCareBookingSource;
+  status: HomeCareRequestStatus;
+  contact_name_snapshot: string;
+  contact_phone_snapshot: string;
+  service_address_snapshot: string;
+  requested_window_start: string | null;
+  requested_window_end: string | null;
+  current_assignment: HomeCareAssignment | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HomeCareRequestDetail = HomeCareRequestListItem & {
+  patient: number;
+  referral: number | null;
+  service_location_notes: string;
+  service_latitude: string | null;
+  service_longitude: string | null;
+  care_notes: string;
+  source_snapshot: Record<string, unknown>;
+  cancel_reason: string;
+};
+
+export type HomeCareRequestCreate = {
+  booking_source: HomeCareBookingSource;
+  referral?: number | null;
+  contact_name_snapshot?: string;
+  contact_phone_snapshot?: string;
+  service_address_snapshot?: string;
+  service_location_notes?: string;
+  service_latitude?: string | null;
+  service_longitude?: string | null;
+  requested_window_start?: string | null;
+  requested_window_end?: string | null;
+  care_notes?: string;
+};
+
+export type HomeCareRequestEvent = {
+  id: number;
+  event_type: string;
+  from_status: string;
+  to_status: string;
+  metadata: Record<string, unknown>;
+  actor: number | null;
+  actor_email: string | null;
+  assignment: number | null;
+  created_at: string;
+};
+
+export type HomeCareTrackingPoint = {
+  id: number;
+  latitude: string;
+  longitude: string;
+  accuracy_meters: number;
+  source: string;
+  created_at: string;
+};
+
+export type HomeCareRating = {
+  id: number;
+  score: number;
+  feedback: string;
+  created_at: string;
 };
 
 export type PaymentProvider = "paystack" | "flutterwave";

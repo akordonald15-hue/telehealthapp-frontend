@@ -1,0 +1,418 @@
+"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2, MapPinned, Navigation, Phone, ShieldCheck, Timer } from "lucide-react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Notice } from "@/components/ui/notice";
+import { Section } from "@/components/ui/section";
+import { homeCareApi } from "@/lib/api/endpoints";
+import { useCurrentUser } from "@/lib/auth/use-auth";
+import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
+import { formatDateTime } from "@/lib/utils";
+import {
+  activeAssignmentForRequest,
+  bookingSourceLabel,
+  buildVerificationPayload,
+  canCompleteCare,
+  canMarkArrived,
+  canStartCare,
+  canStartTrip,
+  canVerifyRequest,
+  homeCareStatusLabel,
+  preferredTimeLabel,
+  type VerificationOutcomeOption,
+  verificationOutcomeOptions,
+} from "@/features/nurse/nurse-utils";
+
+export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
+  const queryClient = useQueryClient();
+  const userQuery = useCurrentUser();
+  const [verificationChoice, setVerificationChoice] = useState<VerificationOutcomeOption>("confirmed");
+  const [verificationNotes, setVerificationNotes] = useState("");
+  const [visitNoteDraft, setVisitNoteDraft] = useState("");
+  const [locationMessage, setLocationMessage] = useState("");
+
+  const requestQuery = useQuery({
+    queryKey: ["home-care", "request", requestId],
+    queryFn: () => homeCareApi.requestDetail(requestId),
+    enabled: userQuery.data?.role === "nurse",
+  });
+  const eventsQuery = useQuery({
+    queryKey: ["home-care", "request", requestId, "events"],
+    queryFn: () => homeCareApi.requestEvents(requestId),
+    enabled: userQuery.data?.role === "nurse",
+  });
+  const trackingQuery = useQuery({
+    queryKey: ["home-care", "request", requestId, "tracking"],
+    queryFn: () => homeCareApi.requestTracking(requestId),
+    enabled: userQuery.data?.role === "nurse",
+  });
+
+  const refreshHomeCare = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["home-care"] });
+  };
+
+  const verifyMutation = useMutation({
+    mutationFn: (assignmentId: number) => homeCareApi.submitVerificationAttempt(assignmentId, buildVerificationPayload(verificationChoice, verificationNotes)),
+    onSuccess: async () => {
+      setVerificationNotes("");
+      await refreshHomeCare();
+    },
+  });
+  const tripMutation = useMutation({
+    mutationFn: homeCareApi.startTrip,
+    onSuccess: async () => {
+      setLocationMessage("Trip started successfully.");
+      await refreshHomeCare();
+    },
+  });
+  const arriveMutation = useMutation({
+    mutationFn: homeCareApi.markArrived,
+    onSuccess: async () => {
+      await refreshHomeCare();
+    },
+  });
+  const careStartMutation = useMutation({
+    mutationFn: homeCareApi.startCare,
+    onSuccess: async () => {
+      await refreshHomeCare();
+    },
+  });
+  const careCompleteMutation = useMutation({
+    mutationFn: homeCareApi.completeCare,
+    onSuccess: async () => {
+      await refreshHomeCare();
+    },
+  });
+  const trackingMutation = useMutation({
+    mutationFn: ({ assignmentId, latitude, longitude, accuracy }: { assignmentId: number; latitude: number; longitude: number; accuracy?: number }) =>
+      homeCareApi.sendTracking(assignmentId, { latitude, longitude, accuracy_meters: accuracy || 0, source: "browser_geolocation" }),
+    onSuccess: async () => {
+      setLocationMessage("Location update shared.");
+      await refreshHomeCare();
+    },
+  });
+
+  const request = requestQuery.data;
+  const assignment = activeAssignmentForRequest(request);
+  const alternatePhone = useMemo(() => {
+    const snapshot = request?.source_snapshot;
+    if (!snapshot || typeof snapshot !== "object") {
+      return "";
+    }
+    const value = snapshot["alternate_phone"];
+    return typeof value === "string" ? value : "";
+  }, [request?.source_snapshot]);
+
+  async function shareCurrentLocation() {
+    if (!assignment) {
+      return;
+    }
+    if (!("geolocation" in navigator)) {
+      setLocationMessage("Location sharing is not available on this device.");
+      return;
+    }
+
+    setLocationMessage("Getting your current location...");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        trackingMutation.mutate({
+          assignmentId: assignment.id,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        });
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationMessage("Location permission was denied. You can still continue without live location.");
+          return;
+        }
+        setLocationMessage("We couldn't read your location right now. Please try again in a moment.");
+      },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 },
+    );
+  }
+
+  if (userQuery.data?.role !== "nurse") {
+    return (
+      <Section title="Request detail" description="This view is available for nurse accounts only.">
+        <Notice title="This view is not available for your account." tone="warning" />
+      </Section>
+    );
+  }
+
+  return (
+    <Section
+      title={request ? request.contact_name_snapshot || "Request detail" : "Request detail"}
+      description="Review patient details, confirm the visit, manage travel, and keep the care workflow moving in the right order."
+      action={<Link href="/nurse/requests" className="text-sm font-semibold text-[var(--primary)]">Back to requests</Link>}
+    >
+      {requestQuery.isError ? (
+        <Notice title="We couldn't load this request." tone="warning">
+          {getFriendlyErrorMessage(requestQuery.error, "homeCare")}
+        </Notice>
+      ) : null}
+
+      {requestQuery.isLoading ? (
+        <div className="rounded-[24px] border border-slate-200 bg-white px-5 py-10 text-sm text-slate-600">Loading request details...</div>
+      ) : request ? (
+        <>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="font-heading text-2xl font-semibold text-[#1F2937]">{request.contact_name_snapshot || "Patient request"}</h2>
+                <span className="rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
+                  {homeCareStatusLabel(request.status)}
+                </span>
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-[#1F2937]">Patient phone</p>
+                  <p className="mt-1 text-sm text-slate-600">{request.contact_phone_snapshot || "Not provided"}</p>
+                </div>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-[#1F2937]">Alternate phone</p>
+                  <p className="mt-1 text-sm text-slate-600">{alternatePhone || "Not provided"}</p>
+                </div>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-[#1F2937]">Booking source</p>
+                  <p className="mt-1 text-sm text-slate-600">{bookingSourceLabel(request.booking_source)}</p>
+                </div>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-[#1F2937]">Preferred time</p>
+                  <p className="mt-1 text-sm text-slate-600">{preferredTimeLabel(request)}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+                <p className="text-sm font-semibold text-[#1F2937]">Address and landmark</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{request.service_address_snapshot || "Address not provided yet."}</p>
+                {request.service_location_notes ? <p className="mt-2 text-sm text-slate-600">{request.service_location_notes}</p> : null}
+              </div>
+
+              <div className="mt-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+                <p className="text-sm font-semibold text-[#1F2937]">Doctor referral or care notes</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{request.care_notes || "No extra notes have been shared for this request yet."}</p>
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <div className="flex items-start gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
+                  <ShieldCheck className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Current workflow</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Actions only appear when the request is ready for them.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-3 text-sm text-slate-600">
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">Assignment</p>
+                  <p className="mt-1">{assignment ? homeCareStatusLabel(assignment.status) : "No active assignment available."}</p>
+                </div>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">Trip status</p>
+                  <p className="mt-1">{homeCareStatusLabel(request.status)}</p>
+                </div>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">Last update</p>
+                  <p className="mt-1">{formatDateTime(request.updated_at)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <div className="flex items-start gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
+                  <Phone className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Pre-visit verification</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Confirm the patient details before starting your trip.</p>
+                </div>
+              </div>
+              <div className="mt-6 grid gap-3">
+                <label className="grid gap-2 text-sm font-semibold text-[#1F2937]">
+                  Verification outcome
+                  <select
+                    value={verificationChoice}
+                    onChange={(event) => setVerificationChoice(event.target.value as VerificationOutcomeOption)}
+                    className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
+                  >
+                    {verificationOutcomeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <p className="text-sm text-slate-500">
+                  {verificationOutcomeOptions.find((option) => option.value === verificationChoice)?.description}
+                </p>
+                <label className="grid gap-2 text-sm font-semibold text-[#1F2937]">
+                  Notes
+                  <textarea
+                    value={verificationNotes}
+                    onChange={(event) => setVerificationNotes(event.target.value)}
+                    rows={4}
+                    placeholder="Add any details the care team should know before travel."
+                    className="rounded-[14px] border border-slate-200 bg-white px-3 py-3 text-sm text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
+                  />
+                </label>
+                <Button
+                  onClick={() => assignment && verifyMutation.mutate(assignment.id)}
+                  disabled={!assignment || !canVerifyRequest(assignment, request) || verifyMutation.isPending}
+                >
+                  {verifyMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Save verification
+                </Button>
+                {!assignment || !canVerifyRequest(assignment, request) ? (
+                  <p className="text-sm text-slate-500">Verification becomes available after the request has been accepted.</p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <div className="flex items-start gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
+                  <Navigation className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Trip and tracking</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Start travel, share location when available, and mark arrival on site.</p>
+                </div>
+              </div>
+              <div className="mt-6 flex flex-col gap-3">
+                <Button
+                  onClick={() => assignment && tripMutation.mutate(assignment.id)}
+                  disabled={!assignment || !canStartTrip(assignment, request) || tripMutation.isPending}
+                >
+                  {tripMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Start trip
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={shareCurrentLocation}
+                  disabled={!assignment || request.status !== "in_transit" || trackingMutation.isPending}
+                >
+                  {trackingMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MapPinned className="mr-2 h-4 w-4" />}
+                  Share current location
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => assignment && arriveMutation.mutate(assignment.id)}
+                  disabled={!assignment || !canMarkArrived(assignment, request) || arriveMutation.isPending}
+                >
+                  {arriveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Mark arrived
+                </Button>
+                {locationMessage ? <p className="text-sm text-slate-600">{locationMessage}</p> : null}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.95fr)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <div className="flex items-start gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
+                  <Timer className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Care workflow</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Move from arrival into care and close the visit when your workflow is complete.</p>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-3">
+                <Button
+                  onClick={() => assignment && careStartMutation.mutate(assignment.id)}
+                  disabled={!assignment || !canStartCare(assignment, request) || careStartMutation.isPending}
+                >
+                  {careStartMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Start care
+                </Button>
+                <label className="grid gap-2 text-sm font-semibold text-[#1F2937]">
+                  Visit note draft
+                  <textarea
+                    value={visitNoteDraft}
+                    onChange={(event) => setVisitNoteDraft(event.target.value)}
+                    rows={4}
+                    placeholder="Capture a short summary for your own workflow."
+                    className="rounded-[14px] border border-slate-200 bg-white px-3 py-3 text-sm text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
+                  />
+                </label>
+                <p className="text-sm text-slate-500">
+                  Visit note persistence is not exposed by the current backend yet, so this draft stays local for now.
+                </p>
+                <Button
+                  variant="secondary"
+                  onClick={() => assignment && careCompleteMutation.mutate(assignment.id)}
+                  disabled={!assignment || !canCompleteCare(assignment, request) || careCompleteMutation.isPending}
+                >
+                  {careCompleteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Complete care
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Request timeline</h2>
+              <p className="mt-1 text-sm text-slate-500">A clear record of what has happened so far.</p>
+              {eventsQuery.isLoading ? (
+                <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading timeline...</div>
+              ) : eventsQuery.data?.results.length ? (
+                <div className="mt-5 grid gap-3">
+                  {eventsQuery.data.results.map((event) => (
+                    <div key={event.id} className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-[#1F2937]">{homeCareStatusLabel(event.to_status || event.event_type)}</p>
+                        <p className="text-xs text-slate-500">{formatDateTime(event.created_at)}</p>
+                      </div>
+                      {event.actor_email ? <p className="mt-1 text-sm text-slate-600">{event.actor_email}</p> : null}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState title="No timeline entries yet" description="Request activity will appear here as the visit moves forward." />
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+            <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Travel tracking</h2>
+            <p className="mt-1 text-sm text-slate-500">Recent shared tracking points for this request.</p>
+            {trackingQuery.isLoading ? (
+              <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading travel updates...</div>
+            ) : trackingQuery.data?.results.length ? (
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                {trackingQuery.data.results.map((point) => (
+                  <div key={point.id} className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+                    <p className="text-sm font-semibold text-[#1F2937]">
+                      {point.latitude}, {point.longitude}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600">{point.accuracy_meters}m accuracy • {point.source}</p>
+                    <p className="mt-1 text-xs text-slate-500">{formatDateTime(point.created_at)}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState title="No travel updates yet" description="Shared location points will appear here when tracking starts." />
+            )}
+          </div>
+        </>
+      ) : null}
+    </Section>
+  );
+}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/app/providers";
+import { BRAND_NAME } from "@/lib/brand";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,8 +16,13 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "LifeFirst | Secure Telehealth Care",
-  description: "Book doctors, manage records, and get secure care support with LifeFirst.",
+  title: `${BRAND_NAME} | Trusted Telehealth And Home Care`,
+  description: `Book appointments, message your care team, manage records, and coordinate home visits with ${BRAND_NAME}.`,
+  icons: {
+    icon: "/Logo/Logo.png",
+    shortcut: "/Logo/Logo.png",
+    apple: "/Logo/Logo.png",
+  },
 };
 
 export default function RootLayout({

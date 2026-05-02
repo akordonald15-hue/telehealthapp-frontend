@@ -2,7 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -15,8 +16,22 @@ import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 
 export function LoginForm() {
   const login = useLogin();
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
+
+  useEffect(() => {
+    if (!searchParams.get("password")) {
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.delete("password");
+    const nextUrl = nextParams.toString() ? `${pathname}?${nextParams.toString()}` : pathname;
+    router.replace(nextUrl);
+  }, [pathname, router, searchParams]);
+
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -28,7 +43,7 @@ export function LoginForm() {
   return (
     <form className="grid gap-5" onSubmit={form.handleSubmit((values) => login.mutate(values))}>
       <Notice title="Welcome back" tone="neutral">
-        Sign in to continue to your secure LifeFirst workspace.
+        Sign in to continue to your secure Caretekk workspace.
       </Notice>
       {login.error ? (
         <div className="grid gap-3">
@@ -43,7 +58,7 @@ export function LoginForm() {
           ) : null}
         </div>
       ) : null}
-      <Field label="Email" error={form.formState.errors.email?.message} hint="Use the email tied to your LifeFirst account.">
+      <Field label="Email" error={form.formState.errors.email?.message} hint="Use the email tied to your Caretekk account.">
         <Input type="email" autoComplete="email" placeholder="you@example.com" {...form.register("email")} />
       </Field>
       <Field label="Password" error={form.formState.errors.password?.message}>

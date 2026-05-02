@@ -4,6 +4,7 @@ import {
   CreditCard,
   FileText,
   HeartPulse,
+  Home,
   MessageSquare,
   type LucideIcon,
   ShieldCheck,
@@ -15,30 +16,30 @@ export const marketingNavItems = [
   { label: "Home", href: "#home" },
   { label: "Features", href: "#features" },
   { label: "Doctors", href: "#doctors" },
-  { label: "How It Works", href: "#how-it-works" },
+  { label: "Home Care", href: "#how-it-works" },
   { label: "Contact", href: "#contact" },
 ];
 
 export const trustItems: Array<{ title: string; text: string; icon: LucideIcon }> = [
   {
     title: "Secure consultations",
-    text: "Protected care conversations and account access.",
+    text: "Protected care conversations, verified access, and thoughtful follow-up.",
     icon: ShieldCheck,
   },
   {
     title: "Verified doctors",
-    text: "Trusted clinicians prepared for launch support.",
+    text: "Trusted clinicians prepared for launch support and ongoing patient care.",
     icon: UserRoundCheck,
   },
   {
     title: "Protected records",
-    text: "Medical files and referrals stay organized.",
+    text: "Medical files, notes, and referrals stay organized and easy to revisit.",
     icon: FileText,
   },
   {
-    title: "Patient-centered care",
-    text: "Clear next steps before and after each visit.",
-    icon: HeartPulse,
+    title: "Home care ready",
+    text: "Telehealth and nurse-led visits can live in one connected care journey.",
+    icon: Home,
   },
 ];
 
@@ -80,27 +81,27 @@ export const doctors = [
 export const features: Array<{ title: string; text: string; icon: LucideIcon }> = [
   {
     title: "Appointments",
-    text: "Book and manage consultations with clear status updates.",
+    text: "Book and manage consultations with clear status updates and reminders.",
     icon: CalendarDays,
   },
   {
     title: "Secure messaging",
-    text: "Continue care conversations with doctors after a visit.",
+    text: "Continue care conversations with doctors in one calm consultation space.",
     icon: MessageSquare,
   },
   {
     title: "Medical records",
-    text: "Keep notes and file uploads organized around each patient.",
+    text: "Keep notes and file uploads organized around each patient journey.",
     icon: FileText,
   },
   {
     title: "Care plans",
-    text: "Review doctor notes, specialist follow-up, and next steps in one place.",
+    text: "Review doctor notes, follow-up guidance, and referrals in one place.",
     icon: ClipboardList,
   },
   {
     title: "Care check-in",
-    text: "Share symptoms and receive guided care direction.",
+    text: "Share symptoms, get guided direction, and move into the right next step faster.",
     icon: Sparkles,
   },
   {
@@ -108,11 +109,21 @@ export const features: Array<{ title: string; text: string; icon: LucideIcon }> 
     text: "Start and track provider-backed payments with confidence.",
     icon: CreditCard,
   },
+  {
+    title: "Home care nurses",
+    text: "Coordinate accepted requests, pre-visit confirmation, travel, and care completion.",
+    icon: Home,
+  },
+  {
+    title: "Follow-up support",
+    text: "Keep consultations, care plans, and on-the-ground updates connected.",
+    icon: HeartPulse,
+  },
 ];
 
 export const heroStats = [
   { value: "4", label: "launch doctors" },
-  { value: "24/7", label: "care access path" },
+  { value: "Home Care", label: "nurse flow ready" },
   { value: "Secure", label: "records and chat" },
 ];
 
@@ -130,17 +141,17 @@ export const howItWorksSteps = [
   {
     id: "03",
     title: "Complete your care check-in",
-    text: "Share symptoms first so we can guide you toward the right doctor and the right next step.",
+    text: "Share symptoms first so we can guide you toward the right doctor or care support path.",
   },
   {
     id: "04",
     title: "Continue with care",
-    text: "Move into consultation, appointments, records, care plans, and follow-up in one place.",
+    text: "Move into consultation, appointments, home visits, records, care plans, and follow-up in one place.",
   },
 ];
 
 export const footerLinks = [
   { label: "Features", href: "#features" },
   { label: "Doctors", href: "#doctors" },
-  { label: "How It Works", href: "#how-it-works" },
+  { label: "Home Care", href: "#how-it-works" },
 ];

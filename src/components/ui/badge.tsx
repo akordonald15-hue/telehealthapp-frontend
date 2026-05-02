@@ -6,6 +6,7 @@ const tones = {
   amber: "bg-[#FFFBEB] text-[#B45309]",
   rose: "bg-[#FEF2F2] text-[#BE123C]",
   cyan: "bg-[#ECFEFF] text-[#0F766E]",
+  blue: "bg-[var(--primary-soft)] text-[var(--primary-strong)]",
 };
 
 export function Badge({

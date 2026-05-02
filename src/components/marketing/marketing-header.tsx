@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import { marketingNavItems } from "@/features/marketing/data";
 
 export function MarketingHeader() {
@@ -12,23 +13,18 @@ export function MarketingHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/70 bg-white/85 backdrop-blur-xl">
       <nav className="lf-shell flex min-h-[72px] items-center justify-between gap-4 sm:min-h-[76px] sm:gap-6" aria-label="Main navigation">
-        <Link href="/" className="inline-flex items-center gap-3" aria-label="LifeFirst home">
-          <span className="grid h-11 w-11 place-items-center rounded-[14px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] text-sm font-black text-white shadow-[0_12px_28px_rgba(37,99,235,0.24)]">
-            LF
-          </span>
-          <span className="font-heading text-[1.12rem] font-extrabold tracking-[-0.03em] text-[#1F2937]">LifeFirst</span>
-        </Link>
+        <BrandLockup href="/" wordmark="image" wordmarkClassName="h-6 max-w-[152px] sm:h-7 sm:max-w-[176px]" />
 
         <div className="hidden items-center gap-6 lg:flex">
           {marketingNavItems.map((item) => (
-            <a key={item.label} href={item.href} className="text-sm font-bold text-[#475467] transition hover:text-[#2563EB]">
+            <a key={item.label} href={item.href} className="text-sm font-bold text-[#475467] transition hover:text-[var(--primary)]">
               {item.label}
             </a>
           ))}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Link href="/login" className="text-sm font-bold text-[#475467] transition hover:text-[#2563EB]">
+          <Link href="/login" className="text-sm font-bold text-[#475467] transition hover:text-[var(--primary)]">
             Sign in
           </Link>
           <Link href="/register" className="lf-btn lf-btn-primary min-h-[48px] px-5 text-sm">
@@ -56,7 +52,7 @@ export function MarketingHeader() {
                 key={item.label}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-[12px] px-3 py-3 text-sm font-bold text-[#475467] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                className="rounded-[12px] px-3 py-3 text-sm font-bold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]"
               >
                 {item.label}
               </a>
@@ -64,7 +60,7 @@ export function MarketingHeader() {
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              className="rounded-[12px] px-3 py-3 text-sm font-bold text-[#475467] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+              className="rounded-[12px] px-3 py-3 text-sm font-bold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]"
             >
               Sign in
             </Link>

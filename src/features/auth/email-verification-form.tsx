@@ -47,7 +47,7 @@ export function EmailVerificationForm() {
   return (
     <div className="grid gap-6">
       <Notice title="Check your email" tone="neutral">
-        We sent a 6-digit code to {email || "your email"}. Enter it here to continue creating your LifeFirst account.
+        We sent a 6-digit code to {email || "your email"}. Enter it here to continue creating your Caretekk account.
       </Notice>
 
       <form

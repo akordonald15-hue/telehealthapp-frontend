@@ -370,7 +370,7 @@ export function TriageClient() {
                     <BrainCircuit className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="font-heading text-xl font-semibold text-[#1F2937]">LifeFirst Assistant</p>
+                    <p className="font-heading text-xl font-semibold text-[#1F2937]">Caretekk Assistant</p>
                     <p className="mt-1 text-sm leading-6 text-slate-600">A quick, guided intake before we connect you with care.</p>
                   </div>
                 </div>

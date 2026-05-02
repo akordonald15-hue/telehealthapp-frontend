@@ -13,7 +13,9 @@ type ErrorContext =
   | "recordUpload"
   | "referrals"
   | "triage"
-  | "profile";
+  | "profile"
+  | "homeCare"
+  | "nurse";
 
 const CONTEXT_DEFAULTS: Record<ErrorContext, string> = {
   generic: "Something went wrong. Please try again.",
@@ -29,6 +31,8 @@ const CONTEXT_DEFAULTS: Record<ErrorContext, string> = {
   referrals: "We couldn't load your referrals right now.",
   triage: "We couldn't complete that health check step right now.",
   profile: "We couldn't update your details right now.",
+  homeCare: "We couldn't load your home care updates right now.",
+  nurse: "We couldn't load your nurse workspace right now.",
 };
 
 const MESSAGE_OVERRIDES: Array<{ pattern: RegExp; replacement: string }> = [

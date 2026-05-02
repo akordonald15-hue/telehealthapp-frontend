@@ -15,6 +15,7 @@ import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { appointmentCompanionLabel } from "@/lib/ui/humanize";
 import type { PaginatedResponse } from "@/lib/types/backend";
 import { formatDateTime, formatMoney } from "@/lib/utils";
+import { NurseDashboardClient } from "@/features/nurse/nurse-dashboard-client";
 
 function Metric({ label, value, href, icon: Icon, description }: { label: string; value: string | number; href: string; icon: React.ComponentType<{ className?: string }>; description: string }) {
   return (
@@ -58,17 +59,35 @@ function listMetric<T>(query: ListQuery<T>) {
 
 export function DashboardClient() {
   const userQuery = useCurrentUser();
-  const appointments = useQuery({ queryKey: ["appointments", "dashboard"], queryFn: () => appointmentsApi.list({ page_size: 5 }) });
-  const threads = useQuery({ queryKey: ["threads", "dashboard"], queryFn: () => messagingApi.threads({ page_size: 5 }) });
-  const canLoadPayments = userQuery.data ? userQuery.data.role !== "doctor" : false;
+  const user = userQuery.data;
+  const isNurse = user?.role === "nurse";
+
+  const appointments = useQuery({
+    queryKey: ["appointments", "dashboard"],
+    queryFn: () => appointmentsApi.list({ page_size: 5 }),
+    enabled: !isNurse,
+  });
+  const threads = useQuery({
+    queryKey: ["threads", "dashboard"],
+    queryFn: () => messagingApi.threads({ page_size: 5 }),
+    enabled: !isNurse,
+  });
+  const canLoadPayments = user ? user.role !== "doctor" && user.role !== "nurse" : false;
   const payments = useQuery({
     queryKey: ["payments", "dashboard"],
     queryFn: () => paymentsApi.list({ page_size: 5 }),
     enabled: canLoadPayments,
   });
-  const referrals = useQuery({ queryKey: ["referrals", "dashboard"], queryFn: () => referralsApi.list({ page_size: 5 }) });
+  const referrals = useQuery({
+    queryKey: ["referrals", "dashboard"],
+    queryFn: () => referralsApi.list({ page_size: 5 }),
+    enabled: !isNurse,
+  });
 
-  const user = userQuery.data;
+  if (isNurse) {
+    return <NurseDashboardClient />;
+  }
+
   const threadMetric = listMetric(threads);
   const referralMetric = listMetric(referrals);
   const paymentMetric = user?.role === "doctor" ? "Not shown" : listMetric(payments);
@@ -201,7 +220,7 @@ export function DashboardClient() {
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
             <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.65)] sm:p-8">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-100">LifeFirst workspace</p>
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-100">Caretekk workspace</p>
               <h2 className="font-heading mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Everything important in one calm view.</h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">
                 Keep up with visits, conversations, records, and referrals without bouncing between disconnected tools.

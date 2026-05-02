@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  Activity,
   CalendarDays,
   ClipboardList,
   CreditCard,
   FileText,
   HeartPulse,
+  Home,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -19,6 +19,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser, useLogout } from "@/lib/auth/use-auth";
@@ -33,21 +34,26 @@ type NavItem = {
 };
 
 const navItems: readonly NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", patientLabel: "Journey", icon: LayoutDashboard, roles: ["patient", "doctor", "admin"] },
+  { href: "/dashboard", label: "Dashboard", patientLabel: "Journey", icon: LayoutDashboard, roles: ["patient", "doctor", "admin", "nurse"] },
   { href: "/triage", label: "Care check-in", patientLabel: "Start Triage", icon: HeartPulse, roles: ["patient", "doctor", "admin"] },
   { href: "/messages", label: "Messages", patientLabel: "Consultation", icon: MessageSquare, roles: ["patient", "doctor", "admin"] },
   { href: "/care-plan", label: "Care Plan", patientLabel: "Care Plan", icon: ClipboardList, roles: ["patient"] },
+  { href: "/home-care/book", label: "Book Nurse", patientLabel: "Book Nurse", icon: Home, roles: ["patient"] },
+  { href: "/home-care/requests", label: "Home Care", patientLabel: "Home Care", icon: ClipboardList, roles: ["patient"] },
   { href: "/appointments", label: "Appointments", icon: CalendarDays, roles: ["patient", "doctor", "admin"] },
+  { href: "/nurse/requests", label: "Requests", icon: ClipboardList, roles: ["nurse"] },
+  { href: "/nurse/history", label: "History", icon: FileText, roles: ["nurse"] },
   { href: "/records", label: "Records", icon: FileText, roles: ["patient", "doctor", "admin"] },
   { href: "/payments", label: "Payments", icon: CreditCard, roles: ["patient", "admin"] },
   { href: "/referrals", label: "Referrals", icon: ClipboardList, roles: ["doctor", "admin"] },
-  { href: "/profile", label: "Profile", icon: UserRound, roles: ["patient", "doctor", "admin"] },
+  { href: "/profile", label: "Profile", icon: UserRound, roles: ["patient", "doctor", "admin", "nurse"] },
   { href: "/audit", label: "Audit", icon: ShieldCheck, roles: ["admin"] },
 ] as const;
 
 function roleTone(role: string | undefined) {
   if (role === "admin") return "rose" as const;
   if (role === "doctor") return "cyan" as const;
+  if (role === "nurse") return "blue" as const;
   return "green" as const;
 }
 
@@ -64,35 +70,44 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       return filtered;
     }
 
-    const patientOrder = ["/dashboard", "/triage", "/messages", "/care-plan", "/appointments", "/records", "/payments", "/profile"];
+    const patientOrder = [
+      "/dashboard",
+      "/triage",
+      "/messages",
+      "/care-plan",
+      "/home-care/book",
+      "/home-care/requests",
+      "/appointments",
+      "/records",
+      "/payments",
+      "/profile",
+    ];
     return [...filtered].sort((left, right) => patientOrder.indexOf(left.href) - patientOrder.indexOf(right.href));
   }, [user]);
 
-  const activeItem = visibleNav.find((item) => pathname === item.href);
+  const activeItem = visibleNav.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
   const activeLabel = user?.role === "patient" ? activeItem?.patientLabel ?? activeItem?.label ?? "Journey" : activeItem?.label ?? "Workspace";
+
+  const workspaceTitle = user?.role === "nurse" ? "Your home care workspace" : "Everything you need for your care journey";
+  const workspaceDescription =
+    user?.role === "nurse"
+      ? "Requests, travel updates, visit progress, and history stay in one clean workflow."
+      : "Appointments, messages, records, and payments are organized here so you can move through your care with ease.";
 
   const navigation = (
     <>
       <div className="rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-4 shadow-[0_24px_64px_-44px_rgba(15,23,42,0.55)]">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-[16px] bg-gradient-to-br from-[#2563EB] via-[#3B82F6] to-[#60A5FA] text-white shadow-lg shadow-blue-200/70">
-            <Activity className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="font-heading text-base font-semibold text-[#1F2937]">LifeFirst</p>
-            <p className="text-sm text-slate-500">Care workspace</p>
-          </div>
-        </div>
-        <div className="mt-4 rounded-[18px] border border-blue-100 bg-[#EFF6FF] px-4 py-3 text-sm text-slate-600">
-          <p className="font-semibold text-[#1F2937]">Everything you need for your care journey</p>
-          <p className="mt-1 leading-6">Appointments, messages, records, and payments are organized here so you can move through your care with ease.</p>
+        <BrandLockup href="/" wordmark="image" wordmarkClassName="h-6 max-w-[150px]" />
+        <div className="mt-4 rounded-[18px] border border-[rgba(66,107,179,0.1)] bg-[var(--primary-soft)] px-4 py-3 text-sm text-slate-600">
+          <p className="font-semibold text-[#1F2937]">{workspaceTitle}</p>
+          <p className="mt-1 leading-6">{workspaceDescription}</p>
         </div>
       </div>
 
       <nav className="mt-5 grid gap-2">
         {visibleNav.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href;
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link
               key={item.href}
@@ -101,14 +116,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className={cn(
                 "group flex items-center gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition",
                 active
-                  ? "border-blue-200 bg-[#EFF6FF] text-[#2563EB] shadow-[0_20px_40px_-34px_rgba(37,99,235,0.5)]"
+                  ? "border-[rgba(66,107,179,0.18)] bg-[var(--primary-soft)] text-[var(--primary)] shadow-[0_20px_40px_-34px_rgba(66,107,179,0.38)]"
                   : "border-transparent bg-white/75 text-slate-600 hover:border-slate-200 hover:bg-white hover:text-[#1F2937] hover:shadow-[0_18px_34px_-34px_rgba(15,23,42,0.45)]",
               )}
             >
               <span
                 className={cn(
                   "flex h-10 w-10 items-center justify-center rounded-[14px] transition",
-                  active ? "bg-white text-[#2563EB]" : "bg-slate-100 text-slate-500 group-hover:bg-[#DBEAFE] group-hover:text-[#2563EB]",
+                  active ? "bg-white text-[var(--primary)]" : "bg-slate-100 text-slate-500 group-hover:bg-[var(--primary-soft)] group-hover:text-[var(--primary)]",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -143,7 +158,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(96,165,250,0.14),_transparent_28%),linear-gradient(180deg,#F8FBFF_0%,#F9FAFB_38%,#FFFFFF_100%)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(112,152,212,0.16),_transparent_28%),linear-gradient(180deg,#F5F9FF_0%,#F7FAFE_38%,#FFFFFF_100%)]">
       <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
         <aside className="hidden w-[290px] shrink-0 px-5 py-6 lg:block xl:px-6">
           <div className="sticky top-6">{navigation}</div>
@@ -152,11 +167,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {mobileOpen ? (
           <div className="fixed inset-0 z-50 bg-slate-950/38 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)}>
             <aside
-              className="absolute inset-y-0 left-0 w-[86vw] max-w-sm overflow-y-auto border-r border-white/60 bg-[#F8FBFF] px-4 py-5 shadow-2xl"
+              className="absolute inset-y-0 left-0 w-[86vw] max-w-sm overflow-y-auto border-r border-white/60 bg-[#F5F9FF] px-4 py-5 shadow-2xl"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="mb-4 flex items-center justify-between">
-                <p className="font-heading text-lg font-semibold text-[#1F2937]">LifeFirst</p>
+                <BrandLockup href="/" wordmark="image" wordmarkClassName="h-6 max-w-[150px]" />
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
@@ -183,13 +198,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <Menu className="h-5 w-5" />
                 </button>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#2563EB]">LifeFirst</p>
-                  <h1 className="truncate font-heading text-lg font-semibold text-[#1F2937] sm:text-xl">{activeLabel}</h1>
+                  <BrandLockup href="/" wordmark="image" wordmarkClassName="h-5 max-w-[132px] sm:h-6 sm:max-w-[150px]" />
+                  <h1 className="mt-1 truncate font-heading text-lg font-semibold text-[#1F2937] sm:text-xl">{activeLabel}</h1>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="hidden text-right md:block">
-                  <p className="text-sm font-semibold text-[#1F2937]">Your care, all in one place</p>
+                  <p className="text-sm font-semibold text-[#1F2937]">{user?.role === "nurse" ? "Care visits, all in one place" : "Your care, all in one place"}</p>
                   <p className="text-xs text-slate-500">Responsive, clear, and tailored to your account</p>
                 </div>
                 {user ? <Badge tone={roleTone(user.role)}>{user.role}</Badge> : null}
