@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
-import { Input, Select } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { authApi } from "@/lib/api/endpoints";
 import {
@@ -35,7 +35,6 @@ export function RegisterForm() {
     defaultValues: {
       email: initialEmail,
       phone: "",
-      role: "patient",
       password: "",
     },
   });
@@ -43,7 +42,7 @@ export function RegisterForm() {
   return (
     <div className="grid gap-5">
       <Notice title="Start with the right account type" tone="neutral">
-        Enter your email first. We will send a 6-digit code and guide you through the rest.
+        Create a patient account to book care and manage your Caretekk journey. Doctor and nurse accounts are created by Caretekk admin.
       </Notice>
 
       {!isCompletingAccount ? (
@@ -84,17 +83,14 @@ export function RegisterForm() {
           <Field label="Phone" error={form.formState.errors.phone?.message}>
             <Input type="tel" autoComplete="tel" placeholder="+234..." {...form.register("phone")} />
           </Field>
-          <Field label="Role" error={form.formState.errors.role?.message}>
-            <Select {...form.register("role")}>
-              <option value="patient">Patient</option>
-              <option value="doctor">Doctor</option>
-            </Select>
-          </Field>
+          <Notice title="Patient registration only" tone="neutral">
+            This form creates patient accounts only. Doctors and nurses should sign in with credentials provided by Caretekk admin.
+          </Notice>
           <Field label="Password" error={form.formState.errors.password?.message} hint="Minimum 8 characters">
             <Input type="password" autoComplete="new-password" placeholder="Create a secure password" {...form.register("password")} />
           </Field>
           <Button type="submit" disabled={register.isPending}>
-            {register.isPending ? "Creating account..." : "Create account"}
+            {register.isPending ? "Creating patient account..." : "Create patient account"}
           </Button>
         </form>
       ) : null}

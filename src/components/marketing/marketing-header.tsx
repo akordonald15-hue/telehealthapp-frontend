@@ -28,7 +28,7 @@ export function MarketingHeader() {
             Sign in
           </Link>
           <Link href="/register" className="lf-btn lf-btn-primary min-h-[48px] px-5 text-sm">
-            Get Started
+            Get started as a patient
           </Link>
         </div>
 
@@ -65,7 +65,7 @@ export function MarketingHeader() {
               Sign in
             </Link>
             <Link href="/register" onClick={() => setOpen(false)} className="lf-btn lf-btn-primary text-sm">
-              Get Started
+              Get started as a patient
             </Link>
           </div>
         </div>

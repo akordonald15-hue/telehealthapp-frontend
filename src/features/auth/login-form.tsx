@@ -43,7 +43,7 @@ export function LoginForm() {
   return (
     <form className="grid gap-5" onSubmit={form.handleSubmit((values) => login.mutate(values))}>
       <Notice title="Welcome back" tone="neutral">
-        Sign in to continue to your secure Caretekk workspace.
+        Sign in to continue to your secure Caretekk workspace. Patients, doctors, nurses, and admins can use their provided credentials.
       </Notice>
       {login.error ? (
         <div className="grid gap-3">
@@ -71,7 +71,7 @@ export function LoginForm() {
         <p>
           New here?{" "}
           <Link className="font-semibold text-[#2563EB]" href="/register">
-            Create account
+            Create patient account
           </Link>
         </p>
         <Link className="font-semibold text-[#2563EB]" href="/password-reset">

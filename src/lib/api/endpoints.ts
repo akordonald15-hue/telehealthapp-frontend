@@ -37,18 +37,19 @@ import type {
   TriageSeverity,
   TriageSymptomSubmitResponse,
   User,
-  UserRole,
 } from "@/lib/types/backend";
-
-type PublicRegistrationRole = Extract<UserRole, "patient" | "doctor">;
 
 function authPath(path: string) {
   return typeof window === "undefined" ? path : `/api${path}`;
 }
 
 export const authApi = {
-  register: (body: { email: string; phone?: string; role: PublicRegistrationRole; password: string }) =>
-    apiRequest<RegisterResponse>(authPath("/auth/register/"), { method: "POST", body, auth: false }),
+  register: (body: { email: string; phone?: string; password: string }) =>
+    apiRequest<RegisterResponse>(authPath("/auth/register/"), {
+      method: "POST",
+      body: { ...body, role: "patient" },
+      auth: false,
+    }),
   login: (body: { email: string; password: string }) =>
     apiRequest<TokenPair>(authPath("/auth/login/"), { method: "POST", body, auth: false }),
   refresh: (body: { refresh: string }) =>

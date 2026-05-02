@@ -27,7 +27,7 @@ export function LandingPage() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link href="/register" className="lf-btn lf-btn-primary sm:min-w-[174px]">
-                Get Started
+                Get started as a patient
               </Link>
               <Link href="/login" className="lf-btn lf-btn-secondary sm:min-w-[160px]">
                 Sign in
@@ -186,7 +186,7 @@ export function LandingPage() {
             </div>
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col lg:items-stretch">
               <Link href="/register" className="lf-btn bg-white text-[var(--primary)] shadow-[0_16px_34px_rgba(255,255,255,0.18)] hover:-translate-y-0.5 hover:bg-[#F8FBFF]">
-                Get Started
+                Create patient account
               </Link>
               <Link href="/login" className="lf-btn lf-btn-ghost-light">
                 Sign in

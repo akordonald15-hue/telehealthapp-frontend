@@ -130,8 +130,8 @@ export const heroStats = [
 export const howItWorksSteps = [
   {
     id: "01",
-    title: "Create your account",
-    text: "Start with your details and begin a guided onboarding flow built around trust.",
+    title: "Create your patient account",
+    text: "Start with your details and begin a guided patient onboarding flow built around trust.",
   },
   {
     id: "02",

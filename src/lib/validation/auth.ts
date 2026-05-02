@@ -8,7 +8,6 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
   email: z.string().email(),
   phone: z.string().max(32).optional(),
-  role: z.enum(["patient", "doctor"]),
   password: z.string().min(8),
 });
 

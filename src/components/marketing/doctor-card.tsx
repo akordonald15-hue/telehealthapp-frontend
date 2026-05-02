@@ -35,7 +35,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         <p className="min-h-[84px] text-[0.94rem] leading-7 text-[#667085]">{doctor.bio}</p>
         <div className="w-fit rounded-full bg-[#ECFDF5] px-3 py-2 text-[0.75rem] font-black text-[#047857]">{doctor.qualification}</div>
         <Link href="/register" className="lf-btn lf-btn-dark mt-auto text-sm">
-          Book Session
+          Book care
         </Link>
       </div>
     </article>
