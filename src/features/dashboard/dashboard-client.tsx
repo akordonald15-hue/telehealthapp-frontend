@@ -73,7 +73,7 @@ export function DashboardClient() {
     queryFn: () => messagingApi.threads({ page_size: 5 }),
     enabled: !isNurse,
   });
-  const canLoadPayments = user ? user.role !== "doctor" && user.role !== "nurse" : false;
+  const canLoadPayments = user?.role === "admin";
   const payments = useQuery({
     queryKey: ["payments", "dashboard"],
     queryFn: () => paymentsApi.list({ page_size: 5 }),
@@ -95,7 +95,7 @@ export function DashboardClient() {
 
   const threadMetric = listMetric(threads);
   const referralMetric = listMetric(referrals);
-  const paymentMetric = listMetric(payments);
+  const paymentMetric = canLoadPayments ? listMetric(payments) : 0;
   const patientHasConsultation = typeof threadMetric === "number" && threadMetric > 0;
   const patientHasCarePlan = typeof referralMetric === "number" && referralMetric > 0;
   const nextPatientStep = patientHasConsultation
@@ -124,7 +124,7 @@ export function DashboardClient() {
       description={
         user?.role === "patient"
           ? "Move from care check-in to consultation and follow-up with clear next steps at every stage."
-          : "A simple view of your appointments, conversations, payments, and next steps."
+          : "A simple view of your appointments, conversations, billing history, and next steps."
       }
       action={
         user ? (
@@ -218,7 +218,6 @@ export function DashboardClient() {
             <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Keep upcoming visits and booking details close." />
             <Metric label="Consultations" value={threadMetric} href="/messages" icon={MessageSquareText} description="Follow up with your doctor in one secure conversation." />
             <Metric label="Care Plans" value={referralMetric} href="/care-plan" icon={FileText} description="Review doctor notes, instructions, and referrals when they are ready." />
-            <Metric label="Payments" value={paymentMetric} href="/payments" icon={CreditCard} description="Complete checkout and keep payment updates in one place." />
           </div>
         </>
       ) : (
@@ -260,7 +259,7 @@ export function DashboardClient() {
                   <p className="mt-1 leading-6">{threads.isLoading ? "Loading your conversations..." : `${listMetric(threads)} conversation${listMetric(threads) === 1 ? "" : "s"} available.`}</p>
                 </div>
                 <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-                  <p className="font-semibold text-[#1F2937]">Payments</p>
+                  <p className="font-semibold text-[#1F2937]">Billing history</p>
                   <p className="mt-1 leading-6">{`${paymentMetric} payment update${paymentMetric === 1 ? "" : "s"} available.`}</p>
                 </div>
               </div>
@@ -286,7 +285,7 @@ export function DashboardClient() {
             <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Track upcoming visits and booking activity." />
             <Metric label="Conversations" value={listMetric(threads)} href="/messages" icon={MessageSquareText} description="Stay close to patient and care-team communication." />
             <Metric label="Referrals" value={listMetric(referrals)} href="/referrals" icon={FileText} description="Review outbound and visible referral activity." />
-            <Metric label="Payments" value={paymentMetric} href="/payments" icon={CreditCard} description="See checkout activity and payment history where permitted." />
+            <Metric label="Billing History" value={paymentMetric} href="/payments" icon={CreditCard} description="See read-only checkout activity where permitted." />
           </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
@@ -322,8 +321,8 @@ export function DashboardClient() {
             <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Recent payments</h2>
-                  <p className="mt-1 text-sm text-slate-500">A quick look at your recent payment activity.</p>
+                  <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Recent billing</h2>
+                  <p className="mt-1 text-sm text-slate-500">A quick read-only look at recent service checkout activity.</p>
                 </div>
                 <Link className="text-sm font-semibold text-[#2563EB]" href="/payments">
                   Open
@@ -345,7 +344,7 @@ export function DashboardClient() {
                     </div>
                   ))
                 ) : (
-                  <EmptyState title="No payments yet" description="Checkout activity and completed payments will appear here when available." action={<Link href="/payments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[#2563EB] px-4 text-sm font-extrabold text-white">Open payments</Link>} />
+                  <EmptyState title="No billing history yet" description="Checkout activity for booked services will appear here when available." action={<Link href="/payments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[#2563EB] px-4 text-sm font-extrabold text-white">Open billing history</Link>} />
                 )}
               </div>
             </div>

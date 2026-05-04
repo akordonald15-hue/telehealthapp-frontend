@@ -6,7 +6,7 @@ import { BrandLockup } from "@/components/brand/brand-lockup";
 const authHighlights = [
   {
     title: "Care that feels coordinated",
-    description: "Appointments, secure records, referrals, and payments stay in one calm workflow.",
+    description: "Appointments, secure records, referrals, and service checkout stay in one calm workflow.",
     icon: Stethoscope,
   },
   {

@@ -64,9 +64,13 @@ export function HomeCareBookingClient() {
   const nurseItems = nursesQuery.data?.results ?? [];
 
   const createRequest = useMutation({
-    mutationFn: (body: HomeCareRequestCreate) => homeCareApi.createRequest(body),
-    onSuccess: (request) => {
-      router.replace(`/home-care/requests/${request.id}`);
+    mutationFn: (body: HomeCareRequestCreate & { callback_url: string }) => homeCareApi.bookRequest(body),
+    onSuccess: (response) => {
+      if (response.payment.authorization_url) {
+        window.location.assign(response.payment.authorization_url);
+        return;
+      }
+      router.replace(`/home-care/requests/${response.request.id}`);
     },
   });
 
@@ -97,7 +101,7 @@ export function HomeCareBookingClient() {
           className="grid gap-5 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6"
           onSubmit={(event) => {
             event.preventDefault();
-            const payload: HomeCareRequestCreate = {
+            const payload: HomeCareRequestCreate & { callback_url: string } = {
               booking_source: bookingSource,
               referral: bookingSource === "doctor_referral" ? Number(referralId) : null,
               preferred_nurse: selectedNurse?.id ?? null,
@@ -108,15 +112,24 @@ export function HomeCareBookingClient() {
               requested_window_start: toIsoOrNull(windowStart),
               requested_window_end: toIsoOrNull(windowEnd),
               care_notes: careNotes.trim(),
+              callback_url: `${window.location.origin}/home-care/requests`,
             };
             createRequest.mutate(payload);
           }}
         >
           {createRequest.error ? (
-            <Notice title="We couldn't create this request." tone="warning">
+            <Notice title="We couldn't start this booking." tone="warning">
               {getFriendlyErrorMessage(createRequest.error, "homeCare")}
             </Notice>
           ) : null}
+          {createRequest.isSuccess ? (
+            <Notice title="Checkout ready" tone="success">
+              Redirecting you to Paystack. The nurse request is not marked paid until Paystack verifies payment.
+            </Notice>
+          ) : null}
+          <Notice title="Home nurse booking price: ₦5,000" tone="neutral">
+            Caretekk sets the homecare booking price on the backend. Nurse matching starts after Paystack verifies payment.
+          </Notice>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Booking source">
@@ -274,7 +287,7 @@ export function HomeCareBookingClient() {
 
           <Button type="submit" disabled={!canSubmit}>
             {createRequest.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Create home nurse request
+            {createRequest.isPending ? "Starting checkout..." : "Book and pay ₦5,000"}
           </Button>
         </form>
 
@@ -285,8 +298,8 @@ export function HomeCareBookingClient() {
             </span>
             <h2 className="font-heading mt-4 text-xl font-semibold text-[#1F2937]">What happens next</h2>
             <div className="mt-5 grid gap-3 text-sm text-slate-600">
-              <p>1. Caretekk records the request and starts nurse matching.</p>
-              <p>2. The assigned nurse accepts and completes pre-visit verification.</p>
+              <p>1. Caretekk records the request and starts secure Paystack checkout.</p>
+              <p>2. Once payment is verified, matching starts with an available nurse.</p>
               <p>3. You can track status, confirm completion, and rate the visit.</p>
             </div>
           </div>

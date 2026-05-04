@@ -28,7 +28,7 @@ export const trustItems: Array<{ title: string; text: string; icon: LucideIcon }
   },
   {
     title: "Verified doctors",
-    text: "Trusted clinicians prepared for launch support and ongoing patient care.",
+    text: "Trusted clinicians for general medical consultation and follow-up care.",
     icon: UserRoundCheck,
   },
   {
@@ -45,36 +45,36 @@ export const trustItems: Array<{ title: string; text: string; icon: LucideIcon }
 
 export const doctors = [
   {
-    name: "Dr. Idam Michael Ogudu",
-    specialty: "Obstetrics & Gynecology • General Medicine",
-    qualification: "MBBS • Medical Practicing License (2023/2024)",
-    experience: "Licensed 2023/2024",
+    name: "Dr. Michael Idam",
+    specialty: "Doctor",
+    qualification: "",
+    experience: "Caretekk doctor",
     image: "/img/Dr michael Idam.jpg",
-    bio: "Women's health, general consultations, and steady guidance through everyday care concerns.",
+    bio: "",
   },
   {
-    name: "Dr. Effiong Okon Etim",
-    specialty: "General Medicine",
-    qualification: "MBBS",
-    experience: "General practice",
+    name: "Dr. Effiong Okon",
+    specialty: "Doctor",
+    qualification: "",
+    experience: "Caretekk doctor",
     image: "/img/Dr effiong Okon.jpg",
-    bio: "Accessible day-to-day medical care, symptom review, and practical next-step support.",
+    bio: "",
   },
   {
-    name: "Dr. Paul Chinonso Ogbogu",
-    specialty: "Obstetrics & Gynecology • Internal Medicine • Surgery",
-    qualification: "MBBS",
-    experience: "Multi-specialty care",
+    name: "Dr. Paul Ogbogu",
+    specialty: "Doctor",
+    qualification: "",
+    experience: "Caretekk doctor",
     image: "/img/Dr Paul Chinonso.jpg",
-    bio: "Broad clinical coverage across medicine, surgery, and reproductive health consultations.",
+    bio: "",
   },
   {
     name: "Dr. Moronu Ekene",
-    specialty: "Orthopaedics • General Medicine",
-    qualification: "MBBS",
-    experience: "Musculoskeletal care",
+    specialty: "Doctor",
+    qualification: "",
+    experience: "Caretekk doctor",
     image: "/img/Dr Ekene.jpg",
-    bio: "Support for bone, joint, and general medical concerns with clear treatment guidance.",
+    bio: "",
   },
 ];
 
@@ -105,8 +105,8 @@ export const features: Array<{ title: string; text: string; icon: LucideIcon }> 
     icon: Sparkles,
   },
   {
-    title: "Payments",
-    text: "Start and track provider-backed payments with confidence.",
+    title: "Service checkout",
+    text: "Pay only inside booked consultation and homecare flows with secure Paystack checkout.",
     icon: CreditCard,
   },
   {
@@ -122,8 +122,8 @@ export const features: Array<{ title: string; text: string; icon: LucideIcon }> 
 ];
 
 export const heroStats = [
-  { value: "4", label: "launch doctors" },
-  { value: "Home Care", label: "nurse flow ready" },
+  { value: "Doctors", label: "general consultations" },
+  { value: "Home Care", label: "nurse visits" },
   { value: "Secure", label: "records and chat" },
 ];
 

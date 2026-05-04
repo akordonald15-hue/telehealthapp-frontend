@@ -3,7 +3,6 @@
 import {
   CalendarDays,
   ClipboardList,
-  CreditCard,
   FileText,
   HeartPulse,
   Home,
@@ -46,7 +45,6 @@ const navItems: readonly NavItem[] = [
   { href: "/nurse/requests", label: "Requests", icon: ClipboardList, roles: ["nurse"] },
   { href: "/nurse/history", label: "History", icon: FileText, roles: ["nurse"] },
   { href: "/records", label: "Records", doctorLabel: "Patients / Care Plans", icon: UserRoundCheck, roles: ["patient", "doctor", "admin"] },
-  { href: "/payments", label: "Payments", icon: CreditCard, roles: ["patient", "admin"] },
   { href: "/referrals", label: "Referrals", icon: ClipboardList, roles: ["doctor", "admin"] },
   { href: "/profile", label: "Profile", icon: UserRound, roles: ["patient", "doctor", "admin", "nurse"] },
   { href: "/audit", label: "Audit", icon: ShieldCheck, roles: ["admin"] },
@@ -96,7 +94,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       "/home-care/requests",
       "/appointments",
       "/records",
-      "/payments",
       "/profile",
     ];
     return [...filtered].sort((left, right) => patientOrder.indexOf(left.href) - patientOrder.indexOf(right.href));
@@ -116,7 +113,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       ? "Requests, travel updates, visit progress, and history stay in one clean workflow."
       : user?.role === "doctor"
         ? "Consultations, patient messages, referrals, and care-plan notes stay focused on your clinical work."
-        : "Appointments, messages, records, and payments are organized here so you can move through your care with ease.";
+        : "Appointments, messages, records, and care plans are organized here so you can move through your care with ease.";
 
   const navigation = (
     <>

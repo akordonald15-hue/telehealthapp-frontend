@@ -2,11 +2,13 @@ import { apiList, apiRequest } from "@/lib/api/client";
 import type {
   AdminAuditLog,
   Appointment,
+  AppointmentBookingResponse,
   AuditEvent,
   AvailabilitySlot,
   DetailResponse,
   DoctorProfile,
   HomeCareAssignment,
+  HomeCareBookingResponse,
   HomeCareRating,
   HomeCareRequestCreate,
   HomeCareRequestDetail,
@@ -109,6 +111,8 @@ export const appointmentsApi = {
   list: (query?: { page?: number; page_size?: number }) => apiList<Appointment>("/appointments/", query),
   availableDoctors: (query?: { page?: number; page_size?: number; specialty?: string; search?: string }) =>
     apiList<ProviderDoctor>("/appointments/available-doctors/", query),
+  book: (body: { doctor: number; scheduled_at: string; reason?: string; notes?: string; callback_url: string }) =>
+    apiRequest<AppointmentBookingResponse>("/appointments/book/", { method: "POST", body }),
   create: (body: { doctor: number; scheduled_at: string; status?: string; reason?: string; notes?: string }) =>
     apiRequest<Appointment>("/appointments/", { method: "POST", body }),
   detail: (id: number) => apiRequest<Appointment>(`/appointments/${id}/`),
@@ -143,6 +147,8 @@ export const homeCareApi = {
   availableNurses: (query?: { page?: number; page_size?: number; service_type?: string; search?: string }) =>
     apiList<ProviderNurse>("/home-care/available-nurses/", query),
   requests: (query?: { page?: number; page_size?: number }) => apiList<HomeCareRequestListItem>("/home-care/requests/", query),
+  bookRequest: (body: HomeCareRequestCreate & { callback_url: string }) =>
+    apiRequest<HomeCareBookingResponse>("/home-care/requests/book/", { method: "POST", body }),
   createRequest: (body: HomeCareRequestCreate) =>
     apiRequest<HomeCareRequestDetail>("/home-care/requests/", { method: "POST", body }),
   requestDetail: (id: number) => apiRequest<HomeCareRequestDetail>(`/home-care/requests/${id}/`),
@@ -184,13 +190,12 @@ export const homeCareApi = {
 
 export const paymentsApi = {
   list: (query?: { page?: number; page_size?: number }) => apiList<Payment>("/payments/", query),
-  create: (body: { appointment?: number | null; provider: string; amount: string | number; currency?: string }) =>
-    apiRequest<Payment>("/payments/", { method: "POST", body }),
   initiate: (body: {
     provider: "paystack" | "flutterwave";
-    amount: number;
+    amount?: number;
     currency?: string;
     appointment_id?: number;
+    homecare_request_id?: number;
     callback_url: string;
   }) => apiRequest<PaymentInitiation>("/payments/initiate/", { method: "POST", body }),
   detail: (id: number) => apiRequest<Payment>(`/payments/${id}/`),

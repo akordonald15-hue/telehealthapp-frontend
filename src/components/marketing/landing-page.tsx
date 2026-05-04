@@ -19,11 +19,10 @@ export function LandingPage() {
           <div className="min-w-0 animate-fade-up">
             <p className="mb-4 text-[0.78rem] font-black uppercase tracking-[0.12em] text-[var(--primary)]">Connected care, built around trust</p>
             <h1 className="w-full max-w-full break-words font-heading text-[2.35rem] font-extrabold leading-[1.04] tracking-[-0.045em] text-[#1F2937] sm:max-w-[730px] sm:text-[clamp(3rem,7vw,5.8rem)] sm:leading-[1.02] sm:tracking-[-0.055em]">
-              Quality healthcare, home support, and follow-up with Caretekk.
+              Trusted doctors and home-care nurses from one Caretekk workspace.
             </h1>
             <p className="mt-5 w-full max-w-full break-words text-base leading-[1.82] text-[#475467] sm:max-w-[650px] sm:text-[clamp(1rem,2.4vw,1.22rem)]">
-              Start with a secure sign-up, complete a guided care check-in, and continue into doctor support, nurse visits,
-              records, appointments, and follow-up from one secure care workspace.
+              Caretekk connects you with trusted doctors and home-care nurses for general medical consultation, mother and baby care, elderly care, postnatal support, and safe healthcare guidance from home.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link href="/register" className="lf-btn lf-btn-primary sm:min-w-[174px]">
@@ -108,10 +107,10 @@ export function LandingPage() {
           <div className="mx-auto mb-10 max-w-[740px] text-center sm:mb-12">
             <p className="mb-4 text-[0.78rem] font-black uppercase tracking-[0.12em] text-[var(--primary)]">Meet Our Doctors</p>
             <h2 className="font-heading text-[clamp(2rem,4vw,3.45rem)] font-extrabold tracking-[-0.055em] text-[#1F2937]">
-              Four clinicians ready to support Caretekk patients at launch.
+              Our doctors
             </h2>
             <p className="mt-5 text-[1.04rem] text-[#667085]">
-              Real doctor profiles and welcoming presentation help people feel confident before they book.
+              Choose care with a simple view of the doctors available through Caretekk.
             </p>
           </div>
 

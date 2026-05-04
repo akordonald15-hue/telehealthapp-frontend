@@ -298,6 +298,7 @@ export type Payment = {
   id: number;
   patient: number;
   appointment: number | null;
+  homecare_request: number | null;
   provider: string;
   amount: string;
   currency: string;
@@ -309,8 +310,22 @@ export type Payment = {
 export type PaymentInitiation = {
   payment_id: number;
   provider: string;
+  amount: string;
+  currency: string;
+  appointment_id: number | null;
+  homecare_request_id: number | null;
   authorization_url: string | null;
   external_ref: string;
+};
+
+export type AppointmentBookingResponse = {
+  appointment: Appointment;
+  payment: PaymentInitiation;
+};
+
+export type HomeCareBookingResponse = {
+  request: HomeCareRequestDetail;
+  payment: PaymentInitiation;
 };
 
 export type Refund = {

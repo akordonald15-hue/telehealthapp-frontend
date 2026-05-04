@@ -42,12 +42,16 @@ export function AppointmentsClient() {
     queryFn: () => appointmentsApi.list({ page, page_size: 10 }),
   });
   const createAppointment = useMutation({
-    mutationFn: appointmentsApi.create,
-    onSuccess: async () => {
+    mutationFn: appointmentsApi.book,
+    onSuccess: async (data) => {
       form.reset();
       setSelectedDoctor(null);
       setPage(1);
       await queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      const authorizationUrl = data.payment.authorization_url;
+      if (authorizationUrl) {
+        window.location.assign(authorizationUrl);
+      }
     },
   });
   const cancelAppointment = useMutation({
@@ -107,6 +111,7 @@ export function AppointmentsClient() {
               scheduled_at: values.scheduled_at,
               reason: values.reason,
               notes: values.notes,
+              callback_url: `${window.location.origin}/appointments`,
             }),
           )}
         >
@@ -116,11 +121,14 @@ export function AppointmentsClient() {
             </span>
             <div>
               <p className="font-heading text-xl font-semibold text-[#1F2937]">Book a new appointment</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">Choose your doctor, pick a time, and tell us what you need help with.</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">Choose your doctor, pick a time, then continue to secure Paystack checkout for ₦1,000.</p>
             </div>
           </div>
           <ErrorMessage error={createAppointment.error} context="appointments" />
-          {createAppointment.isSuccess ? <Notice title="Appointment booked" tone="success">Your visit has been scheduled and your list is up to date.</Notice> : null}
+          {createAppointment.isSuccess ? <Notice title="Checkout ready" tone="success">Redirecting you to Paystack. Your appointment is not marked paid until Paystack verifies payment.</Notice> : null}
+          <Notice title="Consultation price: ₦1,000" tone="neutral">
+            Caretekk sets the consultation price on the backend. You will only pay through the secure checkout returned by the server.
+          </Notice>
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Search doctors">
               <Input value={doctorSearch} onChange={(event) => setDoctorSearch(event.target.value)} placeholder="Name, clinic, or specialty" />
@@ -211,7 +219,7 @@ export function AppointmentsClient() {
             <Textarea placeholder="Briefly describe the reason for your visit" {...form.register("reason")} />
           </Field>
           <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending || !doctorCanBeBooked}>
-            {createAppointment.isPending ? "Booking..." : "Book appointment"}
+            {createAppointment.isPending ? "Starting checkout..." : "Book and pay ₦1,000"}
           </Button>
         </form>
       ) : isDoctor ? (

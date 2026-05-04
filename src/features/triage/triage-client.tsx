@@ -430,7 +430,7 @@ export function TriageClient() {
                         value={symptomText}
                         onChange={(event) => setSymptomText(event.target.value)}
                         placeholder="Describe what you are feeling in your own words"
-                        className="min-h-32 w-full rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 pr-28 text-sm text-[#1F2937] outline-none transition shadow-[0_6px_20px_rgba(31,41,55,0.03)] placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                        className="min-h-32 w-full rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 text-sm text-[#1F2937] outline-none transition shadow-[0_6px_20px_rgba(31,41,55,0.03)] placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 sm:pr-28"
                       />
                       <div className="absolute bottom-3 right-3 flex items-center gap-2">
                         <button

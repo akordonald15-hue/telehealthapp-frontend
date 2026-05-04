@@ -1,5 +1,5 @@
 export const BRAND_NAME = "Caretekk";
-export const BRAND_SUPPORT_EMAIL = "hello@caretekk.com";
+export const BRAND_SUPPORT_EMAIL = "support@caretekk.com";
 
 export const BRAND_THEME = {
   primary: "#426BB3",
