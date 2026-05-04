@@ -12,24 +12,31 @@ import { Button } from "@/components/ui/button";
 import { DataList } from "@/components/ui/data-list";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
-import { Input, Textarea } from "@/components/ui/input";
+import { Input, Select, Textarea } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { appointmentsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { appointmentCompanionLabel } from "@/lib/ui/humanize";
-import type { Appointment } from "@/lib/types/backend";
+import type { Appointment, ProviderDoctor } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
 import { appointmentSchema } from "@/lib/validation/features";
 
 type AppointmentFormValues = z.input<typeof appointmentSchema>;
 type AppointmentInput = z.output<typeof appointmentSchema>;
 
+function doctorSpecialtyLabel(doctor: ProviderDoctor) {
+  return doctor.specialties?.map((specialty) => specialty.name).filter(Boolean).join(", ") || "General consultation";
+}
+
 export function AppointmentsClient() {
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
   const [page, setPage] = useState(1);
+  const [doctorSearch, setDoctorSearch] = useState("");
+  const [specialtyFilter, setSpecialtyFilter] = useState("");
+  const [selectedDoctor, setSelectedDoctor] = useState<ProviderDoctor | null>(null);
   const appointments = useQuery({
     queryKey: ["appointments", page],
     queryFn: () => appointmentsApi.list({ page, page_size: 10 }),
@@ -38,6 +45,7 @@ export function AppointmentsClient() {
     mutationFn: appointmentsApi.create,
     onSuccess: async () => {
       form.reset();
+      setSelectedDoctor(null);
       setPage(1);
       await queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
@@ -57,6 +65,18 @@ export function AppointmentsClient() {
   });
   const user = userQuery.data;
   const isDoctor = user?.role === "doctor";
+  const availableDoctors = useQuery({
+    queryKey: ["appointments", "available-doctors", doctorSearch, specialtyFilter],
+    queryFn: () =>
+      appointmentsApi.availableDoctors({
+        page_size: 50,
+        search: doctorSearch.trim() || undefined,
+        specialty: specialtyFilter.trim() || undefined,
+      }),
+    enabled: user?.role === "patient",
+  });
+  const doctorItems = availableDoctors.data?.results ?? [];
+  const doctorCanBeBooked = selectedDoctor?.availability_status === "available";
 
   return (
     <Section
@@ -102,8 +122,86 @@ export function AppointmentsClient() {
           <ErrorMessage error={createAppointment.error} context="appointments" />
           {createAppointment.isSuccess ? <Notice title="Appointment booked" tone="success">Your visit has been scheduled and your list is up to date.</Notice> : null}
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Doctor profile" error={form.formState.errors.doctor?.message} hint="Enter the number shared with you by the care team.">
-              <Input type="number" min={1} placeholder="Enter the number shared with you" {...form.register("doctor")} />
+            <Field label="Search doctors">
+              <Input value={doctorSearch} onChange={(event) => setDoctorSearch(event.target.value)} placeholder="Name, clinic, or specialty" />
+            </Field>
+            <Field label="Specialty filter">
+              <Input value={specialtyFilter} onChange={(event) => setSpecialtyFilter(event.target.value)} placeholder="e.g. cardiology" />
+            </Field>
+          </div>
+
+          <Field label="Choose doctor" error={form.formState.errors.doctor?.message}>
+            {availableDoctors.isLoading ? (
+              <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading available doctors...</div>
+            ) : availableDoctors.isError ? (
+              <Notice title="Doctor list could not load." tone="warning">
+                Please try again before booking.
+              </Notice>
+            ) : doctorItems.length ? (
+              <div className="grid gap-3 md:grid-cols-2">
+                {doctorItems.map((doctor) => {
+                  const available = doctor.availability_status === "available";
+                  const selected = selectedDoctor?.id === doctor.id;
+                  return (
+                    <button
+                      key={doctor.id}
+                      type="button"
+                      disabled={!available}
+                      onClick={() => {
+                        setSelectedDoctor(doctor);
+                        form.setValue("doctor", doctor.id, { shouldValidate: true });
+                      }}
+                      className={`rounded-[20px] border p-4 text-left transition ${
+                        selected
+                          ? "border-[#2563EB] bg-[#EFF6FF] shadow-[0_18px_44px_-34px_rgba(37,99,235,0.5)]"
+                          : "border-slate-200 bg-slate-50 hover:border-blue-100 hover:bg-white"
+                      } disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[#1F2937]">{doctor.display_name}</p>
+                          <p className="mt-1 text-sm text-slate-600">{doctorSpecialtyLabel(doctor)}</p>
+                        </div>
+                        <StatusBadge value={doctor.availability_status} />
+                      </div>
+                      {doctor.bio || doctor.qualification ? (
+                        <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{doctor.bio || doctor.qualification}</p>
+                      ) : null}
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-500">
+                        {doctor.rating ? <span>Rating {doctor.rating.toFixed(1)}</span> : <span>Rating pending</span>}
+                        {doctor.next_available_time ? <span>Next {formatDateTime(doctor.next_available_time)}</span> : <span>Next time by schedule</span>}
+                      </div>
+                      <span className={`mt-4 inline-flex min-h-9 items-center rounded-[10px] px-3 text-sm font-extrabold ${available ? "bg-[#2563EB] text-white" : "bg-slate-200 text-slate-500"}`}>
+                        {available ? "Book Now" : "Unavailable"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <Notice title="No doctors found" tone="neutral">
+                Try clearing the search or specialty filter.
+              </Notice>
+            )}
+          </Field>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Selected doctor">
+              <Select
+                value={selectedDoctor?.id ? String(selectedDoctor.id) : ""}
+                onChange={(event) => {
+                  const doctor = doctorItems.find((item) => item.id === Number(event.target.value)) ?? null;
+                  setSelectedDoctor(doctor);
+                  form.setValue("doctor", doctor?.id ?? 0, { shouldValidate: true });
+                }}
+              >
+                <option value="">Choose from the list</option>
+                {doctorItems.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id} disabled={doctor.availability_status !== "available"}>
+                    {doctor.display_name} - {doctor.availability_status.replace(/_/g, " ")}
+                  </option>
+                ))}
+              </Select>
             </Field>
             <Field label="Scheduled time" error={form.formState.errors.scheduled_at?.message}>
               <Input type="datetime-local" {...form.register("scheduled_at")} />
@@ -112,7 +210,7 @@ export function AppointmentsClient() {
           <Field label="Reason" error={form.formState.errors.reason?.message}>
             <Textarea placeholder="Briefly describe the reason for your visit" {...form.register("reason")} />
           </Field>
-          <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending}>
+          <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending || !doctorCanBeBooked}>
             {createAppointment.isPending ? "Booking..." : "Book appointment"}
           </Button>
         </form>

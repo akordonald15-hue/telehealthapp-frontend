@@ -11,10 +11,11 @@ import { Field } from "@/components/ui/field";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { homeCareApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
-import type { HomeCareBookingSource, HomeCareRequestCreate } from "@/lib/types/backend";
+import type { HomeCareBookingSource, HomeCareRequestCreate, ProviderNurse } from "@/lib/types/backend";
 
 function toIsoOrNull(value: string) {
   if (!value) {
@@ -36,6 +37,9 @@ export function HomeCareBookingClient() {
   const [windowStart, setWindowStart] = useState("");
   const [windowEnd, setWindowEnd] = useState("");
   const [careNotes, setCareNotes] = useState("");
+  const [nurseSearch, setNurseSearch] = useState("");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState("");
+  const [selectedNurse, setSelectedNurse] = useState<ProviderNurse | null>(null);
 
   const referralsQuery = useQuery({
     queryKey: ["referrals", "home-care-booking"],
@@ -47,6 +51,17 @@ export function HomeCareBookingClient() {
     () => (referralsQuery.data?.results ?? []).filter((referral) => referral.status === "sent"),
     [referralsQuery.data?.results],
   );
+  const nursesQuery = useQuery({
+    queryKey: ["home-care", "available-nurses", nurseSearch, serviceTypeFilter],
+    queryFn: () =>
+      homeCareApi.availableNurses({
+        page_size: 50,
+        search: nurseSearch.trim() || undefined,
+        service_type: serviceTypeFilter.trim() || undefined,
+      }),
+    enabled: userQuery.data?.role === "patient",
+  });
+  const nurseItems = nursesQuery.data?.results ?? [];
 
   const createRequest = useMutation({
     mutationFn: (body: HomeCareRequestCreate) => homeCareApi.createRequest(body),
@@ -64,7 +79,8 @@ export function HomeCareBookingClient() {
   }
 
   const referralRequired = bookingSource === "doctor_referral";
-  const canSubmit = !createRequest.isPending && (!referralRequired || Boolean(referralId));
+  const selectedNurseAvailable = !selectedNurse || selectedNurse.availability_status === "available";
+  const canSubmit = !createRequest.isPending && selectedNurseAvailable && (!referralRequired || Boolean(referralId));
 
   return (
     <Section
@@ -84,6 +100,7 @@ export function HomeCareBookingClient() {
             const payload: HomeCareRequestCreate = {
               booking_source: bookingSource,
               referral: bookingSource === "doctor_referral" ? Number(referralId) : null,
+              preferred_nurse: selectedNurse?.id ?? null,
               contact_name_snapshot: contactName.trim(),
               contact_phone_snapshot: contactPhone.trim(),
               service_address_snapshot: address.trim(),
@@ -142,6 +159,73 @@ export function HomeCareBookingClient() {
               Ask your doctor to send a referral first. Direct booking is available now.
             </Notice>
           ) : null}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Search nurses">
+              <Input value={nurseSearch} onChange={(event) => setNurseSearch(event.target.value)} placeholder="Name, area, or service" />
+            </Field>
+            <Field label="Service filter">
+              <Input value={serviceTypeFilter} onChange={(event) => setServiceTypeFilter(event.target.value)} placeholder="e.g. wound care" />
+            </Field>
+          </div>
+
+          <Field label="Preferred nurse" hint="Optional. If you do not choose one, Caretekk will match an available nurse.">
+            {nursesQuery.isLoading ? (
+              <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading available nurses...</div>
+            ) : nursesQuery.isError ? (
+              <Notice title="Nurse list could not load." tone="warning">
+                You can still submit the request and Caretekk will match a nurse.
+              </Notice>
+            ) : nurseItems.length ? (
+              <div className="grid gap-3 md:grid-cols-2">
+                {nurseItems.map((nurse) => {
+                  const available = nurse.availability_status === "available";
+                  const selected = selectedNurse?.id === nurse.id;
+                  return (
+                    <button
+                      key={nurse.id}
+                      type="button"
+                      disabled={!available}
+                      onClick={() => setSelectedNurse(nurse)}
+                      className={`rounded-[20px] border p-4 text-left transition ${
+                        selected
+                          ? "border-[#2563EB] bg-[#EFF6FF] shadow-[0_18px_44px_-34px_rgba(37,99,235,0.5)]"
+                          : "border-slate-200 bg-slate-50 hover:border-blue-100 hover:bg-white"
+                      } disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[#1F2937]">{nurse.display_name}</p>
+                          <p className="mt-1 text-sm text-slate-600">{nurse.service_type || nurse.specialty}</p>
+                        </div>
+                        <StatusBadge value={nurse.availability_status} />
+                      </div>
+                      <div className="mt-3 grid gap-1 text-sm text-slate-600">
+                        <p>{nurse.location_area || "Location area not provided"}</p>
+                        <p>{nurse.service_radius_km ? `${nurse.service_radius_km} km service radius` : "Service radius pending"}</p>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-500">
+                        {nurse.rating ? <span>Rating {nurse.rating.toFixed(1)}</span> : <span>Rating pending</span>}
+                        <span>{nurse.active_workload} active request{nurse.active_workload === 1 ? "" : "s"}</span>
+                      </div>
+                      <span className={`mt-4 inline-flex min-h-9 items-center rounded-[10px] px-3 text-sm font-extrabold ${available ? "bg-[#2563EB] text-white" : "bg-slate-200 text-slate-500"}`}>
+                        {available ? "Request Nurse" : "Unavailable"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <Notice title="No nurses found" tone="neutral">
+                Try clearing the search or service filter. You can still submit the request for automatic matching.
+              </Notice>
+            )}
+            {selectedNurse ? (
+              <button type="button" className="mt-3 text-sm font-semibold text-[var(--primary)]" onClick={() => setSelectedNurse(null)}>
+                Clear preferred nurse
+              </button>
+            ) : null}
+          </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Contact name" hint="Leave blank to use your profile details.">

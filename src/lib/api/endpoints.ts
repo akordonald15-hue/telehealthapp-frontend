@@ -24,6 +24,9 @@ import type {
   PaymentInitiation,
   ProviderLedgerTransaction,
   ProviderPayoutRequest,
+  ProviderAvailabilityStatus,
+  ProviderDoctor,
+  ProviderNurse,
   ProviderWalletDashboard,
   Refund,
   Referral,
@@ -93,8 +96,19 @@ export const profilesApi = {
     apiRequest<MedicalFileDownload>(`/profiles/medical-files/${fileId}/download/`),
 };
 
+export const providersApi = {
+  doctors: (query?: { page?: number; page_size?: number; specialty?: string; search?: string }) =>
+    apiList<ProviderDoctor>("/providers/doctors/", query),
+  nurses: (query?: { page?: number; page_size?: number; service_type?: string; search?: string }) =>
+    apiList<ProviderNurse>("/providers/nurses/", query),
+  updateAvailability: (body: { availability_status: ProviderAvailabilityStatus }) =>
+    apiRequest<ProviderDoctor | ProviderNurse>("/providers/me/availability/", { method: "PATCH", body }),
+};
+
 export const appointmentsApi = {
   list: (query?: { page?: number; page_size?: number }) => apiList<Appointment>("/appointments/", query),
+  availableDoctors: (query?: { page?: number; page_size?: number; specialty?: string; search?: string }) =>
+    apiList<ProviderDoctor>("/appointments/available-doctors/", query),
   create: (body: { doctor: number; scheduled_at: string; status?: string; reason?: string; notes?: string }) =>
     apiRequest<Appointment>("/appointments/", { method: "POST", body }),
   detail: (id: number) => apiRequest<Appointment>(`/appointments/${id}/`),
@@ -126,6 +140,8 @@ export const messagingApi = {
 };
 
 export const homeCareApi = {
+  availableNurses: (query?: { page?: number; page_size?: number; service_type?: string; search?: string }) =>
+    apiList<ProviderNurse>("/home-care/available-nurses/", query),
   requests: (query?: { page?: number; page_size?: number }) => apiList<HomeCareRequestListItem>("/home-care/requests/", query),
   createRequest: (body: HomeCareRequestCreate) =>
     apiRequest<HomeCareRequestDetail>("/home-care/requests/", { method: "POST", body }),

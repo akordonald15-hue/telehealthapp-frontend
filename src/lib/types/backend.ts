@@ -40,6 +40,8 @@ export type Specialty = {
   name: string;
 };
 
+export type ProviderAvailabilityStatus = "available" | "unavailable" | "busy" | "offline" | "on_break";
+
 export type PatientProfile = {
   id: number;
   dob: string | null;
@@ -56,6 +58,7 @@ export type DoctorProfile = {
   clinic_name: string;
   bio: string;
   years_experience: number;
+  availability_status: ProviderAvailabilityStatus;
   specialties: Specialty[];
 };
 
@@ -63,7 +66,7 @@ export type NurseProfile = {
   id: number;
   license_no: string;
   onboarding_status: "pending" | "approved" | "suspended";
-  availability_status: "available" | "busy" | "offline";
+  availability_status: ProviderAvailabilityStatus;
   service_radius_km: number;
   base_address: string;
   base_latitude: string | null;
@@ -134,6 +137,37 @@ export type Message = {
   attachment_url: string;
   created_at: string;
   read_at: string | null;
+};
+
+export type ProviderDoctor = DoctorProfile & {
+  user_email: string;
+  display_name: string;
+  profile_image_url: string | null;
+  qualification: string;
+  rating: number | null;
+  active_workload: number;
+  next_available_time: string | null;
+  updated_at: string;
+};
+
+export type ProviderNurse = {
+  id: number;
+  user_email: string;
+  display_name: string;
+  license_no: string;
+  specialty: string;
+  service_type: string;
+  profile_image_url: string | null;
+  rating: number | null;
+  availability_status: ProviderAvailabilityStatus;
+  onboarding_status: NurseProfile["onboarding_status"];
+  active_for_dispatch: boolean;
+  service_radius_km: number;
+  location_area: string;
+  base_latitude: string | null;
+  base_longitude: string | null;
+  active_workload: number;
+  updated_at: string;
 };
 
 export type MessageAttachmentUploadInit = {
@@ -217,6 +251,7 @@ export type HomeCareRequestDetail = HomeCareRequestListItem & {
 export type HomeCareRequestCreate = {
   booking_source: HomeCareBookingSource;
   referral?: number | null;
+  preferred_nurse?: number | null;
   contact_name_snapshot?: string;
   contact_phone_snapshot?: string;
   service_address_snapshot?: string;

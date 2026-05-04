@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { homeCareApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
@@ -15,6 +16,7 @@ import type { NurseProfile } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
 import { activeAssignmentForRequest, homeCareStatusLabel, isHistoryRequest, recentActivitySummary } from "@/features/nurse/nurse-utils";
 import { ProviderWalletPanel } from "@/features/provider-ledger/provider-wallet-panel";
+import { AvailabilityControl } from "@/features/providers/availability-control";
 
 function MetricCard({
   label,
@@ -71,7 +73,7 @@ export function NurseDashboardClient() {
     <Section
       title="Nurse dashboard"
       description="Stay on top of assigned visits, pre-visit checks, travel, and care completion from one clean workspace."
-      action={profileQuery.data ? <Badge tone="blue">{profileQuery.data.availability_status}</Badge> : null}
+      action={profileQuery.data ? <StatusBadge value={profileQuery.data.availability_status} /> : null}
     >
       {requestsQuery.isError ? (
         <Notice title="We couldn't load your nurse workspace." tone="warning">
@@ -139,6 +141,12 @@ export function NurseDashboardClient() {
         <MetricCard label="Active request" value={activeRequest ? 1 : 0} description="Your current visit in progress or awaiting the next step." icon={CalendarClock} />
         <MetricCard label="Rating" value="--" description="Patient ratings will appear here once they are added to the nurse summary." icon={Star} />
       </div>
+
+      <AvailabilityControl
+        key={profileQuery.data?.availability_status ?? "nurse-availability-loading"}
+        value={profileQuery.data?.availability_status}
+        queryKeys={[["profiles", "me", "nurse"], ["home-care", "available-nurses"]]}
+      />
 
       <ProviderWalletPanel role="nurse" />
 
