@@ -22,6 +22,9 @@ import type {
   PatientProfile,
   Payment,
   PaymentInitiation,
+  ProviderLedgerTransaction,
+  ProviderPayoutRequest,
+  ProviderWalletDashboard,
   Refund,
   Referral,
   RegisterResponse,
@@ -177,6 +180,14 @@ export const paymentsApi = {
   detail: (id: number) => apiRequest<Payment>(`/payments/${id}/`),
   refund: (body: { payment: number; amount: string | number }) =>
     apiRequest<Refund>("/payments/refunds/", { method: "POST", body }),
+};
+
+export const providerLedgerApi = {
+  wallet: () => apiRequest<ProviderWalletDashboard>("/provider-ledger/wallet/"),
+  transactions: (query?: { page?: number; page_size?: number }) =>
+    apiList<ProviderLedgerTransaction>("/provider-ledger/ledger-transactions/", query),
+  payoutRequests: (query?: { page?: number; page_size?: number }) =>
+    apiList<ProviderPayoutRequest>("/provider-ledger/payout-requests/", query),
 };
 
 export const referralsApi = {

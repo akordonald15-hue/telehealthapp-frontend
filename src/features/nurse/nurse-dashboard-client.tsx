@@ -14,6 +14,7 @@ import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import type { NurseProfile } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
 import { activeAssignmentForRequest, homeCareStatusLabel, isHistoryRequest, recentActivitySummary } from "@/features/nurse/nurse-utils";
+import { ProviderWalletPanel } from "@/features/provider-ledger/provider-wallet-panel";
 
 function MetricCard({
   label,
@@ -138,6 +139,8 @@ export function NurseDashboardClient() {
         <MetricCard label="Active request" value={activeRequest ? 1 : 0} description="Your current visit in progress or awaiting the next step." icon={CalendarClock} />
         <MetricCard label="Rating" value="--" description="Patient ratings will appear here once they are added to the nurse summary." icon={Star} />
       </div>
+
+      <ProviderWalletPanel role="nurse" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
         <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">

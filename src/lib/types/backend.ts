@@ -287,6 +287,73 @@ export type Refund = {
   created_at: string;
 };
 
+export type ProviderLedgerStatus =
+  | "pending"
+  | "available"
+  | "payout_requested"
+  | "approved"
+  | "paid"
+  | "disputed"
+  | "refunded"
+  | "cancelled";
+
+export type ProviderWalletDashboard = {
+  wallet_id: number;
+  provider_type: "doctor" | "nurse";
+  currency: string;
+  pending_balance: string;
+  available_balance: string;
+  payout_requested_balance: string;
+  paid_out_balance: string;
+  disputed_balance: string;
+  refunded_balance: string;
+  lifetime_net_earning: string;
+  next_available_at: string | null;
+};
+
+export type ProviderLedgerEntry = {
+  id: number;
+  account: number;
+  account_type: string;
+  wallet: number | null;
+  direction: "debit" | "credit";
+  amount: string;
+  currency: string;
+  description: string;
+  created_at: string;
+};
+
+export type ProviderLedgerTransaction = {
+  id: number;
+  transaction_type: string;
+  status: ProviderLedgerStatus;
+  idempotency_key: string;
+  source_payment: number | null;
+  source_appointment: number | null;
+  source_homecare_request: number | null;
+  source_refund: number | null;
+  created_by: number | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  entries: ProviderLedgerEntry[];
+};
+
+export type ProviderPayoutRequest = {
+  id: number;
+  wallet: number;
+  provider_type: "doctor" | "nurse";
+  amount: string;
+  currency: string;
+  status: "pending" | "approved" | "paid" | "cancelled";
+  requested_by: number;
+  approved_by: number | null;
+  cancelled_by: number | null;
+  created_at: string;
+  approved_at: string | null;
+  cancelled_at: string | null;
+  notes: string;
+};
+
 export type ReferralStatus = "draft" | "sent";
 
 export type Referral = {
