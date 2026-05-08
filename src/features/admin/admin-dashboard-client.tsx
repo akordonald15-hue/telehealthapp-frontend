@@ -1,0 +1,546 @@
+"use client";
+
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Activity,
+  Banknote,
+  CalendarClock,
+  ClipboardList,
+  Download,
+  Home,
+  MessageSquareText,
+  ShieldCheck,
+  Stethoscope,
+  Users,
+} from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Notice } from "@/components/ui/notice";
+import { Section } from "@/components/ui/section";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { adminApi, appointmentsApi, auditApi, homeCareApi, paymentsApi } from "@/lib/api/endpoints";
+import { useCurrentUser } from "@/lib/auth/use-auth";
+import type { AdminDashboardResponse, AdminProvider, AdminProviderCreateResponse, AdminUser, ProviderAvailabilityStatus, UserRole } from "@/lib/types/backend";
+import { formatDateTime, formatMoney } from "@/lib/utils";
+
+function Metric({
+  label,
+  value,
+  tone = "blue",
+  icon: Icon,
+}: {
+  label: string;
+  value: string | number;
+  tone?: "blue" | "green" | "amber" | "rose" | "cyan";
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  const toneClasses = {
+    blue: "bg-blue-50 text-[#2563EB]",
+    green: "bg-emerald-50 text-[#047857]",
+    amber: "bg-amber-50 text-[#B45309]",
+    rose: "bg-rose-50 text-[#BE123C]",
+    cyan: "bg-cyan-50 text-[#0F766E]",
+  };
+  return (
+    <div className="rounded-[18px] border border-white/70 bg-white p-4 shadow-[0_20px_54px_-42px_rgba(15,23,42,0.45)]">
+      <div className="flex items-start justify-between gap-3">
+        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] ${toneClasses[tone]}`}>
+          <Icon className="h-5 w-5" />
+        </span>
+        <span className="text-right text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Live</span>
+      </div>
+      <p className="mt-4 text-sm font-semibold text-slate-500">{label}</p>
+      <p className="mt-1 font-heading text-2xl font-semibold text-[#1F2937]">{value}</p>
+    </div>
+  );
+}
+
+function Panel({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
+  return (
+    <section className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="font-heading text-xl font-semibold text-[#1F2937]">{title}</h2>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function AdminUserRow({ user }: { user: AdminUser }) {
+  const queryClient = useQueryClient();
+  const updateUser = useMutation({
+    mutationFn: (body: Partial<Pick<AdminUser, "is_active" | "is_email_verified">>) => adminApi.updateUser(user.id, body),
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["admin"] }),
+  });
+  const resetPassword = useMutation({
+    mutationFn: () => adminApi.requestPasswordReset(user.id),
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["admin", "users"] }),
+  });
+
+  return (
+    <article className="rounded-[18px] border border-slate-200 bg-slate-50 p-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-bold text-[#1F2937]">{user.email}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Badge tone={user.role === "admin" ? "rose" : user.role === "doctor" ? "cyan" : user.role === "nurse" ? "green" : "blue"}>{user.role}</Badge>
+            <Badge tone={user.is_active ? "green" : "rose"}>{user.is_active ? "active" : "inactive"}</Badge>
+            <Badge tone={user.is_email_verified ? "green" : "amber"}>{user.is_email_verified ? "verified" : "unverified"}</Badge>
+            {user.provider_status ? <Badge tone={user.provider_status === "suspended" ? "rose" : "neutral"}>{user.provider_status}</Badge> : null}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={updateUser.isPending}
+            onClick={() => updateUser.mutate({ is_active: !user.is_active })}
+            className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 disabled:opacity-50"
+          >
+            {user.is_active ? "Deactivate" : "Activate"}
+          </button>
+          <button
+            type="button"
+            disabled={updateUser.isPending}
+            onClick={() => updateUser.mutate({ is_email_verified: !user.is_email_verified })}
+            className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 disabled:opacity-50"
+          >
+            {user.is_email_verified ? "Unverify" : "Verify"}
+          </button>
+          <button
+            type="button"
+            disabled={resetPassword.isPending}
+            onClick={() => resetPassword.mutate()}
+            className="min-h-10 rounded-[12px] bg-[#2563EB] px-3 text-sm font-extrabold text-white disabled:opacity-50"
+          >
+            Reset password
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ProviderRow({ provider }: { provider: AdminProvider }) {
+  const queryClient = useQueryClient();
+  const updateProvider = useMutation({
+    mutationFn: (body: Parameters<typeof adminApi.updateProviderStatus>[2]) =>
+      adminApi.updateProviderStatus(provider.provider_type, provider.id, body),
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["admin"] }),
+  });
+  const setAvailability = (availability_status: ProviderAvailabilityStatus) => updateProvider.mutate({ availability_status });
+
+  return (
+    <article className="rounded-[18px] border border-slate-200 bg-slate-50 p-4">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-bold text-[#1F2937]">{provider.display_name}</p>
+          <p className="mt-1 truncate text-xs text-slate-500">{provider.user_email}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Badge tone={provider.provider_type === "doctor" ? "cyan" : "green"}>{provider.provider_type}</Badge>
+            <StatusBadge value={provider.availability_status} />
+            <Badge tone={provider.is_active ? "green" : "rose"}>{provider.is_active ? "active" : "inactive"}</Badge>
+            {provider.onboarding_status ? <StatusBadge value={provider.onboarding_status} /> : null}
+          </div>
+          <p className="mt-2 text-xs text-slate-500">
+            Active workload: {provider.active_workload} | Completed: {provider.completed_workload}
+            {provider.rating ? ` | Rating: ${provider.rating}` : ""}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setAvailability("available")} className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700">
+            Online
+          </button>
+          <button type="button" onClick={() => setAvailability("offline")} className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700">
+            Offline
+          </button>
+          <button
+            type="button"
+            onClick={() => updateProvider.mutate({ is_active: !provider.is_active, availability_status: provider.is_active ? "offline" : "available" })}
+            className="min-h-10 rounded-[12px] bg-[#0F766E] px-3 text-sm font-extrabold text-white"
+          >
+            {provider.is_active ? "Suspend" : "Unsuspend"}
+          </button>
+          {provider.provider_type === "nurse" ? (
+            <button
+              type="button"
+              onClick={() => updateProvider.mutate({ onboarding_status: "approved", active_for_dispatch: true })}
+              className="min-h-10 rounded-[12px] bg-[#2563EB] px-3 text-sm font-extrabold text-white"
+            >
+              Approve
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ProviderCreatePanel() {
+  const queryClient = useQueryClient();
+  const [created, setCreated] = useState<AdminProviderCreateResponse | null>(null);
+  const [form, setForm] = useState({
+    role: "doctor" as "doctor" | "nurse",
+    name: "",
+    email: "",
+    phone: "",
+    specialty: "General Medicine",
+    service_type: "Home care nursing",
+    availability_status: "offline" as ProviderAvailabilityStatus,
+    provider_status: "pending" as "pending" | "approved" | "suspended",
+    active_for_dispatch: false,
+    is_active: true,
+    is_email_verified: true,
+  });
+  const createProvider = useMutation({
+    mutationFn: () =>
+      adminApi.createProvider({
+        role: form.role,
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        specialty: form.role === "doctor" ? form.specialty : undefined,
+        service_type: form.role === "nurse" ? form.service_type : undefined,
+        availability_status: form.availability_status,
+        provider_status: form.role === "nurse" ? form.provider_status : undefined,
+        active_for_dispatch: form.role === "nurse" ? form.active_for_dispatch : undefined,
+        is_active: form.is_active,
+        is_email_verified: form.is_email_verified,
+      }),
+    onSuccess: async (data) => {
+      setCreated(data);
+      setForm((current) => ({ ...current, name: "", email: "", phone: "" }));
+      await queryClient.invalidateQueries({ queryKey: ["admin"] });
+    },
+  });
+
+  return (
+    <Panel title="Create provider account">
+      <form
+        className="grid gap-3"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setCreated(null);
+          createProvider.mutate();
+        }}
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-1 text-sm font-semibold text-slate-600">
+            Role
+            <select
+              value={form.role}
+              onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as "doctor" | "nurse" }))}
+              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+            >
+              <option value="doctor">Doctor</option>
+              <option value="nurse">Nurse</option>
+            </select>
+          </label>
+          <label className="grid gap-1 text-sm font-semibold text-slate-600">
+            Name
+            <input
+              required
+              value={form.name}
+              onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+              placeholder={form.role === "doctor" ? "Dr. Ada Care" : "Nurse Ada Care"}
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-semibold text-slate-600">
+            Email
+            <input
+              required
+              type="email"
+              value={form.email}
+              onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-semibold text-slate-600">
+            Phone
+            <input
+              value={form.phone}
+              onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))}
+              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+            />
+          </label>
+          {form.role === "doctor" ? (
+            <label className="grid gap-1 text-sm font-semibold text-slate-600">
+              Specialty
+              <input
+                required
+                value={form.specialty}
+                onChange={(event) => setForm((current) => ({ ...current, specialty: event.target.value }))}
+                className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+              />
+            </label>
+          ) : (
+            <label className="grid gap-1 text-sm font-semibold text-slate-600">
+              Service type
+              <input
+                required
+                value={form.service_type}
+                onChange={(event) => setForm((current) => ({ ...current, service_type: event.target.value }))}
+                className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+              />
+            </label>
+          )}
+          <label className="grid gap-1 text-sm font-semibold text-slate-600">
+            Availability
+            <select
+              value={form.availability_status}
+              onChange={(event) => setForm((current) => ({ ...current, availability_status: event.target.value as ProviderAvailabilityStatus }))}
+              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+            >
+              <option value="offline">Offline</option>
+              <option value="available">Available</option>
+              <option value="unavailable">Unavailable</option>
+              <option value="on_break">On break</option>
+              <option value="busy">Busy</option>
+            </select>
+          </label>
+        </div>
+        <div className="flex flex-wrap gap-3 rounded-[16px] border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-600">
+          <label className="inline-flex items-center gap-2">
+            <input type="checkbox" checked={form.is_active} onChange={(event) => setForm((current) => ({ ...current, is_active: event.target.checked }))} />
+            Active
+          </label>
+          <label className="inline-flex items-center gap-2">
+            <input type="checkbox" checked={form.is_email_verified} onChange={(event) => setForm((current) => ({ ...current, is_email_verified: event.target.checked }))} />
+            Verified
+          </label>
+          {form.role === "nurse" ? (
+            <>
+              <label className="inline-flex items-center gap-2">
+                <input type="checkbox" checked={form.active_for_dispatch} onChange={(event) => setForm((current) => ({ ...current, active_for_dispatch: event.target.checked }))} />
+                Dispatch active
+              </label>
+              <select
+                value={form.provider_status}
+                onChange={(event) => setForm((current) => ({ ...current, provider_status: event.target.value as "pending" | "approved" | "suspended" }))}
+                className="min-h-9 rounded-[10px] border border-slate-200 bg-white px-2"
+              >
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </>
+          ) : null}
+        </div>
+        {createProvider.isError ? <Notice title="Provider could not be created." tone="warning">Check that the email is unique and required provider details are complete.</Notice> : null}
+        {created ? (
+          <Notice title="Temporary password generated" tone="success">
+            <div className="grid gap-1">
+              <span>{created.email}</span>
+              <code className="break-all rounded-[10px] bg-white px-3 py-2 text-sm font-bold text-[#1F2937]">{created.temporary_password}</code>
+            </div>
+          </Notice>
+        ) : null}
+        <button type="submit" disabled={createProvider.isPending} className="min-h-11 rounded-[12px] bg-[#2563EB] px-4 text-sm font-extrabold text-white disabled:opacity-50">
+          {createProvider.isPending ? "Creating..." : "Create provider"}
+        </button>
+      </form>
+    </Panel>
+  );
+}
+
+function exportFinancialReport(data?: AdminDashboardResponse) {
+  if (!data || typeof window === "undefined") return;
+  const payload = JSON.stringify(
+    {
+      generated_at: new Date().toISOString(),
+      overview: data.overview,
+      weekly_revenue: data.analytics.weekly_revenue,
+    },
+    null,
+    2,
+  );
+  const url = URL.createObjectURL(new Blob([payload], { type: "application/json" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "caretekk-financial-report.json";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+export function AdminDashboardClient() {
+  const userQuery = useCurrentUser();
+  const [roleFilter, setRoleFilter] = useState<UserRole | "">("");
+  const dashboard = useQuery({ queryKey: ["admin", "dashboard"], queryFn: adminApi.dashboard, enabled: userQuery.data?.role === "admin" });
+  const users = useQuery({
+    queryKey: ["admin", "users", roleFilter],
+    queryFn: () => adminApi.users({ page_size: 8, role: roleFilter || undefined }),
+    enabled: userQuery.data?.role === "admin",
+  });
+  const providers = useQuery({ queryKey: ["admin", "providers"], queryFn: () => adminApi.providers({ page_size: 12 }), enabled: userQuery.data?.role === "admin" });
+  const appointments = useQuery({ queryKey: ["admin", "appointments"], queryFn: () => appointmentsApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
+  const homecare = useQuery({ queryKey: ["admin", "homecare"], queryFn: () => homeCareApi.requests({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
+  const payments = useQuery({ queryKey: ["admin", "payments"], queryFn: () => paymentsApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
+  const audit = useQuery({ queryKey: ["admin", "audit"], queryFn: () => auditApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
+
+  if (userQuery.data && userQuery.data.role !== "admin") {
+    return (
+      <Section title="Admin dashboard" description="This workspace is available for Caretekk admin accounts only.">
+        <Notice title="Admin access required">Sign in with an admin account to view platform operations.</Notice>
+      </Section>
+    );
+  }
+
+  const overview = dashboard.data?.overview;
+
+  return (
+    <Section
+      title="Admin dashboard"
+      description="Monitor platform operations, provider readiness, bookings, finances, communications, and audit activity."
+      action={<Badge tone="rose">Admin only</Badge>}
+    >
+      {dashboard.isError ? <Notice title="Dashboard data is temporarily unavailable." tone="warning">Some admin metrics could not be loaded.</Notice> : null}
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Metric label="Patients" value={overview?.total_patients ?? "..."} icon={Users} />
+        <Metric label="Doctors" value={overview?.total_doctors ?? "..."} icon={Stethoscope} tone="cyan" />
+        <Metric label="Nurses" value={overview?.total_nurses ?? "..."} icon={Home} tone="green" />
+        <Metric label="Platform revenue" value={overview ? formatMoney(overview.total_platform_revenue) : "..."} icon={Banknote} tone="green" />
+        <Metric label="Active consultations" value={overview?.active_consultations ?? "..."} icon={CalendarClock} />
+        <Metric label="Active homecare" value={overview?.active_homecare_requests ?? "..."} icon={ClipboardList} tone="cyan" />
+        <Metric label="Pending provider earnings" value={overview ? formatMoney(overview.pending_provider_earnings) : "..."} icon={Activity} tone="amber" />
+        <Metric label="Failed payments" value={overview?.failed_payments ?? "..."} icon={ShieldCheck} tone={overview?.failed_payments ? "rose" : "green"} />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
+        <Panel title="User management" action={<RoleFilter value={roleFilter} onChange={setRoleFilter} />}>
+          <div className="grid gap-3">
+            {users.data?.results.length ? users.data.results.map((user) => <AdminUserRow key={user.id} user={user} />) : <EmptyState title="No users found" description="Users matching the current filter will appear here." />}
+          </div>
+        </Panel>
+
+        <ProviderCreatePanel />
+      </div>
+
+      <Panel title="Provider management">
+        <div className="grid gap-3">
+          {providers.data?.results.length ? providers.data.results.map((provider) => <ProviderRow key={`${provider.provider_type}-${provider.id}`} provider={provider} />) : <EmptyState title="No providers found" description="Doctor and nurse providers will appear here." />}
+        </div>
+      </Panel>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Panel title="Booking management">
+          <div className="grid gap-3">
+            <h3 className="text-sm font-bold text-slate-500">Appointments</h3>
+            {appointments.data?.results.map((appointment) => (
+              <div key={appointment.id} className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-sm font-semibold text-[#1F2937]">#{appointment.id} | {formatDateTime(appointment.scheduled_at)}</span>
+                <StatusBadge value={appointment.status} />
+              </div>
+            ))}
+            <h3 className="mt-3 text-sm font-bold text-slate-500">Homecare</h3>
+            {homecare.data?.results.map((request) => (
+              <div key={request.id} className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-sm font-semibold text-[#1F2937]">#{request.id} | {request.service_address_snapshot || "No address"}</span>
+                <StatusBadge value={request.status} />
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel
+          title="Financial management"
+          action={
+            <button type="button" onClick={() => exportFinancialReport(dashboard.data)} className="inline-flex min-h-10 items-center gap-2 rounded-[12px] bg-[#2563EB] px-3 text-sm font-extrabold text-white">
+              <Download className="h-4 w-4" /> Export
+            </button>
+          }
+        >
+          <div className="grid gap-3">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Metric label="Provider payouts" value={overview ? formatMoney(overview.total_provider_payouts) : "..."} icon={Banknote} tone="green" />
+              <Metric label="Refunded payments" value={overview?.refunded_payments ?? "..."} icon={Activity} tone="amber" />
+              <Metric label="Disputes" value={overview?.unresolved_disputes ?? "..."} icon={ShieldCheck} tone={overview?.unresolved_disputes ? "rose" : "green"} />
+            </div>
+            {payments.data?.results.map((payment) => (
+              <div key={payment.id} className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-sm font-semibold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)} | {payment.provider}</span>
+                <StatusBadge value={payment.status} />
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Panel title="Communication monitoring">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Metric label="Open threads" value={dashboard.data?.operations.open_threads ?? "..."} icon={MessageSquareText} />
+            <Metric label="Pending refunds" value={dashboard.data?.operations.pending_refunds ?? "..."} icon={Banknote} tone="amber" />
+            <Metric label="Audit events" value={dashboard.data?.operations.recent_audit_events ?? "..."} icon={ShieldCheck} tone="cyan" />
+          </div>
+          <p className="mt-4 text-sm leading-6 text-slate-600">Conversation content remains governed by existing messaging permissions. Escalation queues can be added here when support-ticket workflow is introduced.</p>
+        </Panel>
+
+        <Panel title="Audit and activity logs">
+          <div className="grid gap-3">
+            {audit.data?.results.map((event) => (
+              <div key={event.id} className="rounded-[16px] border border-slate-200 bg-slate-50 p-3">
+                <p className="text-sm font-semibold text-[#1F2937]">{event.action}</p>
+                <p className="mt-1 text-xs text-slate-500">{event.object_type} #{event.object_id} | {formatDateTime(event.created_at)}</p>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      <Panel title="Analytics">
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div>
+            <h3 className="text-sm font-bold text-slate-500">Weekly revenue</h3>
+            <div className="mt-3 grid gap-2">
+              {dashboard.data?.analytics.weekly_revenue.map((row) => (
+                <div key={row.week} className="flex items-center justify-between rounded-[14px] bg-slate-50 px-3 py-2 text-sm">
+                  <span>{row.week}</span>
+                  <strong>{formatMoney(row.amount)}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-500">Top providers</h3>
+            <div className="mt-3 grid gap-2">
+              {dashboard.data?.analytics.top_doctors.map((doctor) => (
+                <div key={`doctor-${doctor.id}`} className="rounded-[14px] bg-slate-50 px-3 py-2 text-sm">
+                  <strong>{doctor.display_name}</strong> | {doctor.completed_consultations} completed
+                </div>
+              ))}
+              {dashboard.data?.analytics.top_nurses.map((nurse) => (
+                <div key={`nurse-${nurse.id}`} className="rounded-[14px] bg-slate-50 px-3 py-2 text-sm">
+                  <strong>{nurse.email}</strong> | {nurse.completed_visits} visits{nurse.rating ? ` | ${nurse.rating}/5` : ""}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Badge tone="amber">Appointment cancellation {dashboard.data?.analytics.appointment_cancellation_rate ?? 0}%</Badge>
+          <Badge tone="amber">Homecare cancellation {dashboard.data?.analytics.homecare_cancellation_rate ?? 0}%</Badge>
+        </div>
+      </Panel>
+    </Section>
+  );
+}
+
+function RoleFilter({ value, onChange }: { value: UserRole | ""; onChange: (value: UserRole | "") => void }) {
+  return (
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value as UserRole | "")}
+      className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700"
+    >
+      <option value="">All roles</option>
+      <option value="patient">Patients</option>
+      <option value="doctor">Doctors</option>
+      <option value="nurse">Nurses</option>
+      <option value="admin">Admins</option>
+    </select>
+  );
+}

@@ -1,6 +1,10 @@
 import { apiList, apiRequest } from "@/lib/api/client";
 import type {
   AdminAuditLog,
+  AdminDashboardResponse,
+  AdminProvider,
+  AdminProviderCreateResponse,
+  AdminUser,
   Appointment,
   AppointmentBookingResponse,
   AuditEvent,
@@ -45,6 +49,7 @@ import type {
   TriageSeverity,
   TriageSymptomSubmitResponse,
   User,
+  UserRole,
 } from "@/lib/types/backend";
 
 function authPath(path: string) {
@@ -225,6 +230,41 @@ export const auditApi = {
     apiList<AuditEvent>("/audit/", query),
   adminLogs: (query?: { page?: number; page_size?: number }) =>
     apiList<AdminAuditLog>("/admin/audit-logs/", query),
+};
+
+export const adminApi = {
+  dashboard: () => apiRequest<AdminDashboardResponse>("/admin/dashboard/"),
+  users: (query?: { page?: number; page_size?: number; role?: UserRole; search?: string; is_active?: "true" | "false" }) =>
+    apiList<AdminUser>("/admin/users/", query),
+  updateUser: (id: number, body: Partial<Pick<AdminUser, "is_active" | "is_email_verified">>) =>
+    apiRequest<AdminUser>(`/admin/users/${id}/`, { method: "PATCH", body }),
+  requestPasswordReset: (id: number) =>
+    apiRequest<DetailResponse>(`/admin/users/${id}/password-reset/`, { method: "POST" }),
+  providers: (query?: { page?: number; page_size?: number }) => apiList<AdminProvider>("/admin/providers/", query),
+  createProvider: (body: {
+    role: "doctor" | "nurse";
+    name: string;
+    email: string;
+    phone?: string;
+    specialty?: string;
+    service_type?: string;
+    license_no?: string;
+    availability_status: ProviderAvailabilityStatus;
+    provider_status?: NurseProfile["onboarding_status"];
+    active_for_dispatch?: boolean;
+    is_active?: boolean;
+    is_email_verified?: boolean;
+  }) => apiRequest<AdminProviderCreateResponse>("/admin/providers/create/", { method: "POST", body }),
+  updateProviderStatus: (
+    providerType: "doctor" | "nurse",
+    providerId: number,
+    body: {
+      availability_status?: ProviderAvailabilityStatus;
+      is_active?: boolean;
+      onboarding_status?: NurseProfile["onboarding_status"];
+      active_for_dispatch?: boolean;
+    },
+  ) => apiRequest<DetailResponse>(`/admin/providers/${providerType}/${providerId}/status/`, { method: "PATCH", body }),
 };
 
 export const triageApi = {

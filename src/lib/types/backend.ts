@@ -3,6 +3,7 @@ export type UserRole = "patient" | "doctor" | "nurse" | "admin";
 export type User = {
   id: number;
   email: string;
+  full_name: string;
   phone: string;
   role: UserRole;
   created_at: string;
@@ -68,6 +69,7 @@ export type NurseProfile = {
   onboarding_status: "pending" | "approved" | "suspended";
   availability_status: ProviderAvailabilityStatus;
   service_radius_km: number;
+  service_type: string;
   base_address: string;
   base_latitude: string | null;
   base_longitude: string | null;
@@ -434,6 +436,89 @@ export type AdminAuditLog = {
   object_id: string;
   metadata: Record<string, unknown>;
   created_at: string;
+};
+
+export type AdminDashboardMetricOverview = {
+  total_patients: number;
+  total_doctors: number;
+  total_nurses: number;
+  active_consultations: number;
+  active_homecare_requests: number;
+  completed_consultations: number;
+  completed_homecare_visits: number;
+  total_platform_revenue: string;
+  pending_provider_earnings: string;
+  total_provider_payouts: string;
+  failed_payments: number;
+  refunded_payments: number;
+  unresolved_disputes: number;
+};
+
+export type AdminDashboardResponse = {
+  overview: AdminDashboardMetricOverview;
+  operations: {
+    appointments_today: number;
+    homecare_today: number;
+    open_threads: number;
+    pending_refunds: number;
+    recent_audit_events: number;
+  };
+  analytics: {
+    daily_bookings: Array<{ source: "appointments" | "homecare"; date: string; count: number }>;
+    weekly_revenue: Array<{ week: string; amount: string }>;
+    top_doctors: Array<{
+      id: number;
+      email: string;
+      display_name: string;
+      completed_consultations: number;
+      active_consultations: number;
+      availability_status: ProviderAvailabilityStatus;
+    }>;
+    top_nurses: Array<{
+      id: number;
+      email: string;
+      completed_visits: number;
+      active_requests: number;
+      rating: number | null;
+      availability_status: ProviderAvailabilityStatus;
+      onboarding_status: NurseProfile["onboarding_status"];
+    }>;
+    appointment_cancellation_rate: number;
+    homecare_cancellation_rate: number;
+  };
+};
+
+export type AdminUser = User & {
+  is_active: boolean;
+  is_email_verified: boolean;
+  is_staff: boolean;
+  profile_id: number | null;
+  provider_status: string | null;
+  availability_status: ProviderAvailabilityStatus | null;
+};
+
+export type AdminProvider = {
+  provider_type: "doctor" | "nurse";
+  id: number;
+  user_email: string;
+  display_name: string;
+  availability_status: ProviderAvailabilityStatus;
+  is_active: boolean;
+  onboarding_status: string | null;
+  active_for_dispatch: boolean | null;
+  active_workload: number;
+  completed_workload: number;
+  rating: number | null;
+  updated_at: string;
+};
+
+export type AdminProviderCreateResponse = {
+  detail: string;
+  provider_type: "doctor" | "nurse";
+  provider_id: number;
+  user_id: number;
+  email: string;
+  temporary_password: string;
 };
 
 export type TriageSeverity = "mild" | "moderate" | "severe";

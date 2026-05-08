@@ -30,21 +30,22 @@ type NavItem = {
   label: string;
   patientLabel?: string;
   doctorLabel?: string;
+  adminLabel?: string;
   icon: React.ComponentType<{ className?: string }>;
   roles: readonly string[];
 };
 
 const navItems: readonly NavItem[] = [
   { href: "/dashboard", label: "Dashboard", patientLabel: "Journey", icon: LayoutDashboard, roles: ["patient", "doctor", "admin", "nurse"] },
-  { href: "/triage", label: "Care check-in", patientLabel: "Start Triage", icon: HeartPulse, roles: ["patient", "admin"] },
-  { href: "/messages", label: "Messages", patientLabel: "Consultation", icon: MessageSquare, roles: ["patient", "doctor", "admin"] },
+  { href: "/triage", label: "Care check-in", patientLabel: "Start Triage", icon: HeartPulse, roles: ["patient"] },
+  { href: "/messages", label: "Messages", patientLabel: "Consultation", adminLabel: "Communications", icon: MessageSquare, roles: ["patient", "doctor", "admin"] },
   { href: "/care-plan", label: "Care Plan", patientLabel: "Care Plan", icon: ClipboardList, roles: ["patient"] },
   { href: "/home-care/book", label: "Book Nurse", patientLabel: "Book Nurse", icon: Home, roles: ["patient"] },
   { href: "/home-care/requests", label: "Home Care", patientLabel: "Home Care", icon: ClipboardList, roles: ["patient"] },
-  { href: "/appointments", label: "Appointments", doctorLabel: "Consultations", icon: CalendarDays, roles: ["patient", "doctor", "admin"] },
+  { href: "/appointments", label: "Appointments", doctorLabel: "Consultations", adminLabel: "Bookings", icon: CalendarDays, roles: ["patient", "doctor", "admin"] },
   { href: "/nurse/requests", label: "Requests", icon: ClipboardList, roles: ["nurse"] },
   { href: "/nurse/history", label: "History", icon: FileText, roles: ["nurse"] },
-  { href: "/records", label: "Records", doctorLabel: "Patients / Care Plans", icon: UserRoundCheck, roles: ["patient", "doctor", "admin"] },
+  { href: "/records", label: "Records", doctorLabel: "Patients / Care Plans", adminLabel: "Users / Records", icon: UserRoundCheck, roles: ["patient", "doctor", "admin"] },
   { href: "/referrals", label: "Referrals", icon: ClipboardList, roles: ["doctor", "admin"] },
   { href: "/profile", label: "Profile", icon: UserRound, roles: ["patient", "doctor", "admin", "nurse"] },
   { href: "/audit", label: "Audit", icon: ShieldCheck, roles: ["admin"] },
@@ -64,6 +65,9 @@ function navLabelForRole(item: NavItem, role: string | undefined) {
   if (role === "doctor") {
     return item.doctorLabel ?? item.label;
   }
+  if (role === "admin") {
+    return item.adminLabel ?? item.label;
+  }
   return item.label;
 }
 
@@ -79,6 +83,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (user?.role === "doctor") {
       const doctorOrder = ["/dashboard", "/appointments", "/messages", "/referrals", "/records", "/profile"];
       return [...filtered].sort((left, right) => doctorOrder.indexOf(left.href) - doctorOrder.indexOf(right.href));
+    }
+
+    if (user?.role === "admin") {
+      const adminOrder = ["/dashboard", "/appointments", "/messages", "/referrals", "/records", "/audit", "/profile"];
+      return [...filtered].sort((left, right) => adminOrder.indexOf(left.href) - adminOrder.indexOf(right.href));
     }
 
     if (user?.role !== "patient") {
@@ -107,13 +116,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       ? "Your home care workspace"
       : user?.role === "doctor"
         ? "Doctor clinical workspace"
-        : "Everything you need for your care journey";
+        : user?.role === "admin"
+          ? "Caretekk admin operations"
+          : "Everything you need for your care journey";
   const workspaceDescription =
     user?.role === "nurse"
       ? "Requests, travel updates, visit progress, and history stay in one clean workflow."
       : user?.role === "doctor"
         ? "Consultations, patient messages, referrals, and care-plan notes stay focused on your clinical work."
-        : "Appointments, messages, records, and care plans are organized here so you can move through your care with ease.";
+        : user?.role === "admin"
+          ? "Monitor users, providers, bookings, finances, communications, and audit activity from one secure workspace."
+          : "Appointments, messages, records, and care plans are organized here so you can move through your care with ease.";
 
   const navigation = (
     <>

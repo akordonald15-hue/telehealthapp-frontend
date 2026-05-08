@@ -97,7 +97,9 @@ export async function forwardNamespaceRequest(
   const segments = resolvedParams.path ?? [];
   const suffix = segments.length ? `/${segments.join("/")}` : "";
   const normalizedSuffix = options.backendTrailingSlash
-    ? `${suffix || "/"}${suffix.endsWith("/") ? "" : "/"}`
+    ? suffix
+      ? `${suffix}${suffix.endsWith("/") ? "" : "/"}`
+      : "/"
     : suffix || "";
   return forwardBackendRequest(request, `${backendPrefix}${normalizedSuffix}`);
 }

@@ -17,6 +17,7 @@ import type { PaginatedResponse } from "@/lib/types/backend";
 import { formatDateTime, formatMoney } from "@/lib/utils";
 import { DoctorDashboardClient } from "@/features/dashboard/doctor-dashboard-client";
 import { NurseDashboardClient } from "@/features/nurse/nurse-dashboard-client";
+import { AdminDashboardClient } from "@/features/admin/admin-dashboard-client";
 
 function Metric({ label, value, href, icon: Icon, description }: { label: string; value: string | number; href: string; icon: React.ComponentType<{ className?: string }>; description: string }) {
   return (
@@ -93,6 +94,10 @@ export function DashboardClient() {
     return <DoctorDashboardClient />;
   }
 
+  if (user?.role === "admin") {
+    return <AdminDashboardClient />;
+  }
+
   const threadMetric = listMetric(threads);
   const referralMetric = listMetric(referrals);
   const paymentMetric = canLoadPayments ? listMetric(payments) : 0;
@@ -129,7 +134,7 @@ export function DashboardClient() {
       action={
         user ? (
           <div className="flex items-center gap-2">
-            <Badge tone={user.role === "admin" ? "rose" : "green"}>{user.role}</Badge>
+            <Badge tone="green">{user.role}</Badge>
           </div>
         ) : null
       }
@@ -295,7 +300,7 @@ export function DashboardClient() {
                   <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Next appointments</h2>
                   <p className="mt-1 text-sm text-slate-500">Your upcoming visits at a glance.</p>
                 </div>
-                {user ? <Badge tone={user.role === "admin" ? "rose" : "green"}>{user.role}</Badge> : null}
+                {user ? <Badge tone="green">{user.role}</Badge> : null}
               </div>
               <div className="grid gap-3">
                 {appointments.isLoading ? (
