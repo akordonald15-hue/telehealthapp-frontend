@@ -122,9 +122,9 @@ export const features: Array<{ title: string; text: string; icon: LucideIcon }> 
 ];
 
 export const heroStats = [
-  { value: "Doctors", label: "general consultations" },
-  { value: "Home Care", label: "nurse visits" },
-  { value: "Secure", label: "records and chat" },
+  { value: "General care", label: "consult doctors for everyday health concerns" },
+  { value: "Home support", label: "request nurses for guided home-care visits" },
+  { value: "Follow-up", label: "keep records, referrals, and messages connected" },
 ];
 
 export const howItWorksSteps = [

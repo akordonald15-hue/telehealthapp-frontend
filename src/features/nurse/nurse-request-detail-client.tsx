@@ -411,7 +411,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                   />
                 </label>
                 <p className="text-sm text-slate-500">
-                  Visit note persistence is not exposed by the current backend yet, so this draft stays local for now.
+                  This note is a private draft for your visit workflow.
                 </p>
                 <Button
                   variant="secondary"

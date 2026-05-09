@@ -23,7 +23,7 @@ export function PaymentsClient() {
   return (
     <Section title="Billing History" description="Read-only checkout history for booked Caretekk services. Payments start only from consultation or homecare booking.">
       <Notice title="Service payments only" tone="neutral">
-        Caretekk does not support manual payment entry. To pay, book a doctor consultation or home nurse request and continue to the secure checkout returned by the backend.
+        Caretekk does not support manual payment entry. To pay, book a doctor consultation or home nurse request and continue to the secure checkout created for that service.
       </Notice>
 
       {userQuery.data?.role === "doctor" || userQuery.data?.role === "nurse" ? (

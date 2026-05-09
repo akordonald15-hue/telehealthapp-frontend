@@ -44,7 +44,17 @@ export function DataList<T>({
   renderItem: (item: T) => React.ReactNode;
 }) {
   if (isLoading) {
-    return <div className="rounded-[22px] border border-[#E5E7EB] bg-white p-5 text-sm text-[#667085] shadow-[0_10px_30px_rgba(31,41,55,0.06)]">{loadingLabel}</div>;
+    return (
+      <div className="grid gap-3" aria-label={loadingLabel} aria-busy="true">
+        {[0, 1, 2].map((item) => (
+          <div key={item} className="rounded-[22px] border border-[#E5E7EB] bg-white p-5 shadow-[0_10px_30px_rgba(31,41,55,0.06)]">
+            <div className="h-4 w-32 animate-pulse rounded-full bg-slate-100" />
+            <div className="mt-4 h-5 w-3/5 animate-pulse rounded-full bg-slate-100" />
+            <div className="mt-3 h-3 w-4/5 animate-pulse rounded-full bg-slate-100" />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (error) {

@@ -8,6 +8,8 @@ import {
   CalendarClock,
   ClipboardList,
   Download,
+  Eye,
+  EyeOff,
   Home,
   MessageSquareText,
   ShieldCheck,
@@ -45,11 +47,10 @@ function Metric({
   };
   return (
     <div className="rounded-[18px] border border-white/70 bg-white p-4 shadow-[0_20px_54px_-42px_rgba(15,23,42,0.45)]">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3">
         <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] ${toneClasses[tone]}`}>
           <Icon className="h-5 w-5" />
         </span>
-        <span className="text-right text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Live</span>
       </div>
       <p className="mt-4 text-sm font-semibold text-slate-500">{label}</p>
       <p className="mt-1 font-heading text-2xl font-semibold text-[#1F2937]">{value}</p>
@@ -66,6 +67,72 @@ function Panel({ title, children, action }: { title: string; children: React.Rea
       </div>
       {children}
     </section>
+  );
+}
+
+function ConfirmActionButton({
+  label,
+  title,
+  description,
+  confirmLabel = label,
+  disabled,
+  tone = "neutral",
+  onConfirm,
+}: {
+  label: string;
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  disabled?: boolean;
+  tone?: "neutral" | "danger" | "primary";
+  onConfirm: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const buttonClass =
+    tone === "danger"
+      ? "bg-rose-700 text-white hover:bg-rose-800"
+      : tone === "primary"
+        ? "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50";
+
+  return (
+    <>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen(true)}
+        className={`min-h-10 rounded-[12px] px-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 disabled:opacity-50 ${buttonClass}`}
+      >
+        {label}
+      </button>
+      {open ? (
+        <div className="fixed inset-0 z-[70] grid place-items-center bg-slate-950/40 px-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="admin-confirm-title">
+          <div className="w-full max-w-md rounded-[24px] border border-white/70 bg-white p-5 shadow-2xl">
+            <h3 id="admin-confirm-title" className="font-heading text-xl font-semibold text-[#1F2937]">{title}</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="min-h-10 rounded-[12px] border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onConfirm();
+                }}
+                className={`min-h-10 rounded-[12px] px-4 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${tone === "danger" ? "bg-rose-700 text-white hover:bg-rose-800" : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"}`}
+              >
+                {confirmLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -93,30 +160,29 @@ function AdminUserRow({ user }: { user: AdminUser }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
+          <ConfirmActionButton
+            label={user.is_active ? "Deactivate" : "Activate"}
+            title={user.is_active ? "Deactivate this account?" : "Activate this account?"}
+            description={user.is_active ? "The user will no longer be able to use their Caretekk account until it is reactivated." : "The user will regain access to their Caretekk account."}
+            tone={user.is_active ? "danger" : "neutral"}
             disabled={updateUser.isPending}
-            onClick={() => updateUser.mutate({ is_active: !user.is_active })}
-            className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 disabled:opacity-50"
-          >
-            {user.is_active ? "Deactivate" : "Activate"}
-          </button>
-          <button
-            type="button"
+            onConfirm={() => updateUser.mutate({ is_active: !user.is_active })}
+          />
+          <ConfirmActionButton
+            label={user.is_email_verified ? "Unverify" : "Verify"}
+            title={user.is_email_verified ? "Mark email as unverified?" : "Verify this email?"}
+            description={user.is_email_verified ? "The account will be marked as needing email verification again." : "The account email will be marked as verified."}
             disabled={updateUser.isPending}
-            onClick={() => updateUser.mutate({ is_email_verified: !user.is_email_verified })}
-            className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 disabled:opacity-50"
-          >
-            {user.is_email_verified ? "Unverify" : "Verify"}
-          </button>
-          <button
-            type="button"
+            onConfirm={() => updateUser.mutate({ is_email_verified: !user.is_email_verified })}
+          />
+          <ConfirmActionButton
+            label="Reset password"
+            title="Send password reset?"
+            description="Caretekk will start the password reset process for this user."
+            tone="primary"
             disabled={resetPassword.isPending}
-            onClick={() => resetPassword.mutate()}
-            className="min-h-10 rounded-[12px] bg-[#2563EB] px-3 text-sm font-extrabold text-white disabled:opacity-50"
-          >
-            Reset password
-          </button>
+            onConfirm={() => resetPassword.mutate()}
+          />
         </div>
       </div>
     </article>
@@ -150,27 +216,37 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => setAvailability("available")} className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700">
-            Online
-          </button>
-          <button type="button" onClick={() => setAvailability("offline")} className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700">
-            Offline
-          </button>
-          <button
-            type="button"
-            onClick={() => updateProvider.mutate({ is_active: !provider.is_active, availability_status: provider.is_active ? "offline" : "available" })}
-            className="min-h-10 rounded-[12px] bg-[#0F766E] px-3 text-sm font-extrabold text-white"
-          >
-            {provider.is_active ? "Suspend" : "Unsuspend"}
-          </button>
+          <ConfirmActionButton
+            label="Online"
+            title="Set provider online?"
+            description="This provider will appear available for matching when other eligibility rules allow it."
+            disabled={updateProvider.isPending}
+            onConfirm={() => setAvailability("available")}
+          />
+          <ConfirmActionButton
+            label="Offline"
+            title="Set provider offline?"
+            description="This provider will stop appearing as available for new patient selections."
+            disabled={updateProvider.isPending}
+            onConfirm={() => setAvailability("offline")}
+          />
+          <ConfirmActionButton
+            label={provider.is_active ? "Suspend" : "Unsuspend"}
+            title={provider.is_active ? "Suspend this provider?" : "Unsuspend this provider?"}
+            description={provider.is_active ? "The provider will be taken offline and blocked from active dispatch or booking selection." : "The provider can return to availability and operational workflows."}
+            tone={provider.is_active ? "danger" : "primary"}
+            disabled={updateProvider.isPending}
+            onConfirm={() => updateProvider.mutate({ is_active: !provider.is_active, availability_status: provider.is_active ? "offline" : "available" })}
+          />
           {provider.provider_type === "nurse" ? (
-            <button
-              type="button"
-              onClick={() => updateProvider.mutate({ onboarding_status: "approved", active_for_dispatch: true })}
-              className="min-h-10 rounded-[12px] bg-[#2563EB] px-3 text-sm font-extrabold text-white"
-            >
-              Approve
-            </button>
+            <ConfirmActionButton
+              label="Approve"
+              title="Approve this nurse?"
+              description="The nurse will be approved and marked active for dispatch."
+              tone="primary"
+              disabled={updateProvider.isPending}
+              onConfirm={() => updateProvider.mutate({ onboarding_status: "approved", active_for_dispatch: true })}
+            />
           ) : null}
         </div>
       </div>
@@ -181,6 +257,7 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
 function ProviderCreatePanel() {
   const queryClient = useQueryClient();
   const [created, setCreated] = useState<AdminProviderCreateResponse | null>(null);
+  const [showTemporaryPassword, setShowTemporaryPassword] = useState(false);
   const [form, setForm] = useState({
     role: "doctor" as "doctor" | "nurse",
     name: "",
@@ -211,6 +288,7 @@ function ProviderCreatePanel() {
       }),
     onSuccess: async (data) => {
       setCreated(data);
+      setShowTemporaryPassword(false);
       setForm((current) => ({ ...current, name: "", email: "", phone: "" }));
       await queryClient.invalidateQueries({ queryKey: ["admin"] });
     },
@@ -334,7 +412,21 @@ function ProviderCreatePanel() {
           <Notice title="Temporary password generated" tone="success">
             <div className="grid gap-1">
               <span>{created.email}</span>
-              <code className="break-all rounded-[10px] bg-white px-3 py-2 text-sm font-bold text-[#1F2937]">{created.temporary_password}</code>
+              <div className="flex flex-col gap-2 rounded-[10px] bg-white px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                <code className="break-all text-sm font-bold text-[#1F2937]">
+                  {showTemporaryPassword ? created.temporary_password : "Temporary password hidden"}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => setShowTemporaryPassword((current) => !current)}
+                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-[10px] border border-slate-200 px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
+                  aria-label={showTemporaryPassword ? "Hide password" : "Show password"}
+                >
+                  {showTemporaryPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showTemporaryPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+              <span className="text-xs text-slate-600">Share this securely with the provider and ask them to reset it after first sign-in.</span>
             </div>
           </Notice>
         ) : null}

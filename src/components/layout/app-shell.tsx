@@ -148,7 +148,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               href={item.href}
               onClick={() => setMobileOpen(false)}
               className={cn(
-                "group flex items-center gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition",
+                "group flex items-center gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15",
                 active
                   ? "border-[rgba(66,107,179,0.18)] bg-[var(--primary-soft)] text-[var(--primary)] shadow-[0_20px_40px_-34px_rgba(66,107,179,0.38)]"
                   : "border-transparent bg-white/75 text-slate-600 hover:border-slate-200 hover:bg-white hover:text-[#1F2937] hover:shadow-[0_18px_34px_-34px_rgba(15,23,42,0.45)]",
@@ -209,7 +209,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -226,7 +226,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <button
                   type="button"
                   onClick={() => setMobileOpen(true)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm lg:hidden"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 lg:hidden"
                   aria-label="Open navigation"
                 >
                   <Menu className="h-5 w-5" />
@@ -245,7 +245,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         ? "Patient care, all in one place"
                         : "Your care, all in one place"}
                   </p>
-                  <p className="text-xs text-slate-500">Responsive, clear, and tailored to your account</p>
+                  <p className="text-xs text-slate-500">Signed in securely</p>
                 </div>
                 {user ? <Badge tone={roleTone(user.role)}>{user.role}</Badge> : null}
               </div>

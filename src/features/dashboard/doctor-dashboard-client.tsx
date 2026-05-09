@@ -102,7 +102,7 @@ function AppointmentRow({ appointment }: { appointment: Appointment }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="font-semibold text-[#1F2937]">{formatDateTime(appointment.scheduled_at)}</p>
-          <p className="mt-1 text-sm text-slate-600">Patient profile #{appointment.patient}</p>
+          <p className="mt-1 text-sm text-slate-600">Patient details</p>
           {appointment.reason ? <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{appointment.reason}</p> : null}
         </div>
         <StatusBadge value={appointment.status} />
@@ -117,7 +117,7 @@ function ReferralRow({ referral }: { referral: Referral }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="font-semibold text-[#1F2937]">{referral.referred_to || "Referral"}</p>
-          <p className="mt-1 text-sm text-slate-600">Patient profile #{referral.patient}</p>
+          <p className="mt-1 text-sm text-slate-600">Patient details</p>
           {referral.notes ? <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{referral.notes}</p> : null}
         </div>
         <StatusBadge value={referral.status} />
@@ -276,7 +276,7 @@ export function DoctorDashboardClient() {
             <div className="grid gap-3">
               {recentPatientIds.map((patientId) => (
                 <div key={patientId} className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-                  <p className="font-semibold text-[#1F2937]">Patient profile #{patientId}</p>
+                  <p className="font-semibold text-[#1F2937]">Patient details</p>
                   <p className="mt-1 text-sm text-slate-600">Open appointments, messages, or records for more context.</p>
                 </div>
               ))}

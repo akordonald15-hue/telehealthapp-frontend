@@ -80,8 +80,8 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <InfoTile label="Scheduled time" value={formatDateTime(appointment.scheduled_at)} />
-                <InfoTile label="Patient profile" value={`#${appointment.patient}`} />
-                <InfoTile label="Doctor profile" value={`#${appointment.doctor}`} />
+                <InfoTile label="Patient details" value="Available for this consultation" />
+                <InfoTile label="Doctor details" value="Assigned care provider" />
                 <InfoTile label="Consultation status" value={appointment.status} />
               </div>
 
@@ -108,13 +108,13 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">Patient information</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    The current appointment endpoint exposes patient profile ID and appointment context. Expanded patient demographics can be added when a patient summary endpoint is exposed.
+                    More patient details will appear here when available.
                   </p>
                 </div>
               </div>
 
               <div className="mt-6 grid gap-3">
-                <InfoTile label="Patient profile ID" value={`#${appointment.patient}`} />
+                <InfoTile label="Patient details" value="Linked to this consultation" />
                 <InfoTile label="Care-plan entry point" value="Open records or referrals for follow-up context." />
               </div>
             </div>

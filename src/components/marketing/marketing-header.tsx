@@ -17,14 +17,14 @@ export function MarketingHeader() {
 
         <div className="hidden items-center gap-6 lg:flex">
           {marketingNavItems.map((item) => (
-            <a key={item.label} href={item.href} className="text-sm font-bold text-[#475467] transition hover:text-[var(--primary)]">
+            <a key={item.label} href={item.href} className="rounded-[10px] text-sm font-bold text-[#475467] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15">
               {item.label}
             </a>
           ))}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Link href="/login" className="text-sm font-bold text-[#475467] transition hover:text-[var(--primary)]">
+          <Link href="/login" className="rounded-[10px] text-sm font-bold text-[#475467] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15">
             Sign in
           </Link>
           <Link href="/register" className="lf-btn lf-btn-primary min-h-[48px] px-5 text-sm">
@@ -37,7 +37,7 @@ export function MarketingHeader() {
           aria-expanded={open}
           aria-controls="mobile-nav"
           onClick={() => setOpen((value) => !value)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white text-[#1F2937] shadow-[0_8px_20px_rgba(15,23,42,0.05)] lg:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white text-[#1F2937] shadow-[0_8px_20px_rgba(15,23,42,0.05)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 lg:hidden"
         >
           <span className="sr-only">Toggle navigation</span>
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -52,7 +52,7 @@ export function MarketingHeader() {
                 key={item.label}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-[12px] px-3 py-3 text-sm font-bold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]"
+                className="rounded-[12px] px-3 py-3 text-sm font-bold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
               >
                 {item.label}
               </a>
@@ -60,7 +60,7 @@ export function MarketingHeader() {
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              className="rounded-[12px] px-3 py-3 text-sm font-bold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]"
+              className="rounded-[12px] px-3 py-3 text-sm font-bold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
             >
               Sign in
             </Link>

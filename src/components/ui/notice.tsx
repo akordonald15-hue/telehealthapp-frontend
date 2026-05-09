@@ -14,6 +14,7 @@ export function Notice({
 
   return (
     <div
+      role={isWarning ? "alert" : "status"}
       className={
         isSuccess
           ? "rounded-[18px] border border-[#BBF7D0] bg-[#F0FDF4] p-4 shadow-[0_10px_30px_rgba(16,185,129,0.08)]"

@@ -55,7 +55,7 @@ export function RecordsClient() {
   );
 
   return (
-    <Section title="Medical records" description="Review your care history and keep important files in one place.">
+    <Section title="Medical records" description="Review care notes and keep supporting files in one secure place.">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <form
           className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6"
@@ -96,21 +96,21 @@ export function RecordsClient() {
         </form>
 
         <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6">
-          <p className="font-heading text-xl font-semibold text-[#1F2937]">Access guidance</p>
+          <p className="font-heading text-xl font-semibold text-[#1F2937]">How records work</p>
           <div className="mt-4 grid gap-3 text-sm text-slate-600">
             <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-              Patients can view their records and add files when sharing is available.
+              Your visible records and files stay organized here for follow-up care.
             </div>
             <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-              Only doctors and admins can create new medical records.
+              Your care team manages new record entries after consultations or follow-up.
             </div>
             <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-              Downloads use fresh presigned URLs so files are not exposed permanently.
+              File access is prepared only when you request a download.
             </div>
           </div>
           {userQuery.data?.role === "patient" ? (
             <Notice title="Record creation is managed by your care team" tone="neutral">
-              Patients can view their records and add files to records they can access, while care teams create new records.
+              You can view your records and add files to available entries. Your care team creates new records when needed.
             </Notice>
           ) : null}
         </div>

@@ -69,10 +69,10 @@ export function EmailVerificationForm() {
           </div>
         ) : null}
         <ErrorMessage error={confirmVerification.error} context="auth" />
-        <Field label="Email" error={confirmForm.formState.errors.email?.message}>
+        <Field label="Email" error={confirmForm.formState.errors.email?.message} required>
           <Input type="email" autoComplete="email" placeholder="you@example.com" {...confirmForm.register("email")} />
         </Field>
-        <Field label="Verification code" error={confirmForm.formState.errors.code?.message}>
+        <Field label="Verification code" error={confirmForm.formState.errors.code?.message} required>
           <Input
             inputMode="numeric"
             autoComplete="one-time-code"

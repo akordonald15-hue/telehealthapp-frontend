@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { Input, PasswordInput } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { authApi } from "@/lib/api/endpoints";
 import {
@@ -55,7 +55,7 @@ export function RegisterForm() {
           )}
         >
           <ErrorMessage error={requestCode.error} context="auth" />
-          <Field label="Email" error={emailForm.formState.errors.email?.message}>
+          <Field label="Email" error={emailForm.formState.errors.email?.message} required>
             <Input type="email" autoComplete="email" placeholder="you@example.com" {...emailForm.register("email")} />
           </Field>
           <Button type="submit" disabled={requestCode.isPending}>
@@ -77,17 +77,17 @@ export function RegisterForm() {
             Now create your account details so you can continue your care journey.
           </Notice>
           <ErrorMessage error={register.error} context="auth" />
-          <Field label="Email" error={form.formState.errors.email?.message}>
+          <Field label="Email" error={form.formState.errors.email?.message} required>
             <Input type="email" autoComplete="email" placeholder="you@example.com" readOnly {...form.register("email")} />
           </Field>
-          <Field label="Phone" error={form.formState.errors.phone?.message}>
+          <Field label="Phone" error={form.formState.errors.phone?.message} required>
             <Input type="tel" autoComplete="tel" placeholder="+234..." {...form.register("phone")} />
           </Field>
           <Notice title="Patient registration only" tone="neutral">
             This form creates patient accounts only. Doctors and nurses should sign in with credentials provided by Caretekk admin.
           </Notice>
-          <Field label="Password" error={form.formState.errors.password?.message} hint="Minimum 8 characters">
-            <Input type="password" autoComplete="new-password" placeholder="Create a secure password" {...form.register("password")} />
+          <Field label="Password" error={form.formState.errors.password?.message} hint="Minimum 8 characters" required>
+            <PasswordInput autoComplete="new-password" placeholder="Create a secure password" {...form.register("password")} />
           </Field>
           <Button type="submit" disabled={register.isPending}>
             {register.isPending ? "Creating patient account..." : "Create patient account"}

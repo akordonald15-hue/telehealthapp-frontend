@@ -39,7 +39,15 @@ export function NurseHistoryClient() {
       ) : null}
 
       {requestsQuery.isLoading ? (
-        <div className="rounded-[24px] border border-slate-200 bg-white px-5 py-10 text-sm text-slate-600">Loading history...</div>
+        <div className="grid gap-4" aria-busy="true" aria-label="Loading nurse history">
+          {[0, 1, 2].map((item) => (
+            <div key={item} className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+              <div className="h-5 w-44 animate-pulse rounded-full bg-slate-100" />
+              <div className="mt-4 h-4 w-4/5 animate-pulse rounded-full bg-slate-100" />
+              <div className="mt-4 h-3 w-64 animate-pulse rounded-full bg-slate-100" />
+            </div>
+          ))}
+        </div>
       ) : history.length ? (
         <div className="grid gap-4">
           {history.map((request) => (

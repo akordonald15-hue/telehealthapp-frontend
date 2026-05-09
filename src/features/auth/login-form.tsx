@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { Input, PasswordInput } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { useLogin } from "@/lib/auth/use-auth";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
@@ -43,7 +43,7 @@ export function LoginForm() {
   return (
     <form className="grid gap-5" onSubmit={form.handleSubmit((values) => login.mutate(values))}>
       <Notice title="Welcome back" tone="neutral">
-        Sign in to continue to your secure Caretekk workspace. Patients, doctors, nurses, and admins can use their provided credentials.
+        Sign in with your Caretekk credentials to continue to your secure workspace.
       </Notice>
       {login.error ? (
         <div className="grid gap-3">
@@ -58,11 +58,11 @@ export function LoginForm() {
           ) : null}
         </div>
       ) : null}
-      <Field label="Email" error={form.formState.errors.email?.message} hint="Use the email tied to your Caretekk account.">
+      <Field label="Email" error={form.formState.errors.email?.message} hint="Use the email tied to your Caretekk account." required>
         <Input type="email" autoComplete="email" placeholder="you@example.com" {...form.register("email")} />
       </Field>
-      <Field label="Password" error={form.formState.errors.password?.message}>
-        <Input type="password" autoComplete="current-password" placeholder="Enter your password" {...form.register("password")} />
+      <Field label="Password" error={form.formState.errors.password?.message} required>
+        <PasswordInput autoComplete="current-password" placeholder="Enter your password" {...form.register("password")} />
       </Field>
       <Button type="submit" disabled={login.isPending}>
         {login.isPending ? "Signing in..." : "Sign in"}

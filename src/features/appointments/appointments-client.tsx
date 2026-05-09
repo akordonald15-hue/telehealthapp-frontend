@@ -16,6 +16,7 @@ import { Input, Select, Textarea } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ProviderPickerCard } from "@/features/providers/provider-picker-card";
 import { appointmentsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { appointmentCompanionLabel } from "@/lib/ui/humanize";
@@ -127,8 +128,12 @@ export function AppointmentsClient() {
           <ErrorMessage error={createAppointment.error} context="appointments" />
           {createAppointment.isSuccess ? <Notice title="Checkout ready" tone="success">Redirecting you to Paystack. Your appointment is not marked paid until Paystack verifies payment.</Notice> : null}
           <Notice title="Consultation price: ₦1,000" tone="neutral">
-            Caretekk sets the consultation price on the backend. You will only pay through the secure checkout returned by the server.
+            Caretekk confirms the consultation price before checkout. You will only pay through the secure checkout created for this booking.
           </Notice>
+          <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+            <p className="font-semibold text-[#1F2937]">1. Choose a doctor</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">Available doctors appear first. Unavailable doctors cannot be selected.</p>
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Search doctors">
               <Input value={doctorSearch} onChange={(event) => setDoctorSearch(event.target.value)} placeholder="Name, clinic, or specialty" />
@@ -140,7 +145,20 @@ export function AppointmentsClient() {
 
           <Field label="Choose doctor" error={form.formState.errors.doctor?.message}>
             {availableDoctors.isLoading ? (
-              <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading available doctors...</div>
+              <div className="grid gap-3 md:grid-cols-2" aria-busy="true" aria-label="Loading available doctors">
+                {[0, 1, 2, 3].map((item) => (
+                  <div key={item} className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex gap-3">
+                      <div className="h-12 w-12 animate-pulse rounded-[16px] bg-white" />
+                      <div className="flex-1">
+                        <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
+                        <div className="mt-3 h-3 w-28 animate-pulse rounded-full bg-slate-200" />
+                      </div>
+                    </div>
+                    <div className="mt-4 h-10 w-full animate-pulse rounded-[12px] bg-slate-200 sm:w-32" />
+                  </div>
+                ))}
+              </div>
             ) : availableDoctors.isError ? (
               <Notice title="Doctor list could not load." tone="warning">
                 Please try again before booking.
@@ -151,38 +169,22 @@ export function AppointmentsClient() {
                   const available = doctor.availability_status === "available";
                   const selected = selectedDoctor?.id === doctor.id;
                   return (
-                    <button
+                    <ProviderPickerCard
                       key={doctor.id}
-                      type="button"
+                      name={doctor.display_name}
+                      subtitle={doctorSpecialtyLabel(doctor)}
+                      imageUrl={doctor.profile_image_url}
+                      status={doctor.availability_status}
+                      selected={selected}
                       disabled={!available}
-                      onClick={() => {
+                      primaryDetail={doctor.rating ? `Rating ${doctor.rating.toFixed(1)}` : "Rating pending"}
+                      secondaryDetail={doctor.next_available_time ? `Next ${formatDateTime(doctor.next_available_time)}` : "Next time by schedule"}
+                      actionLabel="Book Now"
+                      onSelect={() => {
                         setSelectedDoctor(doctor);
                         form.setValue("doctor", doctor.id, { shouldValidate: true });
                       }}
-                      className={`rounded-[20px] border p-4 text-left transition ${
-                        selected
-                          ? "border-[#2563EB] bg-[#EFF6FF] shadow-[0_18px_44px_-34px_rgba(37,99,235,0.5)]"
-                          : "border-slate-200 bg-slate-50 hover:border-blue-100 hover:bg-white"
-                      } disabled:cursor-not-allowed disabled:opacity-60`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="font-semibold text-[#1F2937]">{doctor.display_name}</p>
-                          <p className="mt-1 text-sm text-slate-600">{doctorSpecialtyLabel(doctor)}</p>
-                        </div>
-                        <StatusBadge value={doctor.availability_status} />
-                      </div>
-                      {doctor.bio || doctor.qualification ? (
-                        <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{doctor.bio || doctor.qualification}</p>
-                      ) : null}
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-500">
-                        {doctor.rating ? <span>Rating {doctor.rating.toFixed(1)}</span> : <span>Rating pending</span>}
-                        {doctor.next_available_time ? <span>Next {formatDateTime(doctor.next_available_time)}</span> : <span>Next time by schedule</span>}
-                      </div>
-                      <span className={`mt-4 inline-flex min-h-9 items-center rounded-[10px] px-3 text-sm font-extrabold ${available ? "bg-[#2563EB] text-white" : "bg-slate-200 text-slate-500"}`}>
-                        {available ? "Book Now" : "Unavailable"}
-                      </span>
-                    </button>
+                    />
                   );
                 })}
               </div>
@@ -194,6 +196,10 @@ export function AppointmentsClient() {
           </Field>
 
           <div className="grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+              <p className="font-semibold text-[#1F2937]">2. Add visit details</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">Choose a time and briefly describe what you need help with.</p>
+            </div>
             <Field label="Selected doctor">
               <Select
                 value={selectedDoctor?.id ? String(selectedDoctor.id) : ""}
@@ -264,7 +270,7 @@ export function AppointmentsClient() {
                   <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
                     <span className="inline-flex items-center gap-2">
                       <Stethoscope className="h-4 w-4 text-[#0F766E]" />
-                      Patient profile #{item.patient}
+                      Patient details
                     </span>
                     <span className="inline-flex items-center gap-2">
                       <MessageSquareText className="h-4 w-4 text-[#0F766E]" />

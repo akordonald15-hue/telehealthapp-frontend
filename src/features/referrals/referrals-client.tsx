@@ -66,20 +66,20 @@ export function ReferralsClient({ mode = "referrals" }: { mode?: "referrals" | "
           <ErrorMessage error={createReferral.error} context="referrals" />
           {createReferral.isSuccess ? <Notice title="Referral created" tone="success">The referral has been saved and your list is up to date.</Notice> : null}
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Patient record" error={form.formState.errors.patient?.message} hint="Enter the number linked to the person receiving this referral.">
-              <Input type="number" min={1} placeholder="Enter the number shared with you" {...form.register("patient")} />
+            <Field label="Patient record" error={form.formState.errors.patient?.message} hint="Use the patient record number provided in the consultation." required>
+              <Input type="number" min={1} placeholder="Patient record number" {...form.register("patient")} />
             </Field>
-            <Field label="Status" error={form.formState.errors.status?.message}>
+            <Field label="Status" error={form.formState.errors.status?.message} required>
               <Select {...form.register("status")}>
                 <option value="draft">Draft</option>
                 <option value="sent">Sent</option>
               </Select>
             </Field>
           </div>
-          <Field label="Referred to" error={form.formState.errors.referred_to?.message}>
+          <Field label="Referred to" error={form.formState.errors.referred_to?.message} required>
             <Input placeholder="Receiving clinic, specialist, or service" {...form.register("referred_to")} />
           </Field>
-          <Field label="Notes" error={form.formState.errors.notes?.message}>
+          <Field label="Notes" error={form.formState.errors.notes?.message} required>
             <Textarea placeholder="Add context for the receiving provider" {...form.register("notes")} />
           </Field>
           <Button className="w-full sm:w-fit" type="submit" disabled={createReferral.isPending}>

@@ -219,8 +219,6 @@ export function LandingPage() {
               <a href={`mailto:${BRAND_SUPPORT_EMAIL}`} className="transition hover:text-[var(--primary)]">
                 {BRAND_SUPPORT_EMAIL}
               </a>
-              <span>Privacy</span>
-              <span>Terms</span>
             </div>
           </div>
         </div>

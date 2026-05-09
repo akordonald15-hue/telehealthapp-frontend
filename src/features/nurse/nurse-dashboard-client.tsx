@@ -139,7 +139,7 @@ export function NurseDashboardClient() {
         <MetricCard label="Completed visits" value={completedCount} description="Visits finished and ready for patient confirmation or closure." icon={CheckCircle2} />
         <MetricCard label="Pending offers" value={pendingOffers} description="Requests waiting for your accept or decline decision." icon={Clock3} />
         <MetricCard label="Active request" value={activeRequest ? 1 : 0} description="Your current visit in progress or awaiting the next step." icon={CalendarClock} />
-        <MetricCard label="Rating" value="--" description="Patient ratings will appear here once they are added to the nurse summary." icon={Star} />
+        <MetricCard label="Rating" value="No ratings yet" description="Patient ratings will appear here once they are added to the nurse summary." icon={Star} />
       </div>
 
       <AvailabilityControl

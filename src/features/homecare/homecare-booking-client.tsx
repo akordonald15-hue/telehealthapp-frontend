@@ -11,7 +11,7 @@ import { Field } from "@/components/ui/field";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { ProviderPickerCard } from "@/features/providers/provider-picker-card";
 import { homeCareApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
@@ -128,8 +128,12 @@ export function HomeCareBookingClient() {
             </Notice>
           ) : null}
           <Notice title="Home nurse booking price: ₦5,000" tone="neutral">
-            Caretekk sets the homecare booking price on the backend. Nurse matching starts after Paystack verifies payment.
+            Caretekk confirms the homecare booking price before checkout. Nurse matching starts after Paystack verifies payment.
           </Notice>
+          <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+            <p className="font-semibold text-[#1F2937]">1. Booking source</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">Start directly or connect the request to a doctor referral.</p>
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Booking source">
@@ -174,6 +178,10 @@ export function HomeCareBookingClient() {
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+              <p className="font-semibold text-[#1F2937]">2. Choose a nurse</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">Pick a preferred nurse or leave it blank for Caretekk matching.</p>
+            </div>
             <Field label="Search nurses">
               <Input value={nurseSearch} onChange={(event) => setNurseSearch(event.target.value)} placeholder="Name, area, or service" />
             </Field>
@@ -184,7 +192,20 @@ export function HomeCareBookingClient() {
 
           <Field label="Preferred nurse" hint="Optional. If you do not choose one, Caretekk will match an available nurse.">
             {nursesQuery.isLoading ? (
-              <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading available nurses...</div>
+              <div className="grid gap-3 md:grid-cols-2" aria-busy="true" aria-label="Loading available nurses">
+                {[0, 1, 2, 3].map((item) => (
+                  <div key={item} className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex gap-3">
+                      <div className="h-12 w-12 animate-pulse rounded-[16px] bg-white" />
+                      <div className="flex-1">
+                        <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
+                        <div className="mt-3 h-3 w-28 animate-pulse rounded-full bg-slate-200" />
+                      </div>
+                    </div>
+                    <div className="mt-4 h-10 w-full animate-pulse rounded-[12px] bg-slate-200 sm:w-32" />
+                  </div>
+                ))}
+              </div>
             ) : nursesQuery.isError ? (
               <Notice title="Nurse list could not load." tone="warning">
                 You can still submit the request and Caretekk will match a nurse.
@@ -195,36 +216,19 @@ export function HomeCareBookingClient() {
                   const available = nurse.availability_status === "available";
                   const selected = selectedNurse?.id === nurse.id;
                   return (
-                    <button
+                    <ProviderPickerCard
                       key={nurse.id}
-                      type="button"
+                      name={nurse.display_name}
+                      subtitle={nurse.service_type || nurse.specialty || "Home care nursing"}
+                      imageUrl={nurse.profile_image_url}
+                      status={nurse.availability_status}
+                      selected={selected}
                       disabled={!available}
-                      onClick={() => setSelectedNurse(nurse)}
-                      className={`rounded-[20px] border p-4 text-left transition ${
-                        selected
-                          ? "border-[#2563EB] bg-[#EFF6FF] shadow-[0_18px_44px_-34px_rgba(37,99,235,0.5)]"
-                          : "border-slate-200 bg-slate-50 hover:border-blue-100 hover:bg-white"
-                      } disabled:cursor-not-allowed disabled:opacity-60`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="font-semibold text-[#1F2937]">{nurse.display_name}</p>
-                          <p className="mt-1 text-sm text-slate-600">{nurse.service_type || nurse.specialty}</p>
-                        </div>
-                        <StatusBadge value={nurse.availability_status} />
-                      </div>
-                      <div className="mt-3 grid gap-1 text-sm text-slate-600">
-                        <p>{nurse.location_area || "Location area not provided"}</p>
-                        <p>{nurse.service_radius_km ? `${nurse.service_radius_km} km service radius` : "Service radius pending"}</p>
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-500">
-                        {nurse.rating ? <span>Rating {nurse.rating.toFixed(1)}</span> : <span>Rating pending</span>}
-                        <span>{nurse.active_workload} active request{nurse.active_workload === 1 ? "" : "s"}</span>
-                      </div>
-                      <span className={`mt-4 inline-flex min-h-9 items-center rounded-[10px] px-3 text-sm font-extrabold ${available ? "bg-[#2563EB] text-white" : "bg-slate-200 text-slate-500"}`}>
-                        {available ? "Request Nurse" : "Unavailable"}
-                      </span>
-                    </button>
+                      primaryDetail={nurse.location_area || "Location area not provided"}
+                      secondaryDetail={nurse.rating ? `Rating ${nurse.rating.toFixed(1)}` : `${nurse.active_workload} active request${nurse.active_workload === 1 ? "" : "s"}`}
+                      actionLabel="Request Nurse"
+                      onSelect={() => setSelectedNurse(nurse)}
+                    />
                   );
                 })}
               </div>
@@ -241,6 +245,10 @@ export function HomeCareBookingClient() {
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+              <p className="font-semibold text-[#1F2937]">3. Contact and location</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">Share where the nurse should visit and how to reach you.</p>
+            </div>
             <Field label="Contact name" hint="Leave blank to use your profile details.">
               <Input value={contactName} onChange={(event) => setContactName(event.target.value)} placeholder="Patient or caregiver name" />
             </Field>
@@ -268,6 +276,10 @@ export function HomeCareBookingClient() {
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+              <p className="font-semibold text-[#1F2937]">4. Preferred time</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">Choose the visit window that works best.</p>
+            </div>
             <Field label="Preferred start">
               <Input type="datetime-local" value={windowStart} onChange={(event) => setWindowStart(event.target.value)} />
             </Field>

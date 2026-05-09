@@ -43,15 +43,15 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   }, [mounted, router, userQuery.isError]);
 
   if (!mounted || userQuery.isLoading) {
-    return <div className="p-6 text-sm text-zinc-600">Loading your workspace...</div>;
+    return <div className="p-6 text-sm text-slate-600">Loading your workspace...</div>;
   }
 
   if (!hasStoredSession()) {
-    return <div className="p-6 text-sm text-zinc-600">Redirecting...</div>;
+    return <div className="p-6 text-sm text-slate-600">Redirecting...</div>;
   }
 
   if (userQuery.isError) {
-    return <div className="p-6 text-sm text-zinc-600">Redirecting...</div>;
+    return <div className="p-6 text-sm text-slate-600">Redirecting...</div>;
   }
 
   return children;

@@ -68,6 +68,13 @@ export function AvailabilityControl({
           </Notice>
         </div>
       ) : null}
+      {mutation.isSuccess ? (
+        <div className="mt-3">
+          <Notice title="Availability updated" tone="success">
+            Your current status has been saved.
+          </Notice>
+        </div>
+      ) : null}
     </div>
   );
 }
