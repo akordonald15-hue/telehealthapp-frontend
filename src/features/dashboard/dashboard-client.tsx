@@ -23,17 +23,17 @@ function Metric({ label, value, href, icon: Icon, description }: { label: string
   return (
     <Link
       href={href}
-      className="ct-card group rounded-[26px] p-6"
+      className="group rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_28px_70px_-42px_rgba(37,99,235,0.28)]"
     >
       <div className="flex items-start justify-between gap-3">
-        <span className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-[#DBEAFE] text-[#2563EB] shadow-[0_16px_28px_-22px_rgba(37,99,235,0.45)]">
+        <span className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-[#DBEAFE] text-[#2563EB]">
           <Icon className="h-5 w-5" />
         </span>
-        <span className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Overview</span>
+        <span className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Now</span>
       </div>
-      <span className="mt-6 block text-sm font-semibold text-slate-500">{label}</span>
-      <strong className="mt-2 block font-heading text-3xl font-semibold tracking-[-0.05em] text-[#1F2937]">{value}</strong>
-      <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
+      <span className="mt-5 block text-sm font-semibold text-slate-500">{label}</span>
+      <strong className="mt-2 block font-heading text-3xl font-semibold tracking-tight text-[#1F2937]">{value}</strong>
+      <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
       <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">
         Open {label.toLowerCase()}
         <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
@@ -141,12 +141,12 @@ export function DashboardClient() {
     >
       {user?.role === "patient" ? (
         <>
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.18fr)_minmax(340px,0.82fr)]">
-            <div className="overflow-hidden rounded-[32px] bg-[radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.18),transparent_28%),linear-gradient(135deg,#17376E_0%,#355A9E_55%,#60A5FA_100%)] p-6 text-white shadow-[0_34px_90px_-44px_rgba(53,90,158,0.68)] sm:p-8">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-blue-100/90">Patient dashboard</p>
-              <h2 className="font-heading mt-4 text-[clamp(2rem,4vw,3.55rem)] font-semibold tracking-[-0.055em]">{nextPatientStep.title}</h2>
-              <p className="mt-4 max-w-2xl text-sm leading-8 text-blue-50/90 sm:text-[1rem]">{nextPatientStep.description}</p>
-              <div className="mt-7 flex flex-wrap gap-3">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+            <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.65)] sm:p-8">
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-100">Guided care journey</p>
+              <h2 className="font-heading mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">{nextPatientStep.title}</h2>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">{nextPatientStep.description}</p>
+              <div className="mt-6 flex flex-wrap gap-3">
                 <Link href={nextPatientStep.href} className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[#2563EB] shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5">
                   {nextPatientStep.cta}
                 </Link>
@@ -154,40 +154,28 @@ export function DashboardClient() {
                   Review appointments
                 </Link>
               </div>
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                {[
-                  { label: "Care check-in", value: patientHasConsultation ? "Completed" : "Ready to start" },
-                  { label: "Consultation", value: patientHasConsultation ? "Open conversation" : "Waiting for match" },
-                  { label: "Care plan", value: patientHasCarePlan ? "Available" : "Comes next" },
-                ].map((item) => (
-                  <div key={item.label} className="rounded-[20px] border border-white/16 bg-white/10 px-4 py-4 backdrop-blur">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-100/80">{item.label}</p>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-white">{item.value}</p>
-                  </div>
-                ))}
-              </div>
             </div>
 
-            <div className="ct-panel p-6">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-emerald-50 text-[#10B981]">
                   <Sparkles className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="font-heading text-[1.35rem] font-semibold tracking-[-0.04em] text-[#1F2937]">What happens next</p>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">What happens next</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">Follow the same care path each time, with a clear next action.</p>
                 </div>
               </div>
               <div className="mt-6 grid gap-3 text-sm text-slate-600">
-                <div className="rounded-[20px] border border-slate-200/90 bg-[var(--surface-soft)] px-4 py-4">
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">1. Care check-in</p>
                   <p className="mt-1 leading-6">Share your symptoms so your doctor gets the right context before the conversation starts.</p>
                 </div>
-                <div className="rounded-[20px] border border-slate-200/90 bg-[var(--surface-soft)] px-4 py-4">
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">2. Doctor match</p>
                   <p className="mt-1 leading-6">We guide you toward the doctor best placed to help with your concern.</p>
                 </div>
-                <div className="rounded-[20px] border border-slate-200/90 bg-[var(--surface-soft)] px-4 py-4">
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">3. Consultation and care plan</p>
                   <p className="mt-1 leading-6">Continue the conversation, review your doctor&apos;s notes, and keep follow-up care close.</p>
                 </div>
@@ -211,23 +199,23 @@ export function DashboardClient() {
           ) : null}
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="ct-card rounded-[26px] p-5">
+            <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
               <p className="text-sm font-semibold text-slate-500">Care check-in</p>
-              <p className="mt-2 font-heading text-2xl font-semibold tracking-[-0.04em] text-[#1F2937]">{patientHasConsultation ? "Done" : "Next"}</p>
-              <p className="mt-3 text-sm leading-7 text-slate-600">Start with symptoms and a short guided review before your consultation.</p>
-              <Link href="/triage" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open care check-in <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Done" : "Next"}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Start with symptoms and a short guided review before your consultation.</p>
+              <Link href="/triage" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open care check-in <ArrowRight className="h-4 w-4" /></Link>
             </div>
-            <div className="ct-card rounded-[26px] p-5">
+            <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
               <p className="text-sm font-semibold text-slate-500">Consultation</p>
-              <p className="mt-2 font-heading text-2xl font-semibold tracking-[-0.04em] text-[#1F2937]">{patientHasConsultation ? "Ready" : "Waiting"}</p>
-              <p className="mt-3 text-sm leading-7 text-slate-600">Your matched doctor and conversation space will guide the next clinical step.</p>
-              <Link href="/messages" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open consultation <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Ready" : "Waiting"}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Your matched doctor and conversation space will guide the next clinical step.</p>
+              <Link href="/messages" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open consultation <ArrowRight className="h-4 w-4" /></Link>
             </div>
-            <div className="ct-card rounded-[26px] p-5">
+            <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
               <p className="text-sm font-semibold text-slate-500">Care plan</p>
-              <p className="mt-2 font-heading text-2xl font-semibold tracking-[-0.04em] text-[#1F2937]">{patientHasCarePlan ? "Available" : "Coming next"}</p>
-              <p className="mt-3 text-sm leading-7 text-slate-600">Doctor notes, instructions, referrals, and next steps come together in one follow-up view.</p>
-              <Link href="/care-plan" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open care plan <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasCarePlan ? "Available" : "Coming next"}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Doctor notes, instructions, referrals, and next steps come together in one follow-up view.</p>
+              <Link href="/care-plan" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open care plan <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </div>
 
@@ -306,7 +294,7 @@ export function DashboardClient() {
           </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
-            <div className="ct-panel p-6">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
                   <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Next appointments</h2>
@@ -335,7 +323,7 @@ export function DashboardClient() {
               </div>
             </div>
 
-            <div className="ct-panel p-6">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
                   <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Recent billing</h2>

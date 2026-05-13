@@ -130,15 +130,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const navigation = (
     <>
-      <div className="ct-panel p-4">
+      <div className="rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-4 shadow-[0_24px_64px_-44px_rgba(15,23,42,0.55)]">
         <BrandLockup href="/" wordmark="image" wordmarkClassName="h-6 max-w-[150px]" />
-        <div className="mt-4 rounded-[20px] border border-[rgba(66,107,179,0.1)] bg-[linear-gradient(180deg,#F8FBFF_0%,#EEF4FF_100%)] px-4 py-4 text-sm text-slate-600">
+        <div className="mt-4 rounded-[18px] border border-[rgba(66,107,179,0.1)] bg-[var(--primary-soft)] px-4 py-3 text-sm text-slate-600">
           <p className="font-semibold text-[#1F2937]">{workspaceTitle}</p>
           <p className="mt-1 leading-6">{workspaceDescription}</p>
         </div>
       </div>
 
-      <nav className="mt-5 grid gap-2.5">
+      <nav className="mt-5 grid gap-2">
         {visibleNav.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -148,10 +148,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               href={item.href}
               onClick={() => setMobileOpen(false)}
               className={cn(
-                "group flex items-center gap-3 rounded-[18px] border px-4 py-3.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15",
+                "group flex items-center gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15",
                 active
-                  ? "border-[rgba(66,107,179,0.18)] bg-[linear-gradient(180deg,#F5F9FF_0%,#EEF4FF_100%)] text-[var(--primary)] shadow-[0_20px_40px_-34px_rgba(66,107,179,0.38)]"
-                  : "border-transparent bg-white/72 text-slate-600 hover:border-slate-200 hover:bg-white hover:text-[#1F2937] hover:shadow-[0_18px_34px_-34px_rgba(15,23,42,0.45)]",
+                  ? "border-[rgba(66,107,179,0.18)] bg-[var(--primary-soft)] text-[var(--primary)] shadow-[0_20px_40px_-34px_rgba(66,107,179,0.38)]"
+                  : "border-transparent bg-white/75 text-slate-600 hover:border-slate-200 hover:bg-white hover:text-[#1F2937] hover:shadow-[0_18px_34px_-34px_rgba(15,23,42,0.45)]",
               )}
             >
               <span
@@ -168,7 +168,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <div className="ct-panel mt-5 p-4">
+      <div className="mt-5 rounded-[24px] border border-white/70 bg-white p-4 shadow-[0_22px_58px_-42px_rgba(15,23,42,0.5)]">
         {user ? (
           <div>
             <p className="truncate text-sm font-semibold text-[#1F2937]">{user.email}</p>
@@ -192,16 +192,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(112,152,212,0.14),_transparent_24%),linear-gradient(180deg,#F8FBFF_0%,#F4F8FF_34%,#FFFFFF_100%)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(112,152,212,0.16),_transparent_28%),linear-gradient(180deg,#F5F9FF_0%,#F7FAFE_38%,#FFFFFF_100%)]">
       <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
-        <aside className="hidden w-[300px] shrink-0 px-5 py-6 lg:block xl:px-6">
+        <aside className="hidden w-[290px] shrink-0 px-5 py-6 lg:block xl:px-6">
           <div className="sticky top-6">{navigation}</div>
         </aside>
 
         {mobileOpen ? (
           <div className="fixed inset-0 z-50 bg-slate-950/38 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)}>
             <aside
-              className="absolute inset-y-0 left-0 w-[86vw] max-w-sm overflow-y-auto border-r border-white/60 bg-[linear-gradient(180deg,#F8FBFF_0%,#F4F8FF_36%,#FFFFFF_100%)] px-4 py-5 shadow-2xl"
+              className="absolute inset-y-0 left-0 w-[86vw] max-w-sm overflow-y-auto border-r border-white/60 bg-[#F5F9FF] px-4 py-5 shadow-2xl"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="mb-4 flex items-center justify-between">
@@ -220,20 +220,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         ) : null}
 
         <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-white/72 bg-[rgba(248,251,255,0.84)] backdrop-blur-xl">
+          <header className="sticky top-0 z-30 border-b border-white/65 bg-white/82 backdrop-blur-xl">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex min-w-0 items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setMobileOpen(true)}
-                  className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-slate-200 bg-white text-slate-600 shadow-[0_14px_28px_-24px_rgba(20,36,68,0.32)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 lg:hidden"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 lg:hidden"
                   aria-label="Open navigation"
                 >
                   <Menu className="h-5 w-5" />
                 </button>
                 <div className="min-w-0">
                   <BrandLockup href="/" wordmark="image" wordmarkClassName="h-5 max-w-[132px] sm:h-6 sm:max-w-[150px]" />
-                  <h1 className="mt-1 truncate font-heading text-[1.18rem] font-semibold tracking-[-0.04em] text-[#1F2937] sm:text-[1.28rem]">{activeLabel}</h1>
+                  <h1 className="mt-1 truncate font-heading text-lg font-semibold text-[#1F2937] sm:text-xl">{activeLabel}</h1>
                 </div>
               </div>
               <div className="flex items-center gap-3">
