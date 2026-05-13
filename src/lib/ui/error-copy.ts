@@ -44,6 +44,8 @@ const MESSAGE_OVERRIDES: Array<{ pattern: RegExp; replacement: string }> = [
   { pattern: /authentication credentials were not provided/i, replacement: "Please sign in again to continue." },
   { pattern: /token is invalid|token not valid|not enough segments|unauthorized/i, replacement: "Please sign in again to continue." },
   { pattern: /invalid signature/i, replacement: "We couldn't confirm that request. Please try again." },
+  { pattern: /google sign-in is not configured|google sign-in is not available|google sign-in could not be verified/i, replacement: "We couldn't verify your Google account right now. Please try again or continue with email." },
+  { pattern: /google email is not verified/i, replacement: "Please use a Google account with a verified email address." },
   { pattern: /method .* not allowed/i, replacement: "That action isn't available right now." },
   { pattern: /throttled|too many requests/i, replacement: "You've made a few requests in a short time. Please wait a moment and try again." },
 ];
