@@ -11,6 +11,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
 import { Input, PasswordInput } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
+import { GoogleAuthButton } from "@/features/auth/google-auth-button";
 import { useLogin } from "@/lib/auth/use-auth";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 
@@ -42,9 +43,15 @@ export function LoginForm() {
 
   return (
     <form className="grid gap-5" onSubmit={form.handleSubmit((values) => login.mutate(values))}>
-      <Notice title="Welcome back" tone="neutral">
-        Sign in with your Caretekk credentials to continue to your secure workspace.
+      <Notice title="Sign in" tone="neutral">
+        Use your email and password to continue.
       </Notice>
+      <GoogleAuthButton mode="login" />
+      <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+        <span className="h-px flex-1 bg-slate-200" />
+        Or
+        <span className="h-px flex-1 bg-slate-200" />
+      </div>
       {login.error ? (
         <div className="grid gap-3">
           <ErrorMessage error={login.error} context="auth" />
@@ -58,7 +65,7 @@ export function LoginForm() {
           ) : null}
         </div>
       ) : null}
-      <Field label="Email" error={form.formState.errors.email?.message} hint="Use the email tied to your Caretekk account." required>
+      <Field label="Email" error={form.formState.errors.email?.message} required>
         <Input type="email" autoComplete="email" placeholder="you@example.com" {...form.register("email")} />
       </Field>
       <Field label="Password" error={form.formState.errors.password?.message} required>
@@ -78,6 +85,9 @@ export function LoginForm() {
           Reset password
         </Link>
       </div>
+      <p className="text-xs leading-6 text-slate-500">
+        Doctors and nurses receive login details from Caretekk admin.
+      </p>
     </form>
   );
 }

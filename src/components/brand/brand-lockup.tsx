@@ -27,7 +27,7 @@ export function BrandLockup({
     <span className={cn("inline-flex items-center gap-2.5 sm:gap-3", className)}>
       <span className={cn("flex shrink-0 items-center justify-center", logoClassName)}>
         <Image
-          src="/Logo/Logo.png"
+          src="/Logo/newlogo.png"
           alt={`${BRAND_NAME} logo`}
           width={48}
           height={48}

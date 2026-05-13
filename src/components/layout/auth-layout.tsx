@@ -1,22 +1,17 @@
 import Image from "next/image";
-import { CheckCircle2, ShieldCheck, Stethoscope } from "lucide-react";
+import { CheckCircle2, Stethoscope } from "lucide-react";
 
 import { BrandLockup } from "@/components/brand/brand-lockup";
 
 const authHighlights = [
   {
-    title: "Care that feels coordinated",
-    description: "Appointments, secure records, referrals, and service checkout stay in one calm workflow.",
+    title: "Simple care access",
+    description: "Appointments, home care, records, and messages stay in one place.",
     icon: Stethoscope,
   },
   {
     title: "Built for trust",
-    description: "Secure sign-in, trusted care teams, and a calm experience from the moment you arrive.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Ready on any screen",
-    description: "Move from sign in to care plans comfortably on mobile, tablet, or desktop.",
+    description: "Secure sign-in and verified care teams from the moment you arrive.",
     icon: CheckCircle2,
   },
 ];
@@ -33,12 +28,12 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
 
             <div className="mt-6 rounded-[28px] border border-white/75 bg-white/88 p-5 shadow-[0_24px_80px_-48px_rgba(66,107,179,0.45)] backdrop-blur sm:p-8">
               <div className="mb-8 min-w-0">
-                <p className="text-sm font-bold uppercase tracking-[0.28em] text-[var(--primary)]">Welcome back to care</p>
+                <p className="text-sm font-bold uppercase tracking-[0.28em] text-[var(--primary)]">Care starts here</p>
                 <h1 className="font-heading mt-4 max-w-full break-words text-3xl font-bold tracking-tight text-[#1F2937] sm:text-4xl">{title}</h1>
                 <p className="mt-3 max-w-full break-words text-sm leading-7 text-slate-600 sm:max-w-lg sm:text-base">{subtitle}</p>
               </div>
 
-              <div className="mb-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              <div className="mb-8 grid gap-3 sm:grid-cols-2">
                 {authHighlights.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -78,9 +73,9 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
             <div className="mb-4">
               <BrandLockup wordmark="image" inverse wordmarkClassName="h-6 max-w-[158px] sm:h-7 sm:max-w-[176px]" />
             </div>
-            <h2 className="font-heading mt-3 text-3xl font-semibold tracking-tight">Healthcare that feels personal, not fragmented.</h2>
+            <h2 className="font-heading mt-3 text-3xl font-semibold tracking-tight">Healthcare that stays calm and connected.</h2>
             <p className="mt-3 max-w-xl text-sm leading-7 text-blue-50/86">
-              Sign in to manage visits, share records, message your care team, and keep each step of the journey in one trusted workspace.
+              Sign in to manage visits, share records, message your care team, and keep every step of the journey in one trusted workspace.
             </p>
           </div>
         </section>

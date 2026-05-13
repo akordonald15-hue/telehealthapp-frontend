@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -21,6 +21,7 @@ import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { messagingApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
+import { buildWebSocketUrl } from "@/lib/realtime";
 import { conversationSummary, conversationTitle, messageSenderLabel } from "@/lib/ui/humanize";
 import type { Message, Thread, UserRole } from "@/lib/types/backend";
 import { uploadToPresignedUrl } from "@/lib/api/client";
@@ -40,14 +41,21 @@ export function MessagesClient() {
   const [composerValue, setComposerValue] = useState("");
   const [attachment, setAttachment] = useState<AttachmentPreview | null>(null);
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+  const [liveConnected, setLiveConnected] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const socketRef = useRef<WebSocket | null>(null);
 
-  const threads = useQuery({ queryKey: ["threads"], queryFn: () => messagingApi.threads() });
+  const threads = useQuery({
+    queryKey: ["threads"],
+    queryFn: () => messagingApi.threads(),
+    refetchInterval: liveConnected ? false : 12000,
+  });
   const messages = useQuery({
     queryKey: ["messages", activeThread],
     queryFn: () => messagingApi.messages(activeThread as number),
     enabled: Boolean(activeThread),
+    refetchInterval: activeThread && !liveConnected ? 6000 : false,
   });
 
   const createMessage = useMutation({
@@ -117,6 +125,42 @@ export function MessagesClient() {
     };
   }, [attachment]);
 
+  useEffect(() => {
+    if (!activeThread || !currentUser || !["patient", "doctor"].includes(currentUser.role)) {
+      socketRef.current?.close();
+      socketRef.current = null;
+      return;
+    }
+
+    const wsUrl = buildWebSocketUrl(`/ws/threads/${activeThread}/`);
+    if (!wsUrl) {
+      return;
+    }
+
+    const socket = new WebSocket(wsUrl);
+    socketRef.current = socket;
+
+    socket.onopen = () => setLiveConnected(true);
+    socket.onerror = () => setLiveConnected(false);
+    socket.onclose = () => {
+      if (socketRef.current === socket) {
+        socketRef.current = null;
+      }
+      setLiveConnected(false);
+    };
+    socket.onmessage = async () => {
+      await queryClient.invalidateQueries({ queryKey: ["messages", activeThread] });
+      await queryClient.invalidateQueries({ queryKey: ["threads"] });
+    };
+
+    return () => {
+      socket.close();
+      if (socketRef.current === socket) {
+        socketRef.current = null;
+      }
+    };
+  }, [activeThread, currentUser, queryClient]);
+
   function selectThread(threadId: number) {
     setActiveThread(threadId);
     setIsMobileChatOpen(true);
@@ -167,6 +211,13 @@ export function MessagesClient() {
           });
         },
       });
+      return;
+    }
+
+    const socket = socketRef.current;
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "message", body: trimmed }));
+      setComposerValue("");
       return;
     }
 
@@ -233,6 +284,7 @@ export function MessagesClient() {
             <ConsultationHeader
               role={currentUser?.role}
               thread={activeThreadDetails}
+              liveConnected={liveConnected}
               onBack={() => setIsMobileChatOpen(false)}
             />
 
@@ -377,10 +429,12 @@ function ConsultationListItem({
 function ConsultationHeader({
   role,
   thread,
+  liveConnected,
   onBack,
 }: {
   role?: UserRole;
   thread: Thread | null;
+  liveConnected: boolean;
   onBack: () => void;
 }) {
   return (
@@ -407,7 +461,7 @@ function ConsultationHeader({
       </div>
       <div className="hidden items-center gap-2 rounded-full bg-[#ECFDF5] px-3 py-2 text-xs font-bold text-[#047857] sm:inline-flex">
         <Stethoscope className="h-4 w-4" />
-        Secure chat
+        {liveConnected ? "Live chat" : "Secure chat"}
       </div>
     </div>
   );
@@ -449,7 +503,7 @@ function ChatMessageBubble({
           </a>
         ) : null}
         <p className={cn("mt-2 text-[11px]", isMine ? "text-white/75" : "text-slate-400")}>
-          {messageSenderLabel(message, currentUserId)} · {formatDateTime(message.created_at)}
+          {messageSenderLabel(message, currentUserId)} {"·"} {formatDateTime(message.created_at)}
         </p>
       </div>
     </article>
@@ -606,3 +660,5 @@ function formatFileSize(size: number) {
   }
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+

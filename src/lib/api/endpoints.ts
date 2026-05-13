@@ -65,10 +65,14 @@ export const authApi = {
     }),
   login: (body: { email: string; password: string }) =>
     apiRequest<TokenPair>(authPath("/auth/login/"), { method: "POST", body, auth: false }),
+  google: (body: { id_token: string }) =>
+    apiRequest<TokenPair>(authPath("/auth/google/"), { method: "POST", body, auth: false }),
   refresh: (body: { refresh: string }) =>
     apiRequest<TokenPair>(authPath("/auth/refresh/"), { method: "POST", body, auth: false }),
   logout: (body: { refresh: string }) => apiRequest<DetailResponse>(authPath("/auth/logout/"), { method: "POST", body }),
   me: () => apiRequest<User>(authPath("/auth/me/")),
+  changePassword: (body: { old_password: string; new_password: string }) =>
+    apiRequest<DetailResponse>(authPath("/auth/change-password/"), { method: "POST", body }),
   updateMe: (body: Partial<Pick<User, "email" | "phone">>) =>
     apiRequest<User>(authPath("/auth/me/"), { method: "PATCH", body }),
   passwordResetRequest: (body: { email: string }) =>

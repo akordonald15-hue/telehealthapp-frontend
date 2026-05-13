@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, MapPinned, Navigation, Phone, ShieldCheck, Timer } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -12,6 +12,7 @@ import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { homeCareApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
+import { buildWebSocketUrl } from "@/lib/realtime";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { formatDateTime } from "@/lib/utils";
 import {
@@ -76,6 +77,8 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
   const [verificationNotes, setVerificationNotes] = useState("");
   const [visitNoteDraft, setVisitNoteDraft] = useState("");
   const [locationMessage, setLocationMessage] = useState("");
+  const [liveTrackingConnected, setLiveTrackingConnected] = useState(false);
+  const socketRef = useRef<WebSocket | null>(null);
 
   const requestQuery = useQuery({
     queryKey: ["home-care", "request", requestId],
@@ -91,11 +94,12 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
     queryKey: ["home-care", "request", requestId, "tracking"],
     queryFn: () => homeCareApi.requestTracking(requestId),
     enabled: userQuery.data?.role === "nurse",
+    refetchInterval: liveTrackingConnected ? false : 8000,
   });
 
-  const refreshHomeCare = async () => {
+  const refreshHomeCare = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["home-care"] });
-  };
+  }, [queryClient]);
 
   const verifyMutation = useMutation({
     mutationFn: (assignmentId: number) => homeCareApi.submitVerificationAttempt(assignmentId, buildVerificationPayload(verificationChoice, verificationNotes)),
@@ -148,6 +152,41 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
     const value = snapshot["alternate_phone"];
     return typeof value === "string" ? value : "";
   }, [request?.source_snapshot]);
+
+  useEffect(() => {
+    if (userQuery.data?.role !== "nurse") {
+      socketRef.current?.close();
+      socketRef.current = null;
+      return;
+    }
+
+    const wsUrl = buildWebSocketUrl(`/ws/home-care/requests/${requestId}/tracking/`);
+    if (!wsUrl) {
+      return;
+    }
+
+    const socket = new WebSocket(wsUrl);
+    socketRef.current = socket;
+    socket.onopen = () => setLiveTrackingConnected(true);
+    socket.onerror = () => setLiveTrackingConnected(false);
+    socket.onclose = () => {
+      if (socketRef.current === socket) {
+        socketRef.current = null;
+      }
+      setLiveTrackingConnected(false);
+    };
+    socket.onmessage = async () => {
+      await refreshHomeCare();
+      setLocationMessage("Live trip update received.");
+    };
+
+    return () => {
+      socket.close();
+      if (socketRef.current === socket) {
+        socketRef.current = null;
+      }
+    };
+  }, [refreshHomeCare, requestId, userQuery.data?.role]);
 
   async function shareCurrentLocation() {
     if (!assignment) {

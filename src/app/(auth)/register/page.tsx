@@ -5,7 +5,7 @@ import { RegisterForm } from "@/features/auth/register-form";
 
 export default function RegisterPage() {
   return (
-    <AuthLayout title="Create patient account" subtitle="Step 1 of 3: confirm your email, then create your Caretekk patient profile. Doctor and nurse accounts are created by Caretekk admin.">
+    <AuthLayout title="Create account" subtitle="Start with your email, confirm the code we send, and finish your patient account.">
       <Suspense fallback={null}>
         <RegisterForm />
       </Suspense>

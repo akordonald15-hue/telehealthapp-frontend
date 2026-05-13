@@ -6,6 +6,7 @@ export type User = {
   full_name: string;
   phone: string;
   role: UserRole;
+  must_change_password: boolean;
   created_at: string;
   updated_at: string;
 };

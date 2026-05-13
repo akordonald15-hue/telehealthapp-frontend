@@ -19,19 +19,56 @@ export function useCurrentUser() {
   });
 }
 
+async function handleAuthSuccess(
+  tokens: { access: string; refresh?: string },
+  queryClient: ReturnType<typeof useQueryClient>,
+  router: ReturnType<typeof useRouter>,
+) {
+  setTokens(tokens);
+  const user = await queryClient.fetchQuery({
+    queryKey: authKeys.me,
+    queryFn: authApi.me,
+  });
+  await queryClient.invalidateQueries({ queryKey: authKeys.me });
+  if (user.must_change_password) {
+    router.replace("/change-password");
+    return;
+  }
+  router.replace(user.role === "patient" ? "/triage" : "/dashboard");
+}
+
 export function useLogin() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
   return useMutation({
     mutationFn: authApi.login,
-    onSuccess: async (tokens) => {
-      setTokens(tokens);
+    onSuccess: async (tokens) => handleAuthSuccess(tokens, queryClient, router),
+  });
+}
+
+export function useGoogleLogin() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: authApi.google,
+    onSuccess: async (tokens) => handleAuthSuccess(tokens, queryClient, router),
+  });
+}
+
+export function useChangePassword() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: authApi.changePassword,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: authKeys.me });
       const user = await queryClient.fetchQuery({
         queryKey: authKeys.me,
         queryFn: authApi.me,
       });
-      await queryClient.invalidateQueries({ queryKey: authKeys.me });
       router.replace(user.role === "patient" ? "/triage" : "/dashboard");
     },
   });

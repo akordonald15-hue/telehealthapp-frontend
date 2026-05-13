@@ -5,7 +5,7 @@ import { LoginForm } from "@/features/auth/login-form";
 
 export default function LoginPage() {
   return (
-    <AuthLayout title="Welcome back" subtitle="Sign in to continue with the next step in your care journey.">
+    <AuthLayout title="Sign in" subtitle="Continue with your email, password, or Google account.">
       <Suspense fallback={null}>
         <LoginForm />
       </Suspense>

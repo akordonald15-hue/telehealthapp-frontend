@@ -42,6 +42,13 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     }
   }, [mounted, router, userQuery.isError]);
 
+  useEffect(() => {
+    if (!mounted || !userQuery.data?.must_change_password) {
+      return;
+    }
+    router.replace("/change-password");
+  }, [mounted, router, userQuery.data?.must_change_password]);
+
   if (!mounted || userQuery.isLoading) {
     return <div className="p-6 text-sm text-slate-600">Loading your workspace...</div>;
   }
@@ -51,6 +58,10 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   }
 
   if (userQuery.isError) {
+    return <div className="p-6 text-sm text-slate-600">Redirecting...</div>;
+  }
+
+  if (userQuery.data?.must_change_password) {
     return <div className="p-6 text-sm text-slate-600">Redirecting...</div>;
   }
 

@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, MapPinned, Star } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Section } from "@/components/ui/section";
 import { Textarea } from "@/components/ui/input";
 import { homeCareApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
+import { buildWebSocketUrl } from "@/lib/realtime";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { formatDateTime } from "@/lib/utils";
 import {
@@ -34,6 +35,8 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
   const [cancelReason, setCancelReason] = useState("");
   const [ratingScore, setRatingScore] = useState("5");
   const [ratingFeedback, setRatingFeedback] = useState("");
+  const [liveTrackingConnected, setLiveTrackingConnected] = useState(false);
+  const socketRef = useRef<WebSocket | null>(null);
 
   const requestQuery = useQuery({
     queryKey: ["home-care", "request", requestId],
@@ -49,11 +52,12 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
     queryKey: ["home-care", "request", requestId, "tracking"],
     queryFn: () => homeCareApi.requestTracking(requestId),
     enabled: userQuery.data?.role === "patient",
+    refetchInterval: liveTrackingConnected ? false : 8000,
   });
 
-  const refreshHomeCare = async () => {
+  const refreshHomeCare = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["home-care"] });
-  };
+  }, [queryClient]);
 
   const cancelMutation = useMutation({
     mutationFn: () => homeCareApi.cancelRequest(requestId, { reason: cancelReason.trim() || "Cancelled by patient." }),
@@ -77,6 +81,40 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
       await refreshHomeCare();
     },
   });
+
+  useEffect(() => {
+    if (userQuery.data?.role !== "patient") {
+      socketRef.current?.close();
+      socketRef.current = null;
+      return;
+    }
+
+    const wsUrl = buildWebSocketUrl(`/ws/home-care/requests/${requestId}/tracking/`);
+    if (!wsUrl) {
+      return;
+    }
+
+    const socket = new WebSocket(wsUrl);
+    socketRef.current = socket;
+    socket.onopen = () => setLiveTrackingConnected(true);
+    socket.onerror = () => setLiveTrackingConnected(false);
+    socket.onclose = () => {
+      if (socketRef.current === socket) {
+        socketRef.current = null;
+      }
+      setLiveTrackingConnected(false);
+    };
+    socket.onmessage = async () => {
+      await refreshHomeCare();
+    };
+
+    return () => {
+      socket.close();
+      if (socketRef.current === socket) {
+        socketRef.current = null;
+      }
+    };
+  }, [refreshHomeCare, requestId, userQuery.data?.role]);
 
   if (userQuery.data?.role !== "patient") {
     return (

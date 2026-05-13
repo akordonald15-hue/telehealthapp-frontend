@@ -64,7 +64,7 @@ export function LandingPage() {
               </div>
               <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3 rounded-[18px] border border-[rgba(220,230,245,0.86)] bg-white/92 p-4 shadow-[0_10px_30px_rgba(31,41,55,0.08)] backdrop-blur-xl sm:left-7 sm:right-auto sm:max-w-[330px]">
                 <Image
-                  src="/Logo/Logo.png"
+                  src="/Logo/newlogo.png"
                   alt="Caretekk brand mark"
                   width={46}
                   height={46}
@@ -118,6 +118,83 @@ export function LandingPage() {
             {doctors.map((doctor) => (
               <DoctorCard key={doctor.name} doctor={doctor} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="lf-section pt-0">
+        <div className="lf-shell grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
+          <div className="rounded-[28px] border border-[rgba(220,230,245,0.9)] bg-[linear-gradient(135deg,#355A9E_0%,#426BB3_58%,#7098D4_120%)] p-6 text-white shadow-[0_24px_60px_rgba(66,107,179,0.18)] sm:p-8">
+            <p className="text-[0.78rem] font-black uppercase tracking-[0.12em] text-white/80">Doctor consultations</p>
+            <h2 className="mt-4 font-heading text-[clamp(2rem,4vw,3.15rem)] font-extrabold tracking-[-0.055em]">
+              With ₦1,000, you can consult a doctor from home.
+            </h2>
+            <p className="mt-4 max-w-[620px] text-[1.02rem] leading-8 text-white/85">
+              Talk to a verified doctor from the comfort of your home for just ₦1,000. Get medical guidance, follow-up support, and referrals when needed.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link href="/register" className="lf-btn bg-white text-[var(--primary)] shadow-[0_14px_30px_rgba(255,255,255,0.16)] hover:bg-[#F8FBFF]">
+                Consult a doctor
+              </Link>
+              <Link href="/login" className="lf-btn lf-btn-ghost-light">
+                Book consultation
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid content-center gap-4 rounded-[28px] border border-[rgba(220,230,245,0.9)] bg-white p-6 shadow-[0_18px_48px_rgba(31,41,55,0.08)] sm:p-8">
+            <div className="flex items-center gap-4 rounded-[22px] border border-[rgba(220,230,245,0.9)] bg-[#F8FBFF] p-4">
+              <Image src="/Logo/newlogo.png" alt="Caretekk logo" width={52} height={52} className="h-12 w-12 object-contain" />
+              <div>
+                <p className="text-sm font-bold uppercase tracking-[0.12em] text-[var(--primary)]">Affordable access</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">Start with a low-friction consultation before you travel or book follow-up care.</p>
+              </div>
+            </div>
+            <div className="rounded-[22px] border border-[rgba(220,230,245,0.9)] bg-white p-5">
+              <p className="text-3xl font-black text-[#1F2937]">₦1,000</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">A clear entry point for patients who want quick medical guidance from a trusted doctor at home.</p>
+            </div>
+            <div className="rounded-[22px] border border-[rgba(220,230,245,0.9)] bg-white p-5">
+              <p className="text-sm font-bold uppercase tracking-[0.12em] text-[var(--primary)]">What follows</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Messages, referrals, follow-up support, and records stay connected after the consultation.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="lf-section bg-[linear-gradient(180deg,#FFFFFF_0%,#F5F9FF_100%)] pt-0">
+        <div className="lf-shell grid items-center gap-8 lg:grid-cols-[minmax(320px,0.96fr)_minmax(0,1.04fr)]">
+          <div className="overflow-hidden rounded-[28px] border border-[rgba(220,230,245,0.9)] bg-white shadow-[0_18px_48px_rgba(31,41,55,0.08)]">
+            <Image
+              src="/img/Nurses.png"
+              alt="Trusted home-care nurse supporting a patient"
+              width={1200}
+              height={900}
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div>
+            <p className="mb-4 text-[0.78rem] font-black uppercase tracking-[0.12em] text-[var(--primary)]">Home care nurses</p>
+            <h2 className="font-heading text-[clamp(2rem,4vw,3.3rem)] font-extrabold tracking-[-0.055em] text-[#1F2937]">
+              Need care at home?
+            </h2>
+            <p className="mt-5 text-[1.02rem] leading-8 text-[#667085]">
+              Caretekk connects you with trusted home-care nurses for mother and baby care, elderly support, postnatal care, and routine home health assistance.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3 text-sm font-semibold text-[#475467]">
+              <span className="rounded-full bg-[var(--primary-soft)] px-4 py-2 text-[var(--primary)]">Mother and baby care</span>
+              <span className="rounded-full bg-[var(--primary-soft)] px-4 py-2 text-[var(--primary)]">Elderly care</span>
+              <span className="rounded-full bg-[var(--primary-soft)] px-4 py-2 text-[var(--primary)]">Postnatal care</span>
+              <span className="rounded-full bg-[var(--primary-soft)] px-4 py-2 text-[var(--primary)]">Routine home support</span>
+            </div>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link href="/register" className="lf-btn lf-btn-primary">
+                Book a nurse
+              </Link>
+              <Link href="/login" className="lf-btn lf-btn-secondary">
+                Request home care
+              </Link>
+            </div>
           </div>
         </div>
       </section>
