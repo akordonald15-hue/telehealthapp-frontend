@@ -46,12 +46,6 @@ export function LoginForm() {
       <Notice title="Sign in" tone="neutral">
         Use your email and password to continue.
       </Notice>
-      <GoogleAuthButton mode="login" />
-      <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-        <span className="h-px flex-1 bg-slate-200" />
-        Or
-        <span className="h-px flex-1 bg-slate-200" />
-      </div>
       {login.error ? (
         <div className="grid gap-3">
           <ErrorMessage error={login.error} context="auth" />
@@ -74,6 +68,14 @@ export function LoginForm() {
       <Button type="submit" disabled={login.isPending}>
         {login.isPending ? "Signing in..." : "Sign in"}
       </Button>
+      <div className="grid gap-3">
+        <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+          <span className="h-px flex-1 bg-slate-200" />
+          Or continue with
+          <span className="h-px flex-1 bg-slate-200" />
+        </div>
+        <GoogleAuthButton mode="login" />
+      </div>
       <div className="flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
         <p>
           New here?{" "}

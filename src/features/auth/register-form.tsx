@@ -48,12 +48,6 @@ export function RegisterForm() {
 
       {!isCompletingAccount ? (
         <>
-          <GoogleAuthButton mode="signup" />
-          <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-            <span className="h-px flex-1 bg-slate-200" />
-            Or
-            <span className="h-px flex-1 bg-slate-200" />
-          </div>
           <form
             className="grid gap-5"
             onSubmit={emailForm.handleSubmit((values) =>
@@ -70,6 +64,14 @@ export function RegisterForm() {
               {requestCode.isPending ? "Sending your code..." : "Continue"}
             </Button>
           </form>
+          <div className="grid gap-3">
+            <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+              <span className="h-px flex-1 bg-slate-200" />
+              Or continue with
+              <span className="h-px flex-1 bg-slate-200" />
+            </div>
+            <GoogleAuthButton mode="signup" />
+          </div>
         </>
       ) : null}
 
