@@ -17,21 +17,17 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { DoctorProfile, type Appointment, type Referral, type Thread } from "@/lib/types/backend";
 import { ProviderWalletPanel } from "@/features/provider-ledger/provider-wallet-panel";
 import { AvailabilityControl } from "@/features/providers/availability-control";
 import { appointmentsApi, messagingApi, profilesApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
-import type { Appointment, DoctorProfile, Referral, Thread } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
 
 function countValue<T>(query: { data?: { count?: number; results: T[] }; isLoading: boolean; isError: boolean }) {
-  if (query.isLoading) {
-    return "...";
-  }
-  if (query.isError) {
-    return "Error";
-  }
+  if (query.isLoading) return "...";
+  if (query.isError) return "Error";
   return query.data?.count ?? query.data?.results.length ?? 0;
 }
 
@@ -53,13 +49,13 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
-      <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#ECFEFF] text-[#0F766E]">
+    <div className="ct-card rounded-[26px] p-5">
+      <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#ECFEFF] text-[#0F766E] shadow-[0_16px_28px_-22px_rgba(15,118,110,0.45)]">
         <Icon className="h-5 w-5" />
       </span>
       <p className="mt-4 text-sm font-semibold text-slate-500">{label}</p>
-      <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{value}</p>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
+      <p className="mt-2 font-heading text-2xl font-semibold tracking-[-0.04em] text-[#1F2937]">{value}</p>
+      <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
     </div>
   );
 }
@@ -78,7 +74,7 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="group rounded-[20px] border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-cyan-100 hover:bg-white hover:shadow-[0_18px_44px_-34px_rgba(15,118,110,0.4)]"
+      className="group rounded-[22px] border border-slate-200/90 bg-[var(--surface-soft)] p-4 transition hover:-translate-y-0.5 hover:border-cyan-100 hover:bg-white hover:shadow-[0_18px_44px_-34px_rgba(15,118,110,0.4)]"
     >
       <div className="flex items-start gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white text-[#0F766E] shadow-sm">
@@ -95,10 +91,7 @@ function QuickAction({
 
 function AppointmentRow({ appointment }: { appointment: Appointment }) {
   return (
-    <Link
-      href={`/appointments/${appointment.id}`}
-      className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-cyan-100 hover:bg-white"
-    >
+    <Link href={`/appointments/${appointment.id}`} className="rounded-[22px] border border-slate-200/90 bg-[var(--surface-soft)] px-4 py-4 transition hover:border-cyan-100 hover:bg-white">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="font-semibold text-[#1F2937]">{formatDateTime(appointment.scheduled_at)}</p>
@@ -113,7 +106,7 @@ function AppointmentRow({ appointment }: { appointment: Appointment }) {
 
 function ReferralRow({ referral }: { referral: Referral }) {
   return (
-    <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4">
+    <div className="rounded-[22px] border border-slate-200/90 bg-[var(--surface-soft)] px-4 py-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="font-semibold text-[#1F2937]">{referral.referred_to || "Referral"}</p>
@@ -128,7 +121,7 @@ function ReferralRow({ referral }: { referral: Referral }) {
 
 function ThreadRow({ thread }: { thread: Thread }) {
   return (
-    <Link href="/messages" className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-cyan-100 hover:bg-white">
+    <Link href="/messages" className="rounded-[22px] border border-slate-200/90 bg-[var(--surface-soft)] px-4 py-4 transition hover:border-cyan-100 hover:bg-white">
       <p className="font-semibold text-[#1F2937]">Patient conversation #{thread.patient}</p>
       <p className="mt-1 text-sm text-slate-600">Opened {formatDateTime(thread.created_at)}</p>
     </Link>
@@ -171,9 +164,7 @@ export function DoctorDashboardClient() {
   const pendingConsultations = appointmentItems.filter((appointment) => appointment.status === "scheduled");
   const threadItems = threads.data?.results ?? [];
   const referralItems = referrals.data?.results ?? [];
-  const recentPatientIds = Array.from(
-    new Set([...appointmentItems.map((appointment) => appointment.patient), ...referralItems.map((referral) => referral.patient)]),
-  ).slice(0, 6);
+  const recentPatientIds = Array.from(new Set([...appointmentItems.map((appointment) => appointment.patient), ...referralItems.map((referral) => referral.patient)])).slice(0, 6);
   const dashboardErrors = [
     appointments.isError ? `Appointments: ${getFriendlyErrorMessage(appointments.error, "dashboard")}` : null,
     threads.isError ? `Messages: ${getFriendlyErrorMessage(threads.error, "dashboard")}` : null,
@@ -183,25 +174,21 @@ export function DoctorDashboardClient() {
   return (
     <Section
       title="Doctor dashboard"
-      description={"Today's consultations, patient messages, referrals, and care-plan notes in one clinical workspace."}
+      description="Today's consultations, patient messages, referrals, and care-plan notes in one clinical workspace."
       action={profileQuery.data ? <StatusBadge value={profileQuery.data.availability_status} /> : <Badge tone="cyan">doctor</Badge>}
     >
-      {dashboardErrors.length ? (
-        <Notice title="Some doctor workspace data could not load." tone="warning">
-          {dashboardErrors.join(" ")}
-        </Notice>
-      ) : null}
+      {dashboardErrors.length ? <Notice title="Some doctor workspace data could not load." tone="warning">{dashboardErrors.join(" ")}</Notice> : null}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,#0F766E_0%,#2563EB_58%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(15,118,110,0.55)] sm:p-8">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-cyan-50">Clinical command center</p>
-          <h2 className="font-heading mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.14fr)_minmax(340px,0.86fr)]">
+        <div className="overflow-hidden rounded-[32px] bg-[radial-gradient(circle_at_82%_16%,rgba(255,255,255,0.16),transparent_26%),linear-gradient(135deg,#0F5F5A_0%,#2563EB_58%,#60A5FA_100%)] p-6 text-white shadow-[0_34px_90px_-44px_rgba(15,118,110,0.58)] sm:p-8">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-cyan-50/90">Doctor dashboard</p>
+          <h2 className="font-heading mt-4 text-[clamp(2rem,4vw,3.45rem)] font-semibold tracking-[-0.055em]">
             {todayAppointments.length ? `${todayAppointments.length} consultation${todayAppointments.length === 1 ? "" : "s"} today` : "No consultations scheduled for today"}
           </h2>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-cyan-50/90 sm:text-base">
-            Review the patient queue, open conversations, and create follow-up referrals without patient booking tools.
+          <p className="mt-4 max-w-2xl text-sm leading-8 text-cyan-50/90 sm:text-[1rem]">
+            Review your patient queue, stay close to conversations, and move from consultation to referral without losing focus.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[#0F766E] shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5">
               View consultations
             </Link>
@@ -209,25 +196,37 @@ export function DoctorDashboardClient() {
               Open messages
             </Link>
           </div>
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: "Today", value: `${todayAppointments.length} scheduled` },
+              { label: "Pending", value: `${pendingConsultations.length} waiting` },
+              { label: "Referrals", value: `${referralItems.length} tracked` },
+            ].map((item) => (
+              <div key={item.label} className="rounded-[20px] border border-white/16 bg-white/10 px-4 py-4 backdrop-blur">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-50/75">{item.label}</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-white">{item.value}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
-          <p className="font-heading text-xl font-semibold text-[#1F2937]">Quick actions</p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Clinical shortcuts for common doctor workflows.</p>
+        <div className="ct-panel p-6">
+          <p className="font-heading text-[1.35rem] font-semibold tracking-[-0.04em] text-[#1F2937]">Quick actions</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">Clinical shortcuts for the work you do most often.</p>
           <div className="mt-5 grid gap-3">
-            <QuickAction href="/appointments" label="View appointments" description={"Open today's and upcoming consultations."} icon={CalendarClock} />
+            <QuickAction href="/appointments" label="View appointments" description="Open today's and upcoming consultations." icon={CalendarClock} />
             <QuickAction href="/messages" label="Open messages" description="Continue patient conversations." icon={MessageSquareText} />
             <QuickAction href="/referrals" label="Create referral" description="Send a specialist or home-nurse recommendation." icon={SendHorizonal} />
-            <QuickAction href="/records" label="Review care plans" description="Review patient records, notes, and follow-up context." icon={FileText} />
+            <QuickAction href="/records" label="Review care plans" description="Review records, notes, and follow-up context." icon={FileText} />
           </div>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label={"Today's consultations"} value={todayAppointments.length} description="Appointments scheduled for today." icon={Stethoscope} />
-        <StatCard label="Pending consultations" value={pendingConsultations.length} description="Scheduled patient visits awaiting care-team action." icon={CalendarClock} />
+        <StatCard label="Today's consultations" value={todayAppointments.length} description="Appointments scheduled for today." icon={Stethoscope} />
+        <StatCard label="Pending consultations" value={pendingConsultations.length} description="Scheduled visits awaiting care-team action." icon={CalendarClock} />
         <StatCard label="Patient messages" value={countValue(threads)} description="Visible patient conversations." icon={MessageSquareText} />
-        <StatCard label="Referrals created" value={countValue(referrals)} description="Draft and sent referrals in your care panel." icon={ClipboardList} />
+        <StatCard label="Referrals created" value={countValue(referrals)} description="Draft and sent referrals in your clinical view." icon={ClipboardList} />
       </div>
 
       <AvailabilityControl
@@ -239,10 +238,10 @@ export function DoctorDashboardClient() {
       <ProviderWalletPanel role="doctor" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">{"Today's appointments"}</h2>
+              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Today&apos;s appointments</h2>
               <p className="mt-1 text-sm text-slate-500">Open a consultation for patient context and next actions.</p>
             </div>
             <Link className="text-sm font-semibold text-[#0F766E]" href="/appointments">
@@ -250,7 +249,7 @@ export function DoctorDashboardClient() {
             </Link>
           </div>
           {appointments.isLoading ? (
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading appointments...</div>
+            <div className="rounded-[20px] border border-slate-200 bg-[var(--surface-soft)] px-4 py-5 text-sm text-slate-600">Loading appointments...</div>
           ) : todayAppointments.length ? (
             <div className="grid gap-3">
               {todayAppointments.slice(0, 5).map((appointment) => (
@@ -262,7 +261,7 @@ export function DoctorDashboardClient() {
           )}
         </div>
 
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
               <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Recent patients</h2>
@@ -271,13 +270,13 @@ export function DoctorDashboardClient() {
             <UserRoundCheck className="h-5 w-5 text-[#0F766E]" />
           </div>
           {appointments.isLoading || referrals.isLoading ? (
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading patients...</div>
+            <div className="rounded-[20px] border border-slate-200 bg-[var(--surface-soft)] px-4 py-5 text-sm text-slate-600">Loading patients...</div>
           ) : recentPatientIds.length ? (
             <div className="grid gap-3">
               {recentPatientIds.map((patientId) => (
-                <div key={patientId} className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                <div key={patientId} className="rounded-[20px] border border-slate-200 bg-[var(--surface-soft)] px-4 py-4">
                   <p className="font-semibold text-[#1F2937]">Patient details</p>
-                  <p className="mt-1 text-sm text-slate-600">Open appointments, messages, or records for more context.</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Open appointments, messages, or records for more context.</p>
                 </div>
               ))}
             </div>
@@ -288,7 +287,7 @@ export function DoctorDashboardClient() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
               <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Patient messages</h2>
@@ -299,7 +298,7 @@ export function DoctorDashboardClient() {
             </Link>
           </div>
           {threads.isLoading ? (
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading messages...</div>
+            <div className="rounded-[20px] border border-slate-200 bg-[var(--surface-soft)] px-4 py-5 text-sm text-slate-600">Loading messages...</div>
           ) : threadItems.length ? (
             <div className="grid gap-3">
               {threadItems.slice(0, 4).map((thread) => (
@@ -311,7 +310,7 @@ export function DoctorDashboardClient() {
           )}
         </div>
 
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
               <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Referral notes</h2>
@@ -322,7 +321,7 @@ export function DoctorDashboardClient() {
             </Link>
           </div>
           {referrals.isLoading ? (
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading referrals...</div>
+            <div className="rounded-[20px] border border-slate-200 bg-[var(--surface-soft)] px-4 py-5 text-sm text-slate-600">Loading referrals...</div>
           ) : referralItems.length ? (
             <div className="grid gap-3">
               {referralItems.slice(0, 4).map((referral) => (

@@ -43,8 +43,8 @@ export function LoginForm() {
 
   return (
     <form className="grid gap-5" onSubmit={form.handleSubmit((values) => login.mutate(values))}>
-      <Notice title="Sign in" tone="neutral">
-        Use your email and password to continue.
+      <Notice title="Welcome back" tone="neutral">
+        Sign in to continue your care journey.
       </Notice>
       {login.error ? (
         <div className="grid gap-3">
@@ -65,7 +65,7 @@ export function LoginForm() {
       <Field label="Password" error={form.formState.errors.password?.message} required>
         <PasswordInput autoComplete="current-password" placeholder="Enter your password" {...form.register("password")} />
       </Field>
-      <Button type="submit" disabled={login.isPending}>
+      <Button type="submit" className="min-h-12 rounded-[14px] font-semibold" disabled={login.isPending}>
         {login.isPending ? "Signing in..." : "Sign in"}
       </Button>
       <div className="grid gap-3">
@@ -77,7 +77,7 @@ export function LoginForm() {
         <GoogleAuthButton mode="login" />
       </div>
       <div className="flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
-        <p>
+        <p className="font-medium">
           New here?{" "}
           <Link className="font-semibold text-[#2563EB]" href="/register">
             Create patient account

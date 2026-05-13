@@ -42,7 +42,7 @@ export function RegisterForm() {
 
   return (
     <div className="grid gap-5">
-      <Notice title="Create your patient account" tone="neutral">
+      <Notice title="Create your account" tone="neutral">
         Start with your email and we will send a 6-digit verification code.
       </Notice>
 
@@ -60,7 +60,7 @@ export function RegisterForm() {
             <Field label="Email" error={emailForm.formState.errors.email?.message} required>
               <Input type="email" autoComplete="email" placeholder="you@example.com" {...emailForm.register("email")} />
             </Field>
-            <Button type="submit" disabled={requestCode.isPending}>
+            <Button type="submit" className="min-h-12 rounded-[14px] font-semibold" disabled={requestCode.isPending}>
               {requestCode.isPending ? "Sending your code..." : "Continue"}
             </Button>
           </form>
@@ -97,7 +97,7 @@ export function RegisterForm() {
           <Field label="Password" error={form.formState.errors.password?.message} hint="Minimum 8 characters" required>
             <PasswordInput autoComplete="new-password" placeholder="Create a secure password" {...form.register("password")} />
           </Field>
-          <Button type="submit" disabled={register.isPending}>
+          <Button type="submit" className="min-h-12 rounded-[14px] font-semibold" disabled={register.isPending}>
             {register.isPending ? "Creating patient account..." : "Create patient account"}
           </Button>
         </form>

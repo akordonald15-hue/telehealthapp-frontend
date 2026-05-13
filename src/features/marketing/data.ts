@@ -6,39 +6,39 @@ import {
   HeartPulse,
   Home,
   MessageSquare,
-  type LucideIcon,
   ShieldCheck,
   Sparkles,
   UserRoundCheck,
+  type LucideIcon,
 } from "lucide-react";
 
 export const marketingNavItems = [
   { label: "Home", href: "#home" },
   { label: "Features", href: "#features" },
   { label: "Doctors", href: "#doctors" },
-  { label: "Home Care", href: "#how-it-works" },
+  { label: "Home Care", href: "#home-care" },
   { label: "Contact", href: "#contact" },
 ];
 
 export const trustItems: Array<{ title: string; text: string; icon: LucideIcon }> = [
   {
     title: "Secure consultations",
-    text: "Protected care conversations, verified access, and thoughtful follow-up.",
+    text: "Private conversations, verified access, and dependable follow-up.",
     icon: ShieldCheck,
   },
   {
     title: "Verified doctors",
-    text: "Trusted clinicians for general medical consultation and follow-up care.",
+    text: "Trusted clinicians for everyday medical guidance and follow-up care.",
     icon: UserRoundCheck,
   },
   {
     title: "Protected records",
-    text: "Medical files, notes, and referrals stay organized and easy to revisit.",
+    text: "Records, notes, and referrals stay organised and easy to revisit.",
     icon: FileText,
   },
   {
     title: "Home care ready",
-    text: "Telehealth and nurse-led visits can live in one connected care journey.",
+    text: "Telehealth and nurse visits stay connected in one care journey.",
     icon: Home,
   },
 ];
@@ -50,7 +50,7 @@ export const doctors = [
     qualification: "MBBS",
     experience: "Licensed for 2023/2024 practice",
     image: "/img/Dr michael Idam.jpg",
-    bio: "Supports women’s health, general consultation, and follow-up care.",
+    bio: "Supports women's health, general consultation, and follow-up care.",
   },
   {
     name: "Dr. Effiong Okon Etim",
@@ -66,7 +66,7 @@ export const doctors = [
     qualification: "MBBS",
     experience: "Multidisciplinary care",
     image: "/img/Dr Paul Chinonso.jpg",
-    bio: "Supports complex care needs across internal medicine, surgery, and women’s health.",
+    bio: "Supports complex care needs across internal medicine, surgery, and women's health.",
   },
   {
     name: "Dr. Moronu Ekene",
@@ -81,17 +81,17 @@ export const doctors = [
 export const features: Array<{ title: string; text: string; icon: LucideIcon }> = [
   {
     title: "Appointments",
-    text: "Book and manage consultations with clear status updates and reminders.",
+    text: "Book consultations and keep each step clear with status updates and reminders.",
     icon: CalendarDays,
   },
   {
     title: "Secure messaging",
-    text: "Continue care conversations with doctors in one calm consultation space.",
+    text: "Continue conversations with your doctor in one calm consultation space.",
     icon: MessageSquare,
   },
   {
     title: "Medical records",
-    text: "Keep notes and file uploads organized around each patient journey.",
+    text: "Keep notes and uploads organised around each patient journey.",
     icon: FileText,
   },
   {
@@ -106,12 +106,12 @@ export const features: Array<{ title: string; text: string; icon: LucideIcon }> 
   },
   {
     title: "Service checkout",
-    text: "Pay only inside booked consultation and homecare flows with secure Paystack checkout.",
+    text: "Pay inside booked consultation and home care flows with secure checkout.",
     icon: CreditCard,
   },
   {
     title: "Home care nurses",
-    text: "Coordinate accepted requests, pre-visit confirmation, travel, and care completion.",
+    text: "Coordinate requests, pre-visit confirmation, travel, and care completion.",
     icon: Home,
   },
   {
@@ -122,8 +122,8 @@ export const features: Array<{ title: string; text: string; icon: LucideIcon }> 
 ];
 
 export const heroStats = [
-  { value: "General care", label: "consult doctors for everyday health concerns" },
-  { value: "Home support", label: "request nurses for guided home-care visits" },
+  { value: "Doctors", label: "consult verified clinicians for everyday health concerns" },
+  { value: "Home care", label: "request trusted nurses for guided visits at home" },
   { value: "Follow-up", label: "keep records, referrals, and messages connected" },
 ];
 
@@ -131,7 +131,7 @@ export const howItWorksSteps = [
   {
     id: "01",
     title: "Create your patient account",
-    text: "Start with your details and begin a guided patient onboarding flow built around trust.",
+    text: "Start with your details and move into a guided onboarding flow built around trust.",
   },
   {
     id: "02",
@@ -153,5 +153,5 @@ export const howItWorksSteps = [
 export const footerLinks = [
   { label: "Features", href: "#features" },
   { label: "Doctors", href: "#doctors" },
-  { label: "Home Care", href: "#how-it-works" },
+  { label: "Home Care", href: "#home-care" },
 ];
