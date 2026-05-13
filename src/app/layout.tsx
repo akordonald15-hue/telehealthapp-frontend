@@ -3,6 +3,7 @@ import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/app/providers";
 import { BRAND_NAME } from "@/lib/brand";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,6 +35,7 @@ export default function RootLayout({
     <html lang="en" className={`h-full ${inter.variable} ${poppins.variable}`}>
       <body className="min-h-full bg-[#F9FAFB] text-[#1F2937] antialiased">
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );
