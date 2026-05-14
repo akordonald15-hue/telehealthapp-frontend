@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
 import { Input, PasswordInput } from "@/components/ui/input";
-import { Notice } from "@/components/ui/notice";
 import { GoogleAuthButton } from "@/features/auth/google-auth-button";
 import { authApi } from "@/lib/api/endpoints";
 import {
@@ -42,37 +41,30 @@ export function RegisterForm() {
 
   return (
     <div className="grid gap-5">
-      <Notice title="Create your patient account" tone="neutral">
-        Start with your email and we will send a 6-digit verification code.
-      </Notice>
+      <GoogleAuthButton mode="signup" />
+      <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+        <span className="h-px flex-1 bg-slate-200" />
+        <span>{isCompletingAccount ? "Finish creating your account" : "Or continue with email"}</span>
+        <span className="h-px flex-1 bg-slate-200" />
+      </div>
 
       {!isCompletingAccount ? (
-        <>
-          <form
-            className="grid gap-5"
-            onSubmit={emailForm.handleSubmit((values) =>
-              requestCode.mutate(values, {
-                onSuccess: () => router.replace(`/verify-email?email=${encodeURIComponent(values.email)}`),
-              }),
-            )}
-          >
-            <ErrorMessage error={requestCode.error} context="auth" />
-            <Field label="Email" error={emailForm.formState.errors.email?.message} required>
-              <Input type="email" autoComplete="email" placeholder="you@example.com" {...emailForm.register("email")} />
-            </Field>
-            <Button type="submit" disabled={requestCode.isPending}>
-              {requestCode.isPending ? "Sending your code..." : "Continue"}
-            </Button>
-          </form>
-          <div className="grid gap-3">
-            <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-              <span className="h-px flex-1 bg-slate-200" />
-              Or continue with
-              <span className="h-px flex-1 bg-slate-200" />
-            </div>
-            <GoogleAuthButton mode="signup" />
-          </div>
-        </>
+        <form
+          className="grid gap-5"
+          onSubmit={emailForm.handleSubmit((values) =>
+            requestCode.mutate(values, {
+              onSuccess: () => router.replace(`/verify-email?email=${encodeURIComponent(values.email)}`),
+            }),
+          )}
+        >
+          <ErrorMessage error={requestCode.error} context="auth" />
+          <Field label="Email" error={emailForm.formState.errors.email?.message} required>
+            <Input type="email" autoComplete="email" placeholder="you@example.com" {...emailForm.register("email")} />
+          </Field>
+          <Button type="submit" disabled={requestCode.isPending}>
+            {requestCode.isPending ? "Sending your code..." : "Create account"}
+          </Button>
+        </form>
       ) : null}
 
       {isCompletingAccount ? (
@@ -84,9 +76,6 @@ export function RegisterForm() {
             }),
           )}
         >
-          <Notice title="Email confirmed" tone="success">
-            Add your phone number and password to finish creating your account.
-          </Notice>
           <ErrorMessage error={register.error} context="auth" />
           <Field label="Email" error={form.formState.errors.email?.message} required>
             <Input type="email" autoComplete="email" placeholder="you@example.com" readOnly {...form.register("email")} />
@@ -98,19 +87,15 @@ export function RegisterForm() {
             <PasswordInput autoComplete="new-password" placeholder="Create a secure password" {...form.register("password")} />
           </Field>
           <Button type="submit" disabled={register.isPending}>
-            {register.isPending ? "Creating patient account..." : "Create patient account"}
+            {register.isPending ? "Creating your account..." : "Create account"}
           </Button>
         </form>
       ) : null}
 
-      <p className="text-xs leading-6 text-slate-500">
-        Doctors and nurses receive login details from Caretekk admin.
-      </p>
-
-      <p className="text-sm text-slate-600">
+      <p className="text-center text-sm text-slate-600">
         Already have an account?{" "}
         <Link className="font-semibold text-[#2563EB]" href="/login">
-          Sign in instead
+          Sign in
         </Link>
       </p>
     </div>

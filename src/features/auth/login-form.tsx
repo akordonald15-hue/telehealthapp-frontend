@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
 import { Input, PasswordInput } from "@/components/ui/input";
-import { Notice } from "@/components/ui/notice";
 import { GoogleAuthButton } from "@/features/auth/google-auth-button";
 import { useLogin } from "@/lib/auth/use-auth";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
@@ -43,9 +42,12 @@ export function LoginForm() {
 
   return (
     <form className="grid gap-5" onSubmit={form.handleSubmit((values) => login.mutate(values))}>
-      <Notice title="Sign in" tone="neutral">
-        Use your email and password to continue.
-      </Notice>
+      <GoogleAuthButton mode="login" />
+      <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+        <span className="h-px flex-1 bg-slate-200" />
+        <span>Or continue with email</span>
+        <span className="h-px flex-1 bg-slate-200" />
+      </div>
       {login.error ? (
         <div className="grid gap-3">
           <ErrorMessage error={login.error} context="auth" />
@@ -68,28 +70,17 @@ export function LoginForm() {
       <Button type="submit" disabled={login.isPending}>
         {login.isPending ? "Signing in..." : "Sign in"}
       </Button>
-      <div className="grid gap-3">
-        <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-          <span className="h-px flex-1 bg-slate-200" />
-          Or continue with
-          <span className="h-px flex-1 bg-slate-200" />
-        </div>
-        <GoogleAuthButton mode="login" />
-      </div>
-      <div className="flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-center gap-2 text-sm text-slate-600 sm:flex-row sm:justify-between">
         <p>
           New here?{" "}
           <Link className="font-semibold text-[#2563EB]" href="/register">
-            Create patient account
+            Create account
           </Link>
         </p>
         <Link className="font-semibold text-[#2563EB]" href="/password-reset">
-          Reset password
+          Forgot password
         </Link>
       </div>
-      <p className="text-xs leading-6 text-slate-500">
-        Doctors and nurses receive login details from Caretekk admin.
-      </p>
     </form>
   );
 }

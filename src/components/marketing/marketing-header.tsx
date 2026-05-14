@@ -11,24 +11,24 @@ export function MarketingHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/70 bg-white/85 backdrop-blur-xl">
-      <nav className="lf-shell flex min-h-[72px] items-center justify-between gap-4 sm:min-h-[76px] sm:gap-6" aria-label="Main navigation">
+    <header className="sticky top-0 z-50 border-b border-white/70 bg-white/82 backdrop-blur-xl">
+      <nav className="lf-shell flex min-h-[76px] items-center justify-between gap-4 sm:min-h-[82px] sm:gap-6" aria-label="Main navigation">
         <BrandLockup href="/" wordmark="image" wordmarkClassName="h-6 max-w-[152px] sm:h-7 sm:max-w-[176px]" />
 
         <div className="hidden items-center gap-6 lg:flex">
           {marketingNavItems.map((item) => (
-            <a key={item.label} href={item.href} className="rounded-[10px] text-sm font-bold text-[#475467] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15">
+            <a key={item.label} href={item.href} className="rounded-[10px] text-sm font-semibold text-[#475467] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15">
               {item.label}
             </a>
           ))}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Link href="/login" className="rounded-[10px] text-sm font-bold text-[#475467] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15">
+          <Link href="/login" className="rounded-[10px] text-sm font-semibold text-[#475467] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15">
             Sign in
           </Link>
           <Link href="/register" className="lf-btn lf-btn-primary min-h-[48px] px-5 text-sm">
-            Get started as a patient
+            Book consultation
           </Link>
         </div>
 
@@ -52,7 +52,7 @@ export function MarketingHeader() {
                 key={item.label}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-[12px] px-3 py-3 text-sm font-bold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
+                className="rounded-[12px] px-3 py-3 text-sm font-semibold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
               >
                 {item.label}
               </a>
@@ -60,12 +60,12 @@ export function MarketingHeader() {
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              className="rounded-[12px] px-3 py-3 text-sm font-bold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
+              className="rounded-[12px] px-3 py-3 text-sm font-semibold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
             >
               Sign in
             </Link>
             <Link href="/register" onClick={() => setOpen(false)} className="lf-btn lf-btn-primary text-sm">
-              Get started as a patient
+              Book consultation
             </Link>
           </div>
         </div>

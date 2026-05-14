@@ -130,10 +130,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const navigation = (
     <>
-      <div className="rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-4 shadow-[0_24px_64px_-44px_rgba(15,23,42,0.55)]">
+      <div className="rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-4 shadow-[0_24px_64px_-44px_rgba(15,23,42,0.32)]">
         <BrandLockup href="/" wordmark="image" wordmarkClassName="h-6 max-w-[150px]" />
-        <div className="mt-4 rounded-[18px] border border-[rgba(66,107,179,0.1)] bg-[var(--primary-soft)] px-4 py-3 text-sm text-slate-600">
-          <p className="font-semibold text-[#1F2937]">{workspaceTitle}</p>
+        <div className="mt-4 rounded-[18px] border border-[rgba(66,107,179,0.1)] bg-[linear-gradient(180deg,#F7FAFF_0%,#EDF3FF_100%)] px-4 py-3 text-sm text-slate-600">
+          <p className="ct-card-title text-[#1F2937]">{workspaceTitle}</p>
           <p className="mt-1 leading-6">{workspaceDescription}</p>
         </div>
       </div>
@@ -150,8 +150,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className={cn(
                 "group flex items-center gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15",
                 active
-                  ? "border-[rgba(66,107,179,0.18)] bg-[var(--primary-soft)] text-[var(--primary)] shadow-[0_20px_40px_-34px_rgba(66,107,179,0.38)]"
-                  : "border-transparent bg-white/75 text-slate-600 hover:border-slate-200 hover:bg-white hover:text-[#1F2937] hover:shadow-[0_18px_34px_-34px_rgba(15,23,42,0.45)]",
+                  ? "border-[rgba(66,107,179,0.18)] bg-[var(--primary-soft)] text-[var(--primary)] shadow-[0_18px_34px_-30px_rgba(66,107,179,0.28)]"
+                  : "border-transparent bg-white/70 text-slate-600 hover:border-slate-200 hover:bg-white hover:text-[#1F2937] hover:shadow-[0_14px_30px_-30px_rgba(15,23,42,0.24)]",
               )}
             >
               <span
@@ -168,7 +168,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <div className="mt-5 rounded-[24px] border border-white/70 bg-white p-4 shadow-[0_22px_58px_-42px_rgba(15,23,42,0.5)]">
+      <div className="mt-5 rounded-[24px] border border-white/70 bg-white p-4 shadow-[0_22px_58px_-42px_rgba(15,23,42,0.28)]">
         {user ? (
           <div>
             <p className="truncate text-sm font-semibold text-[#1F2937]">{user.email}</p>
@@ -192,7 +192,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(112,152,212,0.16),_transparent_28%),linear-gradient(180deg,#F5F9FF_0%,#F7FAFE_38%,#FFFFFF_100%)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.15),_transparent_28%),linear-gradient(180deg,#F5F8FC_0%,#F7FAFE_40%,#FFFFFF_100%)]">
       <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
         <aside className="hidden w-[290px] shrink-0 px-5 py-6 lg:block xl:px-6">
           <div className="sticky top-6">{navigation}</div>
@@ -233,7 +233,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </button>
                 <div className="min-w-0">
                   <BrandLockup href="/" wordmark="image" wordmarkClassName="h-5 max-w-[132px] sm:h-6 sm:max-w-[150px]" />
-                  <h1 className="mt-1 truncate font-heading text-lg font-semibold text-[#1F2937] sm:text-xl">{activeLabel}</h1>
+                  <h1 className="mt-1 truncate font-heading text-lg font-semibold tracking-[-0.025em] text-[#1F2937] sm:text-xl">{activeLabel}</h1>
                 </div>
               </div>
               <div className="flex items-center gap-3">
