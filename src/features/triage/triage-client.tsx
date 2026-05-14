@@ -362,7 +362,7 @@ export function TriageClient() {
         </div>
       ) : assistantOpen ? (
         <div className="fixed inset-0 z-40 overflow-y-auto bg-[linear-gradient(180deg,rgba(15,23,42,0.26),rgba(15,23,42,0.38))] backdrop-blur-sm">
-          <div className="mx-auto flex min-h-full w-full max-w-6xl items-start justify-center px-3 py-4 sm:px-6 sm:py-6">
+          <div className="mx-auto flex min-h-full w-full max-w-6xl items-start justify-center px-2 py-3 sm:px-6 sm:py-6">
             <div className="ct-surface grid w-full min-w-0 max-w-5xl gap-4 rounded-[26px] p-3 sm:rounded-[34px] sm:p-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.85fr)]">
               <div className="ct-panel grid min-w-0 gap-4 rounded-[22px] p-4 sm:rounded-[28px] sm:p-6">
                 <div className="flex items-start gap-3">
@@ -425,14 +425,14 @@ export function TriageClient() {
 
                 {waitingForSymptomText ? (
                   <form className="grid gap-3" onSubmit={handleSymptomSubmit}>
-                    <div className="relative">
+                    <div className="grid gap-3">
                       <textarea
                         value={symptomText}
                         onChange={(event) => setSymptomText(event.target.value)}
                         placeholder="Describe what you are feeling in your own words"
-                        className="min-h-32 w-full rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 text-sm text-[#1F2937] outline-none transition shadow-[0_6px_20px_rgba(31,41,55,0.03)] placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 sm:pr-28"
+                        className="min-h-32 w-full rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 text-sm text-[#1F2937] outline-none transition shadow-[0_6px_20px_rgba(31,41,55,0.03)] placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                       />
-                      <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
                         <button
                           type="button"
                           disabled
@@ -442,7 +442,7 @@ export function TriageClient() {
                         >
                           <Mic className="h-4 w-4" />
                         </button>
-                        <Button type="submit" disabled={!canSubmitSymptomText} className="min-h-10 rounded-full px-4">
+                        <Button type="submit" disabled={!canSubmitSymptomText} className="min-h-10 w-full rounded-full px-4 sm:w-auto">
                           <SendHorizonal className="mr-2 h-4 w-4" />
                           Continue
                         </Button>
@@ -452,13 +452,13 @@ export function TriageClient() {
                 ) : null}
 
                 {waitingForSeverity ? (
-                  <div className="flex flex-wrap gap-3">
+                  <div className="grid gap-3 sm:flex sm:flex-wrap">
                     {severityOptions.map((option) => (
                       <button
                         key={option.value}
                         type="button"
                         onClick={() => handleSeveritySelect(option.value)}
-                        className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#D1D5DB] bg-white px-5 text-sm font-bold text-[#1F2937] transition hover:border-[#93C5FD] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                        className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-[#D1D5DB] bg-white px-5 text-sm font-bold text-[#1F2937] transition hover:border-[#93C5FD] hover:bg-[#EFF6FF] hover:text-[#2563EB] sm:w-auto"
                       >
                         {option.label}
                       </button>
@@ -467,11 +467,11 @@ export function TriageClient() {
                 ) : null}
               </div>
 
-              <div className="ct-panel grid min-w-0 gap-4 rounded-[22px] p-4 sm:rounded-[28px] sm:p-6">
-                <div>
-                  <p className="ct-card-title text-[#1F2937]">Your guidance</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">We&apos;ll summarize what you shared and guide you to the right next step.</p>
-                </div>
+            <div className="ct-panel grid min-w-0 gap-4 rounded-[22px] p-4 sm:rounded-[28px] sm:p-6">
+              <div>
+                <p className="ct-card-title text-[#1F2937]">Your guidance</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">Your care summary will appear here.</p>
+              </div>
 
                 {finishedResult && resultData ? (
                   <div className="grid gap-4">
@@ -502,13 +502,13 @@ export function TriageClient() {
                     <div className="ct-soft-panel rounded-[20px] p-4">
                       <p className="text-sm font-semibold text-[#1F2937]">Summary</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
-                        Tell us what you are feeling and we&apos;ll prepare a concise summary for your doctor.
+                        Tell us how you feel and we&apos;ll prepare a summary.
                       </p>
                     </div>
                     <div className="ct-soft-panel rounded-[20px] p-4">
                       <p className="text-sm font-semibold text-[#1F2937]">Recommended action</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
-                        We&apos;ll quickly review your symptoms, flag urgency where needed, and guide you toward the right next step.
+                        We&apos;ll guide you to the next step.
                       </p>
                     </div>
                   </div>

@@ -46,9 +46,7 @@ export function ReferralsClient({ mode = "referrals" }: { mode?: "referrals" | "
 
   const patientView = mode === "care-plan" || userQuery.data?.role === "patient";
   const sectionTitle = patientView ? "Care Plan" : "Referrals";
-  const sectionDescription = patientView
-    ? "Review doctor notes, care instructions, specialist follow-up, and the next steps in your treatment journey."
-    : "Create and review referrals for the care journeys you support.";
+  const sectionDescription = patientView ? undefined : "Create and review referrals for the care journeys you support.";
 
   return (
     <Section title={sectionTitle} description={sectionDescription}>
@@ -86,11 +84,7 @@ export function ReferralsClient({ mode = "referrals" }: { mode?: "referrals" | "
             {createReferral.isPending ? "Creating..." : "Create referral"}
           </Button>
         </form>
-      ) : patientView ? (
-        <Notice title="Your doctor&apos;s next steps will appear here" tone="neutral">
-          This space brings together care instructions, follow-up referrals, and any specialist guidance shared after your consultation.
-        </Notice>
-      ) : (
+      ) : patientView ? null : (
         <Notice title="Referral creation is limited to care teams" tone="neutral">Only the care team members who manage referrals can create them here.</Notice>
       )}
 
@@ -100,14 +94,14 @@ export function ReferralsClient({ mode = "referrals" }: { mode?: "referrals" | "
         error={referrals.error}
         errorContext="referrals"
         loadingLabel="Loading your referrals..."
-        emptyTitle={patientView ? "No care plan yet" : "No referrals yet"}
-        empty={patientView ? "Doctor notes, instructions, and follow-up referrals will appear here when they are ready." : "Your referrals will appear here when they are available."}
+        emptyTitle={patientView ? "No care plan yet." : "No referrals yet"}
+        empty={patientView ? "" : "Your referrals will appear here when they are available."}
         renderItem={(referral) => (
           <article key={referral.id} className="ct-surface rounded-[24px] p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <p className="font-heading text-xl font-semibold text-[#1F2937]">{patientView ? "Specialist follow-up" : referral.referred_to}</p>
-                <p className="mt-2 text-sm text-slate-600">{referralSummary(userQuery.data?.role)}</p>
+                <p className="font-heading text-xl font-semibold text-[#1F2937]">{patientView ? "Care update" : referral.referred_to}</p>
+                {!patientView ? <p className="mt-2 text-sm text-slate-600">{referralSummary(userQuery.data?.role)}</p> : null}
                 {referral.notes ? <p className="mt-3 text-sm leading-7 text-slate-600">{referral.notes}</p> : null}
               </div>
               <StatusBadge value={referral.status} />

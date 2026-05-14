@@ -24,7 +24,7 @@ export function HomeCareRequestsClient() {
 
   if (userQuery.data?.role !== "patient") {
     return (
-      <Section title="My homecare requests" description="Homecare requests are available for patient accounts.">
+      <Section title="Home Care" description="Home care is available for patient accounts.">
         <Notice title="This view is not available for your account." tone="warning" />
       </Section>
     );
@@ -34,11 +34,10 @@ export function HomeCareRequestsClient() {
 
   return (
     <Section
-      title="My homecare requests"
-      description="Track home nurse booking, assignment, travel, completion, confirmation, and rating from one place."
+      title="Home Care"
       action={
         <Link href="/home-care/book" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[var(--primary)] px-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5">
-          Book home nurse
+          Request Home Care
         </Link>
       }
     >
@@ -114,11 +113,11 @@ export function HomeCareRequestsClient() {
       ) : (
         <EmptyState
           icon={Home}
-          title="No homecare requests yet"
-          description="Book a home nurse when you need coordinated care at home."
+          title="No home care yet."
+          description=""
           action={
             <Link href="/home-care/book" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[var(--primary)] px-4 text-sm font-extrabold text-white">
-              Book home nurse
+              Request Home Care
             </Link>
           }
         />

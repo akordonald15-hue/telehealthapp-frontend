@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, CalendarClock, CreditCard, FileText, MessageSquareText, Sparkles } from "lucide-react";
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
@@ -105,16 +104,16 @@ export function DashboardClient() {
   const patientHasCarePlan = typeof referralMetric === "number" && referralMetric > 0;
   const nextPatientStep = patientHasConsultation
     ? {
-        title: "Continue your consultation",
-        description: "Your conversation space is ready for updates, questions, and follow-up from your doctor.",
+        title: "Guided Journey",
+        description: "Your consultation is ready.",
         href: "/messages",
-        cta: "Open consultation",
+        cta: "Open Consultation",
       }
     : {
-        title: "Start your care check-in",
-        description: "Share your symptoms first so we can guide you toward the right doctor and the right next step.",
+        title: "Guided Journey",
+        description: "Start with a quick care check-in.",
         href: "/triage",
-        cta: "Start triage",
+        cta: "Start Care Check-in",
       };
   const dashboardErrors = [
     appointments.isError ? `Appointments: ${getFriendlyErrorMessage(appointments.error, "dashboard")}` : null,
@@ -125,62 +124,28 @@ export function DashboardClient() {
 
   return (
     <Section
-      title={user?.role === "patient" ? "Your care journey" : "Dashboard"}
+      title={user?.role === "patient" ? "Your Care Journey" : "Dashboard"}
       description={
         user?.role === "patient"
-          ? "Move from care check-in to consultation and follow-up with clear next steps at every stage."
+          ? ""
           : "A simple view of your appointments, conversations, billing history, and next steps."
-      }
-      action={
-        user ? (
-          <div className="flex items-center gap-2">
-            <Badge tone="green">{user.role}</Badge>
-          </div>
-        ) : null
       }
     >
       {user?.role === "patient" ? (
         <>
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-            <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.48)] sm:p-8">
-              <p className="ct-caption text-blue-100">Guided care journey</p>
-              <h2 className="ct-dashboard-title mt-4 text-white sm:text-[2.3rem]">{nextPatientStep.title}</h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">{nextPatientStep.description}</p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link href={nextPatientStep.href} className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[#2563EB] shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5">
-                  {nextPatientStep.cta}
-                </Link>
-                <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-white/25 bg-white/10 px-5 text-sm font-extrabold text-white transition hover:bg-white/16">
-                  Review appointments
-                </Link>
-              </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.42)]">
+              <p className="ct-caption text-blue-100">Guided Journey</p>
+              <h2 className="ct-card-title mt-4 text-white">{nextPatientStep.description}</h2>
             </div>
-
-            <div className="ct-panel rounded-[28px] p-6">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-emerald-50 text-[#10B981]">
-                  <Sparkles className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="ct-card-title text-[#1F2937]">What happens next</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Follow the same care path each time, with a clear next action.</p>
-                </div>
-              </div>
-              <div className="mt-6 grid gap-3 text-sm text-slate-600">
-                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
-                  <p className="font-semibold text-[#1F2937]">1. Care check-in</p>
-                  <p className="mt-1 leading-6">Share your symptoms so your doctor gets the right context before the conversation starts.</p>
-                </div>
-                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
-                  <p className="font-semibold text-[#1F2937]">2. Doctor match</p>
-                  <p className="mt-1 leading-6">We guide you toward the doctor best placed to help with your concern.</p>
-                </div>
-                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
-                  <p className="font-semibold text-[#1F2937]">3. Consultation and care plan</p>
-                  <p className="mt-1 leading-6">Continue the conversation, review your doctor&apos;s notes, and keep follow-up care close.</p>
-                </div>
-              </div>
-            </div>
+            <Link href="/triage" className="ct-surface rounded-[24px] p-5">
+              <p className="ct-caption text-[var(--primary)]">Start Care Check-in</p>
+              <p className="mt-4 text-sm font-semibold text-[#1F2937]">Begin your check-in.</p>
+            </Link>
+            <Link href={patientHasConsultation ? "/messages" : "/appointments"} className="ct-surface rounded-[24px] p-5">
+              <p className="ct-caption text-[var(--primary)]">Review</p>
+              <p className="mt-4 text-sm font-semibold text-[#1F2937]">{patientHasConsultation ? "Open consultation." : "Review appointments."}</p>
+            </Link>
           </div>
 
           {dashboardErrors.length ? (
@@ -200,22 +165,22 @@ export function DashboardClient() {
 
           <div className="grid gap-4 md:grid-cols-3">
             <div className="ct-surface rounded-[24px] p-5">
-              <p className="text-sm font-semibold text-slate-500">Care check-in</p>
+              <p className="text-sm font-semibold text-slate-500">Care Check-in</p>
               <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Done" : "Next"}</p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">Start with symptoms and a short guided review before your consultation.</p>
-              <Link href="/triage" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open care check-in <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Start with a quick check-in.</p>
+              <Link href="/triage" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
             </div>
             <div className="ct-surface rounded-[24px] p-5">
               <p className="text-sm font-semibold text-slate-500">Consultation</p>
               <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Ready" : "Waiting"}</p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">Your matched doctor and conversation space will guide the next clinical step.</p>
-              <Link href="/messages" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open consultation <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Open your secure consultation.</p>
+              <Link href="/messages" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
             </div>
             <div className="ct-surface rounded-[24px] p-5">
               <p className="text-sm font-semibold text-slate-500">Care plan</p>
               <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasCarePlan ? "Available" : "Coming next"}</p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">Doctor notes, instructions, referrals, and next steps come together in one follow-up view.</p>
-              <Link href="/care-plan" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open care plan <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-3 text-sm leading-6 text-slate-600">See your latest care updates.</p>
+              <Link href="/care-plan" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </div>
 
@@ -300,7 +265,7 @@ export function DashboardClient() {
                   <h2 className="ct-card-title text-[#1F2937]">Next appointments</h2>
                   <p className="mt-1 text-sm text-slate-500">Your upcoming visits at a glance.</p>
                 </div>
-                {user ? <Badge tone="green">{user.role}</Badge> : null}
+                {user ? <span className="text-sm font-medium text-slate-500">{user.email}</span> : null}
               </div>
               <div className="grid gap-3">
                 {appointments.isLoading ? (

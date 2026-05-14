@@ -36,12 +36,11 @@ type NavItem = {
 };
 
 const navItems: readonly NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", patientLabel: "Journey", icon: LayoutDashboard, roles: ["patient", "doctor", "admin", "nurse"] },
-  { href: "/triage", label: "Care check-in", patientLabel: "Start Triage", icon: HeartPulse, roles: ["patient"] },
+  { href: "/dashboard", label: "Dashboard", patientLabel: "Your Care Journey", icon: LayoutDashboard, roles: ["patient", "doctor", "admin", "nurse"] },
+  { href: "/triage", label: "Care check-in", patientLabel: "Care Check-in", icon: HeartPulse, roles: ["patient"] },
   { href: "/messages", label: "Messages", patientLabel: "Consultation", adminLabel: "Communications", icon: MessageSquare, roles: ["patient", "doctor", "admin"] },
   { href: "/care-plan", label: "Care Plan", patientLabel: "Care Plan", icon: ClipboardList, roles: ["patient"] },
-  { href: "/home-care/book", label: "Book Nurse", patientLabel: "Book Nurse", icon: Home, roles: ["patient"] },
-  { href: "/home-care/requests", label: "Home Care", patientLabel: "Home Care", icon: ClipboardList, roles: ["patient"] },
+  { href: "/home-care/book", label: "Home Care", patientLabel: "Home Care", icon: Home, roles: ["patient"] },
   { href: "/appointments", label: "Appointments", doctorLabel: "Consultations", adminLabel: "Bookings", icon: CalendarDays, roles: ["patient", "doctor", "admin"] },
   { href: "/nurse/requests", label: "Requests", icon: ClipboardList, roles: ["nurse"] },
   { href: "/nurse/history", label: "History", icon: FileText, roles: ["nurse"] },
@@ -100,7 +99,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       "/messages",
       "/care-plan",
       "/home-care/book",
-      "/home-care/requests",
       "/appointments",
       "/records",
       "/profile",
@@ -133,8 +131,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-4 shadow-[0_24px_64px_-44px_rgba(15,23,42,0.32)]">
         <BrandLockup href="/" wordmark="image" wordmarkClassName="h-6 max-w-[150px]" />
         <div className="mt-4 rounded-[18px] border border-[rgba(66,107,179,0.1)] bg-[linear-gradient(180deg,#F7FAFF_0%,#EDF3FF_100%)] px-4 py-3 text-sm text-slate-600">
-          <p className="ct-card-title text-[#1F2937]">{workspaceTitle}</p>
-          <p className="mt-1 leading-6">{workspaceDescription}</p>
+          <p className="ct-card-title text-[#1F2937]">{user?.full_name || workspaceTitle}</p>
+          <p className="mt-1 leading-6">{user?.email || workspaceDescription}</p>
         </div>
       </div>
 
@@ -171,11 +169,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="mt-5 rounded-[24px] border border-white/70 bg-white p-4 shadow-[0_22px_58px_-42px_rgba(15,23,42,0.28)]">
         {user ? (
           <div>
-            <p className="truncate text-sm font-semibold text-[#1F2937]">{user.email}</p>
-            <div className="mt-3 flex items-center gap-2">
-              <Badge tone={roleTone(user.role)}>{user.role}</Badge>
-              <span className="text-xs text-slate-500">Personalized for your account</span>
-            </div>
+            <p className="truncate text-sm font-semibold text-[#1F2937]">{user.full_name || "Caretekk user"}</p>
+            <p className="mt-1 truncate text-xs text-slate-500">{user.email}</p>
           </div>
         ) : null}
         <Button
@@ -238,16 +233,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
               <div className="flex items-center gap-3">
                 <div className="hidden text-right md:block">
-                  <p className="text-sm font-semibold text-[#1F2937]">
-                    {user?.role === "nurse"
-                      ? "Care visits, all in one place"
-                      : user?.role === "doctor"
-                        ? "Patient care, all in one place"
-                        : "Your care, all in one place"}
-                  </p>
-                  <p className="text-xs text-slate-500">Signed in securely</p>
+                  <p className="text-sm font-semibold text-[#1F2937]">{user?.full_name || "Caretekk user"}</p>
+                  <p className="text-xs text-slate-500">{user?.email || "Signed in securely"}</p>
                 </div>
-                {user ? <Badge tone={roleTone(user.role)}>{user.role}</Badge> : null}
+                {user ? <Badge tone={roleTone(user.role)}>{user.full_name?.[0] || "C"}</Badge> : null}
               </div>
             </div>
           </header>

@@ -41,7 +41,7 @@ export function ProfileClient() {
   const isNurse = user?.role === "nurse";
 
   return (
-    <Section title="Profile" description="Keep your Caretekk account and care details up to date.">
+    <Section title="Profile">
       <div className="grid gap-4 lg:grid-cols-2">
         <form className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6" onSubmit={(event) => {
           event.preventDefault();
@@ -49,15 +49,15 @@ export function ProfileClient() {
         }}>
           <div>
             <h2 className="ct-card-title text-[#1F2937]">Account details</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">Your sign-in email and contact number.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">Your account information.</p>
           </div>
           <ErrorMessage error={updateUser.error} context="profile" />
           {updateUser.isSuccess ? <Notice title="Details saved" tone="success" /> : null}
+          <Field label="Full Name">
+            <Input value={user?.full_name || ""} disabled />
+          </Field>
           <Field label="Email">
             <Input value={user?.email || ""} disabled />
-          </Field>
-          <Field label="Role">
-            <Input value={user?.role || ""} disabled />
           </Field>
           <Field label="Phone">
             <Input value={phone} onChange={(event) => setPhoneDraft(event.target.value)} />
@@ -73,7 +73,7 @@ export function ProfileClient() {
         }}>
           <div>
             <h2 className="ct-card-title text-[#1F2937]">Profile information</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">Details used to support your Caretekk experience.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">Keep your details up to date.</p>
           </div>
           <ErrorMessage error={updateProfile.error} context="profile" />
           {updateProfile.isSuccess ? <Notice title="Profile saved" tone="success" /> : null}

@@ -19,7 +19,7 @@ export function EmptyState({ title, description, icon: Icon, action }: EmptyStat
           ) : null}
           <div>
             <h3 className="ct-card-title text-[#1F2937]">{title}</h3>
-            <p className="mt-2 max-w-2xl text-sm leading-7 text-[#667085]">{description}</p>
+            {description ? <p className="mt-2 max-w-2xl text-sm leading-7 text-[#667085]">{description}</p> : null}
           </div>
         </div>
         {action ? <div className="sm:pl-4">{action}</div> : null}

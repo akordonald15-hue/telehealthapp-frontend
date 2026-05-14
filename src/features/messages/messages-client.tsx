@@ -17,7 +17,6 @@ import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "re
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { messagingApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
@@ -105,10 +104,7 @@ export function MessagesClient() {
 
   const activeThreadDetails = threadItems.find((thread) => thread.id === activeThread) ?? null;
   const sectionTitle = currentUser?.role === "patient" ? "Consultation" : "Messages";
-  const sectionDescription =
-    currentUser?.role === "patient"
-      ? "Chat with your doctor and care team in one calm, secure place."
-      : "Keep patient conversations clear, timely, and easy to follow.";
+  const sectionDescription = "Secure care consultation.";
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
@@ -226,12 +222,6 @@ export function MessagesClient() {
 
   return (
     <Section title={sectionTitle} description={sectionDescription}>
-      {currentUser?.role === "patient" ? (
-        <Notice title="Your care conversation" tone="neutral">
-          Your consultation will appear here once your doctor or care team is ready to respond.
-        </Notice>
-      ) : null}
-
       <div className="overflow-hidden rounded-[32px] border border-white/80 bg-white shadow-[0_28px_80px_-48px_rgba(15,23,42,0.32)]">
         <div className="grid min-h-[calc(100vh-15rem)] bg-[#F8FAFC] lg:grid-cols-[22rem_minmax(0,1fr)]">
           <aside
@@ -241,7 +231,6 @@ export function MessagesClient() {
             )}
           >
             <ConsultationListHeader
-              role={currentUser?.role}
               search={search}
               onSearchChange={setSearch}
             />
@@ -295,8 +284,8 @@ export function MessagesClient() {
               {!activeThread ? (
                 <div className="flex min-h-full items-center justify-center">
                   <EmptyState
-                    title="Choose a consultation"
-                    description="Select a consultation to continue the conversation with your care team."
+                    title="No consultation yet."
+                    description=""
                   />
                 </div>
               ) : messages.isLoading ? (
@@ -316,8 +305,8 @@ export function MessagesClient() {
               ) : (
                 <div className="flex min-h-full items-center justify-center">
                   <EmptyState
-                    title="This consultation is ready"
-                    description="Send a message when you want to share an update or ask your care team a question."
+                    title="No consultation yet."
+                    description=""
                   />
                 </div>
               )}
@@ -349,11 +338,9 @@ export function MessagesClient() {
 }
 
 function ConsultationListHeader({
-  role,
   search,
   onSearchChange,
 }: {
-  role?: string;
   search: string;
   onSearchChange: (value: string) => void;
 }) {
@@ -362,10 +349,7 @@ function ConsultationListHeader({
       <div className="flex items-center gap-3">
         <Avatar label="CT" tone="blue" />
         <div>
-          <p className="ct-card-title text-[#1F2937]">
-            {role === "patient" ? "Consultations" : "Conversations"}
-          </p>
-          <p className="text-sm text-slate-500">Secure care conversations</p>
+          <p className="ct-card-title text-[#1F2937]">Consultation</p>
         </div>
       </div>
 
@@ -451,11 +435,11 @@ function ConsultationHeader({
         <Avatar label={role === "patient" ? "Dr" : "Pt"} tone="blue" size="lg" />
         <div className="min-w-0">
           <h2 className="truncate font-heading text-lg font-semibold text-[#1F2937]">
-            {thread ? conversationTitle(role) : "Choose a consultation"}
+            {thread ? conversationTitle(role) : "Consultation"}
           </h2>
           <p className="mt-0.5 flex items-center gap-2 text-sm text-slate-500">
             <span className="h-2 w-2 rounded-full bg-[#10B981]" />
-            {thread ? (role === "patient" ? "Doctor consultation" : "Care conversation") : "Ready when you are"}
+            {thread ? "Secure care consultation." : "Secure care consultation."}
           </p>
         </div>
       </div>
@@ -597,7 +581,7 @@ function ChatComposer({
       </div>
       <p className="mt-2 flex items-center gap-2 px-2 text-xs text-slate-500">
         <ImageIcon className="h-3.5 w-3.5" />
-        Add photos or documents from your device.
+        Add file from device.
       </p>
     </form>
   );

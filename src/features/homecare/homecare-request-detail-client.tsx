@@ -118,7 +118,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
 
   if (userQuery.data?.role !== "patient") {
     return (
-      <Section title="Homecare request" description="Homecare request details are available for patient accounts.">
+      <Section title="Home Care">
         <Notice title="This view is not available for your account." tone="warning" />
       </Section>
     );
@@ -130,8 +130,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
 
   return (
     <Section
-      title={request ? request.contact_name_snapshot || "Homecare request" : "Homecare request"}
-      description="Review the assigned nurse, visit status, care timeline, completion confirmation, and rating."
+      title={request ? request.contact_name_snapshot || "Home Care" : "Home Care"}
       action={<Link href="/home-care/requests" className="text-sm font-semibold text-[var(--primary)]">Back to requests</Link>}
     >
       {requestQuery.isError ? (
@@ -153,7 +152,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <Info label="Assigned nurse" value={nurse ? nurse.user_email : "Waiting for assignment"} />
-                <Info label="Nurse license" value={nurse?.license_no || "Not assigned yet"} />
+                <Info label="Nurse details" value={nurse?.license_no || "Not assigned yet"} />
                 <Info label="Preferred time" value={preferredTimeLabel(request)} />
                 <Info label="Last update" value={formatDateTime(request.updated_at)} />
               </div>
@@ -165,11 +164,11 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               </div>
 
               <div className="mt-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
-                <p className="text-sm font-semibold text-[#1F2937]">Care notes</p>
+                <p className="text-sm font-semibold text-[#1F2937]">Notes</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{request.care_notes || "No care notes were added."}</p>
                 {notesFromReferral ? (
                   <p className="mt-3 text-sm leading-6 text-slate-600">
-                    <span className="font-semibold text-[#1F2937]">Doctor referral notes: </span>
+                    <span className="font-semibold text-[#1F2937]">Doctor notes: </span>
                     {notesFromReferral}
                   </p>
                 ) : null}
@@ -207,8 +206,8 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               title="Cancel request"
               description={
                 canCancelHomeCare(request.status)
-                  ? "You can cancel before the nurse is in transit or care has started."
-                  : "Cancellation is no longer available for this request status."
+                  ? "Cancel this request if your plans change."
+                  : "Cancellation is not available right now."
               }
             >
               {cancelMutation.error ? (
@@ -237,8 +236,8 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               title="Confirm completion"
               description={
                 canConfirmHomeCare(request.status)
-                  ? "Confirm only after the nurse has completed care."
-                  : "Confirmation becomes available after the nurse completes care."
+                  ? "Confirm when care is complete."
+                  : "This will be available after care is complete."
               }
             >
               {confirmMutation.error ? (
@@ -256,8 +255,8 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               title="Rate nurse"
               description={
                 canRateHomeCare(request.status)
-                  ? "Share feedback after confirming completion."
-                  : "Rating becomes available after completion is confirmed."
+                  ? "Share your feedback."
+                  : "Rating will be available after completion is confirmed."
               }
             >
               {ratingMutation.error ? (
@@ -317,7 +316,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
                   ))}
                 </div>
               ) : (
-                <EmptyState title="No activity yet" description="Status updates will appear here as the request moves forward." />
+                <EmptyState title="No activity yet." description="" />
               )}
             </div>
 
@@ -328,7 +327,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
                 </span>
                 <div>
                   <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Travel updates</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Location points appear when the nurse shares travel progress.</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Location updates appear here.</p>
                 </div>
               </div>
               {trackingQuery.isLoading ? (
@@ -346,7 +345,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
                   ))}
                 </div>
               ) : (
-                <EmptyState title="No travel updates yet" description="Travel tracking starts after the nurse begins the trip." />
+                <EmptyState title="No travel updates yet." description="" />
               )}
             </div>
           </div>
