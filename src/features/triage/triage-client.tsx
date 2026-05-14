@@ -144,13 +144,13 @@ function ResultPanel({
   children: ReactNode;
 }) {
   return (
-    <div className="min-w-0 rounded-[22px] border border-slate-200 bg-slate-50 p-4">
+    <div className="ct-soft-panel min-w-0 rounded-[22px] p-4">
       <div className="flex items-start gap-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white text-[#2563EB] shadow-sm">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0 break-words">
-          <p className="font-semibold text-[#1F2937]">{title}</p>
+          <p className="ct-card-title text-[1rem] text-[#1F2937]">{title}</p>
           <div className="mt-2 text-sm leading-7 text-slate-600">{children}</div>
         </div>
       </div>
@@ -354,7 +354,7 @@ export function TriageClient() {
   return (
     <Section title="Care check-in" description={pageDescription}>
       {!consultationsReady ? (
-        <div className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel grid gap-4 rounded-[28px] p-6">
           <div className="flex items-center gap-3 text-slate-600">
             <LoaderCircle className="h-5 w-5 animate-spin text-[#2563EB]" />
             <p className="text-sm font-medium">Preparing your care check-in...</p>
@@ -363,14 +363,14 @@ export function TriageClient() {
       ) : assistantOpen ? (
         <div className="fixed inset-0 z-40 overflow-y-auto bg-[linear-gradient(180deg,rgba(15,23,42,0.26),rgba(15,23,42,0.38))] backdrop-blur-sm">
           <div className="mx-auto flex min-h-full w-full max-w-6xl items-start justify-center px-3 py-4 sm:px-6 sm:py-6">
-            <div className="grid w-full min-w-0 max-w-5xl gap-4 rounded-[26px] border border-white/60 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_100%)] p-3 shadow-[0_35px_90px_-38px_rgba(15,23,42,0.5)] sm:rounded-[34px] sm:p-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.85fr)]">
-              <div className="grid min-w-0 gap-4 rounded-[22px] border border-white/70 bg-white p-4 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.22)] sm:rounded-[28px] sm:p-6">
+            <div className="ct-surface grid w-full min-w-0 max-w-5xl gap-4 rounded-[26px] p-3 sm:rounded-[34px] sm:p-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.85fr)]">
+              <div className="ct-panel grid min-w-0 gap-4 rounded-[22px] p-4 sm:rounded-[28px] sm:p-6">
                 <div className="flex items-start gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
                     <BrainCircuit className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="font-heading text-xl font-semibold text-[#1F2937]">Caretekk Assistant</p>
+                    <p className="ct-card-title text-[#1F2937]">Caretekk Assistant</p>
                     <p className="mt-1 text-sm leading-6 text-slate-600">A quick, guided intake before we connect you with care.</p>
                   </div>
                 </div>
@@ -412,7 +412,7 @@ export function TriageClient() {
                 </div>
 
                 {booting ? (
-                  <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+                  <div className="ct-soft-panel rounded-[18px] px-4 py-4 text-sm text-slate-600">
                     Preparing your care check-in...
                   </div>
                 ) : null}
@@ -467,17 +467,17 @@ export function TriageClient() {
                 ) : null}
               </div>
 
-              <div className="grid min-w-0 gap-4 rounded-[22px] border border-white/70 bg-white p-4 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.22)] sm:rounded-[28px] sm:p-6">
+              <div className="ct-panel grid min-w-0 gap-4 rounded-[22px] p-4 sm:rounded-[28px] sm:p-6">
                 <div>
-                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Your guidance</p>
+                  <p className="ct-card-title text-[#1F2937]">Your guidance</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">We&apos;ll summarize what you shared and guide you to the right next step.</p>
                 </div>
 
                 {finishedResult && resultData ? (
                   <div className="grid gap-4">
                     <ResultCard data={resultData} />
-                    <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-4 sm:p-5">
-                      <p className="font-heading text-xl font-semibold text-[#1F2937]">Next step</p>
+                    <div className="ct-soft-panel rounded-[22px] p-4 sm:p-5">
+                      <p className="ct-card-title text-[#1F2937]">Next step</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
                         Your care summary is ready for the doctor, so you can continue the conversation with the right context already in place.
                       </p>
@@ -499,13 +499,13 @@ export function TriageClient() {
                   </div>
                 ) : (
                   <div className="grid gap-3">
-                    <div className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+                    <div className="ct-soft-panel rounded-[20px] p-4">
                       <p className="text-sm font-semibold text-[#1F2937]">Summary</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
                         Tell us what you are feeling and we&apos;ll prepare a concise summary for your doctor.
                       </p>
                     </div>
-                    <div className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+                    <div className="ct-soft-panel rounded-[20px] p-4">
                       <p className="text-sm font-semibold text-[#1F2937]">Recommended action</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
                         We&apos;ll quickly review your symptoms, flag urgency where needed, and guide you toward the right next step.
@@ -518,13 +518,13 @@ export function TriageClient() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel grid gap-4 rounded-[28px] p-6">
           <div className="flex items-start gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
               <HeartPulse className="h-5 w-5" />
             </span>
             <div>
-              <p className="font-heading text-xl font-semibold text-[#1F2937]">Your consultation is already in motion</p>
+              <p className="ct-card-title text-[#1F2937]">Your consultation is already in motion</p>
               <p className="mt-1 text-sm leading-6 text-slate-600">
                 You already have an active conversation with your care team, so the next best step is to continue there.
               </p>

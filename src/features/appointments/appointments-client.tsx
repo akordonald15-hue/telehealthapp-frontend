@@ -105,7 +105,7 @@ export function AppointmentsClient() {
     >
       {user?.role === "patient" ? (
         <form
-          className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6"
+          className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6"
           onSubmit={form.handleSubmit((values) =>
             createAppointment.mutate({
               doctor: values.doctor,
@@ -121,7 +121,7 @@ export function AppointmentsClient() {
               <CalendarPlus2 className="h-5 w-5" />
             </span>
             <div>
-              <p className="font-heading text-xl font-semibold text-[#1F2937]">Book a new appointment</p>
+              <p className="ct-card-title text-[#1F2937]">Book a new appointment</p>
               <p className="mt-1 text-sm leading-6 text-slate-600">Choose your doctor, pick a time, then continue to secure Paystack checkout for ₦1,000.</p>
             </div>
           </div>
@@ -130,7 +130,7 @@ export function AppointmentsClient() {
           <Notice title="Consultation price: ₦1,000" tone="neutral">
             Caretekk confirms the consultation price before checkout. You will only pay through the secure checkout created for this booking.
           </Notice>
-          <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="ct-soft-panel rounded-[18px] px-4 py-3">
             <p className="font-semibold text-[#1F2937]">1. Choose a doctor</p>
             <p className="mt-1 text-sm leading-6 text-slate-600">Available doctors appear first. Unavailable doctors cannot be selected.</p>
           </div>
@@ -196,7 +196,7 @@ export function AppointmentsClient() {
           </Field>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="md:col-span-2 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="ct-soft-panel md:col-span-2 rounded-[18px] px-4 py-3">
               <p className="font-semibold text-[#1F2937]">2. Add visit details</p>
               <p className="mt-1 text-sm leading-6 text-slate-600">Choose a time and briefly describe what you need help with.</p>
             </div>

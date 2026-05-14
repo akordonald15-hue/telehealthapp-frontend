@@ -23,16 +23,16 @@ function Metric({ label, value, href, icon: Icon, description }: { label: string
   return (
     <Link
       href={href}
-      className="group rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_28px_70px_-42px_rgba(37,99,235,0.28)]"
+      className="ct-hover-lift ct-surface group rounded-[24px] p-5 hover:shadow-[0_28px_70px_-42px_rgba(37,99,235,0.18)]"
     >
       <div className="flex items-start justify-between gap-3">
         <span className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-[#DBEAFE] text-[#2563EB]">
           <Icon className="h-5 w-5" />
         </span>
-        <span className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Now</span>
+        <span className="ct-caption text-slate-400">Now</span>
       </div>
       <span className="mt-5 block text-sm font-semibold text-slate-500">{label}</span>
-      <strong className="mt-2 block font-heading text-3xl font-semibold tracking-tight text-[#1F2937]">{value}</strong>
+      <strong className="mt-2 block font-heading text-[1.85rem] font-semibold tracking-tight text-[#1F2937]">{value}</strong>
       <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
       <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">
         Open {label.toLowerCase()}
@@ -142,9 +142,9 @@ export function DashboardClient() {
       {user?.role === "patient" ? (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-            <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.65)] sm:p-8">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-100">Guided care journey</p>
-              <h2 className="font-heading mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">{nextPatientStep.title}</h2>
+            <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.48)] sm:p-8">
+              <p className="ct-caption text-blue-100">Guided care journey</p>
+              <h2 className="ct-dashboard-title mt-4 text-white sm:text-[2.3rem]">{nextPatientStep.title}</h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">{nextPatientStep.description}</p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href={nextPatientStep.href} className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[#2563EB] shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5">
@@ -156,26 +156,26 @@ export function DashboardClient() {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+            <div className="ct-panel rounded-[28px] p-6">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-emerald-50 text-[#10B981]">
                   <Sparkles className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="font-heading text-xl font-semibold text-[#1F2937]">What happens next</p>
+                  <p className="ct-card-title text-[#1F2937]">What happens next</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">Follow the same care path each time, with a clear next action.</p>
                 </div>
               </div>
               <div className="mt-6 grid gap-3 text-sm text-slate-600">
-                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">1. Care check-in</p>
                   <p className="mt-1 leading-6">Share your symptoms so your doctor gets the right context before the conversation starts.</p>
                 </div>
-                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">2. Doctor match</p>
                   <p className="mt-1 leading-6">We guide you toward the doctor best placed to help with your concern.</p>
                 </div>
-                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">3. Consultation and care plan</p>
                   <p className="mt-1 leading-6">Continue the conversation, review your doctor&apos;s notes, and keep follow-up care close.</p>
                 </div>
@@ -199,19 +199,19 @@ export function DashboardClient() {
           ) : null}
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+            <div className="ct-surface rounded-[24px] p-5">
               <p className="text-sm font-semibold text-slate-500">Care check-in</p>
               <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Done" : "Next"}</p>
               <p className="mt-3 text-sm leading-6 text-slate-600">Start with symptoms and a short guided review before your consultation.</p>
               <Link href="/triage" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open care check-in <ArrowRight className="h-4 w-4" /></Link>
             </div>
-            <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+            <div className="ct-surface rounded-[24px] p-5">
               <p className="text-sm font-semibold text-slate-500">Consultation</p>
               <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Ready" : "Waiting"}</p>
               <p className="mt-3 text-sm leading-6 text-slate-600">Your matched doctor and conversation space will guide the next clinical step.</p>
               <Link href="/messages" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open consultation <ArrowRight className="h-4 w-4" /></Link>
             </div>
-            <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+            <div className="ct-surface rounded-[24px] p-5">
               <p className="text-sm font-semibold text-slate-500">Care plan</p>
               <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasCarePlan ? "Available" : "Coming next"}</p>
               <p className="mt-3 text-sm leading-6 text-slate-600">Doctor notes, instructions, referrals, and next steps come together in one follow-up view.</p>
@@ -228,9 +228,9 @@ export function DashboardClient() {
       ) : (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-            <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.65)] sm:p-8">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-100">Caretekk workspace</p>
-              <h2 className="font-heading mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Everything important in one calm view.</h2>
+            <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.48)] sm:p-8">
+              <p className="ct-caption text-blue-100">Caretekk workspace</p>
+              <h2 className="ct-dashboard-title mt-4 text-white sm:text-[2.3rem]">Everything important in one calm view.</h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">
                 Keep up with visits, conversations, records, and referrals without bouncing between disconnected tools.
               </p>
@@ -244,26 +244,26 @@ export function DashboardClient() {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+            <div className="ct-panel rounded-[28px] p-6">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-emerald-50 text-[#10B981]">
                   <Sparkles className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Today at a glance</p>
+                  <p className="ct-card-title text-[#1F2937]">Today at a glance</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">A quick read on what needs attention next.</p>
                 </div>
               </div>
               <div className="mt-6 grid gap-3 text-sm text-slate-600">
-                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">Appointments</p>
                   <p className="mt-1 leading-6">{appointments.isLoading ? "Loading your upcoming visits..." : `${listMetric(appointments)} appointment${listMetric(appointments) === 1 ? "" : "s"} to review.`}</p>
                 </div>
-                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">Messages</p>
                   <p className="mt-1 leading-6">{threads.isLoading ? "Loading your conversations..." : `${listMetric(threads)} conversation${listMetric(threads) === 1 ? "" : "s"} available.`}</p>
                 </div>
-                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">Billing history</p>
                   <p className="mt-1 leading-6">{`${paymentMetric} payment update${paymentMetric === 1 ? "" : "s"} available.`}</p>
                 </div>
@@ -294,10 +294,10 @@ export function DashboardClient() {
           </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+            <div className="ct-panel rounded-[28px] p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Next appointments</h2>
+                  <h2 className="ct-card-title text-[#1F2937]">Next appointments</h2>
                   <p className="mt-1 text-sm text-slate-500">Your upcoming visits at a glance.</p>
                 </div>
                 {user ? <Badge tone="green">{user.role}</Badge> : null}
@@ -323,10 +323,10 @@ export function DashboardClient() {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+            <div className="ct-panel rounded-[28px] p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Recent billing</h2>
+                  <h2 className="ct-card-title text-[#1F2937]">Recent billing</h2>
                   <p className="mt-1 text-sm text-slate-500">A quick read-only look at recent service checkout activity.</p>
                 </div>
                 <Link className="text-sm font-semibold text-[#2563EB]" href="/payments">

@@ -43,12 +43,12 @@ export function ProfileClient() {
   return (
     <Section title="Profile" description="Keep your Caretekk account and care details up to date.">
       <div className="grid gap-4 lg:grid-cols-2">
-        <form className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6" onSubmit={(event) => {
+        <form className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6" onSubmit={(event) => {
           event.preventDefault();
           updateUser.mutate();
         }}>
           <div>
-            <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Account details</h2>
+            <h2 className="ct-card-title text-[#1F2937]">Account details</h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">Your sign-in email and contact number.</p>
           </div>
           <ErrorMessage error={updateUser.error} context="profile" />
@@ -67,12 +67,12 @@ export function ProfileClient() {
           </Button>
         </form>
 
-        <form className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6" onSubmit={(event) => {
+        <form className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6" onSubmit={(event) => {
           event.preventDefault();
           updateProfile.mutate();
         }}>
           <div>
-            <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Profile information</h2>
+            <h2 className="ct-card-title text-[#1F2937]">Profile information</h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">Details used to support your Caretekk experience.</p>
           </div>
           <ErrorMessage error={updateProfile.error} context="profile" />
@@ -133,7 +133,7 @@ export function ProfileClient() {
                 <select
                   defaultValue={(profile.data as PatientProfile | undefined)?.gender || ""}
                   onChange={(event) => setProfileDraft((draft) => ({ ...draft, gender: event.target.value }))}
-                  className="min-h-11 w-full rounded-[12px] border border-[#E5E7EB] bg-white px-3.5 text-sm text-[#1F2937] shadow-[0_6px_20px_rgba(31,41,55,0.03)] outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                  className="min-h-12 w-full rounded-[14px] border border-[#E5E7EB] bg-white px-4 text-sm text-[#1F2937] shadow-[0_8px_24px_rgba(31,41,55,0.035)] outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                 >
                   <option value="">Select gender</option>
                   <option value="female">Female</option>

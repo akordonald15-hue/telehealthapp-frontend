@@ -58,7 +58,7 @@ export function RecordsClient() {
     <Section title="Medical records" description="Review care notes and keep supporting files in one secure place.">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <form
-          className="grid gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6"
+          className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6"
           onSubmit={(event) => {
             event.preventDefault();
             upload.mutate();
@@ -69,7 +69,7 @@ export function RecordsClient() {
               <ShieldPlus className="h-5 w-5" />
             </span>
             <div>
-              <p className="font-heading text-xl font-semibold text-[#1F2937]">Upload a supporting file</p>
+              <p className="ct-card-title text-[#1F2937]">Upload a supporting file</p>
               <p className="mt-1 text-sm leading-6 text-slate-600">Choose a record you can view and add a file from your device.</p>
             </div>
           </div>
@@ -95,16 +95,16 @@ export function RecordsClient() {
           </Button>
         </form>
 
-        <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6">
-          <p className="font-heading text-xl font-semibold text-[#1F2937]">How records work</p>
+        <div className="ct-surface rounded-[28px] p-5 sm:p-6">
+          <p className="ct-card-title text-[#1F2937]">How records work</p>
           <div className="mt-4 grid gap-3 text-sm text-slate-600">
-            <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="ct-soft-panel rounded-[18px] px-4 py-3">
               Your visible records and files stay organized here for follow-up care.
             </div>
-            <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="ct-soft-panel rounded-[18px] px-4 py-3">
               Your care team manages new record entries after consultations or follow-up.
             </div>
-            <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="ct-soft-panel rounded-[18px] px-4 py-3">
               File access is prepared only when you request a download.
             </div>
           </div>
@@ -136,7 +136,7 @@ export function RecordsClient() {
         onPrevious={records.data?.previous ? () => setPage((current) => Math.max(1, current - 1)) : undefined}
         onNext={records.data?.next ? () => setPage((current) => current + 1) : undefined}
         renderItem={(record) => (
-          <article key={record.id} className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+          <article key={record.id} className="ct-surface rounded-[24px] p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:justify-between">
               <div>
                 <p className="font-heading text-xl font-semibold text-[#1F2937]">{medicalRecordTitle(record)}</p>

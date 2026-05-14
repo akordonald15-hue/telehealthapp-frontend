@@ -46,23 +46,23 @@ function Metric({
     cyan: "bg-cyan-50 text-[#0F766E]",
   };
   return (
-    <div className="rounded-[18px] border border-white/70 bg-white p-4 shadow-[0_20px_54px_-42px_rgba(15,23,42,0.45)]">
+    <div className="ct-surface rounded-[20px] p-4">
       <div className="flex items-start gap-3">
         <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] ${toneClasses[tone]}`}>
           <Icon className="h-5 w-5" />
         </span>
       </div>
       <p className="mt-4 text-sm font-semibold text-slate-500">{label}</p>
-      <p className="mt-1 font-heading text-2xl font-semibold text-[#1F2937]">{value}</p>
+      <p className="mt-1 font-heading text-[1.8rem] font-semibold text-[#1F2937]">{value}</p>
     </div>
   );
 }
 
 function Panel({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <section className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+    <section className="ct-panel rounded-[24px] p-5">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="font-heading text-xl font-semibold text-[#1F2937]">{title}</h2>
+        <h2 className="ct-card-title text-[#1F2937]">{title}</h2>
         {action}
       </div>
       {children}
@@ -148,7 +148,7 @@ function AdminUserRow({ user }: { user: AdminUser }) {
   });
 
   return (
-    <article className="rounded-[18px] border border-slate-200 bg-slate-50 p-4">
+    <article className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <p className="truncate text-sm font-bold text-[#1F2937]">{user.email}</p>
@@ -199,7 +199,7 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
   const setAvailability = (availability_status: ProviderAvailabilityStatus) => updateProvider.mutate({ availability_status });
 
   return (
-    <article className="rounded-[18px] border border-slate-200 bg-slate-50 p-4">
+    <article className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="min-w-0">
           <p className="truncate text-sm font-bold text-[#1F2937]">{provider.display_name}</p>

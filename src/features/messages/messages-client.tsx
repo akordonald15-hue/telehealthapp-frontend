@@ -232,7 +232,7 @@ export function MessagesClient() {
         </Notice>
       ) : null}
 
-      <div className="overflow-hidden rounded-[32px] border border-white/80 bg-white shadow-[0_28px_80px_-48px_rgba(15,23,42,0.55)]">
+      <div className="overflow-hidden rounded-[32px] border border-white/80 bg-white shadow-[0_28px_80px_-48px_rgba(15,23,42,0.32)]">
         <div className="grid min-h-[calc(100vh-15rem)] bg-[#F8FAFC] lg:grid-cols-[22rem_minmax(0,1fr)]">
           <aside
             className={cn(
@@ -358,11 +358,11 @@ function ConsultationListHeader({
   onSearchChange: (value: string) => void;
 }) {
   return (
-    <div className="border-b border-[#E5E7EB] p-4">
+      <div className="border-b border-[#E5E7EB] p-4 sm:p-5">
       <div className="flex items-center gap-3">
         <Avatar label="CT" tone="blue" />
         <div>
-          <p className="font-heading text-lg font-bold text-[#1F2937]">
+          <p className="ct-card-title text-[#1F2937]">
             {role === "patient" ? "Consultations" : "Conversations"}
           </p>
           <p className="text-sm text-slate-500">Secure care conversations</p>
@@ -399,10 +399,10 @@ function ConsultationListItem({
     <button
       type="button"
       className={cn(
-        "group flex w-full gap-3 rounded-[20px] border p-3 text-left transition duration-200",
+        "group flex w-full gap-3 rounded-[20px] border p-3 text-left transition duration-150",
         isActive
-          ? "border-[#BFDBFE] bg-[#EFF6FF] shadow-[0_16px_42px_-34px_rgba(37,99,235,0.65)]"
-          : "border-transparent bg-white hover:-translate-y-0.5 hover:border-[#E5E7EB] hover:shadow-[0_16px_42px_-34px_rgba(15,23,42,0.4)]",
+          ? "border-[#BFDBFE] bg-[#EFF6FF] shadow-[0_16px_42px_-34px_rgba(37,99,235,0.28)]"
+          : "border-transparent bg-white hover:-translate-y-0.5 hover:border-[#E5E7EB] hover:shadow-[0_16px_42px_-34px_rgba(15,23,42,0.22)]",
       )}
       onClick={onClick}
     >
@@ -450,7 +450,7 @@ function ConsultationHeader({
         </button>
         <Avatar label={role === "patient" ? "Dr" : "Pt"} tone="blue" size="lg" />
         <div className="min-w-0">
-          <h2 className="truncate font-heading text-lg font-bold text-[#1F2937]">
+          <h2 className="truncate font-heading text-lg font-semibold text-[#1F2937]">
             {thread ? conversationTitle(role) : "Choose a consultation"}
           </h2>
           <p className="mt-0.5 flex items-center gap-2 text-sm text-slate-500">
@@ -459,7 +459,7 @@ function ConsultationHeader({
           </p>
         </div>
       </div>
-      <div className="hidden items-center gap-2 rounded-full bg-[#ECFDF5] px-3 py-2 text-xs font-bold text-[#047857] sm:inline-flex">
+        <div className="hidden items-center gap-2 rounded-full bg-[#ECFDF5] px-3 py-2 text-xs font-semibold text-[#047857] sm:inline-flex">
         <Stethoscope className="h-4 w-4" />
         {liveConnected ? "Live chat" : "Secure chat"}
       </div>
@@ -481,7 +481,7 @@ function ChatMessageBubble({
       {!isMine ? <Avatar label="Dr" tone="green" size="sm" /> : null}
       <div
         className={cn(
-          "max-w-[82%] rounded-[22px] px-4 py-3 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.5)] sm:max-w-[68%]",
+          "max-w-[82%] rounded-[22px] px-4 py-3 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.24)] sm:max-w-[68%]",
           isMine
             ? "rounded-br-md bg-[linear-gradient(135deg,#2563EB,#60A5FA)] text-white"
             : "rounded-bl-md border border-white bg-white text-[#1F2937]",
@@ -564,7 +564,7 @@ function ChatComposer({
         </div>
       ) : null}
 
-      <div className="flex items-end gap-2 rounded-[22px] border border-[#E5E7EB] bg-[#F9FAFB] p-2 focus-within:border-[#60A5FA] focus-within:bg-white">
+      <div className="flex items-end gap-2 rounded-[22px] border border-[#E5E7EB] bg-[#F9FAFB] p-2.5 focus-within:border-[#60A5FA] focus-within:bg-white">
         <button
           type="button"
           className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#EFF6FF]"

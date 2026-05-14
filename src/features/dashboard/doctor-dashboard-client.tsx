@@ -53,7 +53,7 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+    <div className="ct-surface rounded-[24px] p-5">
       <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#ECFEFF] text-[#0F766E]">
         <Icon className="h-5 w-5" />
       </span>
@@ -78,7 +78,7 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="group rounded-[20px] border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-cyan-100 hover:bg-white hover:shadow-[0_18px_44px_-34px_rgba(15,118,110,0.4)]"
+      className="ct-hover-lift rounded-[20px] border border-slate-200 bg-slate-50 p-4 hover:border-cyan-100 hover:bg-white hover:shadow-[0_18px_44px_-34px_rgba(15,118,110,0.24)]"
     >
       <div className="flex items-start gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white text-[#0F766E] shadow-sm">
@@ -95,10 +95,7 @@ function QuickAction({
 
 function AppointmentRow({ appointment }: { appointment: Appointment }) {
   return (
-    <Link
-      href={`/appointments/${appointment.id}`}
-      className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-cyan-100 hover:bg-white"
-    >
+    <Link href={`/appointments/${appointment.id}`} className="ct-hover-lift rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 hover:border-cyan-100 hover:bg-white">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="font-semibold text-[#1F2937]">{formatDateTime(appointment.scheduled_at)}</p>
@@ -128,7 +125,7 @@ function ReferralRow({ referral }: { referral: Referral }) {
 
 function ThreadRow({ thread }: { thread: Thread }) {
   return (
-    <Link href="/messages" className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-cyan-100 hover:bg-white">
+    <Link href="/messages" className="ct-hover-lift rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 hover:border-cyan-100 hover:bg-white">
       <p className="font-semibold text-[#1F2937]">Patient conversation #{thread.patient}</p>
       <p className="mt-1 text-sm text-slate-600">Opened {formatDateTime(thread.created_at)}</p>
     </Link>
@@ -193,9 +190,9 @@ export function DoctorDashboardClient() {
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,#0F766E_0%,#2563EB_58%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(15,118,110,0.55)] sm:p-8">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-cyan-50">Clinical command center</p>
-          <h2 className="font-heading mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+        <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,#0F766E_0%,#2563EB_58%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(15,118,110,0.4)] sm:p-8">
+          <p className="ct-caption text-cyan-50">Clinical command center</p>
+          <h2 className="ct-dashboard-title mt-4 text-white sm:text-[2.3rem]">
             {todayAppointments.length ? `${todayAppointments.length} consultation${todayAppointments.length === 1 ? "" : "s"} today` : "No consultations scheduled for today"}
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-cyan-50/90 sm:text-base">
@@ -211,8 +208,8 @@ export function DoctorDashboardClient() {
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
-          <p className="font-heading text-xl font-semibold text-[#1F2937]">Quick actions</p>
+        <div className="ct-panel rounded-[28px] p-6">
+          <p className="ct-card-title text-[#1F2937]">Quick actions</p>
           <p className="mt-1 text-sm leading-6 text-slate-600">Clinical shortcuts for common doctor workflows.</p>
           <div className="mt-5 grid gap-3">
             <QuickAction href="/appointments" label="View appointments" description={"Open today's and upcoming consultations."} icon={CalendarClock} />
@@ -239,10 +236,10 @@ export function DoctorDashboardClient() {
       <ProviderWalletPanel role="doctor" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel rounded-[28px] p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">{"Today's appointments"}</h2>
+              <h2 className="ct-card-title text-[#1F2937]">{"Today's appointments"}</h2>
               <p className="mt-1 text-sm text-slate-500">Open a consultation for patient context and next actions.</p>
             </div>
             <Link className="text-sm font-semibold text-[#0F766E]" href="/appointments">
@@ -262,10 +259,10 @@ export function DoctorDashboardClient() {
           )}
         </div>
 
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel rounded-[28px] p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Recent patients</h2>
+              <h2 className="ct-card-title text-[#1F2937]">Recent patients</h2>
               <p className="mt-1 text-sm text-slate-500">Patient profiles from recent appointments and referrals.</p>
             </div>
             <UserRoundCheck className="h-5 w-5 text-[#0F766E]" />
@@ -288,10 +285,10 @@ export function DoctorDashboardClient() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel rounded-[28px] p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Patient messages</h2>
+              <h2 className="ct-card-title text-[#1F2937]">Patient messages</h2>
               <p className="mt-1 text-sm text-slate-500">Recent visible consultation threads.</p>
             </div>
             <Link className="text-sm font-semibold text-[#0F766E]" href="/messages">
@@ -311,10 +308,10 @@ export function DoctorDashboardClient() {
           )}
         </div>
 
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel rounded-[28px] p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Referral notes</h2>
+              <h2 className="ct-card-title text-[#1F2937]">Referral notes</h2>
               <p className="mt-1 text-sm text-slate-500">Recent referral and care-plan context.</p>
             </div>
             <Link className="text-sm font-semibold text-[#0F766E]" href="/referrals">

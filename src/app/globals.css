@@ -114,6 +114,29 @@ a {
   backdrop-filter: blur(18px);
 }
 
+.ct-surface {
+  border: 1px solid rgba(219, 229, 241, 0.92);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 251, 255, 0.96) 100%);
+  box-shadow: var(--shadow-card);
+}
+
+.ct-panel {
+  border: 1px solid rgba(219, 229, 241, 0.92);
+  background: #ffffff;
+  box-shadow: 0 22px 58px -44px rgba(15, 23, 42, 0.3);
+}
+
+.ct-soft-panel {
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  background: #f8fbff;
+}
+
+.ct-chip {
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+}
+
 .lf-btn {
   display: inline-flex;
   min-height: 52px;

@@ -47,7 +47,7 @@ export function DataList<T>({
     return (
       <div className="grid gap-3" aria-label={loadingLabel} aria-busy="true">
         {[0, 1, 2].map((item) => (
-          <div key={item} className="rounded-[22px] border border-[#E5E7EB] bg-white p-5 shadow-[0_10px_30px_rgba(31,41,55,0.06)]">
+          <div key={item} className="ct-surface rounded-[24px] p-5">
             <div className="h-4 w-32 animate-pulse rounded-full bg-slate-100" />
             <div className="mt-4 h-5 w-3/5 animate-pulse rounded-full bg-slate-100" />
             <div className="mt-3 h-3 w-4/5 animate-pulse rounded-full bg-slate-100" />
@@ -68,7 +68,7 @@ export function DataList<T>({
   return (
     <div className="grid gap-3">
       {data.results.map(renderItem)}
-      <div className="flex flex-col gap-3 rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#667085] shadow-[0_8px_24px_rgba(31,41,55,0.05)] sm:flex-row sm:items-center sm:justify-between">
+      <div className="ct-surface flex flex-col gap-3 rounded-[20px] px-4 py-3 text-sm text-[#667085] sm:flex-row sm:items-center sm:justify-between">
         <span>{typeof data.count === "number" ? `${data.count} total` : "More results may be available"}</span>
         <div className="flex gap-2">
           <Button variant="secondary" disabled={!data.previous || !onPrevious} onClick={onPrevious} aria-label="Previous page">

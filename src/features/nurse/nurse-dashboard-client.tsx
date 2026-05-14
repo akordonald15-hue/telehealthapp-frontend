@@ -30,7 +30,7 @@ function MetricCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+    <div className="ct-surface rounded-[24px] p-5">
       <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
         <Icon className="h-5 w-5" />
       </span>
@@ -82,9 +82,9 @@ export function NurseDashboardClient() {
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,var(--primary-strong)_0%,var(--primary)_55%,var(--accent)_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(66,107,179,0.65)] sm:p-8">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-100">Today&apos;s care journey</p>
-          <h2 className="font-heading mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+        <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,var(--primary-strong)_0%,var(--primary)_55%,var(--accent)_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(66,107,179,0.46)] sm:p-8">
+          <p className="ct-caption text-blue-100">Today&apos;s care journey</p>
+          <h2 className="ct-dashboard-title mt-4 text-white sm:text-[2.3rem]">
             {activeRequest ? `Next visit: ${homeCareStatusLabel(activeRequest.status)}` : "You're ready for the next request"}
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">
@@ -102,10 +102,10 @@ export function NurseDashboardClient() {
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel rounded-[28px] p-6">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="font-heading text-xl font-semibold text-[#1F2937]">Profile summary</p>
+              <p className="ct-card-title text-[#1F2937]">Profile summary</p>
               <p className="mt-1 text-sm leading-6 text-slate-600">Your dispatch details and visit readiness at a glance.</p>
             </div>
             {profileQuery.data ? <Badge tone="blue">{profileQuery.data.active_for_dispatch ? "dispatch ready" : "paused"}</Badge> : null}
@@ -118,15 +118,15 @@ export function NurseDashboardClient() {
             </div>
           ) : profileQuery.data ? (
             <div className="mt-6 grid gap-3 text-sm text-slate-600">
-              <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                 <p className="font-semibold text-[#1F2937]">License</p>
                 <p className="mt-1">{profileQuery.data.license_no || "Not added yet"}</p>
               </div>
-              <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                 <p className="font-semibold text-[#1F2937]">Base area</p>
                 <p className="mt-1">{profileQuery.data.base_address || "Base address not added yet"}</p>
               </div>
-              <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                 <p className="font-semibold text-[#1F2937]">Service radius</p>
                 <p className="mt-1">{profileQuery.data.service_radius_km} km</p>
               </div>
@@ -151,10 +151,10 @@ export function NurseDashboardClient() {
       <ProviderWalletPanel role="nurse" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel rounded-[28px] p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Recent activity</h2>
+              <h2 className="ct-card-title text-[#1F2937]">Recent activity</h2>
               <p className="mt-1 text-sm text-slate-500">The latest changes across your visible requests.</p>
             </div>
             <Link className="text-sm font-semibold text-[var(--primary)]" href="/nurse/requests">
@@ -164,11 +164,7 @@ export function NurseDashboardClient() {
           {recentRequests.length ? (
             <div className="grid gap-3">
               {recentRequests.map((request) => (
-                <Link
-                  key={request.id}
-                  href={`/nurse/request/${request.id}`}
-                  className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-[rgba(66,107,179,0.18)] hover:bg-white"
-                >
+                <Link key={request.id} href={`/nurse/request/${request.id}`} className="ct-hover-lift rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 hover:border-[rgba(66,107,179,0.18)] hover:bg-white">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-[#1F2937]">{request.contact_name_snapshot || "Patient request"}</p>
@@ -184,24 +180,24 @@ export function NurseDashboardClient() {
           )}
         </div>
 
-        <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+        <div className="ct-panel rounded-[28px] p-6">
           <div className="flex items-start gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
               <MapPinned className="h-5 w-5" />
             </span>
             <div>
-              <p className="font-heading text-xl font-semibold text-[#1F2937]">Travel and arrival</p>
+              <p className="ct-card-title text-[#1F2937]">Travel and arrival</p>
               <p className="mt-1 text-sm leading-6 text-slate-600">
                 Use the request detail page to start your trip, share location if available, and mark arrival when you reach the patient.
               </p>
             </div>
           </div>
           <div className="mt-6 grid gap-3 text-sm text-slate-600">
-            <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="ct-soft-panel rounded-[18px] px-4 py-3">
               <p className="font-semibold text-[#1F2937]">Pre-visit first</p>
               <p className="mt-1">Travel starts only after the patient is confirmed.</p>
             </div>
-            <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="ct-soft-panel rounded-[18px] px-4 py-3">
               <p className="font-semibold text-[#1F2937]">Track progress cleanly</p>
               <p className="mt-1">Location updates are optional and handled gracefully when permissions are unavailable.</p>
             </div>
