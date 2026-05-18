@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { authApi } from "@/lib/api/endpoints";
-import { clearTokens, getRefreshToken, hasStoredSession, setTokens } from "@/lib/auth/tokens";
+import { clearTokens, hasStoredSession, setTokens } from "@/lib/auth/tokens";
 import type { User } from "@/lib/types/backend";
 
 export const authKeys = {
@@ -80,10 +80,7 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: async () => {
-      const refresh = getRefreshToken();
-      if (refresh) {
-        await authApi.logout({ refresh });
-      }
+      await authApi.logout();
     },
     onSettled: async () => {
       clearTokens();

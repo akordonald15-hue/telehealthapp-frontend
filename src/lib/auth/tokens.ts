@@ -1,51 +1,44 @@
 import type { TokenPair } from "@/lib/types/backend";
 
-const ACCESS_TOKEN_KEY = "telehealth.access";
-const REFRESH_TOKEN_KEY = "telehealth.refresh";
+const SESSION_COOKIE_NAME = "caretekk_session";
 
-function canUseStorage() {
-  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+function canUseCookies() {
+  return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
 export function getAccessToken() {
-  if (!canUseStorage()) {
-    return null;
-  }
-  return window.localStorage.getItem(ACCESS_TOKEN_KEY);
+  return null;
 }
 
 export function getRefreshToken() {
-  if (!canUseStorage()) {
-    return null;
-  }
-  return window.localStorage.getItem(REFRESH_TOKEN_KEY);
+  return null;
 }
 
-export function setTokens(tokens: TokenPair) {
-  if (!canUseStorage()) {
+export function setTokens(_tokens: TokenPair) {
+  if (!canUseCookies()) {
     return;
   }
-  window.localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access);
-  if (tokens.refresh) {
-    window.localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh);
-  }
+  void _tokens;
+  document.cookie = `${SESSION_COOKIE_NAME}=1; Path=/; SameSite=Lax`;
 }
 
 export function updateAccessToken(access: string) {
-  if (!canUseStorage()) {
-    return;
-  }
-  window.localStorage.setItem(ACCESS_TOKEN_KEY, access);
+  void access;
 }
 
 export function clearTokens() {
-  if (!canUseStorage()) {
+  if (!canUseCookies()) {
     return;
   }
-  window.localStorage.removeItem(ACCESS_TOKEN_KEY);
-  window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+  document.cookie = `${SESSION_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
 }
 
 export function hasStoredSession() {
-  return Boolean(getAccessToken());
+  if (!canUseCookies()) {
+    return false;
+  }
+  return document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .some((part) => part === `${SESSION_COOKIE_NAME}=1`);
 }

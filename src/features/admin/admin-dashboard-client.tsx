@@ -8,8 +8,6 @@ import {
   CalendarClock,
   ClipboardList,
   Download,
-  Eye,
-  EyeOff,
   Home,
   MessageSquareText,
   ShieldCheck,
@@ -257,7 +255,6 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
 function ProviderCreatePanel() {
   const queryClient = useQueryClient();
   const [created, setCreated] = useState<AdminProviderCreateResponse | null>(null);
-  const [showTemporaryPassword, setShowTemporaryPassword] = useState(false);
   const [form, setForm] = useState({
     role: "doctor" as "doctor" | "nurse",
     name: "",
@@ -288,7 +285,6 @@ function ProviderCreatePanel() {
       }),
     onSuccess: async (data) => {
       setCreated(data);
-      setShowTemporaryPassword(false);
       setForm((current) => ({ ...current, name: "", email: "", phone: "" }));
       await queryClient.invalidateQueries({ queryKey: ["admin"] });
     },
@@ -409,24 +405,12 @@ function ProviderCreatePanel() {
         </div>
         {createProvider.isError ? <Notice title="Provider could not be created." tone="warning">Check that the email is unique and required provider details are complete.</Notice> : null}
         {created ? (
-          <Notice title="Temporary password generated" tone="success">
+          <Notice title="Provider setup email sent" tone="success">
             <div className="grid gap-1">
               <span>{created.email}</span>
-              <div className="flex flex-col gap-2 rounded-[10px] bg-white px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
-                <code className="break-all text-sm font-bold text-[#1F2937]">
-                  {showTemporaryPassword ? created.temporary_password : "Temporary password hidden"}
-                </code>
-                <button
-                  type="button"
-                  onClick={() => setShowTemporaryPassword((current) => !current)}
-                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-[10px] border border-slate-200 px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
-                  aria-label={showTemporaryPassword ? "Hide password" : "Show password"}
-                >
-                  {showTemporaryPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  {showTemporaryPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-              <span className="text-xs text-slate-600">Share this securely with the provider and ask them to reset it after first sign-in.</span>
+              <span className="text-xs text-slate-600">
+                Caretekk sent a secure password setup link to this provider. No temporary password is shown in the admin console.
+              </span>
             </div>
           </Notice>
         ) : null}

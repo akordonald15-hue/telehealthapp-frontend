@@ -151,8 +151,8 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <Info label="Assigned nurse" value={nurse ? nurse.user_email : "Waiting for assignment"} />
-                <Info label="Nurse details" value={nurse?.license_no || "Not assigned yet"} />
+                <Info label="Assigned nurse" value={nurse ? nurse.display_name : "Waiting for assignment"} />
+                <Info label="Nurse status" value={nurse?.availability_status || "Not assigned yet"} />
                 <Info label="Preferred time" value={preferredTimeLabel(request)} />
                 <Info label="Last update" value={formatDateTime(request.updated_at)} />
               </div>

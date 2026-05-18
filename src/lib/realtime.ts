@@ -1,4 +1,4 @@
-import { getAccessToken } from "@/lib/auth/tokens";
+import { hasStoredSession } from "@/lib/auth/tokens";
 
 function normalizedBaseUrl() {
   const configured = process.env.NEXT_PUBLIC_WS_BASE_URL?.replace(/\/$/, "");
@@ -13,13 +13,10 @@ function normalizedBaseUrl() {
 }
 
 export function buildWebSocketUrl(path: string) {
-  const token = getAccessToken();
   const base = normalizedBaseUrl();
-  if (!base || !token) {
+  if (!base || !hasStoredSession()) {
     return null;
   }
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const url = new URL(`${base}${normalizedPath}`);
-  url.searchParams.set("token", token);
-  return url.toString();
+  return `${base}${normalizedPath}`;
 }

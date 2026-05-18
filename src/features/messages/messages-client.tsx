@@ -58,7 +58,7 @@ export function MessagesClient() {
   });
 
   const createMessage = useMutation({
-    mutationFn: (body: { body: string; attachment_url?: string }) =>
+    mutationFn: (body: { body: string; attachment_id?: number }) =>
       messagingApi.createMessage(activeThread as number, body),
     onSuccess: async () => {
       setComposerValue("");
@@ -203,7 +203,7 @@ export function MessagesClient() {
         onSuccess: (uploaded) => {
           createMessage.mutate({
             body: trimmed || `Sharing ${attachment.file.name} for review.`,
-            attachment_url: uploaded.attachment_url,
+            attachment_id: uploaded.attachment_id,
           });
         },
       });

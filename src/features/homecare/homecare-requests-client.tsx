@@ -86,7 +86,7 @@ export function HomeCareRequestsClient() {
                     <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2 xl:grid-cols-4">
                       <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
                         <p className="font-semibold text-[#1F2937]">Assigned nurse</p>
-                        <p className="mt-1">{nurse ? nurse.user_email : "Waiting for assignment"}</p>
+                        <p className="mt-1">{nurse ? nurse.display_name : "Waiting for assignment"}</p>
                       </div>
                       <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
                         <p className="font-semibold text-[#1F2937]">Preferred time</p>

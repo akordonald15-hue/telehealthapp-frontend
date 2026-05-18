@@ -1,5 +1,5 @@
-import { clearTokens, getAccessToken, getRefreshToken, updateAccessToken } from "@/lib/auth/tokens";
-import type { BackendErrorPayload, PaginatedResponse, TokenPair } from "@/lib/types/backend";
+import { clearTokens } from "@/lib/auth/tokens";
+import type { BackendErrorPayload, PaginatedResponse } from "@/lib/types/backend";
 
 export class ApiError extends Error {
   status: number;
@@ -76,15 +76,11 @@ export function extractErrorMessage(payload: BackendErrorPayload | null) {
 }
 
 async function refreshAccessToken() {
-  const refresh = getRefreshToken();
-  if (!refresh) {
-    return false;
-  }
-
   const response = await fetch(buildUrl("/auth/refresh/"), {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh }),
+    body: JSON.stringify({}),
   });
 
   if (!response.ok) {
@@ -92,8 +88,7 @@ async function refreshAccessToken() {
     return false;
   }
 
-  const data = (await response.json()) as TokenPair;
-  updateAccessToken(data.access);
+  await response.json();
   return true;
 }
 
@@ -106,14 +101,12 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   }
 
   if (auth) {
-    const token = getAccessToken();
-    if (token) {
-      requestHeaders.set("Authorization", `Bearer ${token}`);
-    }
+    requestHeaders.delete("Authorization");
   }
 
   const response = await fetch(buildUrl(path), {
     ...init,
+    credentials: "include",
     headers: requestHeaders,
     body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
   });

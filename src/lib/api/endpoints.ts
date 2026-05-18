@@ -67,9 +67,9 @@ export const authApi = {
     apiRequest<TokenPair>(authPath("/auth/login/"), { method: "POST", body, auth: false }),
   google: (body: { id_token: string }) =>
     apiRequest<TokenPair>(authPath("/auth/google/"), { method: "POST", body, auth: false }),
-  refresh: (body: { refresh: string }) =>
-    apiRequest<TokenPair>(authPath("/auth/refresh/"), { method: "POST", body, auth: false }),
-  logout: (body: { refresh: string }) => apiRequest<DetailResponse>(authPath("/auth/logout/"), { method: "POST", body }),
+  refresh: () =>
+    apiRequest<TokenPair>(authPath("/auth/refresh/"), { method: "POST", body: {}, auth: false }),
+  logout: () => apiRequest<DetailResponse>(authPath("/auth/logout/"), { method: "POST", body: {} }),
   me: () => apiRequest<User>(authPath("/auth/me/")),
   changePassword: (body: { old_password: string; new_password: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/change-password/"), { method: "POST", body }),
@@ -140,7 +140,7 @@ export const messagingApi = {
     apiRequest<Thread>("/messages/threads/", { method: "POST", body }),
   messages: (threadId: number, query?: { page?: number; page_size?: number }) =>
     apiList<Message>(`/messages/threads/${threadId}/messages/`, query),
-  createMessage: (threadId: number, body: { body: string; attachment_url?: string }) =>
+  createMessage: (threadId: number, body: { body: string; attachment_id?: number }) =>
     apiRequest<Message>(`/messages/threads/${threadId}/messages/`, { method: "POST", body }),
   initAttachmentUpload: (
     threadId: number,

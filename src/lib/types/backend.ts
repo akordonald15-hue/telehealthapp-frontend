@@ -143,10 +143,8 @@ export type Message = {
 };
 
 export type ProviderDoctor = DoctorProfile & {
-  user_email: string;
   display_name: string;
   profile_image_url: string | null;
-  qualification: string;
   rating: number | null;
   active_workload: number;
   next_available_time: string | null;
@@ -155,20 +153,14 @@ export type ProviderDoctor = DoctorProfile & {
 
 export type ProviderNurse = {
   id: number;
-  user_email: string;
   display_name: string;
-  license_no: string;
   specialty: string;
   service_type: string;
   profile_image_url: string | null;
   rating: number | null;
   availability_status: ProviderAvailabilityStatus;
-  onboarding_status: NurseProfile["onboarding_status"];
-  active_for_dispatch: boolean;
   service_radius_km: number;
   location_area: string;
-  base_latitude: string | null;
-  base_longitude: string | null;
   active_workload: number;
   updated_at: string;
 };
@@ -201,10 +193,8 @@ export type HomeCareAssignmentStatus = "pending" | "accepted" | "declined" | "re
 
 export type HomeCareNurseSummary = {
   id: number;
-  user_email: string;
-  license_no: string;
+  display_name: string;
   availability_status: NurseProfile["availability_status"];
-  active_for_dispatch: boolean;
 };
 
 export type HomeCareAssignment = {
@@ -519,7 +509,7 @@ export type AdminProviderCreateResponse = {
   provider_id: number;
   user_id: number;
   email: string;
-  temporary_password: string;
+  password_setup_sent: boolean;
 };
 
 export type TriageSeverity = "mild" | "moderate" | "severe";
