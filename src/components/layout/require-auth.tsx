@@ -93,11 +93,13 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
     let active = true;
 
-    const runProbe = async () => {
+    const runProbe = async (options?: { blocking?: boolean }) => {
       if (!active) {
         return;
       }
-      setSecureState((current) => (current === "offline" ? "offline" : "checking"));
+      if (options?.blocking) {
+        setSecureState((current) => (current === "offline" ? "offline" : "checking"));
+      }
       await probeSecureConnectivity();
     };
 
@@ -109,19 +111,22 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
       setSecureState("offline");
     };
 
-    void runProbe();
+    void runProbe({ blocking: true });
 
     const interval = window.setInterval(() => {
       void runProbe();
     }, CONNECTIVITY_POLL_MS);
 
-    window.addEventListener("online", runProbe);
+    const handleOnline = () => {
+      void runProbe({ blocking: true });
+    };
     window.addEventListener("offline", markOffline);
-    window.addEventListener("focus", runProbe);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("focus", handleOnline);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        void runProbe();
+        void runProbe({ blocking: true });
       }
     };
 
@@ -130,9 +135,9 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     return () => {
       active = false;
       window.clearInterval(interval);
-      window.removeEventListener("online", runProbe);
+      window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", markOffline);
-      window.removeEventListener("focus", runProbe);
+      window.removeEventListener("focus", handleOnline);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [clearSensitiveState, mounted, probeSecureConnectivity]);
