@@ -126,30 +126,30 @@ export function PwaRegister() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[70] flex justify-center px-4">
-      <div className="pointer-events-auto w-full max-w-md rounded-[20px] border border-white/80 bg-white/95 p-4 shadow-[0_24px_72px_-40px_rgba(15,23,42,0.34)] backdrop-blur">
-        <div className="flex items-start gap-3">
+      <div className="pointer-events-auto w-full max-w-sm rounded-[20px] border border-white/80 bg-white/95 p-3 shadow-[0_24px_72px_-40px_rgba(15,23,42,0.34)] backdrop-blur sm:max-w-md sm:p-4">
+        <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[var(--primary-soft)] text-[var(--primary)]">
             {showIosHint ? <Smartphone className="h-5 w-5" /> : <Download className="h-5 w-5" />}
           </span>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-[#1F2937]">Install Caretekk</p>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold leading-5 text-[#1F2937]">Install Caretekk</p>
+            <p className="mt-0.5 text-xs leading-5 text-slate-600 sm:text-sm">
               {showIosHint
-                ? "Use Safari's Share menu, then tap Add to Home Screen."
+                ? "Use Share > Add to Home Screen."
                 : showManualHint
-                  ? "Use your browser menu to install Caretekk if the install prompt does not appear automatically."
-                  : "Install Caretekk for a faster app-like experience."}
+                  ? "Use your browser menu to install."
+                  : "Add Caretekk to your device."}
             </p>
           </div>
         </div>
         {showIosHint ? null : (
-          <div className="mt-4 flex gap-3">
+          <div className="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row sm:gap-3">
             <button
               type="button"
               onClick={handleInstall}
               className="lf-btn lf-btn-primary min-h-11 flex-1"
             >
-              Install Caretekk
+              Install app
             </button>
             <button
               type="button"
@@ -158,7 +158,7 @@ export function PwaRegister() {
                 setShowManualHint(false);
                 setDismissed(true);
               }}
-              className="lf-btn lf-btn-secondary min-h-11 px-4"
+              className="lf-btn lf-btn-secondary min-h-11 px-4 sm:w-auto"
             >
               Not now
             </button>
