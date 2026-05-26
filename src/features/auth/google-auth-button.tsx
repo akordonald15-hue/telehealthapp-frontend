@@ -37,12 +37,10 @@ const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
 export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
   const googleLogin = useGoogleLogin();
-  const [localError, setLocalError] = useState("");
+  const [localError, setLocalError] = useState(
+    GOOGLE_CLIENT_ID ? "" : "Google sign-in is not set up yet for this environment.",
+  );
   const buttonRef = useRef<HTMLDivElement | null>(null);
-
-  if (!GOOGLE_CLIENT_ID) {
-    return null;
-  }
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) {
