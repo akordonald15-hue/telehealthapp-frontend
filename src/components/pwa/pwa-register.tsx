@@ -17,26 +17,29 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 export function PwaRegister() {
+  const [mounted, setMounted] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showManualHint, setShowManualHint] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(() => {
-    if (typeof window === "undefined") {
-      return false;
-    }
+  const [isInstalled, setIsInstalled] = useState(false);
 
-    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-  });
-
-  const supportsStandalone = useMemo(() => {
-    if (typeof window === "undefined") {
-      return false;
-    }
-    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window === "undefined") return;
+    setIsInstalled(
+      window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true,
+    );
   }, []);
 
+  const supportsStandalone = useMemo(() => {
+    if (!mounted || typeof window === "undefined") {
+      return false;
+    }
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }, [mounted]);
+
   const showIosHint = useMemo(() => {
-    if (typeof window === "undefined" || supportsStandalone) {
+    if (!mounted || typeof window === "undefined" || supportsStandalone) {
       return false;
     }
 
@@ -44,10 +47,10 @@ export function PwaRegister() {
     const isIos = /iphone|ipad|ipod/.test(ua);
     const isSafari = /safari/.test(ua) && !/crios|fxios|edgios/.test(ua);
     return isIos && isSafari;
-  }, [supportsStandalone]);
+  }, [mounted, supportsStandalone]);
 
   const isInstallCapableBrowser = useMemo(() => {
-    if (typeof window === "undefined" || supportsStandalone) {
+    if (!mounted || typeof window === "undefined" || supportsStandalone) {
       return false;
     }
 
@@ -55,7 +58,7 @@ export function PwaRegister() {
     const isChromiumFamily =
       /chrome|chromium|crios|edg|opr|opera|samsungbrowser/.test(ua) && !/firefox|fxios/.test(ua);
     return isChromiumFamily && "serviceWorker" in navigator;
-  }, [supportsStandalone]);
+  }, [mounted, supportsStandalone]);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "production" || typeof window === "undefined" || !("serviceWorker" in navigator)) {
@@ -114,6 +117,10 @@ export function PwaRegister() {
     }
 
     setInstallPrompt(null);
+  }
+
+  if (!mounted) {
+    return null;
   }
 
   if (isInstalled || supportsStandalone) {
