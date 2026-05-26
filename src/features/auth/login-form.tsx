@@ -40,14 +40,20 @@ export function LoginForm() {
     },
   });
 
+  const googleConfigured = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+
   return (
     <form className="grid gap-5" onSubmit={form.handleSubmit((values) => login.mutate(values))}>
-      <GoogleAuthButton mode="login" />
-      <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ash-400">
-        <span className="h-px flex-1 bg-ash-200" />
-        <span>Or continue with email</span>
-        <span className="h-px flex-1 bg-ash-200" />
-      </div>
+      {googleConfigured ? (
+        <>
+          <GoogleAuthButton mode="login" />
+          <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ash-400">
+            <span className="h-px flex-1 bg-ash-200" />
+            <span>Or continue with email</span>
+            <span className="h-px flex-1 bg-ash-200" />
+          </div>
+        </>
+      ) : null}
       {login.error ? (
         <div className="grid gap-3">
           <ErrorMessage error={login.error} context="auth" />

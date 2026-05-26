@@ -39,14 +39,20 @@ export function RegisterForm() {
     },
   });
 
+  const googleConfigured = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+
   return (
     <div className="grid gap-5">
-      <GoogleAuthButton mode="signup" />
-      <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ash-400">
-        <span className="h-px flex-1 bg-ash-200" />
-        <span>{isCompletingAccount ? "Finish creating your account" : "Or continue with email"}</span>
-        <span className="h-px flex-1 bg-ash-200" />
-      </div>
+      {googleConfigured ? (
+        <>
+          <GoogleAuthButton mode="signup" />
+          <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ash-400">
+            <span className="h-px flex-1 bg-ash-200" />
+            <span>{isCompletingAccount ? "Finish creating your account" : "Or continue with email"}</span>
+            <span className="h-px flex-1 bg-ash-200" />
+          </div>
+        </>
+      ) : null}
 
       {!isCompletingAccount ? (
         <form
