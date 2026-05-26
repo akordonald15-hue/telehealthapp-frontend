@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
 
 const tones = {
-  neutral: "bg-[#F3F4F6] text-[#374151]",
-  green: "bg-[#ECFDF5] text-[#047857]",
-  amber: "bg-[#FFFBEB] text-[#B45309]",
-  rose: "bg-[#FEF2F2] text-[#BE123C]",
-  cyan: "bg-[#ECFEFF] text-[#0F766E]",
-  blue: "bg-[var(--primary-soft)] text-[var(--primary-strong)]",
+  neutral: "bg-ash-100 text-ash-700",
+  green: "bg-success-soft text-success",
+  amber: "bg-warning-soft text-warning",
+  rose: "bg-danger-soft text-danger",
+  cyan: "bg-cyan-50 text-cyan-700",
+  blue: "bg-primary-soft text-primary-strong",
 };
 
 export function Badge({

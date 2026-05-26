@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { BrandLockup } from "@/components/brand/brand-lockup";
 
 export function AuthLayout({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
@@ -8,11 +10,17 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
           <div className="lf-panel rounded-[28px] p-6 shadow-[0_32px_80px_-50px_rgba(15,23,42,0.4)] sm:p-8">
             <div className="mb-8 flex flex-col items-center text-center">
               <BrandLockup href="/" wordmark="image" wordmarkClassName="h-7 max-w-[176px]" />
-              <h1 className="ct-dashboard-title mt-6 text-[#1F2937]">{title}</h1>
-              {subtitle ? <p className="mt-3 max-w-sm text-sm leading-6 text-slate-600">{subtitle}</p> : null}
+              <h1 className="ct-dashboard-title mt-6 text-ash-900">{title}</h1>
+              {subtitle ? <p className="mt-3 max-w-sm text-sm leading-6 text-ash-600">{subtitle}</p> : null}
             </div>
 
             {children}
+
+            <p className="mt-8 text-center text-xs text-ash-400">
+              <Link href="/" className="transition hover:text-primary">
+                &larr; Back to homepage
+              </Link>
+            </p>
           </div>
         </div>
       </div>

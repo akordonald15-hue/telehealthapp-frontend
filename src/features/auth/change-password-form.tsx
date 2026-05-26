@@ -61,12 +61,12 @@ export function ChangePasswordForm() {
       <Button type="submit" disabled={changePassword.isPending || userQuery.isLoading}>
         {changePassword.isPending ? "Updating password..." : "Continue"}
       </Button>
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-ash-500">
         Staff accounts receive login details from Caretekk admin. If your temporary password no longer works, contact support.
       </p>
       {!hasStoredSession() ? (
-        <p className="text-sm text-slate-600">
-          <Link className="font-semibold text-[var(--primary)]" href="/login">
+        <p className="text-sm text-ash-600">
+          <Link className="font-semibold text-primary hover:text-primary-strong" href="/login">
             Return to sign in
           </Link>
         </p>
