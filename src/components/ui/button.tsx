@@ -18,15 +18,15 @@ const sizeStyles: Record<ButtonSize, string> = {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-primary text-white shadow-[0_1px_2px_rgba(15,23,42,0.08),0_8px_20px_-10px_rgba(37,99,235,0.45)] hover:bg-primary-strong hover:shadow-[0_2px_4px_rgba(15,23,42,0.1),0_12px_28px_-10px_rgba(37,99,235,0.55)]",
+    "bg-[#2563EB] text-white shadow-[0_1px_2px_rgba(15,23,42,0.08),0_8px_20px_-10px_rgba(37,99,235,0.45)] hover:bg-[#1D4ED8] hover:shadow-[0_2px_4px_rgba(15,23,42,0.1),0_12px_28px_-10px_rgba(37,99,235,0.55)]",
   secondary:
-    "border border-ash-300 bg-surface text-ash-800 shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:border-primary hover:bg-primary-tint hover:text-primary",
+    "border border-slate-300 bg-white text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
   dark:
-    "bg-ash-900 text-white hover:bg-primary-deep",
+    "bg-slate-900 text-white hover:bg-[#1E3A8A]",
   danger:
-    "bg-danger text-white hover:opacity-95",
+    "bg-rose-600 text-white hover:opacity-95",
   ghost:
-    "text-ash-700 hover:bg-primary-tint hover:text-primary",
+    "text-slate-700 hover:bg-[#EFF6FF] hover:text-[#2563EB]",
 };
 
 export function Button({
