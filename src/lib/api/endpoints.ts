@@ -208,6 +208,7 @@ export const paymentsApi = {
     callback_url: string;
   }) => apiRequest<PaymentInitiation>("/payments/initiate/", { method: "POST", body }),
   detail: (id: number) => apiRequest<Payment>(`/payments/${id}/`),
+  retry: (id: number) => apiRequest<PaymentInitiation>(`/payments/${id}/retry/`, { method: "POST" }),
   refund: (body: { payment: number; amount: string | number }) =>
     apiRequest<Refund>("/payments/refunds/", { method: "POST", body }),
 };

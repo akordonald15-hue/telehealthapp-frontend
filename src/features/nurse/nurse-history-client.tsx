@@ -1,24 +1,19 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
-import { homeCareApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { formatDateTime } from "@/lib/utils";
 import { bookingSourceLabel, homeCareStatusLabel, isHistoryRequest, preferredTimeLabel } from "@/features/nurse/nurse-utils";
+import { useNurseRequests } from "@/features/nurse/use-nurse-requests";
 
 export function NurseHistoryClient() {
   const userQuery = useCurrentUser();
-  const requestsQuery = useQuery({
-    queryKey: ["home-care", "requests", "history"],
-    queryFn: () => homeCareApi.requests({ page_size: 50 }),
-    enabled: userQuery.data?.role === "nurse",
-  });
+  const requestsQuery = useNurseRequests(userQuery.data?.role === "nurse", 50);
 
   if (userQuery.data?.role !== "nurse") {
     return (
@@ -28,7 +23,7 @@ export function NurseHistoryClient() {
     );
   }
 
-  const history = (requestsQuery.data?.results ?? []).filter((item) => isHistoryRequest(item.status));
+  const history = requestsQuery.requests.filter((item) => isHistoryRequest(item.status));
 
   return (
     <Section title="Nurse history" description="Review completed, cancelled, and unreachable requests without losing the full care timeline.">
@@ -62,9 +57,9 @@ export function NurseHistoryClient() {
                   <p className="mt-1 text-sm text-slate-600">{request.service_address_snapshot || "Address not captured"}</p>
                   <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-500">
                     <span>{homeCareStatusLabel(request.status)}</span>
-                    <span>•</span>
+                    <span>&bull;</span>
                     <span>{bookingSourceLabel(request.booking_source)}</span>
-                    <span>•</span>
+                    <span>&bull;</span>
                     <span>{preferredTimeLabel(request)}</span>
                   </div>
                 </div>

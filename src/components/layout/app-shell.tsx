@@ -20,6 +20,7 @@ import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { BrandLockup } from "@/components/brand/brand-lockup";
+import { OfflineStatusBanner } from "@/components/pwa/offline-status-banner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser, useLogout } from "@/lib/auth/use-auth";
@@ -187,8 +188,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.15),_transparent_28%),linear-gradient(180deg,#F5F8FC_0%,#F7FAFE_40%,#FFFFFF_100%)]">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
+    <div className="ct-safe-area min-h-[100dvh] bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.15),_transparent_28%),linear-gradient(180deg,#F5F8FC_0%,#F7FAFE_40%,#FFFFFF_100%)]">
+      <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1600px]">
         <aside className="hidden w-[290px] shrink-0 px-5 py-6 lg:block xl:px-6">
           <div className="sticky top-6">{navigation}</div>
         </aside>
@@ -214,7 +215,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         ) : null}
 
-        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <div className="flex min-h-[100dvh] min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 border-b border-white/65 bg-white/82 backdrop-blur-xl">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex min-w-0 items-center gap-3">
@@ -241,7 +242,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">{children}</main>
+          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+            <OfflineStatusBanner />
+            {children}
+          </main>
         </div>
       </div>
     </div>
