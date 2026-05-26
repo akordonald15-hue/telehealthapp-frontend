@@ -361,9 +361,8 @@ export function TriageClient() {
           </div>
         </div>
       ) : assistantOpen ? (
-        <div className="fixed inset-0 z-40 overflow-y-auto bg-[linear-gradient(180deg,rgba(15,23,42,0.26),rgba(15,23,42,0.38))] backdrop-blur-sm">
-          <div className="mx-auto flex min-h-full w-full max-w-6xl items-start justify-center px-2 py-3 sm:px-6 sm:py-6">
-            <div className="ct-surface grid w-full min-w-0 max-w-5xl gap-4 rounded-[26px] p-3 sm:rounded-[34px] sm:p-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.85fr)]">
+        <div className="mx-auto w-full max-w-6xl">
+          <div className="ct-surface grid w-full min-w-0 gap-4 rounded-[26px] p-3 sm:rounded-[34px] sm:p-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.85fr)]">
               <div className="ct-panel grid min-w-0 gap-4 rounded-[22px] p-4 sm:rounded-[28px] sm:p-6">
                 <div className="flex items-start gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
@@ -481,7 +480,7 @@ export function TriageClient() {
                       <p className="mt-2 text-sm leading-7 text-slate-600">
                         Your care summary is ready for the doctor, so you can continue the conversation with the right context already in place.
                       </p>
-                      <div className="sticky bottom-3 mt-4 flex flex-col gap-3 rounded-[18px] border border-slate-200 bg-white/96 p-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.55)] backdrop-blur sm:static sm:flex-row sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+                      <div className="mt-4 flex flex-col gap-3 rounded-[18px] border border-slate-200 bg-white/96 p-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] sm:flex-row sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
                         <Link
                           href={hasConsultation ? "/messages" : "/appointments"}
                           className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] px-4 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(37,99,235,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(37,99,235,0.3)]"
@@ -514,7 +513,6 @@ export function TriageClient() {
                   </div>
                 )}
               </div>
-            </div>
           </div>
         </div>
       ) : (

@@ -9,12 +9,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { homeCareApi, profilesApi } from "@/lib/api/endpoints";
+import { profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import type { NurseProfile } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
 import { activeAssignmentForRequest, homeCareStatusLabel, isHistoryRequest, recentActivitySummary } from "@/features/nurse/nurse-utils";
+import { useNurseRequests } from "@/features/nurse/use-nurse-requests";
 import { ProviderWalletPanel } from "@/features/provider-ledger/provider-wallet-panel";
 import { AvailabilityControl } from "@/features/providers/availability-control";
 
@@ -48,11 +49,7 @@ export function NurseDashboardClient() {
     queryFn: () => profilesApi.me<NurseProfile>(),
     enabled: userQuery.data?.role === "nurse",
   });
-  const requestsQuery = useQuery({
-    queryKey: ["home-care", "requests", "dashboard"],
-    queryFn: () => homeCareApi.requests({ page_size: 20 }),
-    enabled: userQuery.data?.role === "nurse",
-  });
+  const requestsQuery = useNurseRequests(userQuery.data?.role === "nurse", 20);
 
   const user = userQuery.data;
   if (user?.role !== "nurse") {
@@ -63,10 +60,12 @@ export function NurseDashboardClient() {
     );
   }
 
-  const requests = requestsQuery.data?.results ?? [];
+  const requests = requestsQuery.requests;
   const activeRequest = requests.find((item) => !isHistoryRequest(item.status) && activeAssignmentForRequest(item));
   const completedCount = requests.filter((item) => ["care_completed", "patient_confirmed"].includes(item.status)).length;
-  const pendingOffers = requests.filter((item) => item.current_assignment?.status === "pending" && item.status === "assigned").length;
+  const pendingOffers = requests.filter(
+    (item) => item.current_assignment?.status === "pending" && item.status === "assigned",
+  ).length;
   const recentRequests = requests.slice(0, 4);
 
   return (
@@ -93,10 +92,16 @@ export function NurseDashboardClient() {
               : "Accepted requests, travel updates, and visit completion all stay connected here."}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={activeRequest ? `/nurse/request/${activeRequest.id}` : "/nurse/requests"} className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[var(--primary)] shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5">
+            <Link
+              href={activeRequest ? `/nurse/request/${activeRequest.id}` : "/nurse/requests"}
+              className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[var(--primary)] shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5"
+            >
               {activeRequest ? "Open active request" : "View assigned requests"}
             </Link>
-            <Link href="/nurse/history" className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-white/25 bg-white/10 px-5 text-sm font-extrabold text-white transition hover:bg-white/16">
+            <Link
+              href="/nurse/history"
+              className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-white/25 bg-white/10 px-5 text-sm font-extrabold text-white transition hover:bg-white/16"
+            >
               View history
             </Link>
           </div>
@@ -111,7 +116,9 @@ export function NurseDashboardClient() {
             {profileQuery.data ? <Badge tone="blue">{profileQuery.data.active_for_dispatch ? "dispatch ready" : "paused"}</Badge> : null}
           </div>
           {profileQuery.isLoading ? (
-            <div className="mt-6 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading your profile...</div>
+            <div className="mt-6 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+              Loading your profile...
+            </div>
           ) : profileQuery.isError ? (
             <div className="mt-6 rounded-[18px] border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
               {getFriendlyErrorMessage(profileQuery.error, "profile")}
@@ -136,10 +143,30 @@ export function NurseDashboardClient() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Completed visits" value={completedCount} description="Visits finished and ready for patient confirmation or closure." icon={CheckCircle2} />
-        <MetricCard label="Pending offers" value={pendingOffers} description="Requests waiting for your accept or decline decision." icon={Clock3} />
-        <MetricCard label="Active request" value={activeRequest ? 1 : 0} description="Your current visit in progress or awaiting the next step." icon={CalendarClock} />
-        <MetricCard label="Rating" value="No ratings yet" description="Patient ratings will appear here once they are added to the nurse summary." icon={Star} />
+        <MetricCard
+          label="Completed visits"
+          value={completedCount}
+          description="Visits finished and ready for patient confirmation or closure."
+          icon={CheckCircle2}
+        />
+        <MetricCard
+          label="Pending offers"
+          value={pendingOffers}
+          description="Requests waiting for your accept or decline decision."
+          icon={Clock3}
+        />
+        <MetricCard
+          label="Active request"
+          value={activeRequest ? 1 : 0}
+          description="Your current visit in progress or awaiting the next step."
+          icon={CalendarClock}
+        />
+        <MetricCard
+          label="Rating"
+          value="No ratings yet"
+          description="Patient ratings will appear here once they are added to the nurse summary."
+          icon={Star}
+        />
       </div>
 
       <AvailabilityControl
@@ -164,11 +191,27 @@ export function NurseDashboardClient() {
           {recentRequests.length ? (
             <div className="grid gap-3">
               {recentRequests.map((request) => (
-                <Link key={request.id} href={`/nurse/request/${request.id}`} className="ct-hover-lift rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 hover:border-[rgba(66,107,179,0.18)] hover:bg-white">
+                <Link
+                  key={request.id}
+                  href={`/nurse/request/${request.id}`}
+                  className="ct-hover-lift rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 hover:border-[rgba(66,107,179,0.18)] hover:bg-white"
+                >
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-[#1F2937]">{request.contact_name_snapshot || "Patient request"}</p>
-                      <p className="mt-1 text-sm text-slate-600">{recentActivitySummary({ id: request.id, event_type: request.status, from_status: "", to_status: request.status, metadata: {}, actor: null, actor_email: null, assignment: request.current_assignment?.id ?? null, created_at: request.updated_at })}</p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {recentActivitySummary({
+                          id: request.id,
+                          event_type: request.status,
+                          from_status: "",
+                          to_status: request.status,
+                          metadata: {},
+                          actor: null,
+                          actor_email: null,
+                          assignment: request.current_assignment?.id ?? null,
+                          created_at: request.updated_at,
+                        })}
+                      </p>
                     </div>
                     <div className="text-sm text-slate-500">{formatDateTime(request.updated_at)}</div>
                   </div>
