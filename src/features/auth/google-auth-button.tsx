@@ -101,14 +101,14 @@ export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
   return (
     <div className="grid gap-3">
       <div
-        className="flex min-h-12 justify-center overflow-hidden rounded-[12px] border border-slate-200 bg-white px-1 py-1"
+        className="flex min-h-12 justify-center overflow-hidden rounded-[12px] border border-ash-200 bg-surface px-1 py-1"
         aria-live="polite"
       >
         <div ref={buttonRef} className="w-full max-w-full" />
       </div>
-      {googleLogin.isPending ? <p className="text-sm text-slate-500">Connecting to Google...</p> : null}
+      {googleLogin.isPending ? <p className="text-sm text-ash-500">Connecting to Google...</p> : null}
       {googleLogin.error ? <ErrorMessage error={googleLogin.error} context="auth" /> : null}
-      {localError ? <p className="text-sm text-amber-700">{localError}</p> : null}
+      {localError ? <p className="text-sm text-warning">{localError}</p> : null}
     </div>
   );
 }

@@ -4,13 +4,13 @@ import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes 
 
 import { cn } from "@/lib/utils";
 
+const baseField =
+  "w-full rounded-[14px] border border-ash-200 bg-surface px-4 text-sm text-ash-800 shadow-[0_8px_24px_rgba(31,41,55,0.035)] outline-none transition placeholder:text-ash-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/15 aria-[invalid=true]:border-rose-300 aria-[invalid=true]:focus:ring-rose-100";
+
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
-      className={cn(
-        "min-h-12 w-full rounded-[14px] border border-[#E5E7EB] bg-white px-4 text-sm text-[#1F2937] shadow-[0_8px_24px_rgba(31,41,55,0.035)] outline-none transition placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 focus-visible:border-[#2563EB] focus-visible:ring-4 focus-visible:ring-[#2563EB]/10 aria-[invalid=true]:border-rose-300 aria-[invalid=true]:focus:ring-rose-100",
-        className,
-      )}
+      className={cn(baseField, "min-h-12", className)}
       {...props}
     />
   );
@@ -29,7 +29,7 @@ export function PasswordInput({ className, ...props }: InputHTMLAttributes<HTMLI
       <button
         type="button"
         onClick={() => setVisible((current) => !current)}
-        className="absolute right-2 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
+        className="absolute right-2 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-[12px] text-ash-500 transition hover:bg-primary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
         aria-label={visible ? "Hide password" : "Show password"}
       >
         {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -41,10 +41,7 @@ export function PasswordInput({ className, ...props }: InputHTMLAttributes<HTMLI
 export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
-      className={cn(
-        "min-h-32 w-full rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-3.5 text-sm text-[#1F2937] shadow-[0_8px_24px_rgba(31,41,55,0.035)] outline-none transition placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 focus-visible:border-[#2563EB] focus-visible:ring-4 focus-visible:ring-[#2563EB]/10 aria-[invalid=true]:border-rose-300 aria-[invalid=true]:focus:ring-rose-100",
-        className,
-      )}
+      className={cn(baseField, "min-h-32 py-3.5", className)}
       {...props}
     />
   );
@@ -53,10 +50,7 @@ export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
 export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
-      className={cn(
-        "min-h-12 w-full rounded-[14px] border border-[#E5E7EB] bg-white px-4 text-sm text-[#1F2937] shadow-[0_8px_24px_rgba(31,41,55,0.035)] outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 focus-visible:border-[#2563EB] focus-visible:ring-4 focus-visible:ring-[#2563EB]/10 aria-[invalid=true]:border-rose-300 aria-[invalid=true]:focus:ring-rose-100",
-        className,
-      )}
+      className={cn(baseField, "min-h-12", className)}
       {...props}
     />
   );

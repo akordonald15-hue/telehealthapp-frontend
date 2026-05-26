@@ -27,7 +27,10 @@ export function MarketingHeader() {
           <Link href="/login" className="rounded-[10px] text-sm font-semibold text-[#475467] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15">
             Sign in
           </Link>
-          <Link href="/register" className="lf-btn lf-btn-primary min-h-[48px] px-5 text-sm">
+          <Link
+            href="/register"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-[#2563EB] px-5 text-sm font-bold text-white shadow-[0_10px_24px_-12px_rgba(37,99,235,0.55)] transition hover:-translate-y-0.5 hover:bg-[#1d4ed8]"
+          >
             Book consultation
           </Link>
         </div>
@@ -64,7 +67,11 @@ export function MarketingHeader() {
             >
               Sign in
             </Link>
-            <Link href="/register" onClick={() => setOpen(false)} className="lf-btn lf-btn-primary text-sm">
+            <Link
+              href="/register"
+              onClick={() => setOpen(false)}
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-[#2563EB] px-5 text-sm font-bold text-white shadow-[0_10px_24px_-12px_rgba(37,99,235,0.55)] transition hover:bg-[#1d4ed8]"
+            >
               Book consultation
             </Link>
           </div>

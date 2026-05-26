@@ -33,10 +33,13 @@ export function PasswordResetForm() {
 
   return (
     <div className="grid gap-6">
-      <form className="grid gap-4 rounded-[22px] border border-slate-200 bg-slate-50/80 p-5" onSubmit={requestForm.handleSubmit((values) => requestReset.mutate(values))}>
+      <form
+        className="grid gap-4 rounded-[22px] border border-ash-200 bg-ash-50/80 p-5 sm:p-6"
+        onSubmit={requestForm.handleSubmit((values) => requestReset.mutate(values))}
+      >
         <div>
-          <p className="font-heading text-xl font-semibold text-[#1F2937]">Request password reset code</p>
-          <p className="mt-1 text-sm text-slate-600">We will send a reset code to the email linked to your account.</p>
+          <p className="font-heading text-xl font-semibold text-ash-900">Request password reset code</p>
+          <p className="mt-1 text-sm text-ash-600">We will send a reset code to the email linked to your account.</p>
         </div>
         {requestReset.isSuccess ? <Notice title={requestReset.data.detail} tone="success" /> : null}
         <ErrorMessage error={requestReset.error} context="auth" />
@@ -48,10 +51,13 @@ export function PasswordResetForm() {
         </Button>
       </form>
 
-      <form className="grid gap-4 rounded-[22px] border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.45)]" onSubmit={confirmForm.handleSubmit((values) => confirmReset.mutate(values))}>
+      <form
+        className="grid gap-4 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.45)] sm:p-6"
+        onSubmit={confirmForm.handleSubmit((values) => confirmReset.mutate(values))}
+      >
         <div>
-          <p className="font-heading text-xl font-semibold text-[#1F2937]">Set a new password</p>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="font-heading text-xl font-semibold text-ash-900">Set a new password</p>
+          <p className="mt-1 text-sm text-ash-600">
             {resetCodeRequested ? "Paste the reset code from your email, then choose a new secure password." : "Request a reset code first, then return here to set your new password."}
           </p>
         </div>
