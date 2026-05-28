@@ -14,6 +14,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -247,7 +248,7 @@ export function DoctorDashboardClient() {
             </Link>
           </div>
           {appointments.isLoading ? (
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading appointments...</div>
+            <InlineLoader compact label="Loading consultations" />
           ) : todayAppointments.length ? (
             <div className="grid gap-3">
               {todayAppointments.slice(0, 5).map((appointment) => (
@@ -268,7 +269,7 @@ export function DoctorDashboardClient() {
             <UserRoundCheck className="h-5 w-5 text-[#0F766E]" />
           </div>
           {appointments.isLoading || referrals.isLoading ? (
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading patients...</div>
+            <InlineLoader compact label="Loading patient overview" />
           ) : recentPatientIds.length ? (
             <div className="grid gap-3">
               {recentPatientIds.map((patientId) => (
@@ -296,7 +297,7 @@ export function DoctorDashboardClient() {
             </Link>
           </div>
           {threads.isLoading ? (
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading messages...</div>
+            <InlineLoader compact label="Loading consultation messages" />
           ) : threadItems.length ? (
             <div className="grid gap-3">
               {threadItems.slice(0, 4).map((thread) => (
@@ -319,7 +320,7 @@ export function DoctorDashboardClient() {
             </Link>
           </div>
           {referrals.isLoading ? (
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading referrals...</div>
+            <InlineLoader compact label="Loading referral activity" />
           ) : referralItems.length ? (
             <div className="grid gap-3">
               {referralItems.slice(0, 4).map((referral) => (

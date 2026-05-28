@@ -17,6 +17,7 @@ import type { ComponentType, ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { messagingApi, triageApi } from "@/lib/api/endpoints";
@@ -355,10 +356,7 @@ export function TriageClient() {
     <Section title="Care check-in" description={pageDescription}>
       {!consultationsReady ? (
         <div className="ct-panel grid gap-4 rounded-[28px] p-6">
-          <div className="flex items-center gap-3 text-slate-600">
-            <LoaderCircle className="h-5 w-5 animate-spin text-[#2563EB]" />
-            <p className="text-sm font-medium">Preparing your care check-in...</p>
-          </div>
+          <InlineLoader label="Preparing your care check-in" />
         </div>
       ) : assistantOpen ? (
         <div className="mx-auto w-full max-w-6xl">
@@ -411,9 +409,7 @@ export function TriageClient() {
                 </div>
 
                 {booting ? (
-                  <div className="ct-soft-panel rounded-[18px] px-4 py-4 text-sm text-slate-600">
-                    Preparing your care check-in...
-                  </div>
+                  <InlineLoader compact label="Preparing your care check-in" />
                 ) : null}
 
                 {startSession.data?.disclaimer && !submittedSymptomText ? (

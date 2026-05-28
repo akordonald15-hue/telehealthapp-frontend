@@ -13,6 +13,7 @@ import { DataList } from "@/components/ui/data-list";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
 import { Input, Textarea } from "@/components/ui/input";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -105,7 +106,14 @@ export function AppointmentsClient() {
             </div>
           </div>
           <ErrorMessage error={createAppointment.error} context="appointments" />
-          {createAppointment.isSuccess ? <Notice title="Checkout ready" tone="success">Redirecting you to Paystack. Your appointment is not marked paid until Paystack verifies payment.</Notice> : null}
+          {createAppointment.isSuccess ? (
+            <div className="grid gap-3">
+              <Notice title="Checkout ready" tone="success">
+                Your appointment is saved. Paystack will verify payment before this consultation is marked paid.
+              </Notice>
+              <InlineLoader label="Preparing secure payment" />
+            </div>
+          ) : null}
           <Field label="Selected Doctor" error={form.formState.errors.doctor?.message}>
             <div className="grid gap-3">
               {selectedDoctor ? (

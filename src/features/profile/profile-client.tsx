@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
 import { Input, Textarea } from "@/components/ui/input";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { authApi, profilesApi } from "@/lib/api/endpoints";
@@ -77,7 +78,7 @@ export function ProfileClient() {
           </div>
           <ErrorMessage error={updateProfile.error} context="profile" />
           {updateProfile.isSuccess ? <Notice title="Profile saved" tone="success" /> : null}
-          {profile.isLoading ? <p className="text-sm text-slate-600">Loading your profile...</p> : null}
+          {profile.isLoading ? <InlineLoader compact label="Loading your profile" /> : null}
           {isDoctor ? (
             <>
               <Field label="License number">

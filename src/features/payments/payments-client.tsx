@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DataList } from "@/components/ui/data-list";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -55,6 +56,7 @@ export function PaymentsClient() {
           Your booking request was saved. Please try payment again. {retryError}
         </Notice>
       ) : null}
+      {retryPayment.isPending ? <InlineLoader label="Preparing secure payment" /> : null}
 
       {userQuery.data?.role === "doctor" || userQuery.data?.role === "nurse" ? (
         <Notice title="Billing history is not available for this account." tone="neutral">

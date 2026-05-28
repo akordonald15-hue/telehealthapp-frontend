@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -240,7 +241,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
       ) : null}
 
       {requestQuery.isLoading ? (
-        <div className="rounded-[24px] border border-slate-200 bg-white px-5 py-10 text-sm text-slate-600">Loading request details...</div>
+        <InlineLoader label="Preparing nurse request details" />
       ) : request ? (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
@@ -467,7 +468,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
               <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Request timeline</h2>
               <p className="mt-1 text-sm text-slate-500">A clear record of what has happened so far.</p>
               {eventsQuery.isLoading ? (
-                <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading timeline...</div>
+                <InlineLoader className="mt-5" compact label="Loading request timeline" />
               ) : eventsQuery.data?.results.length ? (
                 <div className="mt-5 grid gap-3">
                   {eventsQuery.data.results.map((event) => (
@@ -490,7 +491,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
             <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Travel tracking</h2>
             <p className="mt-1 text-sm text-slate-500">Recent shared tracking points for this request.</p>
             {trackingQuery.isLoading ? (
-              <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading travel updates...</div>
+              <InlineLoader className="mt-5" compact label="Loading travel updates" />
             ) : trackingQuery.data?.results.length ? (
               <div className="mt-5 grid gap-3 md:grid-cols-2">
                 {trackingQuery.data.results.map((point) => (

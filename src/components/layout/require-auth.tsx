@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { clearTokens, hasStoredSession } from "@/lib/auth/tokens";
+import { FullPageLoader } from "@/components/ui/loaders";
 
 function subscribeToClientMount() {
   return () => undefined;
@@ -193,19 +194,24 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   }
 
   if (!mounted || secureState === "checking" || userQuery.isLoading) {
-    return <div className="p-6 text-sm text-slate-600">Loading your workspace...</div>;
+    return (
+      <FullPageLoader
+        title="Preparing your Caretekk workspace"
+        subtitle="We are checking your access and loading the right dashboard."
+      />
+    );
   }
 
   if (!hasStoredSession()) {
-    return <div className="p-6 text-sm text-slate-600">Redirecting...</div>;
+    return <FullPageLoader title="Securing your session" subtitle="Taking you to the right sign-in step." />;
   }
 
   if (userQuery.isError) {
-    return <div className="p-6 text-sm text-slate-600">Redirecting...</div>;
+    return <FullPageLoader title="Securing your session" subtitle="Refreshing access before we continue." />;
   }
 
   if (userQuery.data?.must_change_password) {
-    return <div className="p-6 text-sm text-slate-600">Redirecting...</div>;
+    return <FullPageLoader title="Securing your session" subtitle="Preparing your password update." />;
   }
 
   return children;

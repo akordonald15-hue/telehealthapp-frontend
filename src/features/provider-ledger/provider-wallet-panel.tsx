@@ -5,6 +5,7 @@ import { Banknote, Clock3, CreditCard, History, WalletCards } from "lucide-react
 
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { ApiError } from "@/lib/api/client";
 import { providerLedgerApi } from "@/lib/api/endpoints";
@@ -55,7 +56,7 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
   if (walletQuery.isLoading) {
     return (
       <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
-        <div className="h-5 w-40 rounded-full bg-slate-100" />
+        <InlineLoader compact label="Preparing your wallet summary" />
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {[0, 1, 2, 3].map((item) => (
             <div key={item} className="h-32 rounded-[20px] bg-slate-50" />
@@ -144,7 +145,7 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
         </div>
 
         {transactionsQuery.isLoading ? (
-          <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading wallet history...</div>
+          <InlineLoader compact label="Loading wallet history" />
         ) : transactionsQuery.isError ? (
           <Notice title="Wallet history could not load." tone="warning">
             {transactionsQuery.error instanceof Error ? transactionsQuery.error.message : "Please try again shortly."}

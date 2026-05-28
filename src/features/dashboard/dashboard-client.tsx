@@ -5,6 +5,7 @@ import { ArrowRight, CalendarClock, CreditCard, FileText, MessageSquareText, Spa
 import Link from "next/link";
 
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -269,7 +270,7 @@ export function DashboardClient() {
               </div>
               <div className="grid gap-3">
                 {appointments.isLoading ? (
-                  <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading your appointments...</div>
+                  <InlineLoader compact label="Loading your care dashboard" />
                 ) : appointments.isError ? (
                   <div className="rounded-[20px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(appointments.error, "appointments")}</div>
                 ) : appointments.data?.results.length ? (
@@ -300,7 +301,7 @@ export function DashboardClient() {
               </div>
               <div className="grid gap-3">
                 {userQuery.isLoading || payments.isLoading ? (
-                  <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">Loading your payment history...</div>
+                  <InlineLoader compact label="Loading your billing history" />
                 ) : payments.isError ? (
                   <div className="rounded-[20px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(payments.error, "payments")}</div>
                 ) : payments.data?.results.length ? (

@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { Textarea } from "@/components/ui/input";
@@ -140,7 +141,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
       ) : null}
 
       {requestQuery.isLoading ? (
-        <div className="rounded-[24px] border border-slate-200 bg-white px-5 py-10 text-sm text-slate-600">Loading request details...</div>
+        <InlineLoader label="Preparing your home care request" />
       ) : request ? (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.86fr)]">
@@ -302,7 +303,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
             <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Request activity</h2>
               {eventsQuery.isLoading ? (
-                <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading activity...</div>
+                <InlineLoader className="mt-5" compact label="Loading request activity" />
               ) : eventsQuery.data?.results.length ? (
                 <div className="mt-5 grid gap-3">
                   {eventsQuery.data.results.map((event) => (
@@ -331,7 +332,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
                 </div>
               </div>
               {trackingQuery.isLoading ? (
-                <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading travel updates...</div>
+                <InlineLoader className="mt-5" compact label="Loading travel updates" />
               ) : trackingQuery.data?.results.length ? (
                 <div className="mt-5 grid gap-3">
                   {trackingQuery.data.results.map((point) => (

@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -116,9 +117,7 @@ export function NurseDashboardClient() {
             {profileQuery.data ? <Badge tone="blue">{profileQuery.data.active_for_dispatch ? "dispatch ready" : "paused"}</Badge> : null}
           </div>
           {profileQuery.isLoading ? (
-            <div className="mt-6 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
-              Loading your profile...
-            </div>
+            <InlineLoader className="mt-6" compact label="Loading your profile" />
           ) : profileQuery.isError ? (
             <div className="mt-6 rounded-[18px] border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
               {getFriendlyErrorMessage(profileQuery.error, "profile")}

@@ -317,6 +317,30 @@ textarea {
   }
 }
 
+@keyframes caretekk-ring {
+  0% {
+    opacity: 0.72;
+    transform: scale(0.82);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.24);
+  }
+}
+
+@keyframes caretekk-dot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.42;
+  }
+  40% {
+    transform: translateY(-2px);
+    opacity: 1;
+  }
+}
+
 @media (max-width: 640px) {
   .lf-shell {
     width: min(100%, calc(100% - 24px));
