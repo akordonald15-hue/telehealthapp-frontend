@@ -9,6 +9,8 @@ export function ErrorMessage({
   context?:
     | "generic"
     | "auth"
+    | "registration"
+    | "verification"
     | "dashboard"
     | "appointments"
     | "messages"

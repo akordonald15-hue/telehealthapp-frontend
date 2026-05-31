@@ -11,6 +11,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
 import { Input, PasswordInput } from "@/components/ui/input";
 import { GoogleAuthButton } from "@/features/auth/google-auth-button";
+import { savePendingVerificationEmail } from "@/features/auth/email-flow-storage";
 import { useLogin } from "@/lib/auth/use-auth";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 
@@ -52,7 +53,15 @@ export function LoginForm() {
         <div className="grid gap-3">
           <ErrorMessage error={login.error} context="auth" />
           {login.error instanceof Error && login.error.message.toLowerCase().includes("email not verified") ? (
-            <Link href="/verify-email">
+            <Link
+              href="/verify-email"
+              onClick={() => {
+                const targetEmail = form.getValues("email");
+                if (targetEmail) {
+                  savePendingVerificationEmail(targetEmail);
+                }
+              }}
+            >
               <Button type="button" variant="secondary" className="w-full">
                 Confirm email
               </Button>

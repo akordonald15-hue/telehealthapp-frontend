@@ -3,6 +3,8 @@ import { ApiError, extractErrorMessage } from "@/lib/api/client";
 type ErrorContext =
   | "generic"
   | "auth"
+  | "registration"
+  | "verification"
   | "dashboard"
   | "appointments"
   | "messages"
@@ -20,6 +22,8 @@ type ErrorContext =
 const CONTEXT_DEFAULTS: Record<ErrorContext, string> = {
   generic: "Something went wrong. Please try again.",
   auth: "We couldn't sign you in right now. Please try again.",
+  registration: "We couldn't create your account right now. Please try again.",
+  verification: "We couldn't verify that code right now. Please try again.",
   dashboard: "We're having trouble loading some parts of your dashboard.",
   appointments: "We couldn't load your appointments right now.",
   messages: "We couldn't load your messages right now.",
@@ -37,6 +41,14 @@ const CONTEXT_DEFAULTS: Record<ErrorContext, string> = {
 
 const MESSAGE_OVERRIDES: Array<{ pattern: RegExp; replacement: string }> = [
   { pattern: /email not verified/i, replacement: "Please verify your email before signing in." },
+  {
+    pattern: /invalid or expired verification code/i,
+    replacement: "That verification code is invalid or has expired. Request a new code and try again.",
+  },
+  {
+    pattern: /invalid or expired token/i,
+    replacement: "That link or code is no longer valid. Request a new one and try again.",
+  },
   { pattern: /no active account found with the given credentials|invalid credentials/i, replacement: "Your email or password is incorrect." },
   { pattern: /service_unavailable|bad gateway|gateway timeout/i, replacement: "We couldn't reach the sign-in service right now. Please try again in a moment." },
   { pattern: /failed to fetch/i, replacement: "We couldn't connect right now. Please try again in a moment." },
@@ -48,6 +60,10 @@ const MESSAGE_OVERRIDES: Array<{ pattern: RegExp; replacement: string }> = [
   { pattern: /google email is not verified/i, replacement: "Please use a Google account with a verified email address." },
   { pattern: /method .* not allowed/i, replacement: "That action isn't available right now." },
   { pattern: /throttled|too many requests/i, replacement: "You've made a few requests in a short time. Please wait a moment and try again." },
+  {
+    pattern: /valid phone number in 080|phone number.*\+234|invalid phone/i,
+    replacement: "Enter a valid phone number in 080... or +234... format.",
+  },
 ];
 
 export function getFriendlyErrorMessage(error: unknown, context: ErrorContext = "generic") {

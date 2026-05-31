@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { NIGERIAN_PHONE_ERROR, normalizeNigerianPhoneInput } from "@/lib/validation/phone";
 
 export const loginSchema = z.object({
   email: z.string().email(),
@@ -7,7 +8,11 @@ export const loginSchema = z.object({
 
 export const registerSchema = z.object({
   email: z.string().email(),
-  phone: z.string().max(32).optional(),
+  phone: z
+    .string()
+    .max(32)
+    .optional()
+    .refine((value) => !value || normalizeNigerianPhoneInput(value) !== null, NIGERIAN_PHONE_ERROR),
   password: z.string().min(8),
 });
 

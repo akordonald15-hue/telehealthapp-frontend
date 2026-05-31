@@ -24,7 +24,10 @@ export function MarketingHeader() {
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Link href="/login" className="rounded-[10px] text-sm font-semibold text-[#475467] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15">
+          <Link
+            href="/login"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-[#CBD5E1] bg-white px-5 text-sm font-semibold text-[#0b1c30] shadow-[0_8px_20px_-16px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:border-[#2563EB] hover:text-[#2563EB] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
+          >
             Sign in
           </Link>
           <Link
@@ -63,7 +66,7 @@ export function MarketingHeader() {
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              className="rounded-[12px] px-3 py-3 text-sm font-semibold text-[#475467] transition hover:bg-[var(--primary-soft)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-[#CBD5E1] bg-white px-5 text-sm font-semibold text-[#0b1c30] shadow-[0_8px_20px_-16px_rgba(15,23,42,0.22)] transition hover:border-[#2563EB] hover:text-[#2563EB] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
             >
               Sign in
             </Link>
