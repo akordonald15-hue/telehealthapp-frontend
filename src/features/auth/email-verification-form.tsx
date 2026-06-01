@@ -8,8 +8,6 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { OtpInput } from "@/components/ui/otp-input";
 import {
@@ -36,6 +34,7 @@ export function EmailVerificationForm() {
   useEffect(() => {
     const resolvedEmail = email || readPendingVerificationEmail();
     if (!resolvedEmail) {
+      router.replace("/register");
       return;
     }
 
@@ -85,23 +84,29 @@ export function EmailVerificationForm() {
               saveVerifiedRegistrationEmail(values.email);
               router.replace("/register?verified=1");
             },
-          }),
+          })
         )}
       >
         <div>
           <p className="font-heading text-xl font-semibold text-ash-900">Enter your verification code</p>
           <p className="mt-1 text-sm text-ash-600">The code expires in 10 minutes.</p>
         </div>
+
+        {currentEmail ? (
+          <div className="rounded-[16px] border border-ash-200 bg-ash-50 px-4 py-3 text-sm text-ash-700">
+            <span className="font-semibold text-ash-900">Email:</span> {currentEmail}
+          </div>
+        ) : null}
+
         {confirmVerification.isSuccess ? (
           <div className="grid gap-3">
             <Notice title="Email confirmed" tone="success" />
             <p className="text-sm text-ash-600">Taking you to the final account step...</p>
           </div>
         ) : null}
+
         <ErrorMessage error={confirmVerification.error} context="verification" />
-        <Field label="Email" error={confirmForm.formState.errors.email?.message} required>
-          <Input type="email" autoComplete="email" placeholder="you@example.com" {...confirmForm.register("email")} />
-        </Field>
+
         <div className="grid gap-2">
           <span className="text-sm font-bold text-ash-700">
             Verification code <span className="ml-1 text-rose-600" aria-hidden="true">*</span>
@@ -124,9 +129,11 @@ export function EmailVerificationForm() {
             <span className="text-xs text-ash-500">Paste the 6-digit code from your email.</span>
           )}
         </div>
+
         <Button type="submit" disabled={confirmVerification.isPending}>
           {confirmVerification.isPending ? "Confirming..." : "Confirm email"}
         </Button>
+
         <div className="rounded-[16px] bg-ash-50 p-4 text-sm text-ash-600">
           <p>Didn&apos;t get it?</p>
           <button
@@ -137,6 +144,7 @@ export function EmailVerificationForm() {
           >
             {requestVerification.isPending ? "Sending..." : resendWait > 0 ? `Resend code in ${resendWait}s` : "Resend code"}
           </button>
+          <p className="mt-3 text-xs text-ash-500">Need a different email? Go back to sign up and request a new code.</p>
           {requestVerification.isSuccess ? <p className="mt-2 text-success">A fresh code has been sent.</p> : null}
           <ErrorMessage error={requestVerification.error} context="verification" />
         </div>
