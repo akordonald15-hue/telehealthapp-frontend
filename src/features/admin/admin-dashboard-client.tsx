@@ -212,6 +212,10 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
             Active workload: {provider.active_workload} | Completed: {provider.completed_workload}
             {provider.rating ? ` | Rating: ${provider.rating}` : ""}
           </p>
+          <p className="mt-1 text-xs text-slate-500">
+            {provider.active_job_label}
+            {provider.last_active_at ? ` | Last active ${formatDateTime(provider.last_active_at)}` : ""}
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <ConfirmActionButton
@@ -370,9 +374,7 @@ function ProviderCreatePanel() {
             >
               <option value="offline">Offline</option>
               <option value="available">Available</option>
-              <option value="unavailable">Unavailable</option>
               <option value="on_break">On break</option>
-              <option value="busy">Busy</option>
             </select>
           </label>
         </div>

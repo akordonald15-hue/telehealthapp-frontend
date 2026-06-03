@@ -169,8 +169,6 @@ export function NurseDashboardClient() {
       </div>
 
       <AvailabilityControl
-        key={profileQuery.data?.availability_status ?? "nurse-availability-loading"}
-        value={profileQuery.data?.availability_status}
         queryKeys={[["profiles", "me", "nurse"], ["home-care", "available-nurses"]]}
       />
 

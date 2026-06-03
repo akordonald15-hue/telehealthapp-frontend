@@ -21,6 +21,7 @@ import { useMemo, useState } from "react";
 
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { OfflineStatusBanner } from "@/components/pwa/offline-status-banner";
+import { ProviderHeartbeat } from "@/components/providers/provider-heartbeat";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser, useLogout } from "@/lib/auth/use-auth";
@@ -243,6 +244,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </header>
 
           <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+            <ProviderHeartbeat />
             <OfflineStatusBanner />
             {children}
           </main>

@@ -31,6 +31,7 @@ import type {
   ProviderLedgerTransaction,
   ProviderPayoutRequest,
   ProviderAvailabilityStatus,
+  ProviderAvailabilityState,
   ProviderDoctor,
   ProviderNurse,
   ProviderWalletDashboard,
@@ -112,8 +113,10 @@ export const providersApi = {
     apiList<ProviderDoctor>("/providers/doctors/", query),
   nurses: (query?: { page?: number; page_size?: number; service_type?: string; search?: string }) =>
     apiList<ProviderNurse>("/providers/nurses/", query),
+  myAvailability: () => apiRequest<ProviderAvailabilityState>("/providers/me/availability/"),
   updateAvailability: (body: { availability_status: ProviderAvailabilityStatus }) =>
-    apiRequest<ProviderDoctor | ProviderNurse>("/providers/me/availability/", { method: "PATCH", body }),
+    apiRequest<ProviderAvailabilityState>("/providers/me/availability/", { method: "PATCH", body }),
+  heartbeat: () => apiRequest<ProviderAvailabilityState>("/providers/me/heartbeat/", { method: "POST", body: {} }),
 };
 
 export const appointmentsApi = {

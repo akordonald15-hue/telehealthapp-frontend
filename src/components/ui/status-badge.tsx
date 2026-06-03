@@ -21,6 +21,7 @@ export function StatusBadge({ value }: { value: string }) {
     matching: "Matching",
     offline: "Offline",
     on_break: "On break",
+    on_visit: "On visit",
     patient_confirmed: "Patient confirmed",
     pending: "In review",
     processing: "In progress",
@@ -43,6 +44,7 @@ export function StatusBadge({ value }: { value: string }) {
           normalized.includes("processing") ||
           normalized.includes("draft") ||
           normalized === "busy" ||
+          normalized === "on_visit" ||
           normalized === "on_break" ||
           normalized === "requested" ||
           normalized === "matching" ||
@@ -51,6 +53,8 @@ export function StatusBadge({ value }: { value: string }) {
         ? "amber"
         : normalized.includes("failed") || normalized.includes("cancelled") || normalized === "unreachable" || normalized === "declined"
           ? "rose"
+          : normalized === "suspended" || normalized === "admin_disabled"
+            ? "rose"
           : normalized === "confirmed" || normalized === "in_transit" || normalized === "arrived" || normalized === "care_in_progress"
             ? "blue"
             : "neutral";

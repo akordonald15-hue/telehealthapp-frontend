@@ -42,7 +42,7 @@ export type Specialty = {
   name: string;
 };
 
-export type ProviderAvailabilityStatus = "available" | "unavailable" | "busy" | "offline" | "on_break";
+export type ProviderAvailabilityStatus = "available" | "unavailable" | "busy" | "on_visit" | "offline" | "on_break";
 
 export type PatientProfile = {
   id: number;
@@ -61,6 +61,8 @@ export type DoctorProfile = {
   bio: string;
   years_experience: number;
   availability_status: ProviderAvailabilityStatus;
+  preferred_availability_status: ProviderAvailabilityStatus;
+  last_active_at: string | null;
   specialties: Specialty[];
 };
 
@@ -69,12 +71,26 @@ export type NurseProfile = {
   license_no: string;
   onboarding_status: "pending" | "approved" | "suspended";
   availability_status: ProviderAvailabilityStatus;
+  preferred_availability_status: ProviderAvailabilityStatus;
   service_radius_km: number;
   service_type: string;
   base_address: string;
   base_latitude: string | null;
   base_longitude: string | null;
   active_for_dispatch: boolean;
+  last_active_at: string | null;
+};
+
+export type ProviderAvailabilityState = {
+  provider_type: "doctor" | "nurse";
+  availability_status: ProviderAvailabilityStatus;
+  preferred_availability_status: ProviderAvailabilityStatus;
+  last_active_at: string | null;
+  active_workload_count: number;
+  active_job_label: string;
+  can_self_update: boolean;
+  blocked_reason: string;
+  allowed_statuses: ProviderAvailabilityStatus[];
 };
 
 export type MedicalFile = {
@@ -498,8 +514,10 @@ export type AdminProvider = {
   onboarding_status: string | null;
   active_for_dispatch: boolean | null;
   active_workload: number;
+  active_job_label: string;
   completed_workload: number;
   rating: number | null;
+  last_active_at: string | null;
   updated_at: string;
 };
 

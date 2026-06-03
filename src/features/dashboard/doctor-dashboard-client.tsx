@@ -229,8 +229,6 @@ export function DoctorDashboardClient() {
       </div>
 
       <AvailabilityControl
-        key={profileQuery.data?.availability_status ?? "doctor-availability-loading"}
-        value={profileQuery.data?.availability_status}
         queryKeys={[["profiles", "me", "doctor"], ["appointments", "available-doctors"]]}
       />
 
