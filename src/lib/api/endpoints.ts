@@ -266,6 +266,8 @@ export const adminApi = {
     is_active?: boolean;
     is_email_verified?: boolean;
   }) => apiRequest<AdminProviderCreateResponse>("/admin/providers/create/", { method: "POST", body }),
+  resendProviderInvite: (providerType: "doctor" | "nurse", providerId: number) =>
+    apiRequest<DetailResponse>(`/admin/providers/${providerType}/${providerId}/resend-invite/`, { method: "POST" }),
   updateProviderStatus: (
     providerType: "doctor" | "nurse",
     providerId: number,

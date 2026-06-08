@@ -20,6 +20,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ApiError, extractErrorMessage } from "@/lib/api/client";
 import { adminApi, appointmentsApi, auditApi, homeCareApi, paymentsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import type { AdminDashboardResponse, AdminProvider, AdminProviderCreateResponse, AdminUser, ProviderAvailabilityStatus, UserRole } from "@/lib/types/backend";
@@ -194,6 +195,10 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
       adminApi.updateProviderStatus(provider.provider_type, provider.id, body),
     onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["admin"] }),
   });
+  const resendInvite = useMutation({
+    mutationFn: () => adminApi.resendProviderInvite(provider.provider_type, provider.id),
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["admin"] }),
+  });
   const setAvailability = (availability_status: ProviderAvailabilityStatus) => updateProvider.mutate({ availability_status });
 
   return (
@@ -240,6 +245,14 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
             disabled={updateProvider.isPending}
             onConfirm={() => updateProvider.mutate({ is_active: !provider.is_active, availability_status: provider.is_active ? "offline" : "available" })}
           />
+          <ConfirmActionButton
+            label="Resend setup email"
+            title="Queue another provider setup email?"
+            description="Caretekk will queue a fresh password setup code for this provider."
+            tone="primary"
+            disabled={resendInvite.isPending}
+            onConfirm={() => resendInvite.mutate()}
+          />
           {provider.provider_type === "nurse" ? (
             <ConfirmActionButton
               label="Approve"
@@ -252,6 +265,16 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
           ) : null}
         </div>
       </div>
+      {resendInvite.isError ? (
+        <Notice title="Provider setup email could not be queued." tone="warning">
+          {resendInvite.error instanceof ApiError ? extractErrorMessage(resendInvite.error.payload) || resendInvite.error.message : "Please try again."}
+        </Notice>
+      ) : null}
+      {resendInvite.isSuccess ? (
+        <Notice title="Provider setup email queued." tone="success">
+          Caretekk queued a fresh setup code for this provider.
+        </Notice>
+      ) : null}
     </article>
   );
 }
@@ -259,6 +282,7 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
 function ProviderCreatePanel() {
   const queryClient = useQueryClient();
   const [created, setCreated] = useState<AdminProviderCreateResponse | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [form, setForm] = useState({
     role: "doctor" as "doctor" | "nurse",
     name: "",
@@ -289,8 +313,17 @@ function ProviderCreatePanel() {
       }),
     onSuccess: async (data) => {
       setCreated(data);
+      setCreateError(null);
       setForm((current) => ({ ...current, name: "", email: "", phone: "" }));
       await queryClient.invalidateQueries({ queryKey: ["admin"] });
+    },
+    onError: (error) => {
+      setCreated(null);
+      if (error instanceof ApiError) {
+        setCreateError(extractErrorMessage(error.payload) || error.message);
+        return;
+      }
+      setCreateError("We couldn't create this provider right now.");
     },
   });
 
@@ -301,6 +334,7 @@ function ProviderCreatePanel() {
         onSubmit={(event) => {
           event.preventDefault();
           setCreated(null);
+          setCreateError(null);
           createProvider.mutate();
         }}
       >
@@ -405,13 +439,13 @@ function ProviderCreatePanel() {
             </>
           ) : null}
         </div>
-        {createProvider.isError ? <Notice title="Provider could not be created." tone="warning">Check that the email is unique and required provider details are complete.</Notice> : null}
+        {createError ? <Notice title="Provider could not be created." tone="warning">{createError}</Notice> : null}
         {created ? (
-          <Notice title="Provider setup email sent" tone="success">
+          <Notice title="Provider created. Setup email queued." tone="success">
             <div className="grid gap-1">
               <span>{created.email}</span>
               <span className="text-xs text-slate-600">
-                Caretekk sent a secure password setup link to this provider. No temporary password is shown in the admin console.
+                Caretekk queued a secure password setup code for this provider.
               </span>
             </div>
           </Notice>

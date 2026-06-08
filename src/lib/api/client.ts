@@ -62,6 +62,9 @@ export function extractErrorMessage(payload: BackendErrorPayload | null) {
     return "";
   }
   if (payload.detail) {
+    if (Array.isArray(payload.detail)) {
+      return payload.detail.join(", ");
+    }
     return payload.detail;
   }
   if (typeof payload.message === "string") {
@@ -71,6 +74,21 @@ export function extractErrorMessage(payload: BackendErrorPayload | null) {
     return Object.entries(payload.message as Record<string, string[] | string>)
       .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
       .join(" ");
+  }
+  const fieldMessages = Object.entries(payload as Record<string, unknown>)
+    .filter(([key]) => !["detail", "message", "error"].includes(key))
+    .map(([field, messages]) => {
+      if (Array.isArray(messages)) {
+        return `${field}: ${messages.join(", ")}`;
+      }
+      if (typeof messages === "string") {
+        return `${field}: ${messages}`;
+      }
+      return "";
+    })
+    .filter(Boolean);
+  if (fieldMessages.length) {
+    return fieldMessages.join(" ");
   }
   return payload.error || "";
 }
