@@ -46,6 +46,10 @@ const MESSAGE_OVERRIDES: Array<{ pattern: RegExp; replacement: string }> = [
     replacement: "That verification code is invalid or has expired. Request a new code and try again.",
   },
   {
+    pattern: /invalid or expired reset code/i,
+    replacement: "That reset code is invalid or has expired. Request a new code and try again.",
+  },
+  {
     pattern: /invalid or expired token/i,
     replacement: "That link or code is no longer valid. Request a new one and try again.",
   },

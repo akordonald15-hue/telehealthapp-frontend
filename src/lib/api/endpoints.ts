@@ -27,6 +27,7 @@ import type {
   NurseProfile,
   PatientProfile,
   Payment,
+  PasswordResetVerifyResponse,
   PaymentInitiation,
   ProviderLedgerTransaction,
   ProviderPayoutRequest,
@@ -78,7 +79,9 @@ export const authApi = {
     apiRequest<User>(authPath("/auth/me/"), { method: "PATCH", body }),
   passwordResetRequest: (body: { email: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/password-reset/request/"), { method: "POST", body, auth: false }),
-  passwordResetConfirm: (body: { token: string; new_password: string }) =>
+  passwordResetVerify: (body: { email: string; code: string }) =>
+    apiRequest<PasswordResetVerifyResponse>(authPath("/auth/password-reset/verify/"), { method: "POST", body, auth: false }),
+  passwordResetConfirm: (body: { reset_token: string; new_password: string; confirm_password: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/password-reset/confirm/"), { method: "POST", body, auth: false }),
   otpRequest: (body: { email: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/otp/request/"), { method: "POST", body, auth: false }),

@@ -22,6 +22,11 @@ export type DetailResponse = {
   detail: string;
 };
 
+export type PasswordResetVerifyResponse = DetailResponse & {
+  reset_token: string;
+  expires_at: string;
+};
+
 export type BackendErrorPayload = {
   error?: string;
   message?: string | Record<string, string[] | string> | unknown[];
