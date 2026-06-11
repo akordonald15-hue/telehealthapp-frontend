@@ -41,9 +41,17 @@ export function MessagesClient() {
   const [attachment, setAttachment] = useState<AttachmentPreview | null>(null);
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [liveConnected, setLiveConnected] = useState(false);
+  const [realtimeUnavailable, setRealtimeUnavailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
+
+  function markRealtimeUnavailable() {
+    window.setTimeout(() => {
+      setLiveConnected(false);
+      setRealtimeUnavailable(true);
+    }, 0);
+  }
 
   const threads = useQuery({
     queryKey: ["threads"],
@@ -130,19 +138,37 @@ export function MessagesClient() {
 
     const wsUrl = buildWebSocketUrl(`/ws/threads/${activeThread}/`);
     if (!wsUrl) {
+      markRealtimeUnavailable();
       return;
     }
 
-    const socket = new WebSocket(wsUrl);
+    let socket: WebSocket;
+    let closedByCleanup = false;
+    try {
+      socket = new WebSocket(wsUrl);
+    } catch (error) {
+      console.warn("Realtime messaging connection could not be started.", error);
+      markRealtimeUnavailable();
+      return;
+    }
     socketRef.current = socket;
 
-    socket.onopen = () => setLiveConnected(true);
-    socket.onerror = () => setLiveConnected(false);
+    socket.onopen = () => {
+      setLiveConnected(true);
+      setRealtimeUnavailable(false);
+    };
+    socket.onerror = () => {
+      setLiveConnected(false);
+      setRealtimeUnavailable(true);
+    };
     socket.onclose = () => {
       if (socketRef.current === socket) {
         socketRef.current = null;
       }
       setLiveConnected(false);
+      if (!closedByCleanup) {
+        setRealtimeUnavailable(true);
+      }
     };
     socket.onmessage = async () => {
       await queryClient.invalidateQueries({ queryKey: ["messages", activeThread] });
@@ -150,6 +176,7 @@ export function MessagesClient() {
     };
 
     return () => {
+      closedByCleanup = true;
       socket.close();
       if (socketRef.current === socket) {
         socketRef.current = null;
@@ -158,6 +185,8 @@ export function MessagesClient() {
   }, [activeThread, currentUser, queryClient]);
 
   function selectThread(threadId: number) {
+    setLiveConnected(false);
+    setRealtimeUnavailable(false);
     setActiveThread(threadId);
     setIsMobileChatOpen(true);
   }
@@ -274,8 +303,14 @@ export function MessagesClient() {
               role={currentUser?.role}
               thread={activeThreadDetails}
               liveConnected={liveConnected}
+              realtimeUnavailable={realtimeUnavailable}
               onBack={() => setIsMobileChatOpen(false)}
             />
+            {activeThread && realtimeUnavailable ? (
+              <div className="border-b border-amber-100 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 sm:px-6">
+                Realtime connection lost. Messages will refresh manually.
+              </div>
+            ) : null}
 
             <div
               ref={scrollAreaRef}
@@ -414,11 +449,13 @@ function ConsultationHeader({
   role,
   thread,
   liveConnected,
+  realtimeUnavailable,
   onBack,
 }: {
   role?: UserRole;
   thread: Thread | null;
   liveConnected: boolean;
+  realtimeUnavailable: boolean;
   onBack: () => void;
 }) {
   return (
@@ -445,7 +482,7 @@ function ConsultationHeader({
       </div>
         <div className="hidden items-center gap-2 rounded-full bg-[#ECFDF5] px-3 py-2 text-xs font-semibold text-[#047857] sm:inline-flex">
         <Stethoscope className="h-4 w-4" />
-        {liveConnected ? "Live chat" : "Secure chat"}
+        {liveConnected ? "Live chat" : realtimeUnavailable ? "Manual refresh" : "Secure chat"}
       </div>
     </div>
   );
