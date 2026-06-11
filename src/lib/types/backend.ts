@@ -148,8 +148,48 @@ export type AvailabilitySlot = {
 
 export type Thread = {
   id: number;
+  thread_id?: number;
   patient: number;
   doctor: number;
+  patient_profile?: {
+    id: number;
+    display_name: string;
+    email?: string;
+  };
+  doctor_profile?: {
+    id: number;
+    display_name: string;
+    specialty?: string;
+    specialties?: string[];
+  };
+  appointment?: {
+    id: number;
+    status: AppointmentStatus | string;
+    scheduled_at: string;
+  } | null;
+  last_message?: {
+    id: number;
+    body: string;
+    sender: number;
+    sender_role: UserRole;
+    sender_name: string;
+    created_at: string;
+  } | null;
+  unread_count?: number;
+  updated_at?: string;
+  consultation_status?: string;
+  triage_summary?: {
+    label: string;
+    symptoms: string[];
+    duration: string;
+    severity: string;
+    risk_level: string;
+    recommendation: string;
+    department: string;
+    red_flags: string[];
+    created_at: string;
+    disclaimer: string;
+  } | null;
   created_at: string;
 };
 

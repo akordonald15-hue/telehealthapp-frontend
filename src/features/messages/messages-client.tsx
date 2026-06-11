@@ -21,15 +21,98 @@ import { Section } from "@/components/ui/section";
 import { messagingApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { buildWebSocketUrl } from "@/lib/realtime";
-import { conversationSummary, conversationTitle, messageSenderLabel } from "@/lib/ui/humanize";
+import { messageSenderLabel } from "@/lib/ui/humanize";
 import type { Message, Thread, UserRole } from "@/lib/types/backend";
 import { uploadToPresignedUrl } from "@/lib/api/client";
-import { cn, formatDateTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 type AttachmentPreview = {
   file: File;
   previewUrl: string | null;
 };
+
+function participantName(thread: Thread | null, role?: UserRole) {
+  if (!thread) {
+    return "Consultation";
+  }
+  if (role === "patient") {
+    return thread.doctor_profile?.display_name || `Doctor #${thread.doctor}`;
+  }
+  if (role === "doctor") {
+    return thread.patient_profile?.display_name || `Patient #${thread.patient}`;
+  }
+  if (role === "admin") {
+    return `${thread.patient_profile?.display_name || `Patient #${thread.patient}`} / ${
+      thread.doctor_profile?.display_name || `Doctor #${thread.doctor}`
+    }`;
+  }
+  return "Care conversation";
+}
+
+function participantRole(thread: Thread | null, role?: UserRole) {
+  if (!thread) {
+    return "Secure consultation";
+  }
+  if (role === "patient") {
+    return thread.doctor_profile?.specialty || "Doctor";
+  }
+  if (role === "doctor") {
+    return "Patient";
+  }
+  return "Patient and doctor";
+}
+
+function threadPreview(thread: Thread, role?: UserRole, latestMessage?: Message) {
+  if (latestMessage?.body) {
+    return latestMessage.body;
+  }
+  if (thread.last_message?.body) {
+    return thread.last_message.body;
+  }
+  if (thread.triage_summary?.symptoms?.length) {
+    return `Triage: ${thread.triage_summary.symptoms.join(", ")}`;
+  }
+  return role === "patient" ? "Your consultation thread is ready." : "Consultation thread is ready.";
+}
+
+function relativeThreadTime(value?: string | null) {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const startOfValue = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const dayDiff = Math.round((startOfToday - startOfValue) / 86_400_000);
+  if (dayDiff === 0) {
+    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  }
+  if (dayDiff === 1) {
+    return "Yesterday";
+  }
+  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+function messageTime(value?: string | null) {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function formatStatus(value?: string | null) {
+  if (!value) {
+    return "";
+  }
+  return value.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
 export function MessagesClient() {
   const queryClient = useQueryClient();
@@ -100,9 +183,11 @@ export function MessagesClient() {
     }
     return threadItems.filter((thread) => {
       const haystack = [
-        conversationTitle(currentUser?.role),
-        conversationSummary(currentUser?.role),
-        formatDateTime(thread.created_at),
+        participantName(thread, currentUser?.role),
+        participantRole(thread, currentUser?.role),
+        thread.last_message?.body,
+        thread.triage_summary?.symptoms?.join(" "),
+        relativeThreadTime(thread.updated_at || thread.created_at),
       ]
         .join(" ")
         .toLowerCase();
@@ -311,6 +396,9 @@ export function MessagesClient() {
                 Realtime connection lost. Messages will refresh manually.
               </div>
             ) : null}
+            {activeThreadDetails?.triage_summary ? (
+              <TriageSummaryPanel thread={activeThreadDetails} role={currentUser?.role} />
+            ) : null}
 
             <div
               ref={scrollAreaRef}
@@ -372,6 +460,58 @@ export function MessagesClient() {
   );
 }
 
+function TriageSummaryPanel({ thread, role }: { thread: Thread; role?: UserRole }) {
+  const summary = thread.triage_summary;
+  if (!summary) {
+    return null;
+  }
+  const symptoms = summary.symptoms?.filter(Boolean) ?? [];
+  const redFlags = summary.red_flags?.filter(Boolean) ?? [];
+  const title = role === "doctor" ? "Patient triage summary" : "Your triage summary";
+
+  return (
+    <details className="border-b border-[#DDEBFF] bg-[#F8FBFF] px-4 py-3 text-sm sm:px-6" open={role === "doctor"}>
+      <summary className="cursor-pointer list-none font-bold text-[#1F2937]">
+        {title}
+        <span className="ml-2 rounded-full bg-white px-2 py-1 text-[11px] font-bold text-[#2563EB]">
+          {formatStatus(summary.risk_level || summary.severity) || "Check-in"}
+        </span>
+      </summary>
+      <div className="mt-3 grid gap-3 text-slate-600 sm:grid-cols-2">
+        {symptoms.length ? (
+          <p>
+            <span className="font-semibold text-[#1F2937]">Symptoms:</span> {symptoms.join(", ")}
+          </p>
+        ) : null}
+        {summary.duration ? (
+          <p>
+            <span className="font-semibold text-[#1F2937]">Duration:</span> {summary.duration}
+          </p>
+        ) : null}
+        {summary.department ? (
+          <p>
+            <span className="font-semibold text-[#1F2937]">Suggested department:</span> {summary.department}
+          </p>
+        ) : null}
+        {summary.created_at ? (
+          <p>
+            <span className="font-semibold text-[#1F2937]">Captured:</span> {relativeThreadTime(summary.created_at)}
+          </p>
+        ) : null}
+      </div>
+      {summary.recommendation ? (
+        <p className="mt-3 leading-6 text-slate-700">{summary.recommendation}</p>
+      ) : null}
+      {redFlags.length ? (
+        <p className="mt-3 rounded-[8px] border border-rose-100 bg-rose-50 px-3 py-2 text-rose-700">
+          <span className="font-semibold">Red flags:</span> {redFlags.join(", ")}
+        </p>
+      ) : null}
+      <p className="mt-3 text-xs leading-5 text-slate-500">{summary.disclaimer}</p>
+    </details>
+  );
+}
+
 function ConsultationListHeader({
   search,
   onSearchChange,
@@ -414,6 +554,12 @@ function ConsultationListItem({
   latestMessage?: Message;
   onClick: () => void;
 }) {
+  const displayName = participantName(thread, role);
+  const roleLabel = participantRole(thread, role);
+  const updatedAt = thread.last_message?.created_at || thread.updated_at || thread.created_at;
+  const unreadCount = thread.unread_count ?? 0;
+  const status = formatStatus(thread.consultation_status || thread.appointment?.status);
+
   return (
     <button
       type="button"
@@ -428,17 +574,22 @@ function ConsultationListItem({
       <Avatar label={role === "patient" ? "Dr" : "Pt"} tone={isActive ? "blue" : "green"} />
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-2">
-          <span className="truncate font-semibold text-[#1F2937]">{conversationTitle(role)}</span>
+          <span className="truncate font-semibold text-[#1F2937]">{displayName}</span>
           <span className="shrink-0 text-[11px] font-medium text-slate-400">
-            {new Date(thread.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            {relativeThreadTime(updatedAt)}
           </span>
         </span>
+        <span className="mt-0.5 flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <span>{roleLabel}</span>
+          {status ? <span className="rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[#2563EB]">{status}</span> : null}
+          {unreadCount > 0 ? <span className="rounded-full bg-[#DBEAFE] px-2 py-0.5 text-[#1D4ED8]">{unreadCount} unread</span> : null}
+        </span>
         <span className="mt-1 line-clamp-1 text-sm text-slate-500">
-          {latestMessage?.body || conversationSummary(role)}
+          {threadPreview(thread, role, latestMessage)}
         </span>
         <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[11px] font-bold text-[#10B981]">
           <CheckCircle2 className="h-3 w-3" />
-          Care team
+          Consultation
         </span>
       </span>
     </button>
@@ -458,6 +609,10 @@ function ConsultationHeader({
   realtimeUnavailable: boolean;
   onBack: () => void;
 }) {
+  const title = participantName(thread, role);
+  const subtitle = participantRole(thread, role);
+  const status = formatStatus(thread?.consultation_status || thread?.appointment?.status);
+
   return (
     <div className="flex min-h-20 items-center justify-between gap-3 border-b border-[#E5E7EB] bg-white px-4 py-3 sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
@@ -472,11 +627,11 @@ function ConsultationHeader({
         <Avatar label={role === "patient" ? "Dr" : "Pt"} tone="blue" size="lg" />
         <div className="min-w-0">
           <h2 className="truncate font-heading text-lg font-semibold text-[#1F2937]">
-            {thread ? conversationTitle(role) : "Consultation"}
+            {title}
           </h2>
-          <p className="mt-0.5 flex items-center gap-2 text-sm text-slate-500">
+          <p className="mt-0.5 flex min-w-0 items-center gap-2 text-sm text-slate-500">
             <span className="h-2 w-2 rounded-full bg-[#10B981]" />
-            {thread ? "Secure care consultation." : "Secure care consultation."}
+            <span className="truncate">{status ? `${subtitle} · ${status}` : subtitle}</span>
           </p>
         </div>
       </div>
@@ -524,7 +679,7 @@ function ChatMessageBubble({
           </a>
         ) : null}
         <p className={cn("mt-2 text-[11px]", isMine ? "text-white/75" : "text-slate-400")}>
-          {messageSenderLabel(message, currentUserId)} {"·"} {formatDateTime(message.created_at)}
+          {messageSenderLabel(message, currentUserId)} at {messageTime(message.created_at)}
         </p>
       </div>
     </article>
