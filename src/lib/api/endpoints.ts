@@ -29,6 +29,7 @@ import type {
   Payment,
   PasswordResetVerifyResponse,
   PaymentInitiation,
+  ProviderSetupVerifyResponse,
   ProviderLedgerTransaction,
   ProviderPayoutRequest,
   ProviderAvailabilityStatus,
@@ -83,6 +84,10 @@ export const authApi = {
     apiRequest<PasswordResetVerifyResponse>(authPath("/auth/password-reset/verify/"), { method: "POST", body, auth: false }),
   passwordResetConfirm: (body: { reset_token: string; new_password: string; confirm_password: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/password-reset/confirm/"), { method: "POST", body, auth: false }),
+  providerSetupVerify: (body: { token: string }) =>
+    apiRequest<ProviderSetupVerifyResponse>(authPath("/auth/provider-setup/verify/"), { method: "POST", body, auth: false }),
+  providerSetupComplete: (body: { token: string; new_password: string; confirm_password: string }) =>
+    apiRequest<DetailResponse>(authPath("/auth/provider-setup/complete/"), { method: "POST", body, auth: false }),
   otpRequest: (body: { email: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/otp/request/"), { method: "POST", body, auth: false }),
   otpVerify: (body: { email: string; code: string }) =>

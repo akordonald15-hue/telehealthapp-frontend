@@ -27,6 +27,13 @@ export type PasswordResetVerifyResponse = DetailResponse & {
   expires_at: string;
 };
 
+export type ProviderSetupVerifyResponse = DetailResponse & {
+  email: string;
+  name: string;
+  role: "doctor" | "nurse";
+  expires_at: string;
+};
+
 export type BackendErrorPayload = {
   error?: string;
   message?: string | Record<string, string[] | string> | unknown[];

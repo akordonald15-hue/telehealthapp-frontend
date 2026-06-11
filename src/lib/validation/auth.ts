@@ -35,6 +35,17 @@ export const passwordResetConfirmSchema = z
     message: "Passwords do not match.",
   });
 
+export const providerSetupCompleteSchema = z
+  .object({
+    token: z.string().min(1).max(256),
+    new_password: z.string().min(8, "Use at least 8 characters."),
+    confirm_password: z.string().min(8, "Confirm your new password."),
+  })
+  .refine((values) => values.new_password === values.confirm_password, {
+    path: ["confirm_password"],
+    message: "Passwords do not match.",
+  });
+
 export const changePasswordSchema = z
   .object({
     old_password: z.string().min(8, "Current password is required."),
