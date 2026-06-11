@@ -21,7 +21,6 @@ import { Section } from "@/components/ui/section";
 import { messagingApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { buildWebSocketUrl } from "@/lib/realtime";
-import { messageSenderLabel } from "@/lib/ui/humanize";
 import type { Message, Thread, UserRole } from "@/lib/types/backend";
 import { uploadToPresignedUrl } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
@@ -114,6 +113,29 @@ function formatStatus(value?: string | null) {
   return value.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function orderedMessages(messages?: Message[]) {
+  return [...(messages ?? [])].sort((a, b) => {
+    const timeDiff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    return timeDiff || a.id - b.id;
+  });
+}
+
+function messageSenderName(message: Message, thread: Thread | null, currentUserId?: number | null, role?: UserRole) {
+  if (currentUserId && message.sender === currentUserId) {
+    return "You";
+  }
+  if (!thread) {
+    return "Caretekk";
+  }
+  if (role === "doctor") {
+    return thread.patient_profile?.display_name || "Patient";
+  }
+  if (role === "patient") {
+    return thread.doctor_profile?.display_name || "Doctor";
+  }
+  return "Caretekk";
+}
+
 export function MessagesClient() {
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
@@ -196,6 +218,8 @@ export function MessagesClient() {
   }, [currentUser?.role, search, threadItems]);
 
   const activeThreadDetails = threadItems.find((thread) => thread.id === activeThread) ?? null;
+  const orderedMessageItems = useMemo(() => orderedMessages(messages.data?.results), [messages.data?.results]);
+  const latestOrderedMessageId = orderedMessageItems.at(-1)?.id;
   const sectionTitle = currentUser?.role === "patient" ? "Consultation" : "Messages";
   const sectionDescription = "Secure care consultation.";
 
@@ -204,7 +228,7 @@ export function MessagesClient() {
       top: scrollAreaRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [messages.data?.results.length, activeThread]);
+  }, [orderedMessageItems.length, latestOrderedMessageId, activeThread]);
 
   useEffect(() => {
     return () => {
@@ -364,7 +388,7 @@ export function MessagesClient() {
                       thread={thread}
                       role={currentUser?.role}
                       isActive={activeThread === thread.id}
-                      latestMessage={thread.id === activeThread ? messages.data?.results.at(-1) : undefined}
+                      latestMessage={thread.id === activeThread ? orderedMessageItems.at(-1) : undefined}
                       onClick={() => selectThread(thread.id)}
                     />
                   ))}
@@ -415,13 +439,15 @@ export function MessagesClient() {
                 <MessageSkeleton />
               ) : messages.error ? (
                 <ErrorMessage error={messages.error} context="messages" />
-              ) : messages.data?.results.length ? (
+              ) : orderedMessageItems.length ? (
                 <div className="space-y-4">
-                  {messages.data.results.map((message) => (
+                  {orderedMessageItems.map((message) => (
                     <ChatMessageBubble
                       key={message.id}
                       message={message}
+                      thread={activeThreadDetails}
                       currentUserId={currentUser?.id}
+                      currentUserRole={currentUser?.role}
                     />
                   ))}
                 </div>
@@ -645,16 +671,21 @@ function ConsultationHeader({
 
 function ChatMessageBubble({
   message,
+  thread,
   currentUserId,
+  currentUserRole,
 }: {
   message: Message;
+  thread: Thread | null;
   currentUserId?: number | null;
+  currentUserRole?: UserRole;
 }) {
   const isMine = Boolean(currentUserId && message.sender === currentUserId);
+  const senderName = messageSenderName(message, thread, currentUserId, currentUserRole);
 
   return (
     <article className={cn("flex gap-2", isMine ? "justify-end" : "justify-start")}>
-      {!isMine ? <Avatar label="Dr" tone="green" size="sm" /> : null}
+      {!isMine ? <Avatar label={currentUserRole === "doctor" ? "Pt" : "Dr"} tone="green" size="sm" /> : null}
       <div
         className={cn(
           "max-w-[82%] rounded-[22px] px-4 py-3 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.24)] sm:max-w-[68%]",
@@ -679,7 +710,7 @@ function ChatMessageBubble({
           </a>
         ) : null}
         <p className={cn("mt-2 text-[11px]", isMine ? "text-white/75" : "text-slate-400")}>
-          {messageSenderLabel(message, currentUserId)} at {messageTime(message.created_at)}
+          {senderName} at {messageTime(message.created_at)}
         </p>
       </div>
     </article>
