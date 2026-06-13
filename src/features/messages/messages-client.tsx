@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
+  AlertTriangle,
   CheckCircle2,
   Image as ImageIcon,
   Paperclip,
@@ -144,6 +145,8 @@ export function MessagesClient() {
   const [search, setSearch] = useState("");
   const [composerValue, setComposerValue] = useState("");
   const [attachment, setAttachment] = useState<AttachmentPreview | null>(null);
+  const [disputeReason, setDisputeReason] = useState("need_clarification");
+  const [disputeExplanation, setDisputeExplanation] = useState("");
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [liveConnected, setLiveConnected] = useState(false);
   const [realtimeUnavailable, setRealtimeUnavailable] = useState(false);
@@ -197,6 +200,24 @@ export function MessagesClient() {
     },
   });
 
+  const endConsultation = useMutation({
+    mutationFn: (threadId: number) => messagingApi.endConsultation(threadId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["threads"] });
+      await queryClient.invalidateQueries({ queryKey: ["messages", activeThread] });
+    },
+  });
+
+  const createDispute = useMutation({
+    mutationFn: (body: { reason_category: string; explanation?: string }) =>
+      messagingApi.createDispute(activeThread as number, body),
+    onSuccess: async () => {
+      setDisputeExplanation("");
+      await queryClient.invalidateQueries({ queryKey: ["threads"] });
+      await queryClient.invalidateQueries({ queryKey: ["messages", activeThread] });
+    },
+  });
+
   const threadItems = useMemo(() => threads.data?.results ?? [], [threads.data?.results]);
   const filteredThreads = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -222,6 +243,7 @@ export function MessagesClient() {
   const latestOrderedMessageId = orderedMessageItems.at(-1)?.id;
   const sectionTitle = currentUser?.role === "patient" ? "Consultation" : "Messages";
   const sectionDescription = "Secure care consultation.";
+  const canSendInActiveThread = Boolean(activeThread && activeThreadDetails?.can_send_messages !== false);
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
@@ -327,7 +349,7 @@ export function MessagesClient() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!activeThread || createMessage.isPending) {
+    if (!activeThread || !canSendInActiveThread || createMessage.isPending) {
       return;
     }
 
@@ -356,6 +378,27 @@ export function MessagesClient() {
     }
 
     createMessage.mutate({ body: trimmed });
+  }
+
+  function handleEndConsultation() {
+    if (!activeThread || !activeThreadDetails?.can_end_consultation) {
+      return;
+    }
+    const confirmed = window.confirm("End this consultation? Patient and doctor messages will become read-only.");
+    if (confirmed) {
+      endConsultation.mutate(activeThread);
+    }
+  }
+
+  function handleDisputeSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!activeThread || !activeThreadDetails?.can_raise_dispute) {
+      return;
+    }
+    createDispute.mutate({
+      reason_category: disputeReason,
+      explanation: disputeExplanation.trim(),
+    });
   }
 
   return (
@@ -413,8 +456,15 @@ export function MessagesClient() {
               thread={activeThreadDetails}
               liveConnected={liveConnected}
               realtimeUnavailable={realtimeUnavailable}
+              isEnding={endConsultation.isPending}
+              onEndConsultation={handleEndConsultation}
               onBack={() => setIsMobileChatOpen(false)}
             />
+            {endConsultation.error ? (
+              <div className="border-b border-rose-100 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 sm:px-6">
+                Consultation could not be ended. Please try again.
+              </div>
+            ) : null}
             {activeThread && realtimeUnavailable ? (
               <div className="border-b border-amber-100 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 sm:px-6">
                 Realtime connection lost. Messages will refresh manually.
@@ -422,6 +472,18 @@ export function MessagesClient() {
             ) : null}
             {activeThreadDetails?.triage_summary ? (
               <TriageSummaryPanel thread={activeThreadDetails} role={currentUser?.role} />
+            ) : null}
+            {activeThreadDetails ? (
+              <ConsultationLifecycleBanner
+                thread={activeThreadDetails}
+                disputeReason={disputeReason}
+                disputeExplanation={disputeExplanation}
+                isSubmitting={createDispute.isPending}
+                disputeError={createDispute.error}
+                onReasonChange={setDisputeReason}
+                onExplanationChange={setDisputeExplanation}
+                onSubmit={handleDisputeSubmit}
+              />
             ) : null}
 
             <div
@@ -463,7 +525,12 @@ export function MessagesClient() {
 
             <ChatComposer
               value={composerValue}
-              disabled={!activeThread}
+              disabled={!activeThread || !canSendInActiveThread}
+              disabledReason={
+                activeThread && !canSendInActiveThread
+                  ? "This consultation is closed. History remains available, but new messages and uploads are disabled."
+                  : ""
+              }
               isSending={createMessage.isPending || uploadAttachment.isPending}
               attachment={attachment}
               error={uploadAttachment.error || createMessage.error}
@@ -535,6 +602,80 @@ function TriageSummaryPanel({ thread, role }: { thread: Thread; role?: UserRole 
       ) : null}
       <p className="mt-3 text-xs leading-5 text-slate-500">{summary.disclaimer}</p>
     </details>
+  );
+}
+
+function ConsultationLifecycleBanner({
+  thread,
+  disputeReason,
+  disputeExplanation,
+  isSubmitting,
+  disputeError,
+  onReasonChange,
+  onExplanationChange,
+  onSubmit,
+}: {
+  thread: Thread;
+  disputeReason: string;
+  disputeExplanation: string;
+  isSubmitting: boolean;
+  disputeError: unknown;
+  onReasonChange: (value: string) => void;
+  onExplanationChange: (value: string) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  if (thread.consultation_lifecycle_status === "open") {
+    return null;
+  }
+
+  const statusLabel = formatStatus(thread.consultation_lifecycle_status || thread.consultation_status);
+
+  return (
+    <div className="border-b border-[#DDEBFF] bg-white px-4 py-3 sm:px-6">
+      <div className="flex flex-col gap-3 rounded-[12px] border border-[#DDEBFF] bg-[#F8FBFF] p-3 text-sm text-slate-700">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
+          <div>
+            <p className="font-bold text-[#1F2937]">Consultation status: {statusLabel}</p>
+            <p className="mt-1 leading-6">
+              This conversation is read-only. Patient and doctor messages remain available for history.
+            </p>
+          </div>
+        </div>
+
+        {thread.can_raise_dispute ? (
+          <form className="grid gap-3 border-t border-[#DDEBFF] pt-3" onSubmit={onSubmit}>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Dispute reason</label>
+              <select
+                className="mt-1 min-h-11 w-full rounded-[8px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#60A5FA]"
+                value={disputeReason}
+                onChange={(event) => onReasonChange(event.target.value)}
+              >
+                <option value="ended_too_early">Consultation ended too early</option>
+                <option value="issue_not_addressed">My issue was not addressed</option>
+                <option value="need_clarification">I need clarification</option>
+                <option value="technical_issue">Technical issue</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Optional explanation</label>
+              <textarea
+                className="mt-1 min-h-20 w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-[#1F2937] outline-none focus:border-[#60A5FA]"
+                value={disputeExplanation}
+                placeholder="Share what the review team should know."
+                onChange={(event) => onExplanationChange(event.target.value)}
+              />
+            </div>
+            {disputeError ? <ErrorMessage error={disputeError} context="messages" /> : null}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting dispute..." : "Raise dispute"}
+            </Button>
+          </form>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
@@ -627,12 +768,16 @@ function ConsultationHeader({
   thread,
   liveConnected,
   realtimeUnavailable,
+  isEnding,
+  onEndConsultation,
   onBack,
 }: {
   role?: UserRole;
   thread: Thread | null;
   liveConnected: boolean;
   realtimeUnavailable: boolean;
+  isEnding: boolean;
+  onEndConsultation: () => void;
   onBack: () => void;
 }) {
   const title = participantName(thread, role);
@@ -661,9 +806,16 @@ function ConsultationHeader({
           </p>
         </div>
       </div>
+      <div className="flex shrink-0 items-center gap-2">
+        {thread?.can_end_consultation ? (
+          <Button type="button" variant="secondary" size="sm" disabled={isEnding} onClick={onEndConsultation}>
+            {isEnding ? "Ending..." : "End Consultation"}
+          </Button>
+        ) : null}
         <div className="hidden items-center gap-2 rounded-full bg-[#ECFDF5] px-3 py-2 text-xs font-semibold text-[#047857] sm:inline-flex">
-        <Stethoscope className="h-4 w-4" />
-        {liveConnected ? "Live chat" : realtimeUnavailable ? "Manual refresh" : "Secure chat"}
+          <Stethoscope className="h-4 w-4" />
+          {liveConnected ? "Live chat" : realtimeUnavailable ? "Manual refresh" : "Secure chat"}
+        </div>
       </div>
     </div>
   );
@@ -720,6 +872,7 @@ function ChatMessageBubble({
 function ChatComposer({
   value,
   disabled,
+  disabledReason,
   isSending,
   attachment,
   error,
@@ -730,6 +883,7 @@ function ChatComposer({
 }: {
   value: string;
   disabled: boolean;
+  disabledReason: string;
   isSending: boolean;
   attachment: AttachmentPreview | null;
   error: unknown;
@@ -741,6 +895,11 @@ function ChatComposer({
   return (
     <form className="border-t border-[#E5E7EB] bg-white p-3 sm:p-4" onSubmit={onSubmit}>
       {error ? <ErrorMessage error={error} context="messageSend" /> : null}
+      {disabled && disabledReason ? (
+        <p className="mb-3 rounded-[8px] bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">
+          {disabledReason}
+        </p>
+      ) : null}
 
       {attachment ? (
         <div className="mb-3 flex items-center gap-3 rounded-[18px] border border-[#DDEBFF] bg-[#F8FBFF] p-3">

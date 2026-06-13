@@ -9,6 +9,7 @@ import type {
   AppointmentBookingResponse,
   AuditEvent,
   AvailabilitySlot,
+  ConsultationDispute,
   DetailResponse,
   DoctorProfile,
   HomeCareAssignment,
@@ -153,6 +154,10 @@ export const messagingApi = {
     apiList<Message>(`/messages/threads/${threadId}/messages/`, query),
   createMessage: (threadId: number, body: { body: string; attachment_id?: number }) =>
     apiRequest<Message>(`/messages/threads/${threadId}/messages/`, { method: "POST", body }),
+  endConsultation: (threadId: number) =>
+    apiRequest<DetailResponse>(`/messages/threads/${threadId}/end/`, { method: "POST", body: {} }),
+  createDispute: (threadId: number, body: { reason_category: string; explanation?: string }) =>
+    apiRequest<ConsultationDispute>(`/messages/threads/${threadId}/dispute/`, { method: "POST", body }),
   initAttachmentUpload: (
     threadId: number,
     body: { filename: string; content_type?: string; size_bytes?: number },

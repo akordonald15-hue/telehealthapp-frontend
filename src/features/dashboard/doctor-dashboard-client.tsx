@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
@@ -20,10 +19,10 @@ import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ProviderWalletPanel } from "@/features/provider-ledger/provider-wallet-panel";
 import { AvailabilityControl } from "@/features/providers/availability-control";
-import { appointmentsApi, messagingApi, profilesApi, referralsApi } from "@/lib/api/endpoints";
+import { appointmentsApi, messagingApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
-import type { Appointment, DoctorProfile, Referral, Thread } from "@/lib/types/backend";
+import type { Appointment, Referral, Thread } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
 
 function countValue<T>(query: { data?: { count?: number; results: T[] }; isLoading: boolean; isError: boolean }) {
@@ -150,12 +149,6 @@ export function DoctorDashboardClient() {
     queryFn: () => referralsApi.list({ page_size: 10 }),
     enabled: userQuery.data?.role === "doctor",
   });
-  const profileQuery = useQuery({
-    queryKey: ["profiles", "me", "doctor"],
-    queryFn: () => profilesApi.me<DoctorProfile>(),
-    enabled: userQuery.data?.role === "doctor",
-  });
-
   if (userQuery.data?.role !== "doctor") {
     return (
       <Section title="Doctor dashboard" description="This workspace is available for doctor accounts only.">
@@ -182,7 +175,12 @@ export function DoctorDashboardClient() {
     <Section
       title="Doctor dashboard"
       description={"Today's consultations, patient messages, referrals, and care-plan notes in one clinical workspace."}
-      action={profileQuery.data ? <StatusBadge value={profileQuery.data.availability_status} /> : <Badge tone="cyan">doctor</Badge>}
+      action={
+        <AvailabilityControl
+          compact
+          queryKeys={[["profiles", "me", "doctor"], ["appointments", "available-doctors"]]}
+        />
+      }
     >
       {dashboardErrors.length ? (
         <Notice title="Some doctor workspace data could not load." tone="warning">
@@ -227,10 +225,6 @@ export function DoctorDashboardClient() {
         <StatCard label="Patient messages" value={countValue(threads)} description="Visible patient conversations." icon={MessageSquareText} />
         <StatCard label="Referrals created" value={countValue(referrals)} description="Draft and sent referrals in your care panel." icon={ClipboardList} />
       </div>
-
-      <AvailabilityControl
-        queryKeys={[["profiles", "me", "doctor"], ["appointments", "available-doctors"]]}
-      />
 
       <ProviderWalletPanel role="doctor" />
 

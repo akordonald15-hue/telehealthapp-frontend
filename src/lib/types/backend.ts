@@ -185,6 +185,16 @@ export type Thread = {
   unread_count?: number;
   updated_at?: string;
   consultation_status?: string;
+  consultation_lifecycle_status?: "open" | "doctor_ended" | "disputed" | "resolved";
+  can_send_messages?: boolean;
+  can_end_consultation?: boolean;
+  can_raise_dispute?: boolean;
+  latest_dispute?: {
+    id: number;
+    reason_category: string;
+    review_status: string;
+    created_at: string;
+  } | null;
   triage_summary?: {
     label: string;
     symptoms: string[];
@@ -198,6 +208,16 @@ export type Thread = {
     disclaimer: string;
   } | null;
   created_at: string;
+};
+
+export type ConsultationDispute = {
+  id: number;
+  thread: number;
+  reason_category: string;
+  explanation: string;
+  review_status: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Message = {

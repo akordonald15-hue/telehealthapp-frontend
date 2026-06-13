@@ -17,8 +17,10 @@ const OPTIONS: Array<{ value: ProviderAvailabilityStatus; label: string; descrip
 
 export function AvailabilityControl({
   queryKeys,
+  compact = false,
 }: {
   queryKeys: string[][];
+  compact?: boolean;
 }) {
   const queryClient = useQueryClient();
   const availabilityQuery = useQuery({
@@ -38,6 +40,44 @@ export function AvailabilityControl({
   const data = availabilityQuery.data;
   const selectedStatus = data?.preferred_availability_status ?? "offline";
   const disabledReason = data?.blocked_reason ?? "";
+
+  if (compact) {
+    const canUpdate = Boolean(data?.can_self_update);
+    return (
+      <div className="flex w-full flex-col gap-2 rounded-[12px] border border-slate-200 bg-white px-3 py-2 shadow-sm sm:w-auto sm:min-w-[260px]">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Availability</p>
+            <div className="mt-1 flex items-center gap-2">
+              <StatusBadge value={data?.availability_status ?? "offline"} />
+              {data?.active_job_label ? <span className="text-xs font-semibold text-slate-500">{data.active_job_label}</span> : null}
+            </div>
+          </div>
+          <select
+            className="min-h-9 rounded-[8px] border border-slate-200 bg-slate-50 px-2 text-sm font-semibold text-[#1F2937] outline-none focus:border-[var(--primary)]"
+            value={selectedStatus}
+            disabled={mutation.isPending || availabilityQuery.isLoading || !canUpdate}
+            onChange={(event) => mutation.mutate({ availability_status: event.target.value as ProviderAvailabilityStatus })}
+            aria-label="Update availability"
+          >
+            {OPTIONS.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                disabled={data ? data.allowed_statuses.indexOf(option.value) === -1 : false}
+              >
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        {!data?.can_self_update && disabledReason ? <p className="text-xs font-semibold text-amber-700">{disabledReason}</p> : null}
+        {mutation.isError || availabilityQuery.isError ? (
+          <p className="text-xs font-semibold text-rose-700">Availability could not be updated.</p>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">

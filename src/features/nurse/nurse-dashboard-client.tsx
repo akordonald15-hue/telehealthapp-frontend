@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { AvailabilityControl } from "@/features/providers/availability-control";
 import { profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
@@ -18,7 +18,6 @@ import { formatDateTime } from "@/lib/utils";
 import { activeAssignmentForRequest, homeCareStatusLabel, isHistoryRequest, recentActivitySummary } from "@/features/nurse/nurse-utils";
 import { useNurseRequests } from "@/features/nurse/use-nurse-requests";
 import { ProviderWalletPanel } from "@/features/provider-ledger/provider-wallet-panel";
-import { AvailabilityControl } from "@/features/providers/availability-control";
 
 function MetricCard({
   label,
@@ -73,7 +72,12 @@ export function NurseDashboardClient() {
     <Section
       title="Nurse dashboard"
       description="Stay on top of assigned visits, pre-visit checks, travel, and care completion from one clean workspace."
-      action={profileQuery.data ? <StatusBadge value={profileQuery.data.availability_status} /> : null}
+      action={
+        <AvailabilityControl
+          compact
+          queryKeys={[["profiles", "me", "nurse"], ["home-care", "available-nurses"]]}
+        />
+      }
     >
       {requestsQuery.isError ? (
         <Notice title="We couldn't load your nurse workspace." tone="warning">
@@ -167,10 +171,6 @@ export function NurseDashboardClient() {
           icon={Star}
         />
       </div>
-
-      <AvailabilityControl
-        queryKeys={[["profiles", "me", "nurse"], ["home-care", "available-nurses"]]}
-      />
 
       <ProviderWalletPanel role="nurse" />
 
