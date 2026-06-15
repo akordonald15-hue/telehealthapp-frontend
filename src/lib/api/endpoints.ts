@@ -166,6 +166,14 @@ export const messagingApi = {
       method: "POST",
       body,
     }),
+  uploadAttachmentFile: (attachmentId: number, file: File) => {
+    const body = new FormData();
+    body.set("file", file);
+    return apiRequest<DetailResponse>(`/messages/attachments/${attachmentId}/upload/`, {
+      method: "POST",
+      body,
+    });
+  },
 };
 
 export const homeCareApi = {

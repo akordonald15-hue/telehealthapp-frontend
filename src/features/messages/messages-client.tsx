@@ -25,7 +25,6 @@ import { messagingApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { buildWebSocketUrl } from "@/lib/realtime";
 import type { Message, Thread, UserRole } from "@/lib/types/backend";
-import { uploadToPresignedUrl } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 
 type AttachmentPreview = {
@@ -221,7 +220,7 @@ export function MessagesClient() {
         size_bytes: file.size,
         duration_seconds: preview.kind === "voice" ? preview.durationSeconds : undefined,
       });
-      await uploadToPresignedUrl(uploadInit.upload_url, file, file.type || "application/octet-stream");
+      await messagingApi.uploadAttachmentFile(uploadInit.attachment_id, file);
       return uploadInit;
     },
   });
