@@ -6,10 +6,12 @@ import {
   AlertTriangle,
   CheckCircle2,
   Image as ImageIcon,
+  Mic,
   Paperclip,
   Plus,
   Search,
   Send,
+  Square,
   Stethoscope,
   X,
 } from "lucide-react";
@@ -29,7 +31,12 @@ import { cn } from "@/lib/utils";
 type AttachmentPreview = {
   file: File;
   previewUrl: string | null;
+  kind: "file" | "image" | "voice";
+  durationSeconds?: number;
 };
+
+const VOICE_NOTE_MAX_SECONDS = 60;
+const VOICE_MIME_CANDIDATES = ["audio/webm", "audio/mp4", "audio/ogg"];
 
 function participantName(thread: Thread | null, role?: UserRole) {
   if (!thread) {
@@ -107,6 +114,15 @@ function messageTime(value?: string | null) {
   return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
+function formatDuration(seconds?: number | null) {
+  if (!seconds || seconds < 1) {
+    return "0:00";
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainder = Math.round(seconds % 60);
+  return `${minutes}:${String(remainder).padStart(2, "0")}`;
+}
+
 function formatStatus(value?: string | null) {
   if (!value) {
     return "";
@@ -150,9 +166,17 @@ export function MessagesClient() {
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [liveConnected, setLiveConnected] = useState(false);
   const [realtimeUnavailable, setRealtimeUnavailable] = useState(false);
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [recordingError, setRecordingError] = useState<Error | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordingChunksRef = useRef<BlobPart[]>([]);
+  const recordingStreamRef = useRef<MediaStream | null>(null);
+  const recordingTimerRef = useRef<number | null>(null);
+  const recordingElapsedSecondsRef = useRef(0);
 
   function markRealtimeUnavailable() {
     window.setTimeout(() => {
@@ -185,15 +209,17 @@ export function MessagesClient() {
   });
 
   const uploadAttachment = useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async (preview: AttachmentPreview) => {
       if (!activeThread) {
         throw new Error("Choose a consultation first.");
       }
 
+      const file = preview.file;
       const uploadInit = await messagingApi.initAttachmentUpload(activeThread, {
         filename: file.name,
         content_type: file.type || "application/octet-stream",
         size_bytes: file.size,
+        duration_seconds: preview.kind === "voice" ? preview.durationSeconds : undefined,
       });
       await uploadToPresignedUrl(uploadInit.upload_url, file, file.type || "application/octet-stream");
       return uploadInit;
@@ -244,6 +270,7 @@ export function MessagesClient() {
   const sectionTitle = currentUser?.role === "patient" ? "Consultation" : "Messages";
   const sectionDescription = "Secure care consultation.";
   const canSendInActiveThread = Boolean(activeThread && activeThreadDetails?.can_send_messages !== false);
+  const canRecordVoice = Boolean(currentUser?.role === "patient" && canSendInActiveThread);
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
@@ -259,6 +286,15 @@ export function MessagesClient() {
       }
     };
   }, [attachment]);
+
+  useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) {
+        window.clearInterval(recordingTimerRef.current);
+      }
+      recordingStreamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
 
   useEffect(() => {
     if (!activeThread || !currentUser || !["patient", "doctor"].includes(currentUser.role)) {
@@ -322,6 +358,87 @@ export function MessagesClient() {
     setIsMobileChatOpen(true);
   }
 
+  function stopVoiceRecording() {
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      recorder.stop();
+    }
+  }
+
+  async function startVoiceRecording() {
+    if (!canRecordVoice || isRecordingVoice) {
+      return;
+    }
+    setRecordingError(null);
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setRecordingError(new Error("Voice recording is not available on this browser."));
+      return;
+    }
+
+    try {
+      clearAttachment();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = VOICE_MIME_CANDIDATES.find((candidate) => MediaRecorder.isTypeSupported(candidate));
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      recordingChunksRef.current = [];
+      recordingStreamRef.current = stream;
+      mediaRecorderRef.current = recorder;
+      recordingElapsedSecondsRef.current = 0;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordingChunksRef.current.push(event.data);
+        }
+      };
+      recorder.onstop = () => {
+        if (recordingTimerRef.current) {
+          window.clearInterval(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+        stream.getTracks().forEach((track) => track.stop());
+        recordingStreamRef.current = null;
+        mediaRecorderRef.current = null;
+        setIsRecordingVoice(false);
+
+        const durationSeconds = Math.max(1, Math.min(VOICE_NOTE_MAX_SECONDS, recordingElapsedSecondsRef.current));
+        const blob = new Blob(recordingChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        recordingChunksRef.current = [];
+        if (!blob.size) {
+          setRecordingError(new Error("We could not capture audio. Please try again."));
+          return;
+        }
+        const extension = (recorder.mimeType || "audio/webm").includes("mp4") ? "m4a" : "webm";
+        const file = new File([blob], `caretekk-voice-note.${extension}`, {
+          type: recorder.mimeType || "audio/webm",
+        });
+        setAttachment({
+          file,
+          previewUrl: URL.createObjectURL(blob),
+          kind: "voice",
+          durationSeconds,
+        });
+        setRecordingSeconds(0);
+      };
+
+      recorder.start();
+      setIsRecordingVoice(true);
+      setRecordingSeconds(0);
+      recordingTimerRef.current = window.setInterval(() => {
+        recordingElapsedSecondsRef.current += 1;
+        setRecordingSeconds(Math.min(recordingElapsedSecondsRef.current, VOICE_NOTE_MAX_SECONDS));
+        if (recordingElapsedSecondsRef.current >= VOICE_NOTE_MAX_SECONDS) {
+          stopVoiceRecording();
+        }
+      }, 1000);
+    } catch (error) {
+      console.warn("Voice recording could not be started.", error);
+      recordingStreamRef.current?.getTracks().forEach((track) => track.stop());
+      recordingStreamRef.current = null;
+      setIsRecordingVoice(false);
+      setRecordingError(new Error("Microphone access was not available."));
+    }
+  }
+
   function clearAttachment() {
     setAttachment((current) => {
       if (current?.previewUrl) {
@@ -344,6 +461,7 @@ export function MessagesClient() {
     setAttachment({
       file,
       previewUrl: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+      kind: file.type.startsWith("image/") ? "image" : "file",
     });
   }
 
@@ -359,10 +477,14 @@ export function MessagesClient() {
     }
 
     if (attachment) {
-      uploadAttachment.mutate(attachment.file, {
+      uploadAttachment.mutate(attachment, {
         onSuccess: (uploaded) => {
           createMessage.mutate({
-            body: trimmed || `Sharing ${attachment.file.name} for review.`,
+            body:
+              trimmed ||
+              (attachment.kind === "voice"
+                ? `Voice note (${formatDuration(attachment.durationSeconds)})`
+                : `Sharing ${attachment.file.name} for review.`),
             attachment_id: uploaded.attachment_id,
           });
         },
@@ -533,10 +655,15 @@ export function MessagesClient() {
               }
               isSending={createMessage.isPending || uploadAttachment.isPending}
               attachment={attachment}
-              error={uploadAttachment.error || createMessage.error}
+              error={recordingError || uploadAttachment.error || createMessage.error}
+              canRecordVoice={canRecordVoice}
+              isRecordingVoice={isRecordingVoice}
+              recordingSeconds={recordingSeconds}
               onValueChange={setComposerValue}
               onSubmit={handleSubmit}
               onPickAttachment={() => fileInputRef.current?.click()}
+              onStartVoiceRecording={startVoiceRecording}
+              onStopVoiceRecording={stopVoiceRecording}
               onClearAttachment={clearAttachment}
             />
             <input
@@ -560,6 +687,7 @@ function TriageSummaryPanel({ thread, role }: { thread: Thread; role?: UserRole 
   }
   const symptoms = summary.symptoms?.filter(Boolean) ?? [];
   const redFlags = summary.red_flags?.filter(Boolean) ?? [];
+  const possibleCauses = summary.possible_causes?.filter(Boolean) ?? [];
   const title = role === "doctor" ? "Patient triage summary" : "Your triage summary";
 
   return (
@@ -586,6 +714,11 @@ function TriageSummaryPanel({ thread, role }: { thread: Thread; role?: UserRole 
             <span className="font-semibold text-[#1F2937]">Suggested department:</span> {summary.department}
           </p>
         ) : null}
+        {summary.severity ? (
+          <p>
+            <span className="font-semibold text-[#1F2937]">Severity:</span> {formatStatus(summary.severity)}
+          </p>
+        ) : null}
         {summary.created_at ? (
           <p>
             <span className="font-semibold text-[#1F2937]">Captured:</span> {relativeThreadTime(summary.created_at)}
@@ -598,6 +731,11 @@ function TriageSummaryPanel({ thread, role }: { thread: Thread; role?: UserRole 
       {redFlags.length ? (
         <p className="mt-3 rounded-[8px] border border-rose-100 bg-rose-50 px-3 py-2 text-rose-700">
           <span className="font-semibold">Red flags:</span> {redFlags.join(", ")}
+        </p>
+      ) : null}
+      {possibleCauses.length ? (
+        <p className="mt-3 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 text-slate-700">
+          <span className="font-semibold text-[#1F2937]">Possible causes:</span> {possibleCauses.join(", ")}
         </p>
       ) : null}
       <p className="mt-3 text-xs leading-5 text-slate-500">{summary.disclaimer}</p>
@@ -834,6 +972,8 @@ function ChatMessageBubble({
 }) {
   const isMine = Boolean(currentUserId && message.sender === currentUserId);
   const senderName = messageSenderName(message, thread, currentUserId, currentUserRole);
+  const isVoiceAttachment =
+    message.attachment_kind === "voice" || Boolean(message.attachment_content_type?.startsWith("audio/"));
 
   return (
     <article className={cn("flex gap-2", isMine ? "justify-end" : "justify-start")}>
@@ -847,7 +987,9 @@ function ChatMessageBubble({
         )}
       >
         <p className="whitespace-pre-line text-sm leading-7">{message.body}</p>
-        {message.attachment_url ? (
+        {message.attachment_url && isVoiceAttachment ? (
+          <VoiceNotePlayer message={message} isMine={isMine} />
+        ) : message.attachment_url ? (
           <a
             className={cn(
               "mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold",
@@ -869,6 +1011,63 @@ function ChatMessageBubble({
   );
 }
 
+function VoiceNotePlayer({ message, isMine }: { message: Message; isMine: boolean }) {
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setAudioUrl(null);
+    setLoadError(false);
+
+    async function loadAudioUrl() {
+      try {
+        const response = await fetch(message.attachment_url, { credentials: "include" });
+        if (!response.ok) {
+          throw new Error("Unable to load voice note.");
+        }
+        const payload = (await response.json()) as { download_url?: string };
+        if (!cancelled) {
+          setAudioUrl(payload.download_url || null);
+          setLoadError(!payload.download_url);
+        }
+      } catch {
+        if (!cancelled) {
+          setLoadError(true);
+        }
+      }
+    }
+
+    loadAudioUrl();
+    return () => {
+      cancelled = true;
+    };
+  }, [message.attachment_url]);
+
+  return (
+    <div
+      className={cn(
+        "mt-3 rounded-[14px] px-3 py-2",
+        isMine ? "bg-white/15 text-white" : "border border-[#DDEBFF] bg-[#F8FBFF] text-[#1F2937]",
+      )}
+    >
+      <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold">
+        <span>Voice note</span>
+        <span>{formatDuration(message.attachment_duration_seconds)}</span>
+      </div>
+      {audioUrl ? (
+        <audio className="w-full max-w-64" controls preload="metadata" src={audioUrl}>
+          Voice note playback is not available in this browser.
+        </audio>
+      ) : (
+        <p className={cn("text-xs", isMine ? "text-white/75" : "text-slate-500")}>
+          {loadError ? "Voice note could not be loaded." : "Preparing voice note..."}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function ChatComposer({
   value,
   disabled,
@@ -876,9 +1075,14 @@ function ChatComposer({
   isSending,
   attachment,
   error,
+  canRecordVoice,
+  isRecordingVoice,
+  recordingSeconds,
   onValueChange,
   onSubmit,
   onPickAttachment,
+  onStartVoiceRecording,
+  onStopVoiceRecording,
   onClearAttachment,
 }: {
   value: string;
@@ -887,9 +1091,14 @@ function ChatComposer({
   isSending: boolean;
   attachment: AttachmentPreview | null;
   error: unknown;
+  canRecordVoice: boolean;
+  isRecordingVoice: boolean;
+  recordingSeconds: number;
   onValueChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onPickAttachment: () => void;
+  onStartVoiceRecording: () => void;
+  onStopVoiceRecording: () => void;
   onClearAttachment: () => void;
 }) {
   return (
@@ -903,7 +1112,11 @@ function ChatComposer({
 
       {attachment ? (
         <div className="mb-3 flex items-center gap-3 rounded-[18px] border border-[#DDEBFF] bg-[#F8FBFF] p-3">
-          {attachment.previewUrl ? (
+          {attachment.kind === "voice" && attachment.previewUrl ? (
+            <span className="flex h-14 w-14 items-center justify-center rounded-[14px] bg-white text-[#2563EB]">
+              <Mic className="h-5 w-5" />
+            </span>
+          ) : attachment.previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={attachment.previewUrl}
@@ -917,7 +1130,16 @@ function ChatComposer({
           )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-[#1F2937]">{attachment.file.name}</p>
-            <p className="text-xs text-slate-500">{formatFileSize(attachment.file.size)}</p>
+            <p className="text-xs text-slate-500">
+              {attachment.kind === "voice"
+                ? `Voice note · ${formatDuration(attachment.durationSeconds)}`
+                : formatFileSize(attachment.file.size)}
+            </p>
+            {attachment.kind === "voice" && attachment.previewUrl ? (
+              <audio className="mt-2 w-full max-w-72" controls preload="metadata" src={attachment.previewUrl}>
+                Voice note playback is not available in this browser.
+              </audio>
+            ) : null}
           </div>
           <button
             type="button"
@@ -940,6 +1162,20 @@ function ChatComposer({
         >
           <Plus className="h-5 w-5" />
         </button>
+        {canRecordVoice ? (
+          <button
+            type="button"
+            className={cn(
+              "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-sm transition hover:-translate-y-0.5",
+              isRecordingVoice ? "bg-rose-600 text-white hover:bg-rose-700" : "bg-white text-[#2563EB] hover:bg-[#EFF6FF]",
+            )}
+            disabled={disabled || isSending}
+            onClick={isRecordingVoice ? onStopVoiceRecording : onStartVoiceRecording}
+            aria-label={isRecordingVoice ? "Stop voice note" : "Record voice note"}
+          >
+            {isRecordingVoice ? <Square className="h-4 w-4 fill-current" /> : <Mic className="h-5 w-5" />}
+          </button>
+        ) : null}
         <textarea
           className="max-h-32 min-h-11 flex-1 resize-none bg-transparent px-1 py-3 text-sm leading-6 text-[#1F2937] outline-none placeholder:text-slate-400"
           value={value}
@@ -962,8 +1198,17 @@ function ChatComposer({
         </Button>
       </div>
       <p className="mt-2 flex items-center gap-2 px-2 text-xs text-slate-500">
-        <ImageIcon className="h-3.5 w-3.5" />
-        Add file from device.
+        {isRecordingVoice ? (
+          <>
+            <Mic className="h-3.5 w-3.5 text-rose-600" />
+            Recording voice note: {formatDuration(recordingSeconds)} / {formatDuration(VOICE_NOTE_MAX_SECONDS)}
+          </>
+        ) : (
+          <>
+            <ImageIcon className="h-3.5 w-3.5" />
+            Add file from device{canRecordVoice ? " or record a voice note up to 60 seconds." : "."}
+          </>
+        )}
       </p>
     </form>
   );

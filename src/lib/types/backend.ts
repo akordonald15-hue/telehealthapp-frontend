@@ -204,6 +204,7 @@ export type Thread = {
     recommendation: string;
     department: string;
     red_flags: string[];
+    possible_causes?: string[];
     created_at: string;
     disclaimer: string;
   } | null;
@@ -226,6 +227,11 @@ export type Message = {
   sender: number;
   body: string;
   attachment_url: string;
+  attachment_kind?: "file" | "image" | "voice" | "";
+  attachment_filename?: string;
+  attachment_content_type?: string;
+  attachment_size_bytes?: number;
+  attachment_duration_seconds?: number | null;
   created_at: string;
   read_at: string | null;
 };

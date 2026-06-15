@@ -160,7 +160,7 @@ export const messagingApi = {
     apiRequest<ConsultationDispute>(`/messages/threads/${threadId}/dispute/`, { method: "POST", body }),
   initAttachmentUpload: (
     threadId: number,
-    body: { filename: string; content_type?: string; size_bytes?: number },
+    body: { filename: string; content_type?: string; size_bytes?: number; duration_seconds?: number },
   ) =>
     apiRequest<MessageAttachmentUploadInit>(`/messages/threads/${threadId}/attachments/init/`, {
       method: "POST",
