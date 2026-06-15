@@ -205,6 +205,8 @@ export type Thread = {
     department: string;
     red_flags: string[];
     possible_causes?: string[];
+    urgency_guidance?: string[];
+    self_care_guidance?: string[];
     created_at: string;
     disclaimer: string;
   } | null;

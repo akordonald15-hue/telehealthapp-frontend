@@ -692,6 +692,8 @@ function TriageSummaryPanel({ thread, role }: { thread: Thread; role?: UserRole 
   const symptoms = summary.symptoms?.filter(Boolean) ?? [];
   const redFlags = summary.red_flags?.filter(Boolean) ?? [];
   const possibleCauses = summary.possible_causes?.filter(Boolean) ?? [];
+  const urgencyGuidance = summary.urgency_guidance?.filter(Boolean) ?? [];
+  const selfCareGuidance = summary.self_care_guidance?.filter(Boolean) ?? [];
   const title = role === "doctor" ? "Patient triage summary" : "Your triage summary";
 
   return (
@@ -737,9 +739,19 @@ function TriageSummaryPanel({ thread, role }: { thread: Thread; role?: UserRole 
           <span className="font-semibold">Red flags:</span> {redFlags.join(", ")}
         </p>
       ) : null}
+      {urgencyGuidance.length ? (
+        <p className="mt-3 rounded-[8px] border border-amber-100 bg-amber-50 px-3 py-2 text-amber-800">
+          <span className="font-semibold">Urgency guidance:</span> {urgencyGuidance.join(" ")}
+        </p>
+      ) : null}
       {possibleCauses.length ? (
         <p className="mt-3 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 text-slate-700">
           <span className="font-semibold text-[#1F2937]">Possible causes:</span> {possibleCauses.join(", ")}
+        </p>
+      ) : null}
+      {selfCareGuidance.length ? (
+        <p className="mt-3 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 text-slate-700">
+          <span className="font-semibold text-[#1F2937]">Self-care discussed:</span> {selfCareGuidance.join(", ")}
         </p>
       ) : null}
       <p className="mt-3 text-xs leading-5 text-slate-500">{summary.disclaimer}</p>
