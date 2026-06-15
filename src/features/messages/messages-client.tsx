@@ -152,6 +152,11 @@ function messageSenderName(message: Message, thread: Thread | null, currentUserI
   return "Caretekk";
 }
 
+function messageAttachmentId(message: Message) {
+  const match = message.attachment_url.match(/\/attachments\/(\d+)\/(?:download|file)\//);
+  return match?.[1] ?? null;
+}
+
 export function MessagesClient() {
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
@@ -1011,37 +1016,8 @@ function ChatMessageBubble({
 }
 
 function VoiceNotePlayer({ message, isMine }: { message: Message; isMine: boolean }) {
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [loadError, setLoadError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    setAudioUrl(null);
-    setLoadError(false);
-
-    async function loadAudioUrl() {
-      try {
-        const response = await fetch(message.attachment_url, { credentials: "include" });
-        if (!response.ok) {
-          throw new Error("Unable to load voice note.");
-        }
-        const payload = (await response.json()) as { download_url?: string };
-        if (!cancelled) {
-          setAudioUrl(payload.download_url || null);
-          setLoadError(!payload.download_url);
-        }
-      } catch {
-        if (!cancelled) {
-          setLoadError(true);
-        }
-      }
-    }
-
-    loadAudioUrl();
-    return () => {
-      cancelled = true;
-    };
-  }, [message.attachment_url]);
+  const attachmentId = messageAttachmentId(message);
+  const audioUrl = attachmentId ? `/api/messages/attachments/${attachmentId}/file/` : null;
 
   return (
     <div
@@ -1060,7 +1036,7 @@ function VoiceNotePlayer({ message, isMine }: { message: Message; isMine: boolea
         </audio>
       ) : (
         <p className={cn("text-xs", isMine ? "text-white/75" : "text-slate-500")}>
-          {loadError ? "Voice note could not be loaded." : "Preparing voice note..."}
+          Voice note could not be loaded.
         </p>
       )}
     </div>
