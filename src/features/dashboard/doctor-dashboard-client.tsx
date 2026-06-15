@@ -189,32 +189,32 @@ export function DoctorDashboardClient() {
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,#0F766E_0%,#2563EB_58%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(15,118,110,0.4)] sm:p-8">
+        <div className="rounded-[22px] border border-white/70 bg-[linear-gradient(135deg,#0F766E_0%,#2563EB_58%,#60A5FA_100%)] p-5 text-white shadow-[0_24px_64px_-42px_rgba(15,118,110,0.4)] sm:p-6">
           <p className="ct-caption text-cyan-50">Clinical command center</p>
-          <h2 className="ct-dashboard-title mt-4 text-white sm:text-[2.3rem]">
+          <h2 className="mt-3 font-heading text-2xl font-semibold leading-tight text-white sm:text-[2rem]">
             {todayAppointments.length ? `${todayAppointments.length} consultation${todayAppointments.length === 1 ? "" : "s"} today` : "No consultations scheduled for today"}
           </h2>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-cyan-50/90 sm:text-base">
-            Review the patient queue, open conversations, and create follow-up referrals without patient booking tools.
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-cyan-50/90">
+            Review patient context, conversations, and follow-up work from one place.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[#0F766E] shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5">
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/appointments" className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-white px-4 text-sm font-semibold text-[#0F766E] shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5">
               View consultations
             </Link>
-            <Link href="/messages" className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-white/25 bg-white/10 px-5 text-sm font-extrabold text-white transition hover:bg-white/16">
+            <Link href="/messages" className="inline-flex min-h-10 items-center justify-center rounded-[8px] border border-white/25 bg-white/10 px-4 text-sm font-semibold text-white transition hover:bg-white/16">
               Open messages
             </Link>
           </div>
         </div>
 
-        <div className="ct-panel rounded-[28px] p-6">
+        <div className="ct-panel rounded-[22px] p-5">
           <p className="ct-card-title text-[#1F2937]">Quick actions</p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Clinical shortcuts for common doctor workflows.</p>
-          <div className="mt-5 grid gap-3">
-            <QuickAction href="/appointments" label="View appointments" description={"Open today's and upcoming consultations."} icon={CalendarClock} />
-            <QuickAction href="/messages" label="Open messages" description="Continue patient conversations." icon={MessageSquareText} />
-            <QuickAction href="/referrals" label="Create referral" description="Send a specialist or home-nurse recommendation." icon={SendHorizonal} />
-            <QuickAction href="/records" label="Review care plans" description="Review patient records, notes, and follow-up context." icon={FileText} />
+          <p className="mt-1 text-sm leading-6 text-slate-600">Common clinical actions.</p>
+          <div className="mt-4 grid gap-3">
+            <QuickAction href="/appointments" label="View appointments" description="Today and upcoming." icon={CalendarClock} />
+            <QuickAction href="/messages" label="Open messages" description="Patient conversations." icon={MessageSquareText} />
+            <QuickAction href="/referrals" label="Create referral" description="Specialist or homecare." icon={SendHorizonal} />
+            <QuickAction href="/records" label="Review care plans" description="Notes and follow-up context." icon={FileText} />
           </div>
         </div>
       </div>

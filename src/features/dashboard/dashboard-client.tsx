@@ -23,19 +23,18 @@ function Metric({ label, value, href, icon: Icon, description }: { label: string
   return (
     <Link
       href={href}
-      className="ct-hover-lift ct-surface group rounded-[24px] p-5 hover:shadow-[0_28px_70px_-42px_rgba(37,99,235,0.18)]"
+      className="ct-hover-lift ct-surface group rounded-[18px] p-4 hover:shadow-[0_24px_56px_-38px_rgba(37,99,235,0.18)]"
     >
       <div className="flex items-start justify-between gap-3">
-        <span className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-[#DBEAFE] text-[#2563EB]">
+        <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#DBEAFE] text-[#2563EB]">
           <Icon className="h-5 w-5" />
         </span>
-        <span className="ct-caption text-slate-400">Now</span>
       </div>
-      <span className="mt-5 block text-sm font-semibold text-slate-500">{label}</span>
-      <strong className="mt-2 block font-heading text-[1.85rem] font-semibold tracking-tight text-[#1F2937]">{value}</strong>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
-      <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">
-        Open {label.toLowerCase()}
+      <span className="mt-4 block text-sm font-semibold text-slate-500">{label}</span>
+      <strong className="mt-1 block font-heading text-[1.65rem] font-semibold tracking-tight text-[#1F2937]">{value}</strong>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+      <span className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">
+        Open
         <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
       </span>
     </Link>
@@ -135,17 +134,17 @@ export function DashboardClient() {
       {user?.role === "patient" ? (
         <>
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.42)]">
+            <div className="rounded-[22px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_55%,#60A5FA_100%)] p-5 text-white shadow-[0_24px_64px_-42px_rgba(37,99,235,0.42)]">
               <p className="ct-caption text-blue-100">Guided Journey</p>
-              <h2 className="ct-card-title mt-4 text-white">{nextPatientStep.description}</h2>
+              <h2 className="mt-3 font-heading text-xl font-semibold text-white">{nextPatientStep.description}</h2>
             </div>
-            <Link href="/triage" className="ct-surface rounded-[24px] p-5">
-              <p className="ct-caption text-[var(--primary)]">Start Care Check-in</p>
-              <p className="mt-4 text-sm font-semibold text-[#1F2937]">Begin your check-in.</p>
+            <Link href="/triage" className="ct-surface rounded-[18px] p-4">
+              <p className="ct-caption text-[var(--primary)]">Care Check-in</p>
+              <p className="mt-3 text-sm font-semibold text-[#1F2937]">Start now</p>
             </Link>
-            <Link href={patientHasConsultation ? "/messages" : "/appointments"} className="ct-surface rounded-[24px] p-5">
-              <p className="ct-caption text-[var(--primary)]">Review</p>
-              <p className="mt-4 text-sm font-semibold text-[#1F2937]">{patientHasConsultation ? "Open consultation." : "Review appointments."}</p>
+            <Link href={patientHasConsultation ? "/messages" : "/appointments"} className="ct-surface rounded-[18px] p-4">
+              <p className="ct-caption text-[var(--primary)]">Next Step</p>
+              <p className="mt-3 text-sm font-semibold text-[#1F2937]">{patientHasConsultation ? "Open consultation" : "Review appointments"}</p>
             </Link>
           </div>
 
@@ -165,30 +164,30 @@ export function DashboardClient() {
           ) : null}
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="ct-surface rounded-[24px] p-5">
+            <div className="ct-surface rounded-[18px] p-4">
               <p className="text-sm font-semibold text-slate-500">Care Check-in</p>
-              <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Done" : "Next"}</p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">Start with a quick check-in.</p>
-              <Link href="/triage" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-2 font-heading text-xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Done" : "Next"}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Share symptoms before booking.</p>
+              <Link href="/triage" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
             </div>
-            <div className="ct-surface rounded-[24px] p-5">
+            <div className="ct-surface rounded-[18px] p-4">
               <p className="text-sm font-semibold text-slate-500">Consultation</p>
-              <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Ready" : "Waiting"}</p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">Open your secure consultation.</p>
-              <Link href="/messages" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-2 font-heading text-xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Ready" : "Waiting"}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Continue with your doctor.</p>
+              <Link href="/messages" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
             </div>
-            <div className="ct-surface rounded-[24px] p-5">
+            <div className="ct-surface rounded-[18px] p-4">
               <p className="text-sm font-semibold text-slate-500">Care plan</p>
-              <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{patientHasCarePlan ? "Available" : "Coming next"}</p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">See your latest care updates.</p>
-              <Link href="/care-plan" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-2 font-heading text-xl font-semibold text-[#1F2937]">{patientHasCarePlan ? "Available" : "Coming next"}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Review care updates.</p>
+              <Link href="/care-plan" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Keep upcoming visits and booking details close." />
-            <Metric label="Consultations" value={threadMetric} href="/messages" icon={MessageSquareText} description="Follow up with your doctor in one secure conversation." />
-            <Metric label="Care Plans" value={referralMetric} href="/care-plan" icon={FileText} description="Review doctor notes, instructions, and referrals when they are ready." />
+            <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Upcoming visits and booking details." />
+            <Metric label="Consultations" value={threadMetric} href="/messages" icon={MessageSquareText} description="Secure doctor conversations." />
+            <Metric label="Care Plans" value={referralMetric} href="/care-plan" icon={FileText} description="Doctor notes and referrals." />
           </div>
         </>
       ) : (

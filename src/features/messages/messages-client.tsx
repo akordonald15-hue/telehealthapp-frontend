@@ -592,8 +592,8 @@ export function MessagesClient() {
               </div>
             ) : null}
             {activeThread && realtimeUnavailable ? (
-              <div className="border-b border-amber-100 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 sm:px-6">
-                Realtime connection lost. Messages will refresh manually.
+              <div className="border-b border-amber-100 bg-amber-50/70 px-4 py-2 text-xs font-medium text-amber-800 sm:px-6">
+                Realtime paused. Messages will refresh manually.
               </div>
             ) : null}
             {activeThreadDetails?.triage_summary ? (
@@ -698,61 +698,62 @@ function TriageSummaryPanel({ thread, role }: { thread: Thread; role?: UserRole 
 
   return (
     <details className="border-b border-[#DDEBFF] bg-[#F8FBFF] px-4 py-3 text-sm sm:px-6" open={role === "doctor"}>
-      <summary className="cursor-pointer list-none font-bold text-[#1F2937]">
+      <summary className="cursor-pointer list-none font-semibold text-[#1F2937]">
         {title}
-        <span className="ml-2 rounded-full bg-white px-2 py-1 text-[11px] font-bold text-[#2563EB]">
+        <span className="ml-2 rounded-full bg-white px-2 py-1 text-[11px] font-semibold text-[#2563EB]">
           {formatStatus(summary.risk_level || summary.severity) || "Check-in"}
         </span>
       </summary>
-      <div className="mt-3 grid gap-3 text-slate-600 sm:grid-cols-2">
+      <div className="mt-3 grid gap-2 text-slate-600 sm:grid-cols-2">
         {symptoms.length ? (
-          <p>
+          <p className="rounded-[8px] bg-white px-3 py-2">
             <span className="font-semibold text-[#1F2937]">Symptoms:</span> {symptoms.join(", ")}
           </p>
         ) : null}
         {summary.duration ? (
-          <p>
+          <p className="rounded-[8px] bg-white px-3 py-2">
             <span className="font-semibold text-[#1F2937]">Duration:</span> {summary.duration}
           </p>
         ) : null}
         {summary.department ? (
-          <p>
-            <span className="font-semibold text-[#1F2937]">Suggested department:</span> {summary.department}
+          <p className="rounded-[8px] bg-white px-3 py-2">
+            <span className="font-semibold text-[#1F2937]">Specialty:</span> {summary.department}
           </p>
         ) : null}
         {summary.severity ? (
-          <p>
+          <p className="rounded-[8px] bg-white px-3 py-2">
             <span className="font-semibold text-[#1F2937]">Severity:</span> {formatStatus(summary.severity)}
           </p>
         ) : null}
         {summary.created_at ? (
-          <p>
+          <p className="rounded-[8px] bg-white px-3 py-2">
             <span className="font-semibold text-[#1F2937]">Captured:</span> {relativeThreadTime(summary.created_at)}
           </p>
         ) : null}
       </div>
       {summary.recommendation ? (
-        <p className="mt-3 leading-6 text-slate-700">{summary.recommendation}</p>
+        <p className="mt-3 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 leading-6 text-slate-700">{summary.recommendation}</p>
       ) : null}
       {redFlags.length ? (
-        <p className="mt-3 rounded-[8px] border border-rose-100 bg-rose-50 px-3 py-2 text-rose-700">
+        <p className="mt-2 rounded-[8px] border border-rose-100 bg-rose-50 px-3 py-2 text-rose-700">
           <span className="font-semibold">Red flags:</span> {redFlags.join(", ")}
         </p>
       ) : null}
       {urgencyGuidance.length ? (
-        <p className="mt-3 rounded-[8px] border border-amber-100 bg-amber-50 px-3 py-2 text-amber-800">
+        <p className="mt-2 rounded-[8px] border border-amber-100 bg-amber-50 px-3 py-2 text-amber-800">
           <span className="font-semibold">Urgency guidance:</span> {urgencyGuidance.join(" ")}
         </p>
       ) : null}
       {possibleCauses.length ? (
-        <p className="mt-3 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 text-slate-700">
+        <p className="mt-2 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 text-slate-700">
           <span className="font-semibold text-[#1F2937]">Possible causes:</span> {possibleCauses.join(", ")}
         </p>
       ) : null}
       {selfCareGuidance.length ? (
-        <p className="mt-3 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 text-slate-700">
-          <span className="font-semibold text-[#1F2937]">Self-care discussed:</span> {selfCareGuidance.join(", ")}
-        </p>
+        <details className="mt-2 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 text-slate-700">
+          <summary className="cursor-pointer list-none text-sm font-semibold text-[#1F2937]">Self-care guidance</summary>
+          <p className="mt-2 leading-6">{selfCareGuidance.join(", ")}</p>
+        </details>
       ) : null}
       <p className="mt-3 text-xs leading-5 text-slate-500">{summary.disclaimer}</p>
     </details>
@@ -996,13 +997,13 @@ function ChatMessageBubble({
       {!isMine ? <Avatar label={currentUserRole === "doctor" ? "Pt" : "Dr"} tone="green" size="sm" /> : null}
       <div
         className={cn(
-          "max-w-[82%] rounded-[22px] px-4 py-3 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.24)] sm:max-w-[68%]",
+          "max-w-[84%] rounded-[18px] px-3.5 py-2.5 shadow-[0_12px_34px_-30px_rgba(15,23,42,0.24)] sm:max-w-[68%]",
           isMine
             ? "rounded-br-md bg-[linear-gradient(135deg,#2563EB,#60A5FA)] text-white"
             : "rounded-bl-md border border-white bg-white text-[#1F2937]",
         )}
       >
-        <p className="whitespace-pre-line text-sm leading-7">{message.body}</p>
+        {message.body ? <p className="whitespace-pre-line text-sm leading-6">{message.body}</p> : null}
         {message.attachment_url && isVoiceAttachment ? (
           <VoiceNotePlayer message={message} isMine={isMine} />
         ) : message.attachment_url ? (
@@ -1019,8 +1020,8 @@ function ChatMessageBubble({
             Open attachment
           </a>
         ) : null}
-        <p className={cn("mt-2 text-[11px]", isMine ? "text-white/75" : "text-slate-400")}>
-          {senderName} at {messageTime(message.created_at)}
+        <p className={cn("mt-2 text-[11px]", isMine ? "text-right text-white/75" : "text-slate-400")}>
+          {isMine ? messageTime(message.created_at) : `${senderName} · ${messageTime(message.created_at)}`}
         </p>
       </div>
     </article>
@@ -1034,23 +1035,20 @@ function VoiceNotePlayer({ message, isMine }: { message: Message; isMine: boolea
   return (
     <div
       className={cn(
-        "mt-3 rounded-[14px] px-3 py-2",
+        "mt-2 flex min-w-[13rem] max-w-full items-center gap-2 rounded-full px-2.5 py-2",
         isMine ? "bg-white/15 text-white" : "border border-[#DDEBFF] bg-[#F8FBFF] text-[#1F2937]",
       )}
     >
-      <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold">
-        <span>Voice note</span>
-        <span>{formatDuration(message.attachment_duration_seconds)}</span>
-      </div>
       {audioUrl ? (
-        <audio className="w-full max-w-64" controls preload="metadata" src={audioUrl}>
+        <audio className="h-8 min-w-0 flex-1" controls preload="metadata" src={audioUrl}>
           Voice note playback is not available in this browser.
         </audio>
       ) : (
-        <p className={cn("text-xs", isMine ? "text-white/75" : "text-slate-500")}>
-          Voice note could not be loaded.
-        </p>
+        <p className={cn("min-w-0 flex-1 text-xs", isMine ? "text-white/75" : "text-slate-500")}>Audio unavailable</p>
       )}
+      <span className={cn("shrink-0 text-[11px] font-medium", isMine ? "text-white/80" : "text-slate-500")}>
+        {formatDuration(message.attachment_duration_seconds)}
+      </span>
     </div>
   );
 }
@@ -1098,7 +1096,7 @@ function ChatComposer({
       ) : null}
 
       {attachment ? (
-        <div className="mb-3 flex items-center gap-3 rounded-[18px] border border-[#DDEBFF] bg-[#F8FBFF] p-3">
+        <div className="mb-3 flex items-center gap-3 rounded-[16px] border border-[#DDEBFF] bg-[#F8FBFF] p-3">
           {attachment.kind === "voice" && attachment.previewUrl ? (
             <span className="flex h-14 w-14 items-center justify-center rounded-[14px] bg-white text-[#2563EB]">
               <Mic className="h-5 w-5" />
@@ -1116,17 +1114,21 @@ function ChatComposer({
             </span>
           )}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-[#1F2937]">{attachment.file.name}</p>
-            <p className="text-xs text-slate-500">
-              {attachment.kind === "voice"
-                ? `Voice note · ${formatDuration(attachment.durationSeconds)}`
-                : formatFileSize(attachment.file.size)}
-            </p>
             {attachment.kind === "voice" && attachment.previewUrl ? (
-              <audio className="mt-2 w-full max-w-72" controls preload="metadata" src={attachment.previewUrl}>
-                Voice note playback is not available in this browser.
-              </audio>
-            ) : null}
+              <div className="flex items-center gap-2">
+                <audio className="h-8 min-w-0 flex-1" controls preload="metadata" src={attachment.previewUrl}>
+                  Voice note playback is not available in this browser.
+                </audio>
+                <span className="shrink-0 text-[11px] font-medium text-slate-500">
+                  {formatDuration(attachment.durationSeconds)}
+                </span>
+              </div>
+            ) : (
+              <>
+                <p className="truncate text-sm font-semibold text-[#1F2937]">{attachment.file.name}</p>
+                <p className="text-xs text-slate-500">{formatFileSize(attachment.file.size)}</p>
+              </>
+            )}
           </div>
           <button
             type="button"
@@ -1193,7 +1195,7 @@ function ChatComposer({
         ) : (
           <>
             <ImageIcon className="h-3.5 w-3.5" />
-            Add file from device{canRecordVoice ? " or record a voice note up to 60 seconds." : "."}
+            {canRecordVoice ? "Add a file or voice note." : "Add a file from your device."}
           </>
         )}
       </p>
