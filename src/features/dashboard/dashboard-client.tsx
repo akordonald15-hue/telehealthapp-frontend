@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, CalendarClock, CreditCard, FileText, MessageSquareText, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarClock, ClipboardList, CreditCard, FileText, MessageSquareText, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 import { EmptyState } from "@/components/ui/empty-state";
@@ -84,6 +84,11 @@ export function DashboardClient() {
     queryFn: () => referralsApi.list({ page_size: 5 }),
     enabled: !isNurse,
   });
+  const carePlans = useQuery({
+    queryKey: ["care-plans", "dashboard"],
+    queryFn: () => profilesApi.carePlans({ page_size: 5 }),
+    enabled: user?.role === "patient",
+  });
   const patientProfile = useQuery({
     queryKey: ["profile", "me", "patient"],
     queryFn: () => profilesApi.me<PatientProfile>(),
@@ -104,9 +109,11 @@ export function DashboardClient() {
 
   const threadMetric = listMetric(threads);
   const referralMetric = listMetric(referrals);
+  const carePlanMetric = listMetric(carePlans);
   const paymentMetric = canLoadPayments ? listMetric(payments) : 0;
   const patientHasConsultation = typeof threadMetric === "number" && threadMetric > 0;
-  const patientHasCarePlan = typeof referralMetric === "number" && referralMetric > 0;
+  const patientHasCarePlan = typeof carePlanMetric === "number" && carePlanMetric > 0;
+  const patientHasReferral = typeof referralMetric === "number" && referralMetric > 0;
   const nextPatientStep = patientHasConsultation
     ? {
         title: "Guided Journey",
@@ -124,6 +131,7 @@ export function DashboardClient() {
     appointments.isError ? `Appointments: ${getFriendlyErrorMessage(appointments.error, "dashboard")}` : null,
     threads.isError ? `Messages: ${getFriendlyErrorMessage(threads.error, "dashboard")}` : null,
     referrals.isError ? `Referrals: ${getFriendlyErrorMessage(referrals.error, "dashboard")}` : null,
+    carePlans.isError ? `Care plans: ${getFriendlyErrorMessage(carePlans.error, "dashboard")}` : null,
     payments.isError ? `Payments: ${getFriendlyErrorMessage(payments.error, "dashboard")}` : null,
   ].filter(Boolean);
 
@@ -206,7 +214,8 @@ export function DashboardClient() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Upcoming visits and booking details." />
             <Metric label="Consultations" value={threadMetric} href="/messages" icon={MessageSquareText} description="Secure doctor conversations." />
-            <Metric label="Care Plans" value={referralMetric} href="/care-plan" icon={FileText} description="Doctor notes and referrals." />
+            <Metric label="Care Plans" value={carePlanMetric} href="/care-plan" icon={FileText} description="Doctor-written next steps." />
+            {patientHasReferral ? <Metric label="Referrals" value={referralMetric} href="/referrals" icon={ClipboardList} description="Specialist or facility referrals." /> : null}
           </div>
         </>
       ) : (

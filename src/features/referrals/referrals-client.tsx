@@ -1,61 +1,56 @@
-﻿"use client";
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, SendHorizonal } from "lucide-react";
-import { useForm } from "react-hook-form";
-import type { z } from "zod";
+import { ClipboardList, FileText } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { DataList } from "@/components/ui/data-list";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
-import { Input, Select, Textarea } from "@/components/ui/input";
+import { Select } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { profilesApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { referralSummary } from "@/lib/ui/humanize";
-import type { CarePlan, Referral } from "@/lib/types/backend";
-import { referralSchema } from "@/lib/validation/features";
+import type { CarePlan, Referral, ReferralStatus } from "@/lib/types/backend";
+import { formatDateTime } from "@/lib/utils";
 
-type ReferralFormValues = z.input<typeof referralSchema>;
-type ReferralInput = z.output<typeof referralSchema>;
+const referralStatuses: ReferralStatus[] = ["pending", "reviewed", "contacted", "completed", "cancelled"];
+
+function Detail({ label, children }: { label: string; children: React.ReactNode }) {
+  if (!children) return null;
+  return (
+    <p>
+      <span className="font-semibold text-[#1F2937]">{label}:</span> {children}
+    </p>
+  );
+}
 
 export function ReferralsClient({ mode = "referrals" }: { mode?: "referrals" | "care-plan" }) {
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
-  const referrals = useQuery({ queryKey: ["referrals"], queryFn: () => referralsApi.list() });
+  const isCarePlanView = mode === "care-plan";
+  const referrals = useQuery({
+    queryKey: ["referrals"],
+    queryFn: () => referralsApi.list(),
+    enabled: !isCarePlanView,
+  });
   const carePlans = useQuery({
     queryKey: ["care-plans"],
     queryFn: () => profilesApi.carePlans(),
-    enabled: mode === "care-plan" || userQuery.data?.role === "patient",
+    enabled: isCarePlanView,
   });
-  const createReferral = useMutation({
-    mutationFn: referralsApi.create,
+  const updateReferral = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: ReferralStatus }) => referralsApi.update(id, { status }),
     onSuccess: async () => {
-      form.reset();
       await queryClient.invalidateQueries({ queryKey: ["referrals"] });
     },
   });
-  const form = useForm<ReferralFormValues, unknown, ReferralInput>({
-    resolver: zodResolver(referralSchema),
-    defaultValues: {
-      patient: 0,
-      referred_to: "",
-      notes: "",
-      status: "draft",
-    },
-  });
 
-  const patientView = mode === "care-plan" || userQuery.data?.role === "patient";
-  const sectionTitle = patientView ? "Care Plan" : "Referrals";
-  const sectionDescription = patientView ? "Doctor-written care plans from your consultations." : "Review referrals created from consultation workspaces.";
-
-  return (
-    <Section title={sectionTitle} description={sectionDescription}>
-      {patientView ? (
+  if (isCarePlanView) {
+    return (
+      <Section title="Care Plan" description="Doctor-written care plans from your consultations.">
         <DataList<CarePlan>
           data={carePlans.data}
           isLoading={carePlans.isLoading}
@@ -71,86 +66,91 @@ export function ReferralsClient({ mode = "referrals" }: { mode?: "referrals" | "
                   <FileText className="h-5 w-5" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Care plan</p>
-                  {carePlan.doctor_name ? <p className="mt-1 text-sm text-slate-500">Prepared by {carePlan.doctor_name}</p> : null}
-                  <div className="mt-4 grid gap-3 text-sm leading-6 text-slate-600">
-                    {carePlan.complaint_summary ? <p><span className="font-semibold text-[#1F2937]">Complaint:</span> {carePlan.complaint_summary}</p> : null}
-                    {carePlan.assessment_note ? <p><span className="font-semibold text-[#1F2937]">Assessment:</span> {carePlan.assessment_note}</p> : null}
-                    {carePlan.care_steps ? <p><span className="font-semibold text-[#1F2937]">Care steps:</span> {carePlan.care_steps}</p> : null}
-                    {carePlan.medications ? <p><span className="font-semibold text-[#1F2937]">Instructions:</span> {carePlan.medications}</p> : null}
-                    {carePlan.lifestyle_advice ? <p><span className="font-semibold text-[#1F2937]">Follow-up advice:</span> {carePlan.lifestyle_advice}</p> : null}
-                    {carePlan.warning_signs ? <p><span className="font-semibold text-[#1F2937]">Seek urgent care if:</span> {carePlan.warning_signs}</p> : null}
+                  <p className="font-heading text-lg font-semibold text-[#1F2937]">Care plan</p>
+                  <div className="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
+                    <Detail label="Complaint summary">{carePlan.complaint_summary || "Not added"}</Detail>
+                    <Detail label="Care plan">{carePlan.care_steps}</Detail>
+                    <Detail label="Follow-up date">{carePlan.follow_up_date || "Not scheduled"}</Detail>
+                    <Detail label="Doctor">{carePlan.doctor_name || "Caretekk doctor"}</Detail>
+                    <Detail label="Consultation date">
+                      {carePlan.appointment_scheduled_at ? formatDateTime(carePlan.appointment_scheduled_at) : formatDateTime(carePlan.created_at)}
+                    </Detail>
                   </div>
                 </div>
               </div>
             </article>
           )}
         />
-      ) : userQuery.data?.role === "doctor" ? (
+      </Section>
+    );
+  }
+
+  return (
+    <Section
+      title="Referrals"
+      description={
+        userQuery.data?.role === "patient"
+          ? "Specialist or facility referrals created from your Caretekk consultations."
+          : "Operational queue for referrals created from consultation workspaces."
+      }
+    >
+      {userQuery.data?.role === "doctor" ? (
         <Notice title="Create referrals from a consultation" tone="neutral">
           Open a patient consultation and use Create referral so patient and appointment context are linked automatically.
         </Notice>
-      ) : userQuery.data?.role === "admin" ? (
-        <form className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6" onSubmit={form.handleSubmit((values) => createReferral.mutate(values))}>
-          <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
-              <SendHorizonal className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="ct-card-title text-[#1F2937]">Create a referral</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">Create a referral with the details another clinic or specialist will need.</p>
-            </div>
-          </div>
-          <ErrorMessage error={createReferral.error} context="referrals" />
-          {createReferral.isSuccess ? <Notice title="Referral created" tone="success">The referral has been saved and your list is up to date.</Notice> : null}
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Patient record" error={form.formState.errors.patient?.message} hint="Use the patient record number provided in the consultation." required>
-              <Input type="number" min={1} placeholder="Patient record number" {...form.register("patient")} />
-            </Field>
-            <Field label="Status" error={form.formState.errors.status?.message} required>
-              <Select {...form.register("status")}>
-                <option value="draft">Draft</option>
-                <option value="sent">Sent</option>
-              </Select>
-            </Field>
-          </div>
-          <Field label="Referred to" error={form.formState.errors.referred_to?.message} required>
-            <Input placeholder="Receiving clinic, specialist, or service" {...form.register("referred_to")} />
-          </Field>
-          <Field label="Notes" error={form.formState.errors.notes?.message} required>
-            <Textarea placeholder="Add context for the receiving provider" {...form.register("notes")} />
-          </Field>
-          <Button className="w-full sm:w-fit" type="submit" disabled={createReferral.isPending}>
-            {createReferral.isPending ? "Creating..." : "Create referral"}
-          </Button>
-        </form>
-      ) : (
-        <Notice title="Referral creation is limited to care teams" tone="neutral">Only the care team members who manage referrals can create them here.</Notice>
-      )}
-
-      {!patientView ? (
-        <DataList<Referral>
-          data={referrals.data}
-          isLoading={referrals.isLoading}
-          error={referrals.error}
-          errorContext="referrals"
-          loadingLabel="Loading your referrals..."
-          emptyTitle="No referrals yet"
-          empty="Referrals will appear here when they are created from consultations."
-          renderItem={(referral) => (
-            <article key={referral.id} className="ct-surface rounded-[24px] p-5">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <p className="font-heading text-xl font-semibold text-[#1F2937]">{referral.referred_to}</p>
-                  <p className="mt-2 text-sm text-slate-600">{referralSummary(userQuery.data?.role)}</p>
-                  {referral.notes ? <p className="mt-3 text-sm leading-7 text-slate-600">{referral.notes}</p> : null}
-                </div>
-                <StatusBadge value={referral.status} />
-              </div>
-            </article>
-          )}
-        />
       ) : null}
+
+      <ErrorMessage error={updateReferral.error} context="referrals" />
+      <DataList<Referral>
+        data={referrals.data}
+        isLoading={referrals.isLoading}
+        error={referrals.error}
+        errorContext="referrals"
+        loadingLabel="Loading referrals..."
+        emptyTitle="No referrals yet"
+        empty="Referrals will appear here when they are created from consultations."
+        renderItem={(referral) => (
+          <article key={referral.id} className="ct-surface rounded-[24px] p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-[#ECFEFF] text-[#0F766E]">
+                    <ClipboardList className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-heading text-lg font-semibold text-[#1F2937]">{referral.referred_to}</p>
+                    <p className="mt-1 text-sm text-slate-500">{referralSummary(userQuery.data?.role)}</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-2 text-sm leading-6 text-slate-600">
+                  <Detail label="Reason">{referral.notes || "Details are available from the consultation record."}</Detail>
+                  <Detail label="Doctor">{referral.doctor_name || "Caretekk doctor"}</Detail>
+                  {userQuery.data?.role === "admin" ? <Detail label="Patient">{referral.patient_name || `Patient #${referral.patient}`}</Detail> : null}
+                  <Detail label="Date">{referral.created_at ? formatDateTime(referral.created_at) : "Not available"}</Detail>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 sm:min-w-48">
+                <StatusBadge value={referral.status} />
+                {userQuery.data?.role === "admin" ? (
+                  <Field label="Operational status">
+                    <Select
+                      value={referral.status}
+                      disabled={updateReferral.isPending}
+                      onChange={(event) => updateReferral.mutate({ id: referral.id, status: event.target.value as ReferralStatus })}
+                    >
+                      {referralStatuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status.replace(/_/g, " ")}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                ) : null}
+              </div>
+            </div>
+          </article>
+        )}
+      />
     </Section>
   );
 }

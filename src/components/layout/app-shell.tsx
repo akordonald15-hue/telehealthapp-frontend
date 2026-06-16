@@ -47,7 +47,7 @@ const navItems: readonly NavItem[] = [
   { href: "/nurse/requests", label: "Requests", icon: ClipboardList, roles: ["nurse"] },
   { href: "/nurse/history", label: "History", icon: FileText, roles: ["nurse"] },
   { href: "/records", label: "Records", doctorLabel: "Patients / Care Plans", adminLabel: "Users / Records", icon: UserRoundCheck, roles: ["patient", "doctor", "admin"] },
-  { href: "/referrals", label: "Referrals", icon: ClipboardList, roles: ["admin"] },
+  { href: "/referrals", label: "Referrals", patientLabel: "Referrals", icon: ClipboardList, roles: ["patient", "admin"] },
   { href: "/profile", label: "Profile", icon: UserRound, roles: ["patient", "doctor", "admin", "nurse"] },
   { href: "/audit", label: "Audit", icon: ShieldCheck, roles: ["admin"] },
 ] as const;
@@ -98,9 +98,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     const patientOrder = [
       "/dashboard",
       "/triage",
-      "/messages",
-      "/care-plan",
-      "/home-care/book",
+        "/messages",
+        "/care-plan",
+        "/referrals",
+        "/home-care/book",
       "/appointments",
       "/records",
       "/profile",

@@ -223,7 +223,7 @@ export function DoctorDashboardClient() {
         <StatCard label={"Today's consultations"} value={todayAppointments.length} description="Appointments scheduled for today." icon={Stethoscope} />
         <StatCard label="Pending consultations" value={pendingConsultations.length} description="Scheduled patient visits awaiting care-team action." icon={CalendarClock} />
         <StatCard label="Patient messages" value={countValue(threads)} description="Visible patient conversations." icon={MessageSquareText} />
-        <StatCard label="Referrals created" value={countValue(referrals)} description="Draft and sent referrals in your care panel." icon={ClipboardList} />
+        <StatCard label="Referrals created" value={countValue(referrals)} description="Consultation-linked referrals in your care panel." icon={ClipboardList} />
       </div>
 
       <ProviderWalletPanel role="doctor" />

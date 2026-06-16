@@ -97,6 +97,8 @@ export function humanizeAuditAction(action: string) {
       return "Referral details updated";
     case "referral_sent":
       return "Referral sent";
+    case "referral_patient_notified":
+      return "Referral patient notified";
     case "referral_email_failed":
       return "Referral delivery needs attention";
     case "payment_initiated":

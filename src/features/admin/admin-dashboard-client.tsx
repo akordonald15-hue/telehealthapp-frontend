@@ -21,9 +21,9 @@ import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ApiError, extractErrorMessage } from "@/lib/api/client";
-import { adminApi, appointmentsApi, auditApi, homeCareApi, paymentsApi } from "@/lib/api/endpoints";
+import { adminApi, appointmentsApi, auditApi, homeCareApi, paymentsApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
-import type { AdminDashboardResponse, AdminProvider, AdminProviderCreateResponse, AdminUser, ProviderAvailabilityStatus, UserRole } from "@/lib/types/backend";
+import type { AdminDashboardResponse, AdminProvider, AdminProviderCreateResponse, AdminUser, ProviderAvailabilityStatus, ReferralStatus, UserRole } from "@/lib/types/backend";
 import { formatDateTime, formatMoney } from "@/lib/utils";
 
 function Metric({
@@ -479,6 +479,7 @@ function exportFinancialReport(data?: AdminDashboardResponse) {
 
 export function AdminDashboardClient() {
   const userQuery = useCurrentUser();
+  const queryClient = useQueryClient();
   const [roleFilter, setRoleFilter] = useState<UserRole | "">("");
   const dashboard = useQuery({ queryKey: ["admin", "dashboard"], queryFn: adminApi.dashboard, enabled: userQuery.data?.role === "admin" });
   const users = useQuery({
@@ -490,7 +491,14 @@ export function AdminDashboardClient() {
   const appointments = useQuery({ queryKey: ["admin", "appointments"], queryFn: () => appointmentsApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
   const homecare = useQuery({ queryKey: ["admin", "homecare"], queryFn: () => homeCareApi.requests({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
   const payments = useQuery({ queryKey: ["admin", "payments"], queryFn: () => paymentsApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
+  const referrals = useQuery({ queryKey: ["admin", "referrals"], queryFn: () => referralsApi.list({ page_size: 8 }), enabled: userQuery.data?.role === "admin" });
   const audit = useQuery({ queryKey: ["admin", "audit"], queryFn: () => auditApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
+  const updateReferral = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: ReferralStatus }) => referralsApi.update(id, { status }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "referrals"] });
+    },
+  });
 
   if (userQuery.data && userQuery.data.role !== "admin") {
     return (
@@ -534,6 +542,39 @@ export function AdminDashboardClient() {
       <Panel title="Provider management">
         <div className="grid gap-3">
           {providers.data?.results.length ? providers.data.results.map((provider) => <ProviderRow key={`${provider.provider_type}-${provider.id}`} provider={provider} />) : <EmptyState title="No providers found" description="Doctor and nurse providers will appear here." />}
+        </div>
+      </Panel>
+
+      <Panel title="Referral queue">
+        {updateReferral.isError ? <Notice title="Referral status was not updated" tone="warning">Please try again in a moment.</Notice> : null}
+        <div className="grid gap-3">
+          {referrals.data?.results.length ? referrals.data.results.map((referral) => (
+            <article key={referral.id} className="rounded-[18px] border border-slate-200 bg-slate-50 p-3">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-[#1F2937]">{referral.referred_to}</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {referral.patient_name || `Patient #${referral.patient}`} | {referral.doctor_name || `Doctor #${referral.doctor}`} | {referral.created_at ? formatDateTime(referral.created_at) : "No date"}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <StatusBadge value={referral.status} />
+                  <select
+                    value={referral.status}
+                    disabled={updateReferral.isPending}
+                    onChange={(event) => updateReferral.mutate({ id: referral.id, status: event.target.value as ReferralStatus })}
+                    className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+              </div>
+            </article>
+          )) : <EmptyState title="No referrals found" description="Consultation-linked referrals will appear here." />}
         </div>
       </Panel>
 

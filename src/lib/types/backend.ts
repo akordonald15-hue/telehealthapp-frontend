@@ -146,6 +146,7 @@ export type CarePlan = {
   doctor: number;
   doctor_name?: string;
   appointment: number | null;
+  appointment_scheduled_at?: string | null;
   complaint_summary: string;
   assessment_note: string;
   care_steps: string;
@@ -532,13 +533,16 @@ export type ProviderPayoutRequest = {
   notes: string;
 };
 
-export type ReferralStatus = "draft" | "sent";
+export type ReferralStatus = "pending" | "reviewed" | "contacted" | "completed" | "cancelled";
 
 export type Referral = {
   id: number;
   patient: number;
+  patient_name?: string;
   doctor: number;
+  doctor_name?: string;
   appointment?: number | null;
+  appointment_scheduled_at?: string | null;
   referred_to: string;
   notes: string;
   status: ReferralStatus;

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
-import { Input, Select, Textarea } from "@/components/ui/input";
+import { Input, Textarea } from "@/components/ui/input";
 import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
@@ -67,16 +67,11 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
       await queryClient.invalidateQueries({ queryKey: ["care-plans"] });
     },
   });
-  const [referralDraft, setReferralDraft] = useState({ referred_to: "", notes: "", status: "draft" });
+  const [referralDraft, setReferralDraft] = useState({ referred_to: "", notes: "" });
   const [carePlanDraft, setCarePlanDraft] = useState({
     complaint_summary: "",
-    assessment_note: "",
-    care_steps: "",
-    medications: "",
-    lifestyle_advice: "",
-    referral_recommendation: "",
+    care_plan: "",
     follow_up_date: "",
-    warning_signs: "",
   });
 
   if (userQuery.data?.role !== "doctor" && userQuery.data?.role !== "admin") {
@@ -200,25 +195,18 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                     appointment: appointment.id,
                     referred_to: referralDraft.referred_to,
                     notes: referralDraft.notes,
-                    status: referralDraft.status,
                   });
                 }}
               >
                 <ErrorMessage error={createReferral.error} context="referrals" />
-                {createReferral.isSuccess ? <Notice title="Referral saved" tone="success">The referral is linked to this consultation.</Notice> : null}
+                {createReferral.isSuccess ? <Notice title="Referral saved" tone="success">Patient notification has been queued.</Notice> : null}
                 <Field label="Patient">
                   <Input value={patient?.display_name || `Patient #${appointment.patient}`} disabled />
                 </Field>
                 <Field label="Specialty or facility" required>
                   <Input value={referralDraft.referred_to} onChange={(event) => setReferralDraft((draft) => ({ ...draft, referred_to: event.target.value }))} />
                 </Field>
-                <Field label="Status">
-                  <Select value={referralDraft.status} onChange={(event) => setReferralDraft((draft) => ({ ...draft, status: event.target.value }))}>
-                    <option value="draft">Draft</option>
-                    <option value="sent">Sent</option>
-                  </Select>
-                </Field>
-                <Field label="Referral notes">
+                <Field label="Referral note">
                   <Textarea value={referralDraft.notes} onChange={(event) => setReferralDraft((draft) => ({ ...draft, notes: event.target.value }))} />
                 </Field>
                 <Button type="submit" disabled={createReferral.isPending || !referralDraft.referred_to.trim()}>
@@ -238,7 +226,8 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                   createCarePlan.mutate({
                     patient: appointment.patient,
                     appointment: appointment.id,
-                    ...carePlanDraft,
+                    complaint_summary: carePlanDraft.complaint_summary,
+                    care_steps: carePlanDraft.care_plan,
                     follow_up_date: carePlanDraft.follow_up_date || null,
                   });
                 }}
@@ -248,28 +237,18 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 <Field label="Complaint summary">
                   <Textarea value={carePlanDraft.complaint_summary} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, complaint_summary: event.target.value }))} />
                 </Field>
-                <Field label="Assessment note">
-                  <Textarea value={carePlanDraft.assessment_note} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, assessment_note: event.target.value }))} />
-                </Field>
-                <Field label="Recommended care steps" required>
-                  <Textarea value={carePlanDraft.care_steps} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, care_steps: event.target.value }))} />
-                </Field>
-                <Field label="Medications / instructions">
-                  <Textarea value={carePlanDraft.medications} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, medications: event.target.value }))} />
-                </Field>
-                <Field label="Lifestyle or follow-up advice">
-                  <Textarea value={carePlanDraft.lifestyle_advice} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, lifestyle_advice: event.target.value }))} />
-                </Field>
-                <Field label="Referral recommendation">
-                  <Textarea value={carePlanDraft.referral_recommendation} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, referral_recommendation: event.target.value }))} />
+                <Field label="Care plan / medication instructions" required>
+                  <Textarea
+                    value={carePlanDraft.care_plan}
+                    onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, care_plan: event.target.value }))}
+                    placeholder="Medication instructions, self-care advice, warning signs, and next steps."
+                    className="min-h-40"
+                  />
                 </Field>
                 <Field label="Follow-up date">
                   <Input type="date" value={carePlanDraft.follow_up_date} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, follow_up_date: event.target.value }))} />
                 </Field>
-                <Field label="Warning signs">
-                  <Textarea value={carePlanDraft.warning_signs} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, warning_signs: event.target.value }))} />
-                </Field>
-                <Button type="submit" disabled={createCarePlan.isPending || !carePlanDraft.care_steps.trim()}>
+                <Button type="submit" disabled={createCarePlan.isPending || !carePlanDraft.care_plan.trim()}>
                   {createCarePlan.isPending ? "Saving..." : "Save care plan"}
                 </Button>
               </form>

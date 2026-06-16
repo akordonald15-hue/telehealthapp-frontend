@@ -24,7 +24,7 @@ export const referralSchema = z.object({
   patient: z.coerce.number().int().positive(),
   referred_to: z.string().min(1).max(255),
   notes: z.string().optional(),
-  status: z.enum(["draft", "sent"]).default("draft"),
+  status: z.enum(["pending", "reviewed", "contacted", "completed", "cancelled"]).default("pending"),
 });
 
 export const triageSymptomsSchema = z.object({
