@@ -3,14 +3,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, FileText, Loader2, MessageSquareText, Stethoscope, UserRoundCheck } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { Field } from "@/components/ui/field";
+import { Input, Select, Textarea } from "@/components/ui/input";
 import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { appointmentsApi, messagingApi } from "@/lib/api/endpoints";
+import { appointmentsApi, messagingApi, profilesApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { appointmentCompanionLabel } from "@/lib/ui/humanize";
@@ -23,6 +26,19 @@ function InfoTile({ label, value }: { label: string; value: string | number }) {
       <p className="mt-1 break-words text-sm leading-6 text-slate-600">{value || "Not available"}</p>
     </div>
   );
+}
+
+function patientAge(dob?: string | null) {
+  if (!dob) return "Not added";
+  const birthDate = new Date(dob);
+  if (Number.isNaN(birthDate.getTime())) return "Not added";
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDelta = today.getMonth() - birthDate.getMonth();
+  if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < birthDate.getDate())) {
+    age -= 1;
+  }
+  return age > 0 ? `${age}` : "Not added";
 }
 
 export function AppointmentDetailClient({ appointmentId }: { appointmentId: number }) {
@@ -39,6 +55,29 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
       await queryClient.invalidateQueries({ queryKey: ["threads"] });
     },
   });
+  const createReferral = useMutation({
+    mutationFn: referralsApi.create,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["referrals"] });
+    },
+  });
+  const createCarePlan = useMutation({
+    mutationFn: profilesApi.createCarePlan,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["care-plans"] });
+    },
+  });
+  const [referralDraft, setReferralDraft] = useState({ referred_to: "", notes: "", status: "draft" });
+  const [carePlanDraft, setCarePlanDraft] = useState({
+    complaint_summary: "",
+    assessment_note: "",
+    care_steps: "",
+    medications: "",
+    lifestyle_advice: "",
+    referral_recommendation: "",
+    follow_up_date: "",
+    warning_signs: "",
+  });
 
   if (userQuery.data?.role !== "doctor" && userQuery.data?.role !== "admin") {
     return (
@@ -49,6 +88,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
   }
 
   const appointment = appointmentQuery.data;
+  const patient = appointment?.patient_profile;
 
   return (
     <Section
@@ -81,8 +121,8 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <InfoTile label="Scheduled time" value={formatDateTime(appointment.scheduled_at)} />
-                <InfoTile label="Patient details" value="Available for this consultation" />
-                <InfoTile label="Doctor details" value="Assigned care provider" />
+                <InfoTile label="Patient" value={patient?.display_name || "Patient"} />
+                <InfoTile label="Doctor" value={appointment.doctor_profile?.display_name || "Assigned care provider"} />
                 <InfoTile label="Consultation status" value={appointment.status} />
               </div>
 
@@ -114,9 +154,13 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-3">
-                <InfoTile label="Patient details" value="Linked to this consultation" />
-                <InfoTile label="Care-plan entry point" value="Open records or referrals for follow-up context." />
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <InfoTile label="Name" value={patient?.display_name || "Patient"} />
+                <InfoTile label="Age" value={patientAge(patient?.dob)} />
+                <InfoTile label="Gender" value={patient?.gender || "Not added"} />
+                <InfoTile label="State / LGA" value={[patient?.state, patient?.lga].filter(Boolean).join(" / ") || "Not added"} />
+                <InfoTile label="Phone" value={patient?.phone || "Not added"} />
+                <InfoTile label="Patient ID" value={appointment.patient} />
               </div>
             </div>
           </div>
@@ -146,19 +190,89 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
             <div className="ct-panel rounded-[28px] p-6">
               <ClipboardList className="h-6 w-6 text-[#0F766E]" />
               <h2 className="ct-card-title mt-4 text-[#1F2937]">Create referral</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Create specialist referrals or recommend home-care nursing from the referrals workspace.</p>
-              <Link href="/referrals" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[#0F766E] px-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5">
-                Create referral
-              </Link>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Patient and consultation are linked automatically.</p>
+              <form
+                className="mt-5 grid gap-3"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  createReferral.mutate({
+                    patient: appointment.patient,
+                    appointment: appointment.id,
+                    referred_to: referralDraft.referred_to,
+                    notes: referralDraft.notes,
+                    status: referralDraft.status,
+                  });
+                }}
+              >
+                <ErrorMessage error={createReferral.error} context="referrals" />
+                {createReferral.isSuccess ? <Notice title="Referral saved" tone="success">The referral is linked to this consultation.</Notice> : null}
+                <Field label="Patient">
+                  <Input value={patient?.display_name || `Patient #${appointment.patient}`} disabled />
+                </Field>
+                <Field label="Specialty or facility" required>
+                  <Input value={referralDraft.referred_to} onChange={(event) => setReferralDraft((draft) => ({ ...draft, referred_to: event.target.value }))} />
+                </Field>
+                <Field label="Status">
+                  <Select value={referralDraft.status} onChange={(event) => setReferralDraft((draft) => ({ ...draft, status: event.target.value }))}>
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                  </Select>
+                </Field>
+                <Field label="Referral notes">
+                  <Textarea value={referralDraft.notes} onChange={(event) => setReferralDraft((draft) => ({ ...draft, notes: event.target.value }))} />
+                </Field>
+                <Button type="submit" disabled={createReferral.isPending || !referralDraft.referred_to.trim()}>
+                  {createReferral.isPending ? "Saving..." : "Save referral"}
+                </Button>
+              </form>
             </div>
 
             <div className="ct-panel rounded-[28px] p-6">
               <FileText className="h-6 w-6 text-[#0F766E]" />
-              <h2 className="ct-card-title mt-4 text-[#1F2937]">Review care plan</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Review patient records and care-plan context before adding follow-up guidance.</p>
-              <Link href="/records" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-[12px] border border-slate-200 bg-white px-4 text-sm font-extrabold text-[#1F2937] transition hover:border-cyan-100 hover:bg-cyan-50">
-                Open records
-              </Link>
+              <h2 className="ct-card-title mt-4 text-[#1F2937]">Create care plan</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Write a structured follow-up plan for this patient.</p>
+              <form
+                className="mt-5 grid gap-3"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  createCarePlan.mutate({
+                    patient: appointment.patient,
+                    appointment: appointment.id,
+                    ...carePlanDraft,
+                    follow_up_date: carePlanDraft.follow_up_date || null,
+                  });
+                }}
+              >
+                <ErrorMessage error={createCarePlan.error} context="records" />
+                {createCarePlan.isSuccess ? <Notice title="Care plan saved" tone="success">The patient can view it from Care Plan.</Notice> : null}
+                <Field label="Complaint summary">
+                  <Textarea value={carePlanDraft.complaint_summary} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, complaint_summary: event.target.value }))} />
+                </Field>
+                <Field label="Assessment note">
+                  <Textarea value={carePlanDraft.assessment_note} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, assessment_note: event.target.value }))} />
+                </Field>
+                <Field label="Recommended care steps" required>
+                  <Textarea value={carePlanDraft.care_steps} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, care_steps: event.target.value }))} />
+                </Field>
+                <Field label="Medications / instructions">
+                  <Textarea value={carePlanDraft.medications} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, medications: event.target.value }))} />
+                </Field>
+                <Field label="Lifestyle or follow-up advice">
+                  <Textarea value={carePlanDraft.lifestyle_advice} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, lifestyle_advice: event.target.value }))} />
+                </Field>
+                <Field label="Referral recommendation">
+                  <Textarea value={carePlanDraft.referral_recommendation} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, referral_recommendation: event.target.value }))} />
+                </Field>
+                <Field label="Follow-up date">
+                  <Input type="date" value={carePlanDraft.follow_up_date} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, follow_up_date: event.target.value }))} />
+                </Field>
+                <Field label="Warning signs">
+                  <Textarea value={carePlanDraft.warning_signs} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, warning_signs: event.target.value }))} />
+                </Field>
+                <Button type="submit" disabled={createCarePlan.isPending || !carePlanDraft.care_steps.trim()}>
+                  {createCarePlan.isPending ? "Saving..." : "Save care plan"}
+                </Button>
+              </form>
             </div>
           </div>
         </>

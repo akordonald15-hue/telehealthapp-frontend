@@ -213,8 +213,8 @@ export function DoctorDashboardClient() {
           <div className="mt-4 grid gap-3">
             <QuickAction href="/appointments" label="View appointments" description="Today and upcoming." icon={CalendarClock} />
             <QuickAction href="/messages" label="Open messages" description="Patient conversations." icon={MessageSquareText} />
-            <QuickAction href="/referrals" label="Create referral" description="Specialist or homecare." icon={SendHorizonal} />
-            <QuickAction href="/records" label="Review care plans" description="Notes and follow-up context." icon={FileText} />
+            <QuickAction href="/appointments" label="Create referral" description="From consultation detail." icon={SendHorizonal} />
+            <QuickAction href="/appointments" label="Create care plan" description="From patient context." icon={FileText} />
           </div>
         </div>
       </div>
@@ -305,10 +305,10 @@ export function DoctorDashboardClient() {
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
               <h2 className="ct-card-title text-[#1F2937]">Referral notes</h2>
-              <p className="mt-1 text-sm text-slate-500">Recent referral and care-plan context.</p>
+              <p className="mt-1 text-sm text-slate-500">Recent referral context from consultations.</p>
             </div>
-            <Link className="text-sm font-semibold text-[#0F766E]" href="/referrals">
-              Create referral
+            <Link className="text-sm font-semibold text-[#0F766E]" href="/appointments">
+              Open consultations
             </Link>
           </div>
           {referrals.isLoading ? (
@@ -320,7 +320,7 @@ export function DoctorDashboardClient() {
               ))}
             </div>
           ) : (
-            <EmptyState title="No referrals yet" description="Create a referral or home-nurse recommendation from the referrals page." />
+            <EmptyState title="No referrals yet" description="Create referrals from a patient consultation." />
           )}
         </div>
       </div>

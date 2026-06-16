@@ -6,12 +6,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
-import { Input, Textarea } from "@/components/ui/input";
+import { Input, Select, Textarea } from "@/components/ui/input";
 import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { authApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
+import { NIGERIA_STATE_LGAS, NIGERIA_STATES } from "@/lib/nigeria-locations";
 import type { DoctorProfile, NurseProfile, PatientProfile } from "@/lib/types/backend";
 
 export function ProfileClient() {
@@ -24,12 +25,18 @@ export function ProfileClient() {
     enabled: Boolean(user),
   });
   const [phoneDraft, setPhoneDraft] = useState<string | null>(null);
+  const [nameDraft, setNameDraft] = useState<string | null>(null);
   const [profileDraft, setProfileDraft] = useState<Record<string, string>>({});
   const phone = phoneDraft ?? user?.phone ?? "";
+  const fullName = nameDraft ?? user?.full_name ?? "";
+  const patientProfile = profile.data as PatientProfile | undefined;
+  const selectedState = profileDraft.state ?? patientProfile?.state ?? "";
+  const lgaOptions = selectedState ? (NIGERIA_STATE_LGAS[selectedState] ?? []) : [];
   const updateUser = useMutation({
-    mutationFn: () => authApi.updateMe({ phone }),
+    mutationFn: () => authApi.updateMe({ phone, full_name: fullName }),
     onSuccess: async () => {
       setPhoneDraft(null);
+      setNameDraft(null);
       await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
     },
   });
@@ -55,7 +62,7 @@ export function ProfileClient() {
           <ErrorMessage error={updateUser.error} context="profile" />
           {updateUser.isSuccess ? <Notice title="Details saved" tone="success" /> : null}
           <Field label="Full Name">
-            <Input value={user?.full_name || ""} disabled />
+            <Input value={fullName} onChange={(event) => setNameDraft(event.target.value)} />
           </Field>
           <Field label="Email">
             <Input value={user?.email || ""} disabled />
@@ -131,16 +138,42 @@ export function ProfileClient() {
                 />
               </Field>
               <Field label="Gender">
-                <select
+                <Select
                   defaultValue={(profile.data as PatientProfile | undefined)?.gender || ""}
                   onChange={(event) => setProfileDraft((draft) => ({ ...draft, gender: event.target.value }))}
-                  className="min-h-12 w-full rounded-[14px] border border-[#E5E7EB] bg-white px-4 text-sm text-[#1F2937] shadow-[0_8px_24px_rgba(31,41,55,0.035)] outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                 >
                   <option value="">Select gender</option>
                   <option value="female">Female</option>
                   <option value="male">Male</option>
+                  <option value="other">Other</option>
                   <option value="prefer_not_to_say">Prefer not to say</option>
-                </select>
+                </Select>
+              </Field>
+              <Field label="State">
+                <Select
+                  value={selectedState}
+                  onChange={(event) => {
+                    const state = event.target.value;
+                    setProfileDraft((draft) => ({ ...draft, state, lga: "" }));
+                  }}
+                >
+                  <option value="">Select state</option>
+                  {NIGERIA_STATES.map((state) => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Local government area">
+                <Select
+                  value={profileDraft.lga ?? patientProfile?.lga ?? ""}
+                  disabled={!selectedState}
+                  onChange={(event) => setProfileDraft((draft) => ({ ...draft, lga: event.target.value }))}
+                >
+                  <option value="">{selectedState ? "Select LGA" : "Select state first"}</option>
+                  {lgaOptions.map((lga) => (
+                    <option key={lga} value={lga}>{lga}</option>
+                  ))}
+                </Select>
               </Field>
               <Field label="Address">
                 <Textarea

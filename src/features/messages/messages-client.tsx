@@ -1146,7 +1146,10 @@ function ChatComposer({
           type="button"
           className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#EFF6FF]"
           disabled={disabled || isSending}
-          onClick={onPickAttachment}
+          onClick={(event) => {
+            event.preventDefault();
+            onPickAttachment();
+          }}
           aria-label="Add attachment"
         >
           <Plus className="h-5 w-5" />

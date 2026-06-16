@@ -18,9 +18,9 @@ import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ProviderPickerCard } from "@/features/providers/provider-picker-card";
-import { appointmentsApi } from "@/lib/api/endpoints";
+import { appointmentsApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
-import type { Appointment, ProviderDoctor } from "@/lib/types/backend";
+import type { Appointment, PatientProfile, ProviderDoctor } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
 import { appointmentSchema } from "@/lib/validation/features";
 
@@ -75,8 +75,14 @@ export function AppointmentsClient() {
     queryFn: () => appointmentsApi.availableDoctors({ page_size: 50 }),
     enabled: user?.role === "patient",
   });
+  const patientProfile = useQuery({
+    queryKey: ["profile", "me", "patient"],
+    queryFn: () => profilesApi.me<PatientProfile>(),
+    enabled: user?.role === "patient",
+  });
   const doctorItems = availableDoctors.data?.results ?? [];
   const doctorCanBeBooked = selectedDoctor?.availability_status === "available";
+  const profileIncomplete = Boolean(user?.role === "patient" && patientProfile.data && !patientProfile.data.profile_complete);
 
   return (
     <Section
@@ -106,6 +112,12 @@ export function AppointmentsClient() {
             </div>
           </div>
           <ErrorMessage error={createAppointment.error} context="appointments" />
+          {profileIncomplete ? (
+            <Notice title="Complete your profile before booking" tone="warning">
+              Doctors need your name, phone, date of birth, gender, state, and LGA before consultation.
+              <Link className="ml-2 font-semibold text-amber-800 underline" href="/profile">Update profile</Link>
+            </Notice>
+          ) : null}
           {createAppointment.isSuccess ? (
             <div className="grid gap-3">
               <Notice title="Checkout ready" tone="success">
@@ -146,7 +158,7 @@ export function AppointmentsClient() {
           <Field label="Reason" error={form.formState.errors.reason?.message}>
             <Textarea placeholder="Why do you need to see a doctor?" {...form.register("reason")} />
           </Field>
-          <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending || !doctorCanBeBooked}>
+          <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending || !doctorCanBeBooked || profileIncomplete}>
             {createAppointment.isPending ? "Starting checkout..." : "Book Appointment"}
           </Button>
         </form>

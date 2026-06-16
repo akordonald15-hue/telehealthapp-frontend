@@ -47,7 +47,7 @@ const navItems: readonly NavItem[] = [
   { href: "/nurse/requests", label: "Requests", icon: ClipboardList, roles: ["nurse"] },
   { href: "/nurse/history", label: "History", icon: FileText, roles: ["nurse"] },
   { href: "/records", label: "Records", doctorLabel: "Patients / Care Plans", adminLabel: "Users / Records", icon: UserRoundCheck, roles: ["patient", "doctor", "admin"] },
-  { href: "/referrals", label: "Referrals", icon: ClipboardList, roles: ["doctor", "admin"] },
+  { href: "/referrals", label: "Referrals", icon: ClipboardList, roles: ["admin"] },
   { href: "/profile", label: "Profile", icon: UserRound, roles: ["patient", "doctor", "admin", "nurse"] },
   { href: "/audit", label: "Audit", icon: ShieldCheck, roles: ["admin"] },
 ] as const;
@@ -82,7 +82,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const visibleNav = useMemo(() => {
     const filtered = navItems.filter((item) => !user || (item.roles as readonly string[]).includes(user.role));
     if (user?.role === "doctor") {
-      const doctorOrder = ["/dashboard", "/appointments", "/messages", "/referrals", "/records", "/profile"];
+      const doctorOrder = ["/dashboard", "/appointments", "/messages", "/records", "/profile"];
       return [...filtered].sort((left, right) => doctorOrder.indexOf(left.href) - doctorOrder.indexOf(right.href));
     }
 

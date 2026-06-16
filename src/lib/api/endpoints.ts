@@ -9,6 +9,7 @@ import type {
   AppointmentBookingResponse,
   AuditEvent,
   AvailabilitySlot,
+  CarePlan,
   ConsultationDispute,
   DetailResponse,
   DoctorProfile,
@@ -77,7 +78,7 @@ export const authApi = {
   me: () => apiRequest<User>(authPath("/auth/me/")),
   changePassword: (body: { old_password: string; new_password: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/change-password/"), { method: "POST", body }),
-  updateMe: (body: Partial<Pick<User, "email" | "phone">>) =>
+  updateMe: (body: Partial<Pick<User, "email" | "phone" | "full_name">>) =>
     apiRequest<User>(authPath("/auth/me/"), { method: "PATCH", body }),
   passwordResetRequest: (body: { email: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/password-reset/request/"), { method: "POST", body, auth: false }),
@@ -115,6 +116,21 @@ export const profilesApi = {
   ) => apiRequest<MedicalFileUploadInit>(`/profiles/medical-records/${recordId}/files/init/`, { method: "POST", body }),
   medicalFileDownload: (fileId: number) =>
     apiRequest<MedicalFileDownload>(`/profiles/medical-files/${fileId}/download/`),
+  carePlans: (query?: { page?: number; page_size?: number }) =>
+    apiList<CarePlan>("/profiles/care-plans/", query),
+  createCarePlan: (body: {
+    patient: number;
+    appointment: number;
+    complaint_summary?: string;
+    assessment_note?: string;
+    care_steps?: string;
+    medications?: string;
+    lifestyle_advice?: string;
+    referral_recommendation?: string;
+    follow_up_date?: string | null;
+    warning_signs?: string;
+  }) => apiRequest<CarePlan>("/profiles/care-plans/", { method: "POST", body }),
+  carePlan: (id: number) => apiRequest<CarePlan>(`/profiles/care-plans/${id}/`),
 };
 
 export const providersApi = {
@@ -247,7 +263,7 @@ export const providerLedgerApi = {
 
 export const referralsApi = {
   list: (query?: { page?: number; page_size?: number }) => apiList<Referral>("/referrals/", query),
-  create: (body: { patient: number; referred_to: string; notes?: string; status?: string }) =>
+  create: (body: { patient: number; appointment?: number | null; referred_to: string; notes?: string; status?: string }) =>
     apiRequest<Referral>("/referrals/", { method: "POST", body }),
   detail: (id: number) => apiRequest<Referral>(`/referrals/${id}/`),
   update: (id: number, body: Partial<Pick<Referral, "patient" | "referred_to" | "notes" | "status">>) =>

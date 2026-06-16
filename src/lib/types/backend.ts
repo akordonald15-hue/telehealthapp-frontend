@@ -58,12 +58,18 @@ export type ProviderAvailabilityStatus = "available" | "unavailable" | "busy" | 
 
 export type PatientProfile = {
   id: number;
+  full_name?: string;
+  email?: string;
+  phone?: string;
   dob: string | null;
   gender: string;
+  state?: string;
+  lga?: string;
   address: string;
   emergency_contact_name: string;
   emergency_contact_phone: string;
   medical_history: Record<string, unknown>;
+  profile_complete?: boolean;
 };
 
 export type DoctorProfile = {
@@ -133,12 +139,45 @@ export type MedicalFileDownload = {
   download_url: string;
 };
 
+export type CarePlan = {
+  id: number;
+  patient: number;
+  patient_name?: string;
+  doctor: number;
+  doctor_name?: string;
+  appointment: number | null;
+  complaint_summary: string;
+  assessment_note: string;
+  care_steps: string;
+  medications: string;
+  lifestyle_advice: string;
+  referral_recommendation: string;
+  follow_up_date: string | null;
+  warning_signs: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type AppointmentStatus = "scheduled" | "completed" | "cancelled";
 
 export type Appointment = {
   id: number;
   patient: number;
   doctor: number;
+  patient_profile?: {
+    id: number;
+    display_name: string;
+    email?: string;
+    phone?: string;
+    dob?: string | null;
+    gender?: string;
+    state?: string;
+    lga?: string;
+  };
+  doctor_profile?: {
+    id: number;
+    display_name: string;
+  };
   scheduled_at: string;
   status: AppointmentStatus;
   reason: string;
@@ -499,9 +538,12 @@ export type Referral = {
   id: number;
   patient: number;
   doctor: number;
+  appointment?: number | null;
   referred_to: string;
   notes: string;
   status: ReferralStatus;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type AuditEvent = {

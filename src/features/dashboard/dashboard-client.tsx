@@ -9,11 +9,11 @@ import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { appointmentsApi, messagingApi, paymentsApi, referralsApi } from "@/lib/api/endpoints";
+import { appointmentsApi, messagingApi, paymentsApi, profilesApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { appointmentCompanionLabel } from "@/lib/ui/humanize";
-import type { PaginatedResponse } from "@/lib/types/backend";
+import type { PaginatedResponse, PatientProfile } from "@/lib/types/backend";
 import { formatDateTime, formatMoney } from "@/lib/utils";
 import { DoctorDashboardClient } from "@/features/dashboard/doctor-dashboard-client";
 import { NurseDashboardClient } from "@/features/nurse/nurse-dashboard-client";
@@ -83,6 +83,11 @@ export function DashboardClient() {
     queryKey: ["referrals", "dashboard"],
     queryFn: () => referralsApi.list({ page_size: 5 }),
     enabled: !isNurse,
+  });
+  const patientProfile = useQuery({
+    queryKey: ["profile", "me", "patient"],
+    queryFn: () => profilesApi.me<PatientProfile>(),
+    enabled: user?.role === "patient",
   });
 
   if (isNurse) {
@@ -159,6 +164,20 @@ export function DashboardClient() {
                 >
                   Try again
                 </button>
+              </div>
+            </Notice>
+          ) : null}
+
+          {patientProfile.data && !patientProfile.data.profile_complete ? (
+            <Notice title="Complete your profile before booking" tone="warning">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <span>Doctors need your name, phone, date of birth, gender, state, and LGA before consultation.</span>
+                <Link
+                  href="/profile"
+                  className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-white px-4 text-sm font-semibold text-amber-800"
+                >
+                  Complete profile
+                </Link>
               </div>
             </Notice>
           ) : null}
