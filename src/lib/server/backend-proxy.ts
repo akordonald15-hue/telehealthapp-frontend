@@ -43,6 +43,8 @@ async function getRequestBody(request: NextRequest, headers: Headers) {
 export async function forwardBackendRequest(request: NextRequest, backendPath: string) {
   const targetUrl = new URL(`${backendApiBaseUrl}${backendPath}${request.nextUrl.search}`);
   const headers = new Headers(request.headers);
+  const outgoingHost = targetUrl.host;
+  const outgoingCookieExists = headers.has("cookie") && Boolean(headers.get("cookie")?.trim());
 
   headers.delete("host");
   headers.delete("origin");
@@ -71,6 +73,12 @@ export async function forwardBackendRequest(request: NextRequest, backendPath: s
   let response: Response;
 
   try {
+    console.info("Backend proxy forwarding request", {
+      targetUrl: targetUrl.toString(),
+      method: request.method,
+      outgoingHost,
+      outgoingCookieExists,
+    });
     response = await fetch(targetUrl, init);
   } catch (error) {
     console.error("Backend proxy request failed", {
@@ -109,6 +117,9 @@ export async function forwardBackendRequest(request: NextRequest, backendPath: s
 
   responseHeaders.delete("content-encoding");
   responseHeaders.delete("transfer-encoding");
+  responseHeaders.set("x-caretekk-proxy-target", targetUrl.toString());
+  responseHeaders.set("x-caretekk-proxy-host", outgoingHost);
+  responseHeaders.set("x-caretekk-proxy-cookie-present", outgoingCookieExists ? "yes" : "no");
 
   return new Response(response.body, {
     status: response.status,
