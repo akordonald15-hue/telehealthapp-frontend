@@ -50,6 +50,12 @@ export async function forwardBackendRequest(request: NextRequest, backendPath: s
   headers.delete("connection");
   headers.delete("content-length");
   headers.delete("expect");
+  headers.delete("forwarded");
+  headers.delete("x-forwarded-for");
+  headers.delete("x-forwarded-host");
+  headers.delete("x-forwarded-port");
+  headers.delete("x-forwarded-proto");
+  headers.delete("x-real-ip");
 
   const init: RequestInit = {
     method: request.method,
