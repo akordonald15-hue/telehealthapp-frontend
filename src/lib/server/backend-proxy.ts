@@ -1,8 +1,15 @@
 import { type NextRequest } from "next/server";
 
-const backendApiBaseUrl = (process.env.BACKEND_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(
-  /\/$/,
-  "",
+function normalizeBackendApiBaseUrl(value: string) {
+  const trimmed = value.trim().replace(/\/+$/, "");
+  if (!trimmed) {
+    return "";
+  }
+  return trimmed.endsWith("/api/v1") ? trimmed : `${trimmed}/api/v1`;
+}
+
+const backendApiBaseUrl = normalizeBackendApiBaseUrl(
+  process.env.BACKEND_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "",
 );
 
 if (!backendApiBaseUrl) {
@@ -13,6 +20,25 @@ type RouteParams = Promise<{ path?: string[] }>;
 type NamespaceProxyOptions = {
   backendTrailingSlash?: boolean;
 };
+
+async function getRequestBody(request: NextRequest, headers: Headers) {
+  if (["GET", "HEAD"].includes(request.method)) {
+    return undefined;
+  }
+
+  const contentType = headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    const payload = await request.json().catch(() => null);
+    if (payload === null) {
+      return undefined;
+    }
+    headers.set("content-type", "application/json");
+    return JSON.stringify(payload);
+  }
+
+  const body = await request.arrayBuffer();
+  return body.byteLength > 0 ? body : undefined;
+}
 
 export async function forwardBackendRequest(request: NextRequest, backendPath: string) {
   const targetUrl = new URL(`${backendApiBaseUrl}${backendPath}${request.nextUrl.search}`);
@@ -31,11 +57,9 @@ export async function forwardBackendRequest(request: NextRequest, backendPath: s
     redirect: "manual",
   };
 
-  if (!["GET", "HEAD"].includes(request.method)) {
-    const body = await request.arrayBuffer();
-    if (body.byteLength > 0) {
-      init.body = body;
-    }
+  const body = await getRequestBody(request, headers);
+  if (body !== undefined) {
+    init.body = body;
   }
 
   let response: Response;
