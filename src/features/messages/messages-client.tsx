@@ -75,10 +75,25 @@ function threadPreview(thread: Thread, role?: UserRole, latestMessage?: Message)
   if (thread.last_message?.body) {
     return thread.last_message.body;
   }
-  if (thread.triage_summary?.symptoms?.length) {
-    return `Triage: ${thread.triage_summary.symptoms.join(", ")}`;
+  const symptoms = safeTextList(thread.triage_summary?.symptoms);
+  if (symptoms.length) {
+    return `Triage: ${symptoms.join(", ")}`;
   }
   return role === "patient" ? "Your consultation thread is ready." : "Consultation thread is ready.";
+}
+
+function safeTextList(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean).slice(0, 8);
+  }
+  if (typeof value === "string" && value.trim()) {
+    return value
+      .split(/[,;\n]/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+  }
+  return [];
 }
 
 function relativeThreadTime(value?: string | null) {
@@ -177,7 +192,8 @@ function messageSenderName(message: Message, thread: Thread | null, currentUserI
 }
 
 function messageAttachmentId(message: Message) {
-  const match = message.attachment_url.match(/\/attachments\/(\d+)\/(?:download|file)\//);
+  const attachmentUrl = typeof message.attachment_url === "string" ? message.attachment_url : "";
+  const match = attachmentUrl.match(/\/attachments\/(\d+)\/(?:download|file)\//);
   return match?.[1] ?? null;
 }
 
@@ -744,11 +760,11 @@ function TriageSummaryPanel({ thread, role }: { thread: Thread; role?: UserRole 
   if (!summary) {
     return null;
   }
-  const symptoms = summary.symptoms?.filter(Boolean) ?? [];
-  const redFlags = summary.red_flags?.filter(Boolean) ?? [];
-  const possibleCauses = summary.possible_causes?.filter(Boolean) ?? [];
-  const urgencyGuidance = summary.urgency_guidance?.filter(Boolean) ?? [];
-  const selfCareGuidance = summary.self_care_guidance?.filter(Boolean) ?? [];
+  const symptoms = safeTextList(summary.symptoms);
+  const redFlags = safeTextList(summary.red_flags);
+  const possibleCauses = safeTextList(summary.possible_causes);
+  const urgencyGuidance = safeTextList(summary.urgency_guidance);
+  const selfCareGuidance = safeTextList(summary.self_care_guidance);
   const title = role === "doctor" ? "Patient triage summary" : "Your triage summary";
 
   return (
