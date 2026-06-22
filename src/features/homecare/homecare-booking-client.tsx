@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Home, Loader2, X } from "lucide-react";
+import { CheckCircle2, Home, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -43,6 +43,7 @@ export function HomeCareBookingClient() {
   const [preferredTime, setPreferredTime] = useState("");
   const [notes, setNotes] = useState("");
   const [selectedNurse, setSelectedNurse] = useState<ProviderNurse | null>(null);
+  const [assignmentMode, setAssignmentMode] = useState<"auto" | "choose">("auto");
   const [selectorOpen, setSelectorOpen] = useState(false);
 
   const profileQuery = useQuery({
@@ -97,7 +98,15 @@ export function HomeCareBookingClient() {
   const effectiveContactName = contactName || userQuery.data?.full_name || profileQuery.data?.full_name || "";
   const effectiveContactPhone = contactPhone || userQuery.data?.phone || profileQuery.data?.phone || "";
   const effectiveAddress = address || profileQuery.data?.address || "";
-  const canSubmit = Boolean(zone && selectedService && effectiveContactName.trim() && effectiveContactPhone.trim() && effectiveAddress.trim() && preferredTime);
+  const canSubmit = Boolean(
+    zone &&
+      selectedService &&
+      effectiveContactName.trim() &&
+      effectiveContactPhone.trim() &&
+      effectiveAddress.trim() &&
+      preferredTime &&
+      (assignmentMode === "auto" || selectedNurse),
+  );
 
   return (
     <Section
@@ -117,7 +126,7 @@ export function HomeCareBookingClient() {
             referral: null,
             service: typeof selectedServiceId === "number" ? selectedServiceId : null,
             service_zone: zone,
-            preferred_nurse: selectedNurse?.id ?? null,
+            preferred_nurse: assignmentMode === "choose" ? selectedNurse?.id ?? null : null,
             contact_name_snapshot: effectiveContactName.trim(),
             contact_phone_snapshot: effectiveContactPhone.trim(),
             service_address_snapshot: effectiveAddress.trim(),
@@ -146,7 +155,7 @@ export function HomeCareBookingClient() {
             ) : null}
           </div>
           <Button type="button" variant="secondary" disabled={!zone || !selectedService} onClick={() => setSelectorOpen(true)}>
-            Select nurse
+            Choose nurse
           </Button>
         </div>
 
@@ -205,11 +214,48 @@ export function HomeCareBookingClient() {
           </div>
         ) : null}
 
-        {selectedNurse ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            className={[
+              "rounded-[18px] border px-4 py-4 text-left transition",
+              assignmentMode === "auto" ? "border-[var(--primary)] bg-[var(--primary-soft)]" : "border-slate-200 bg-slate-50",
+            ].join(" ")}
+            onClick={() => {
+              setAssignmentMode("auto");
+              setSelectedNurse(null);
+            }}
+          >
+            <span className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
+              <CheckCircle2 className="h-4 w-4 text-[var(--primary)]" />
+              Assign any available nurse
+            </span>
+            <span className="mt-1 block text-sm text-slate-600">Recommended. Caretekk matches by availability, service, zone, and workload.</span>
+          </button>
+          <button
+            type="button"
+            className={[
+              "rounded-[18px] border px-4 py-4 text-left transition",
+              assignmentMode === "choose" ? "border-[var(--primary)] bg-[var(--primary-soft)]" : "border-slate-200 bg-slate-50",
+            ].join(" ")}
+            onClick={() => {
+              setAssignmentMode("choose");
+              setSelectorOpen(Boolean(zone && selectedService));
+            }}
+          >
+            <span className="text-sm font-semibold text-[#1F2937]">Choose nurse</span>
+            <span className="mt-1 block text-sm text-slate-600">{selectedNurse ? selectedNurse.display_name : "Select from available nurses."}</span>
+          </button>
+        </div>
+
+        {assignmentMode === "choose" && selectedNurse ? (
           <div className="ct-soft-panel flex items-center justify-between gap-3 rounded-[20px] px-4 py-4">
             <div>
               <p className="font-semibold text-[#1F2937]">{selectedNurse.display_name}</p>
-              <p className="mt-1 text-sm text-slate-600">{selectedNurse.service_type || "Home care"}</p>
+              <p className="mt-1 text-sm text-slate-600">
+                {selectedNurse.rating ? `Star ${selectedNurse.rating} (${selectedNurse.review_count ?? 0} reviews)` : "No reviews yet"}
+                {selectedNurse.completed_visits !== undefined ? ` · ${selectedNurse.completed_visits} completed visits` : ""}
+              </p>
             </div>
             <Button type="button" variant="ghost" onClick={() => setSelectedNurse(null)}>
               Clear
@@ -247,7 +293,7 @@ export function HomeCareBookingClient() {
           <div className="mt-2 grid gap-1 text-sm text-slate-600">
             <span>{zone ? HOMECARE_ZONES.find((item) => item.value === zone)?.label : "Location not selected"}</span>
             <span>{selectedService ? selectedService.name : "Service not selected"}</span>
-            <span>{selectedNurse ? selectedNurse.display_name : "System matching"}</span>
+            <span>{assignmentMode === "choose" && selectedNurse ? selectedNurse.display_name : "Assign any available nurse"}</span>
             <span>{effectiveAddress || "Address not entered"}</span>
             <span className="font-semibold text-[var(--primary)]">
               {selectedService ? formatMoney(selectedService.price) : "Price appears after service selection"}
@@ -306,8 +352,11 @@ export function HomeCareBookingClient() {
                       status={nurse.availability_status}
                       selected={selectedNurse?.id === nurse.id}
                       disabled={nurse.availability_status !== "available"}
+                      primaryDetail={nurse.rating ? `Star ${nurse.rating} (${nurse.review_count ?? 0} reviews)` : "No reviews yet"}
+                      secondaryDetail={`${nurse.completed_visits ?? 0} completed visits`}
                       actionLabel="Select"
                       onSelect={() => {
+                        setAssignmentMode("choose");
                         setSelectedNurse(nurse);
                         setSelectorOpen(false);
                       }}
@@ -330,6 +379,7 @@ function EmptyHomeCareNurseState() {
     <div className="ct-surface rounded-[24px] p-6 text-center">
       <Home className="mx-auto h-6 w-6 text-[var(--primary)]" />
       <p className="mt-3 font-semibold text-[#1F2937]">No nurses available right now.</p>
+      <p className="mt-1 text-sm text-slate-600">You can continue with automatic assignment.</p>
     </div>
   );
 }

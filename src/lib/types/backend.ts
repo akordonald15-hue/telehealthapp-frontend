@@ -97,6 +97,10 @@ export type NurseProfile = {
   base_longitude: string | null;
   active_for_dispatch: boolean;
   last_active_at: string | null;
+  rating?: number | null;
+  review_count?: number;
+  completed_visits?: number;
+  rating_breakdown?: RatingBreakdown;
 };
 
 export type ProviderAvailabilityState = {
@@ -297,12 +301,17 @@ export type ProviderNurse = {
   service_type: string;
   profile_image_url: string | null;
   rating: number | null;
+  review_count?: number;
+  completed_visits?: number;
+  rating_breakdown?: RatingBreakdown;
   availability_status: ProviderAvailabilityStatus;
   service_radius_km: number;
   location_area: string;
   active_workload: number;
   updated_at: string;
 };
+
+export type RatingBreakdown = Record<string, { count: number; percentage: number }>;
 
 export type MessageAttachmentUploadInit = {
   upload_url: string;

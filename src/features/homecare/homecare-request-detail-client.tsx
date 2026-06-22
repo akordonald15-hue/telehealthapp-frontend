@@ -34,7 +34,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
   const [cancelReason, setCancelReason] = useState("");
-  const [ratingScore, setRatingScore] = useState("5");
+  const [ratingScore, setRatingScore] = useState(5);
   const [ratingFeedback, setRatingFeedback] = useState("");
   const [liveTrackingConnected, setLiveTrackingConnected] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
@@ -268,21 +268,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
                 </Notice>
               ) : null}
               {ratingMutation.isSuccess ? <Notice title="Rating submitted" tone="success" /> : null}
-              <div className="grid gap-2">
-                <label className="text-sm font-semibold text-[#1F2937]">Score</label>
-                <select
-                  value={ratingScore}
-                  onChange={(event) => setRatingScore(event.target.value)}
-                  disabled={!canRateHomeCare(request.status)}
-                  className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
-                >
-                  {[5, 4, 3, 2, 1].map((score) => (
-                    <option key={score} value={score}>
-                      {score} star{score === 1 ? "" : "s"}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <StarRatingInput value={ratingScore} disabled={!canRateHomeCare(request.status)} onChange={setRatingScore} />
               <Textarea
                 value={ratingFeedback}
                 onChange={(event) => setRatingFeedback(event.target.value)}
@@ -355,6 +341,42 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
         </>
       ) : null}
     </Section>
+  );
+}
+
+function StarRatingInput({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: number;
+  disabled: boolean;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div className="grid gap-2">
+      <p className="text-sm font-semibold text-[#1F2937]">Rating</p>
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Rate nurse">
+        {[1, 2, 3, 4, 5].map((score) => (
+          <button
+            key={score}
+            type="button"
+            role="radio"
+            aria-checked={value === score}
+            disabled={disabled}
+            onClick={() => onChange(score)}
+            className={[
+              "inline-flex h-11 w-11 items-center justify-center rounded-[10px] border text-lg transition",
+              score <= value ? "border-amber-200 bg-amber-50 text-amber-500" : "border-slate-200 bg-white text-slate-300",
+              disabled ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5",
+            ].join(" ")}
+          >
+            <Star className={score <= value ? "h-5 w-5 fill-current" : "h-5 w-5"} />
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-slate-500">{value} out of 5</p>
+    </div>
   );
 }
 

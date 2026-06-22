@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { CalendarClock, CheckCircle2, Clock3, MapPinned } from "lucide-react";
+import { CalendarClock, CheckCircle2, Clock3, MapPinned, Star } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -67,6 +67,9 @@ export function NurseDashboardClient() {
     (item) => item.current_assignment?.status === "pending" && item.status === "assigned",
   ).length;
   const recentRequests = requests.slice(0, 4);
+  const rating = profileQuery.data?.rating;
+  const reviewCount = profileQuery.data?.review_count ?? 0;
+  const completedVisits = profileQuery.data?.completed_visits ?? completedCount;
 
   return (
     <Section
@@ -91,9 +94,7 @@ export function NurseDashboardClient() {
             {activeRequest ? `Next visit: ${homeCareStatusLabel(activeRequest.status)}` : "You're ready for the next request"}
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">
-            {activeRequest
-              ? `${activeRequest.contact_name_snapshot || "Patient"} - ${activeRequest.service_address_snapshot || "Address pending"}`
-              : "Accepted visits and active requests appear here."}
+            {activeRequest ? `${activeRequest.contact_name_snapshot || "Patient"} - ${activeRequest.service_address_snapshot || "Address pending"}` : ""}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -129,14 +130,22 @@ export function NurseDashboardClient() {
               <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                 <p className="font-semibold text-[#1F2937]">License</p>
                 <p className="mt-1">{profileQuery.data.license_no || "Not added yet"}</p>
+                <p className="mt-1 text-xs text-slate-500">Issued by Caretekk. Contact admin for changes.</p>
               </div>
               <div className="ct-soft-panel rounded-[18px] px-4 py-3">
-                <p className="font-semibold text-[#1F2937]">Base area</p>
-                <p className="mt-1">{profileQuery.data.base_address || "Base address not added yet"}</p>
+                <p className="font-semibold text-[#1F2937]">Rating</p>
+                <p className="mt-1 flex items-center gap-1">
+                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  {rating ? `${rating}` : "No rating yet"}
+                </p>
               </div>
               <div className="ct-soft-panel rounded-[18px] px-4 py-3">
-                <p className="font-semibold text-[#1F2937]">Service radius</p>
-                <p className="mt-1">{profileQuery.data.service_radius_km} km</p>
+                <p className="font-semibold text-[#1F2937]">Reviews</p>
+                <p className="mt-1">{reviewCount}</p>
+              </div>
+              <div className="ct-soft-panel rounded-[18px] px-4 py-3">
+                <p className="font-semibold text-[#1F2937]">Completed visits</p>
+                <p className="mt-1">{completedVisits}</p>
               </div>
             </div>
           ) : null}
@@ -146,7 +155,7 @@ export function NurseDashboardClient() {
       <div className="grid gap-4 md:grid-cols-3">
         <MetricCard
           label="Completed visits"
-          value={completedCount}
+          value={completedVisits}
           icon={CheckCircle2}
         />
         <MetricCard
@@ -162,6 +171,29 @@ export function NurseDashboardClient() {
       </div>
 
       <ProviderWalletPanel role="nurse" />
+
+      {profileQuery.data?.rating_breakdown && reviewCount > 0 ? (
+        <div className="ct-panel rounded-[28px] p-6">
+          <div className="flex items-center gap-2">
+            <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
+            <h2 className="ct-card-title text-[#1F2937]">Ratings</h2>
+          </div>
+          <div className="mt-5 grid gap-2">
+            {[5, 4, 3, 2, 1].map((score) => {
+              const item = profileQuery.data?.rating_breakdown?.[String(score)];
+              return (
+                <div key={score} className="grid gap-2 sm:grid-cols-[5rem_minmax(0,1fr)_4rem] sm:items-center">
+                  <span className="text-sm font-semibold text-[#1F2937]">{score} star</span>
+                  <span className="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <span className="block h-full rounded-full bg-amber-400" style={{ width: `${item?.percentage ?? 0}%` }} />
+                  </span>
+                  <span className="text-sm text-slate-600">{item?.percentage ?? 0}%</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
         <div className="ct-panel rounded-[28px] p-6">

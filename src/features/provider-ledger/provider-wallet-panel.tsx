@@ -98,7 +98,7 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
           <div>
             <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Wallet summary</h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">
-              Backend-calculated earnings and settlement history for your {role} account.
+              {role === "nurse" ? "Earnings unlock after paid care, nurse completion, and patient confirmation." : `Backend-calculated earnings and settlement history for your ${role} account.`}
             </p>
           </div>
         </div>
@@ -106,9 +106,9 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
       </div>
 
       <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <MoneyCard label="Total earned" value={wallet.lifetime_net_earning} currency={wallet.currency} description="Lifetime net earnings recorded by Caretekk." />
-        <MoneyCard label="Pending earnings" value={wallet.pending_balance} currency={wallet.currency} description="Completed services still inside the settlement period." />
-        <MoneyCard label="Available earnings" value={wallet.available_balance} currency={wallet.currency} description="Balance available after settlement rules are met." />
+        <MoneyCard label="Lifetime earnings" value={wallet.lifetime_net_earning} currency={wallet.currency} description="Historical net earnings recorded by Caretekk." />
+        <MoneyCard label="Pending earnings" value={wallet.pending_balance} currency={wallet.currency} description={role === "nurse" ? "Awaiting confirmation, review, or settlement." : "Completed services still inside the settlement period."} />
+        <MoneyCard label="Available balance" value={wallet.available_balance} currency={wallet.currency} description="Eligible for payout after Caretekk rules are met." />
         <MoneyCard label="Paid out" value={wallet.paid_out_balance} currency={wallet.currency} description="Provider payouts marked paid by Caretekk admin." />
       </div>
 
