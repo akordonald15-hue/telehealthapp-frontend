@@ -108,7 +108,7 @@ export function AppointmentsClient() {
             </span>
             <div>
               <p className="ct-card-title text-[#1F2937]">Book Appointment</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">₦1,000 consultation</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">₦2,000 per consultation</p>
             </div>
           </div>
           <ErrorMessage error={createAppointment.error} context="appointments" />

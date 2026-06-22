@@ -16,7 +16,7 @@ import { homeCareApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { buildWebSocketUrl } from "@/lib/realtime";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, formatMoney } from "@/lib/utils";
 import {
   bookingSourceLabel,
   canCancelHomeCare,
@@ -154,6 +154,8 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <Info label="Assigned nurse" value={nurse ? nurse.display_name : "Waiting for assignment"} />
                 <Info label="Nurse status" value={nurse?.availability_status || "Not assigned yet"} />
+                <Info label="Service" value={request.service_name_snapshot || "Home care"} />
+                <Info label="Price" value={request.service_price_snapshot ? formatMoney(request.service_price_snapshot) : "Pending"} />
                 <Info label="Preferred time" value={preferredTimeLabel(request)} />
                 <Info label="Last update" value={formatDateTime(request.updated_at)} />
               </div>

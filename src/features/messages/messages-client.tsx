@@ -129,6 +129,22 @@ function formatStatus(value?: string | null) {
   return value.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function consultationWindowLabel(thread: Thread | null) {
+  if (!thread?.consultation_expires_at) {
+    return "Timer starts when doctor replies";
+  }
+  const expiresAt = new Date(thread.consultation_expires_at).getTime();
+  if (Number.isNaN(expiresAt)) {
+    return "20-minute consultation";
+  }
+  const remainingMs = expiresAt - Date.now();
+  if (remainingMs <= 0 || thread.can_send_messages === false) {
+    return "Consultation ended";
+  }
+  const minutes = Math.max(1, Math.ceil(remainingMs / 60_000));
+  return `${minutes} min left`;
+}
+
 function orderedMessages(messages?: Message[]) {
   return [...(messages ?? [])].sort((a, b) => {
     const timeDiff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
@@ -779,11 +795,13 @@ function ConsultationLifecycleBanner({
   onExplanationChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
-  if (thread.consultation_lifecycle_status === "open") {
+  if (thread.consultation_lifecycle_status === "open" && thread.can_send_messages !== false) {
     return null;
   }
 
-  const statusLabel = formatStatus(thread.consultation_lifecycle_status || thread.consultation_status);
+  const statusLabel = thread.can_send_messages === false
+    ? "Consultation ended"
+    : formatStatus(thread.consultation_lifecycle_status || thread.consultation_status);
 
   return (
     <div className="border-b border-[#DDEBFF] bg-white px-4 py-3 sm:px-6">
@@ -793,7 +811,7 @@ function ConsultationLifecycleBanner({
           <div>
             <p className="font-bold text-[#1F2937]">Consultation status: {statusLabel}</p>
             <p className="mt-1 leading-6">
-              This conversation is read-only. Patient and doctor messages remain available for history.
+              You can view the conversation history.
             </p>
           </div>
         </div>
@@ -938,6 +956,7 @@ function ConsultationHeader({
   const title = participantName(thread, role);
   const subtitle = participantRole(thread, role);
   const status = formatStatus(thread?.consultation_status || thread?.appointment?.status);
+  const windowLabel = consultationWindowLabel(thread);
 
   return (
     <div className="flex min-h-20 items-center justify-between gap-3 border-b border-[#E5E7EB] bg-white px-4 py-3 sm:px-6">
@@ -959,6 +978,7 @@ function ConsultationHeader({
             <span className="h-2 w-2 rounded-full bg-[#10B981]" />
             <span className="truncate">{status ? `${subtitle} · ${status}` : subtitle}</span>
           </p>
+          <p className="mt-0.5 text-xs font-semibold text-[#2563EB]">{windowLabel}</p>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">

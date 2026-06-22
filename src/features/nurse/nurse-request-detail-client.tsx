@@ -32,12 +32,12 @@ import {
 } from "@/features/nurse/nurse-utils";
 
 const workflowSteps = [
-  { key: "accepted", label: "Verify", description: "Confirm patient and address." },
-  { key: "confirmed", label: "Start trip", description: "Travel unlocks after verification." },
-  { key: "in_transit", label: "Arrive", description: "Mark arrival after trip starts." },
-  { key: "arrived", label: "Start care", description: "Begin care on site." },
-  { key: "care_in_progress", label: "Complete", description: "Close care after service." },
-  { key: "care_completed", label: "Done", description: "Wait for patient confirmation." },
+  { key: "accepted", label: "Verify" },
+  { key: "confirmed", label: "Start trip" },
+  { key: "in_transit", label: "Arrived" },
+  { key: "arrived", label: "Start care" },
+  { key: "care_in_progress", label: "Complete care" },
+  { key: "care_completed", label: "Patient confirmation" },
 ] as const;
 
 const workflowOrder: string[] = workflowSteps.map((step) => step.key);
@@ -66,7 +66,6 @@ function WorkflowStep({ step, status }: { step: (typeof workflowSteps)[number]; 
           {current ? "Now" : completed ? "Done" : "Locked"}
         </span>
       </div>
-      <p className="mt-1 text-sm leading-6 text-slate-600">{step.description}</p>
     </div>
   );
 }
@@ -231,7 +230,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
   return (
     <Section
       title={request ? request.contact_name_snapshot || "Request detail" : "Request detail"}
-      description="Review patient details, confirm the visit, manage travel, and keep the care workflow moving in the right order."
       action={<Link href="/nurse/requests" className="text-sm font-semibold text-[var(--primary)]">Back to requests</Link>}
     >
       {requestQuery.isError ? (
@@ -290,9 +288,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                 </span>
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">Current workflow</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                    Actions only appear when the request is ready for them.
-                  </p>
                 </div>
               </div>
 
@@ -319,7 +314,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
 
               <div className="mt-6">
                 <p className="font-heading text-lg font-semibold text-[#1F2937]">State-machine progress</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">Each action unlocks only after the previous visit step is complete.</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {workflowSteps.map((step) => (
                     <WorkflowStep key={step.key} step={step} status={request.status} />
@@ -337,7 +331,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                 </span>
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">Pre-visit verification</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Confirm the patient details before starting your trip.</p>
                 </div>
               </div>
               <div className="mt-6 grid gap-3">
@@ -373,11 +366,8 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                   disabled={!assignment || !canVerifyRequest(assignment, request) || verifyMutation.isPending}
                 >
                   {verifyMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Save verification
+                  Verify
                 </Button>
-                {!assignment || !canVerifyRequest(assignment, request) ? (
-                  <p className="text-sm text-slate-500">Verification becomes available after the request has been accepted.</p>
-                ) : null}
               </div>
             </div>
 
@@ -388,7 +378,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                 </span>
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">Trip and tracking</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Start travel, share location when available, and mark arrival on site.</p>
                 </div>
               </div>
               <div className="mt-6 flex flex-col gap-3">
@@ -413,7 +402,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                   disabled={!assignment || !canMarkArrived(assignment, request) || arriveMutation.isPending}
                 >
                   {arriveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Mark arrived
+                  Arrived
                 </Button>
                 {locationMessage ? <p className="text-sm text-slate-600">{locationMessage}</p> : null}
               </div>
@@ -428,7 +417,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                 </span>
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">Care workflow</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Move from arrival into care and close the visit when your workflow is complete.</p>
                 </div>
               </div>
 
@@ -461,6 +449,9 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                   {careCompleteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Complete care
                 </Button>
+                {request.status === "care_completed" ? (
+                  <Notice title="Waiting for patient confirmation" tone="neutral" />
+                ) : null}
               </div>
             </div>
 

@@ -242,7 +242,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ₦1,000 consultation banner */}
+      {/* ₦2,000 consultation banner */}
       <section className="px-4 py-20 md:px-10 lg:py-24">
         <div className="mx-auto max-w-[1440px]">
           <div className="relative overflow-hidden rounded-[2.5rem] bg-[linear-gradient(135deg,#1e40af_0%,#2563EB_58%,#7ca4d7_100%)] p-10 text-white shadow-[0_28px_72px_-44px_rgba(29,78,216,0.55)] sm:p-12 lg:p-16">
@@ -250,7 +250,7 @@ export function LandingPage() {
             <div className="relative z-10">
               <p className="ct-caption text-white/75">Doctor consultations</p>
               <h2 className="mt-4 max-w-[16ch] font-heading text-3xl font-semibold leading-tight text-white sm:text-4xl">
-                See a doctor for just ₦1,000.
+                See a doctor for ₦2,000.
               </h2>
               <p className="mt-5 max-w-xl text-base leading-8 text-white/85 sm:text-lg">
                 Book a session with a trusted doctor from the comfort of your home.

@@ -225,7 +225,10 @@ export type Thread = {
   unread_count?: number;
   updated_at?: string;
   consultation_status?: string;
-  consultation_lifecycle_status?: "open" | "doctor_ended" | "disputed" | "resolved";
+  consultation_lifecycle_status?: "open" | "doctor_ended" | "expired" | "disputed" | "resolved";
+  consultation_started_at?: string | null;
+  consultation_expires_at?: string | null;
+  ended_at?: string | null;
   can_send_messages?: boolean;
   can_end_consultation?: boolean;
   can_raise_dispute?: boolean;
@@ -308,6 +311,16 @@ export type MessageAttachmentUploadInit = {
 };
 
 export type HomeCareBookingSource = "direct" | "doctor_referral";
+export type HomeCareZone = "eket" | "uyo";
+export type HomeCareService = {
+  id: number;
+  name: string;
+  zone: HomeCareZone;
+  zone_label: string;
+  description: string;
+  price: string;
+  is_active: boolean;
+};
 export type HomeCareRequestStatus =
   | "requested"
   | "matching"
@@ -356,6 +369,10 @@ export type HomeCareRequestListItem = {
   id: number;
   booking_source: HomeCareBookingSource;
   status: HomeCareRequestStatus;
+  service: number | null;
+  service_name_snapshot: string;
+  service_price_snapshot: string | null;
+  service_zone: string;
   contact_name_snapshot: string;
   contact_phone_snapshot: string;
   service_address_snapshot: string;
@@ -380,6 +397,8 @@ export type HomeCareRequestDetail = HomeCareRequestListItem & {
 export type HomeCareRequestCreate = {
   booking_source: HomeCareBookingSource;
   referral?: number | null;
+  service?: number | null;
+  service_zone?: string;
   preferred_nurse?: number | null;
   contact_name_snapshot?: string;
   contact_phone_snapshot?: string;

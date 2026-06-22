@@ -111,8 +111,9 @@ export function ProfileClient() {
             <>
               <Field label="License number">
                 <Input
-                  defaultValue={(profile.data as NurseProfile | undefined)?.license_no || ""}
-                  onChange={(event) => setProfileDraft((draft) => ({ ...draft, license_no: event.target.value }))}
+                  value={(profile.data as NurseProfile | undefined)?.license_no || "Assigned by Caretekk"}
+                  disabled
+                  readOnly
                 />
               </Field>
               <Field label="Service type">

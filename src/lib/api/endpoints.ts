@@ -20,6 +20,7 @@ import type {
   HomeCareRequestDetail,
   HomeCareRequestEvent,
   HomeCareRequestListItem,
+  HomeCareService,
   HomeCareTrackingPoint,
   MedicalFileDownload,
   MedicalFileUploadInit,
@@ -193,7 +194,9 @@ export const messagingApi = {
 };
 
 export const homeCareApi = {
-  availableNurses: (query?: { page?: number; page_size?: number; service_type?: string; search?: string }) =>
+  services: (query?: { zone?: string; page?: number; page_size?: number }) =>
+    apiList<HomeCareService>("/home-care/services/", query),
+  availableNurses: (query?: { page?: number; page_size?: number; service_type?: string; service_id?: number; zone?: string; search?: string }) =>
     apiList<ProviderNurse>("/home-care/available-nurses/", query),
   requests: (query?: { page?: number; page_size?: number }) => apiList<HomeCareRequestListItem>("/home-care/requests/", query),
   bookRequest: (body: HomeCareRequestCreate & { callback_url: string }) =>

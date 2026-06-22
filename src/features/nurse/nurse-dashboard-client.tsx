@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { CalendarClock, CheckCircle2, Clock3, MapPinned, Star } from "lucide-react";
+import { CalendarClock, CheckCircle2, Clock3, MapPinned } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,7 @@ function MetricCard({
 }: {
   label: string;
   value: string | number;
-  description: string;
+  description?: string;
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
@@ -37,7 +37,7 @@ function MetricCard({
       </span>
       <p className="mt-4 text-sm font-semibold text-slate-500">{label}</p>
       <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{value}</p>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
+      {description ? <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p> : null}
     </div>
   );
 }
@@ -71,7 +71,6 @@ export function NurseDashboardClient() {
   return (
     <Section
       title="Nurse dashboard"
-      description="Stay on top of assigned visits, pre-visit checks, travel, and care completion from one clean workspace."
       action={
         <AvailabilityControl
           compact
@@ -87,14 +86,14 @@ export function NurseDashboardClient() {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,var(--primary-strong)_0%,var(--primary)_55%,var(--accent)_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(66,107,179,0.46)] sm:p-8">
-          <p className="ct-caption text-blue-100">Today&apos;s care journey</p>
+          <p className="ct-caption text-blue-100">Today</p>
           <h2 className="ct-dashboard-title mt-4 text-white sm:text-[2.3rem]">
             {activeRequest ? `Next visit: ${homeCareStatusLabel(activeRequest.status)}` : "You're ready for the next request"}
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">
             {activeRequest
               ? `${activeRequest.contact_name_snapshot || "Patient"} - ${activeRequest.service_address_snapshot || "Address pending"}`
-              : "Accepted requests, travel updates, and visit completion all stay connected here."}
+              : "Accepted visits and active requests appear here."}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -116,9 +115,8 @@ export function NurseDashboardClient() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="ct-card-title text-[#1F2937]">Profile summary</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">Your dispatch details and visit readiness at a glance.</p>
             </div>
-            {profileQuery.data ? <Badge tone="blue">{profileQuery.data.active_for_dispatch ? "dispatch ready" : "paused"}</Badge> : null}
+            {profileQuery.data ? <Badge tone="blue">{profileQuery.data.active_for_dispatch ? "Available" : "Paused"}</Badge> : null}
           </div>
           {profileQuery.isLoading ? (
             <InlineLoader className="mt-6" compact label="Loading your profile" />
@@ -145,30 +143,21 @@ export function NurseDashboardClient() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <MetricCard
           label="Completed visits"
           value={completedCount}
-          description="Visits finished and ready for patient confirmation or closure."
           icon={CheckCircle2}
         />
         <MetricCard
           label="Pending offers"
           value={pendingOffers}
-          description="Requests waiting for your accept or decline decision."
           icon={Clock3}
         />
         <MetricCard
           label="Active request"
           value={activeRequest ? 1 : 0}
-          description="Your current visit in progress or awaiting the next step."
           icon={CalendarClock}
-        />
-        <MetricCard
-          label="Rating"
-          value="No ratings yet"
-          description="Patient ratings will appear here once they are added to the nurse summary."
-          icon={Star}
         />
       </div>
 
@@ -178,8 +167,7 @@ export function NurseDashboardClient() {
         <div className="ct-panel rounded-[28px] p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
-              <h2 className="ct-card-title text-[#1F2937]">Recent activity</h2>
-              <p className="mt-1 text-sm text-slate-500">The latest changes across your visible requests.</p>
+              <h2 className="ct-card-title text-[#1F2937]">Available Requests</h2>
             </div>
             <Link className="text-sm font-semibold text-[var(--primary)]" href="/nurse/requests">
               Open requests
@@ -226,20 +214,17 @@ export function NurseDashboardClient() {
               <MapPinned className="h-5 w-5" />
             </span>
             <div>
-              <p className="ct-card-title text-[#1F2937]">Travel and arrival</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Use the request detail page to start your trip, share location if available, and mark arrival when you reach the patient.
-              </p>
+              <p className="ct-card-title text-[#1F2937]">Current Assignment</p>
             </div>
           </div>
           <div className="mt-6 grid gap-3 text-sm text-slate-600">
             <div className="ct-soft-panel rounded-[18px] px-4 py-3">
-              <p className="font-semibold text-[#1F2937]">Pre-visit first</p>
-              <p className="mt-1">Travel starts only after the patient is confirmed.</p>
+              <p className="font-semibold text-[#1F2937]">Verify first</p>
+              <p className="mt-1">Travel unlocks after verification.</p>
             </div>
             <div className="ct-soft-panel rounded-[18px] px-4 py-3">
-              <p className="font-semibold text-[#1F2937]">Track progress cleanly</p>
-              <p className="mt-1">Location updates are optional and handled gracefully when permissions are unavailable.</p>
+              <p className="font-semibold text-[#1F2937]">Arrival</p>
+              <p className="mt-1">Mark arrival when you reach the patient.</p>
             </div>
           </div>
         </div>
