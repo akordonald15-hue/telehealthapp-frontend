@@ -66,7 +66,7 @@ export function ConfirmDialog({
             if (event.target === event.currentTarget) setOpen(false);
           }}
         >
-          <div className="w-full max-w-md rounded-[24px] border border-white/70 bg-surface p-5 shadow-2xl">
+          <div className="w-full max-w-md rounded-[8px] border border-white/70 bg-surface p-5 shadow-2xl">
             <h3 id={titleId} className="font-heading text-xl font-semibold text-ash-800">
               {title}
             </h3>

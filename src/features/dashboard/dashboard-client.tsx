@@ -23,10 +23,10 @@ function Metric({ label, value, href, icon: Icon, description }: { label: string
   return (
     <Link
       href={href}
-      className="ct-hover-lift ct-surface group rounded-[18px] p-4 hover:shadow-[0_24px_56px_-38px_rgba(37,99,235,0.18)]"
+      className="ct-hover-lift ct-surface group rounded-[8px] p-4 hover:shadow-[0_24px_56px_-38px_rgba(37,99,235,0.18)]"
     >
       <div className="flex items-start justify-between gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#DBEAFE] text-[#2563EB]">
+        <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
           <Icon className="h-5 w-5" />
         </span>
       </div>
@@ -147,15 +147,15 @@ export function DashboardClient() {
       {user?.role === "patient" ? (
         <>
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-[22px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_55%,#60A5FA_100%)] p-5 text-white shadow-[0_24px_64px_-42px_rgba(37,99,235,0.42)]">
+            <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_55%,#60A5FA_100%)] p-5 text-white shadow-[0_24px_64px_-42px_rgba(37,99,235,0.42)]">
               <p className="ct-caption text-blue-100">Guided Journey</p>
               <h2 className="mt-3 font-heading text-xl font-semibold text-white">{nextPatientStep.description}</h2>
             </div>
-            <Link href="/triage" className="ct-surface rounded-[18px] p-4">
+            <Link href="/triage" className="ct-surface rounded-[8px] p-4">
               <p className="ct-caption text-[var(--primary)]">Care Check-in</p>
               <p className="mt-3 text-sm font-semibold text-[#1F2937]">Start now</p>
             </Link>
-            <Link href={patientHasConsultation ? "/messages" : "/appointments"} className="ct-surface rounded-[18px] p-4">
+            <Link href={patientHasConsultation ? "/messages" : "/appointments"} className="ct-surface rounded-[8px] p-4">
               <p className="ct-caption text-[var(--primary)]">Next Step</p>
               <p className="mt-3 text-sm font-semibold text-[#1F2937]">{patientHasConsultation ? "Open consultation" : "Review appointments"}</p>
             </Link>
@@ -168,7 +168,7 @@ export function DashboardClient() {
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
-                  className="inline-flex min-h-10 items-center justify-center rounded-[12px] border border-amber-200 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-50"
+                  className="inline-flex min-h-10 items-center justify-center rounded-[8px] border border-amber-200 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-50"
                 >
                   Try again
                 </button>
@@ -191,19 +191,19 @@ export function DashboardClient() {
           ) : null}
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="ct-surface rounded-[18px] p-4">
+            <div className="ct-surface rounded-[8px] p-4">
               <p className="text-sm font-semibold text-slate-500">Care Check-in</p>
               <p className="mt-2 font-heading text-xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Done" : "Next"}</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">Share symptoms before booking.</p>
               <Link href="/triage" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
             </div>
-            <div className="ct-surface rounded-[18px] p-4">
+            <div className="ct-surface rounded-[8px] p-4">
               <p className="text-sm font-semibold text-slate-500">Consultation</p>
               <p className="mt-2 font-heading text-xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Ready" : "Waiting"}</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">Continue with your doctor.</p>
               <Link href="/messages" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
             </div>
-            <div className="ct-surface rounded-[18px] p-4">
+            <div className="ct-surface rounded-[8px] p-4">
               <p className="text-sm font-semibold text-slate-500">Care plan</p>
               <p className="mt-2 font-heading text-xl font-semibold text-[#1F2937]">{patientHasCarePlan ? "Available" : "Coming next"}</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">Review care updates.</p>
@@ -212,51 +212,51 @@ export function DashboardClient() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Upcoming visits and booking details." />
-            <Metric label="Consultations" value={threadMetric} href="/messages" icon={MessageSquareText} description="Secure doctor conversations." />
+            <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Visits and booking details." />
+            <Metric label="Consultations" value={threadMetric} href="/messages" icon={MessageSquareText} description="Doctor conversations." />
             <Metric label="Care Plans" value={carePlanMetric} href="/care-plan" icon={FileText} description="Doctor-written next steps." />
-            {patientHasReferral ? <Metric label="Referrals" value={referralMetric} href="/referrals" icon={ClipboardList} description="Specialist or facility referrals." /> : null}
+            {patientHasReferral ? <Metric label="Referrals" value={referralMetric} href="/referrals" icon={ClipboardList} description="Specialist referrals." /> : null}
           </div>
         </>
       ) : (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-            <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.48)] sm:p-8">
+            <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.48)] sm:p-8">
               <p className="ct-caption text-blue-100">Caretekk workspace</p>
-              <h2 className="ct-dashboard-title mt-4 text-white sm:text-[2.3rem]">Everything important in one calm view.</h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-50/90 sm:text-base">
-                Keep up with visits, conversations, records, and referrals without bouncing between disconnected tools.
+              <h2 className="ct-dashboard-title mt-4 text-white">Care updates at a glance.</h2>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-blue-50/90">
+                Visits, conversations, records, and referrals in one place.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[#2563EB] shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5">
+                <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-white px-5 text-sm font-semibold text-[#2563EB] shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5">
                   Book or review visits
                 </Link>
-                <Link href="/messages" className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-white/25 bg-white/10 px-5 text-sm font-extrabold text-white transition hover:bg-white/16">
+                <Link href="/messages" className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-white/25 bg-white/10 px-5 text-sm font-semibold text-white transition hover:bg-white/16">
                   Open messages
                 </Link>
               </div>
             </div>
 
-            <div className="ct-panel rounded-[28px] p-6">
+            <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-emerald-50 text-[#10B981]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-emerald-50 text-[#10B981]">
                   <Sparkles className="h-5 w-5" />
                 </span>
                 <div>
                   <p className="ct-card-title text-[#1F2937]">Today at a glance</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">A quick read on what needs attention next.</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">What needs attention next.</p>
                 </div>
               </div>
               <div className="mt-6 grid gap-3 text-sm text-slate-600">
-                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
+                <div className="ct-soft-panel rounded-[8px] px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">Appointments</p>
                   <p className="mt-1 leading-6">{appointments.isLoading ? "Loading your upcoming visits..." : `${listMetric(appointments)} appointment${listMetric(appointments) === 1 ? "" : "s"} to review.`}</p>
                 </div>
-                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
+                <div className="ct-soft-panel rounded-[8px] px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">Messages</p>
                   <p className="mt-1 leading-6">{threads.isLoading ? "Loading your conversations..." : `${listMetric(threads)} conversation${listMetric(threads) === 1 ? "" : "s"} available.`}</p>
                 </div>
-                <div className="ct-soft-panel rounded-[18px] px-4 py-3">
+                <div className="ct-soft-panel rounded-[8px] px-4 py-3">
                   <p className="font-semibold text-[#1F2937]">Billing history</p>
                   <p className="mt-1 leading-6">{`${paymentMetric} payment update${paymentMetric === 1 ? "" : "s"} available.`}</p>
                 </div>
@@ -271,7 +271,7 @@ export function DashboardClient() {
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
-                  className="inline-flex min-h-10 items-center justify-center rounded-[12px] border border-amber-200 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-50"
+                  className="inline-flex min-h-10 items-center justify-center rounded-[8px] border border-amber-200 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-50"
                 >
                   Try again
                 </button>
@@ -280,14 +280,14 @@ export function DashboardClient() {
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Track upcoming visits and booking activity." />
-            <Metric label="Conversations" value={listMetric(threads)} href="/messages" icon={MessageSquareText} description="Stay close to patient and care-team communication." />
-            <Metric label="Referrals" value={listMetric(referrals)} href="/referrals" icon={FileText} description="Review outbound and visible referral activity." />
-            <Metric label="Billing History" value={paymentMetric} href="/payments" icon={CreditCard} description="See read-only checkout activity where permitted." />
+            <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Upcoming visits." />
+            <Metric label="Conversations" value={listMetric(threads)} href="/messages" icon={MessageSquareText} description="Care conversations." />
+            <Metric label="Referrals" value={listMetric(referrals)} href="/referrals" icon={FileText} description="Referral activity." />
+            <Metric label="Billing History" value={paymentMetric} href="/payments" icon={CreditCard} description="Checkout activity." />
           </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
-            <div className="ct-panel rounded-[28px] p-6">
+            <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
                   <h2 className="ct-card-title text-[#1F2937]">Next appointments</h2>
@@ -299,10 +299,10 @@ export function DashboardClient() {
                 {appointments.isLoading ? (
                   <InlineLoader compact label="Loading your care dashboard" />
                 ) : appointments.isError ? (
-                  <div className="rounded-[20px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(appointments.error, "appointments")}</div>
+                  <div className="rounded-[8px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(appointments.error, "appointments")}</div>
                 ) : appointments.data?.results.length ? (
                   appointments.data.results.map((item) => (
-                    <div key={item.id} className="flex flex-col gap-3 rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div key={item.id} className="flex flex-col gap-3 rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
                         <p className="mt-1 text-sm text-slate-600">{appointmentCompanionLabel(user?.role)}</p>
@@ -311,16 +311,16 @@ export function DashboardClient() {
                     </div>
                   ))
                 ) : (
-                  <EmptyState title="No appointments yet" description="Your upcoming visits will appear here once they are scheduled." action={<Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[#2563EB] px-4 text-sm font-extrabold text-white">Go to appointments</Link>} />
+                  <EmptyState title="No appointments yet" description="Your upcoming visits will appear here." action={<Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white">Go to appointments</Link>} />
                 )}
               </div>
             </div>
 
-            <div className="ct-panel rounded-[28px] p-6">
+            <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
                   <h2 className="ct-card-title text-[#1F2937]">Recent billing</h2>
-                  <p className="mt-1 text-sm text-slate-500">A quick read-only look at recent service checkout activity.</p>
+                  <p className="mt-1 text-sm text-slate-500">Recent checkout activity.</p>
                 </div>
                 <Link className="text-sm font-semibold text-[#2563EB]" href="/payments">
                   Open
@@ -330,10 +330,10 @@ export function DashboardClient() {
                 {userQuery.isLoading || payments.isLoading ? (
                   <InlineLoader compact label="Loading your billing history" />
                 ) : payments.isError ? (
-                  <div className="rounded-[20px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(payments.error, "payments")}</div>
+                  <div className="rounded-[8px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(payments.error, "payments")}</div>
                 ) : payments.data?.results.length ? (
                   payments.data.results.map((item) => (
-                    <div key={item.id} className="flex flex-col gap-3 rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div key={item.id} className="flex flex-col gap-3 rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm font-semibold text-[#1F2937]">{formatMoney(item.amount, item.currency)}</p>
                         <p className="mt-1 text-sm text-slate-600">{item.provider}</p>
@@ -342,7 +342,7 @@ export function DashboardClient() {
                     </div>
                   ))
                 ) : (
-                  <EmptyState title="No billing history yet" description="Checkout activity for booked services will appear here when available." action={<Link href="/payments" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[#2563EB] px-4 text-sm font-extrabold text-white">Open billing history</Link>} />
+                  <EmptyState title="No billing history yet" description="Booked service payments will appear here." action={<Link href="/payments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white">Open billing history</Link>} />
                 )}
               </div>
             </div>

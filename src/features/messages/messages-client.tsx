@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   AlertTriangle,
-  CheckCircle2,
   Image as ImageIcon,
   Mic,
   Paperclip,
@@ -596,7 +595,7 @@ export function MessagesClient() {
 
   return (
     <Section title={sectionTitle} description={sectionDescription}>
-      <div className="overflow-hidden rounded-[32px] border border-white/80 bg-white shadow-[0_28px_80px_-48px_rgba(15,23,42,0.32)]">
+      <div className="overflow-hidden rounded-[8px] border border-white/80 bg-white shadow-[0_24px_64px_-48px_rgba(15,23,42,0.28)]">
         <div className="grid min-h-[calc(100vh-15rem)] bg-[#F8FAFC] lg:grid-cols-[22rem_minmax(0,1fr)]">
           <aside
             className={cn(
@@ -630,10 +629,7 @@ export function MessagesClient() {
                   ))}
                 </div>
               ) : (
-                <EmptyState
-                  title="No consultations yet"
-                  description="Your consultation will appear here once your care team responds."
-                />
+                <EmptyState title="No consultations yet" description="Your consultations will appear here." />
               )}
             </div>
           </aside>
@@ -724,7 +720,7 @@ export function MessagesClient() {
               disabledReason={
                 activeThread && !canSendInActiveThread
                   ? activeThreadExpired
-                    ? "The 20-minute consultation window has ended. History remains available, but new messages and voice notes are disabled."
+                    ? "This consultation has ended. History remains available."
                     : "This consultation is closed. History remains available, but new messages and uploads are disabled."
                   : ""
               }
@@ -860,7 +856,7 @@ function ConsultationLifecycleBanner({
 
   return (
     <div className="border-b border-[#DDEBFF] bg-white px-4 py-3 sm:px-6">
-      <div className="flex flex-col gap-3 rounded-[12px] border border-[#DDEBFF] bg-[#F8FBFF] p-3 text-sm text-slate-700">
+      <div className="flex flex-col gap-3 rounded-[8px] border border-[#DDEBFF] bg-[#F8FBFF] p-3 text-sm text-slate-700">
         <div className="flex items-start gap-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
           <div>
@@ -923,7 +919,7 @@ function ConsultationListHeader({
         </div>
       </div>
 
-      <label className="mt-4 flex min-h-11 items-center gap-2 rounded-[16px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm text-slate-500 focus-within:border-[#60A5FA] focus-within:bg-white">
+      <label className="mt-4 flex min-h-11 items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm text-slate-500 focus-within:border-[#60A5FA] focus-within:bg-white">
         <Search className="h-4 w-4" />
         <input
           className="w-full bg-transparent text-[#1F2937] outline-none placeholder:text-slate-400"
@@ -959,10 +955,10 @@ function ConsultationListItem({
     <button
       type="button"
       className={cn(
-        "group flex w-full gap-3 rounded-[20px] border p-3 text-left transition duration-150",
+        "group flex w-full gap-3 rounded-[8px] border p-3 text-left transition duration-150",
         isActive
           ? "border-[#BFDBFE] bg-[#EFF6FF] shadow-[0_16px_42px_-34px_rgba(37,99,235,0.28)]"
-          : "border-transparent bg-white hover:-translate-y-0.5 hover:border-[#E5E7EB] hover:shadow-[0_16px_42px_-34px_rgba(15,23,42,0.22)]",
+          : "border-transparent bg-white hover:-translate-y-0.5 hover:border-[#E5E7EB] hover:shadow-[0_16px_42px_-34px_rgba(15,23,42,0.18)]",
       )}
       onClick={onClick}
     >
@@ -982,10 +978,11 @@ function ConsultationListItem({
         <span className="mt-1 line-clamp-1 text-sm text-slate-500">
           {threadPreview(thread, role, latestMessage)}
         </span>
-        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[11px] font-bold text-[#10B981]">
-          <CheckCircle2 className="h-3 w-3" />
-          Consultation
-        </span>
+        {thread.can_send_messages === false ? (
+          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[11px] font-semibold text-slate-500">
+            Closed
+          </span>
+        ) : null}
       </span>
     </button>
   );
@@ -1070,19 +1067,20 @@ function ChatMessageBubble({
   const senderName = messageSenderName(message, thread, currentUserId, currentUserRole);
   const isVoiceAttachment =
     message.attachment_kind === "voice" || Boolean(message.attachment_content_type?.startsWith("audio/"));
+  const shouldHideGeneratedVoiceLabel = isVoiceAttachment && /^voice note(?:\s*\([^)]+\))?$/i.test(message.body.trim());
 
   return (
     <article className={cn("flex gap-2", isMine ? "justify-end" : "justify-start")}>
       {!isMine ? <Avatar label={currentUserRole === "doctor" ? "Pt" : "Dr"} tone="green" size="sm" /> : null}
       <div
         className={cn(
-          "max-w-[84%] rounded-[18px] px-3.5 py-2.5 shadow-[0_12px_34px_-30px_rgba(15,23,42,0.24)] sm:max-w-[68%]",
+          "max-w-[86%] rounded-[8px] px-3.5 py-2.5 shadow-[0_12px_34px_-30px_rgba(15,23,42,0.24)] sm:max-w-[68%]",
           isMine
-            ? "rounded-br-md bg-[linear-gradient(135deg,#2563EB,#60A5FA)] text-white"
-            : "rounded-bl-md border border-white bg-white text-[#1F2937]",
+            ? "bg-[linear-gradient(135deg,#2563EB,#60A5FA)] text-white"
+            : "border border-white bg-white text-[#1F2937]",
         )}
       >
-        {message.body ? <p className="whitespace-pre-line text-sm leading-6">{message.body}</p> : null}
+        {message.body && !shouldHideGeneratedVoiceLabel ? <p className="whitespace-pre-line text-sm leading-6">{message.body}</p> : null}
         {message.attachment_url && isVoiceAttachment ? (
           <VoiceNotePlayer message={message} isMine={isMine} />
         ) : message.attachment_url ? (
@@ -1114,7 +1112,7 @@ function VoiceNotePlayer({ message, isMine }: { message: Message; isMine: boolea
   return (
     <div
       className={cn(
-        "mt-2 flex min-w-[13rem] max-w-full items-center gap-2 rounded-full px-2.5 py-2",
+        "mt-2 flex min-w-[13rem] max-w-full items-center gap-2 rounded-[8px] px-2.5 py-2",
         isMine ? "bg-white/15 text-white" : "border border-[#DDEBFF] bg-[#F8FBFF] text-[#1F2937]",
       )}
     >
@@ -1175,9 +1173,9 @@ function ChatComposer({
       ) : null}
 
       {attachment ? (
-        <div className="mb-3 flex items-center gap-3 rounded-[16px] border border-[#DDEBFF] bg-[#F8FBFF] p-3">
+        <div className="mb-3 flex items-center gap-3 rounded-[8px] border border-[#DDEBFF] bg-[#F8FBFF] p-3">
           {attachment.kind === "voice" && attachment.previewUrl ? (
-            <span className="flex h-14 w-14 items-center justify-center rounded-[14px] bg-white text-[#2563EB]">
+            <span className="flex h-14 w-14 items-center justify-center rounded-[8px] bg-white text-[#2563EB]">
               <Mic className="h-5 w-5" />
             </span>
           ) : attachment.previewUrl ? (
@@ -1185,10 +1183,10 @@ function ChatComposer({
             <img
               src={attachment.previewUrl}
               alt=""
-              className="h-14 w-14 rounded-[14px] object-cover"
+              className="h-14 w-14 rounded-[8px] object-cover"
             />
           ) : (
-            <span className="flex h-14 w-14 items-center justify-center rounded-[14px] bg-white text-[#2563EB]">
+            <span className="flex h-14 w-14 items-center justify-center rounded-[8px] bg-white text-[#2563EB]">
               <Paperclip className="h-5 w-5" />
             </span>
           )}
@@ -1220,7 +1218,7 @@ function ChatComposer({
         </div>
       ) : null}
 
-      <div className="flex items-end gap-2 rounded-[22px] border border-[#E5E7EB] bg-[#F9FAFB] p-2.5 focus-within:border-[#60A5FA] focus-within:bg-white">
+      <div className="flex items-end gap-2 rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] p-2.5 focus-within:border-[#60A5FA] focus-within:bg-white">
         <button
           type="button"
           className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#EFF6FF]"
@@ -1272,12 +1270,12 @@ function ChatComposer({
         {isRecordingVoice ? (
           <>
             <Mic className="h-3.5 w-3.5 text-rose-600" />
-            Recording voice note: {formatDuration(recordingSeconds)} / {formatDuration(VOICE_NOTE_MAX_SECONDS)}
+            Recording {formatDuration(recordingSeconds)} / {formatDuration(VOICE_NOTE_MAX_SECONDS)}
           </>
         ) : (
           <>
             <ImageIcon className="h-3.5 w-3.5" />
-            {canRecordVoice ? "Add a file or voice note." : "Add a file from your device."}
+            {canRecordVoice ? "Attach file or record audio." : "Attach file."}
           </>
         )}
       </p>
@@ -1314,7 +1312,7 @@ function ConversationSkeleton() {
   return (
     <div className="space-y-2">
       {[0, 1, 2].map((item) => (
-        <div key={item} className="h-24 animate-pulse rounded-[20px] bg-slate-100" />
+        <div key={item} className="h-24 animate-pulse rounded-[8px] bg-slate-100" />
       ))}
     </div>
   );
@@ -1327,7 +1325,7 @@ function MessageSkeleton() {
         <div
           key={item}
           className={cn(
-            "h-20 max-w-[70%] animate-pulse rounded-[22px] bg-white/80",
+            "h-20 max-w-[70%] animate-pulse rounded-[8px] bg-white/80",
             item % 2 ? "ml-auto" : "mr-auto",
           )}
         />

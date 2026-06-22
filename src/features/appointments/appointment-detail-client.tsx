@@ -22,7 +22,7 @@ import { formatDateTime } from "@/lib/utils";
 
 function InfoTile({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="ct-soft-panel rounded-[18px] px-4 py-3">
+    <div className="ct-soft-panel rounded-[8px] px-4 py-3">
       <p className="text-sm font-semibold text-[#1F2937]">{label}</p>
       <p className="mt-1 break-words text-sm leading-6 text-slate-600">{value || "Not available"}</p>
     </div>
@@ -31,9 +31,9 @@ function InfoTile({ label, value }: { label: string; value: string | number }) {
 
 function ClinicalNote({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+    <div className="rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4">
       <p className="text-sm font-semibold text-[#1F2937]">{title}</p>
-      <div className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-600">{children}</div>
+      <div className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{children}</div>
     </div>
   );
 }
@@ -114,7 +114,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
   return (
     <Section
       title={appointment ? `Consultation #${appointment.id}` : "Consultation detail"}
-      description="Patient context, messaging, care plan, and referral actions for this consultation."
+      description="Patient context, messaging, care plan, and referral actions."
       action={<Link href="/appointments" className="text-sm font-semibold text-[#0F766E]">Back to consultations</Link>}
     >
       {appointmentQuery.isError ? (
@@ -128,13 +128,13 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
       ) : appointment ? (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
-            <div className="ct-panel rounded-[28px] p-6">
+            <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#ECFEFF] text-[#0F766E]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#ECFEFF] text-[#0F766E]">
                   <Stethoscope className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="ct-dashboard-title text-[#1F2937]">Patient consultation</h2>
+                  <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Patient consultation</h2>
                   <p className="mt-1 text-sm text-slate-600">{appointmentCompanionLabel(userQuery.data?.role)}</p>
                 </div>
                 <StatusBadge value={appointment.status} />
@@ -160,16 +160,14 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
               </div>
             </div>
 
-            <div className="ct-panel rounded-[28px] p-6">
+            <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#ECFEFF] text-[#0F766E]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#ECFEFF] text-[#0F766E]">
                   <UserRoundCheck className="h-5 w-5" />
                 </span>
                 <div>
                   <p className="ct-card-title text-[#1F2937]">Patient information</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                    More patient details will appear here when available.
-                  </p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Key profile details.</p>
                 </div>
               </div>
 
@@ -184,7 +182,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
           </div>
 
           <div className="grid gap-4 xl:grid-cols-3">
-            <div className="ct-panel rounded-[28px] p-6">
+            <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <MessageSquareText className="h-6 w-6 text-[#0F766E]" />
               <h2 className="ct-card-title mt-4 text-[#1F2937]">Message patient</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">The 20-minute timer starts when you send the first reply.</p>
@@ -199,13 +197,13 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                   {createThread.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquareText className="mr-2 h-4 w-4" />}
                   Prepare message thread
                 </Button>
-                <Link href="/messages" className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-slate-200 bg-white px-4 text-sm font-extrabold text-[#1F2937] transition hover:border-cyan-100 hover:bg-cyan-50">
+                <Link href="/messages" className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition hover:border-cyan-100 hover:bg-cyan-50">
                   Open messages
                 </Link>
               </div>
             </div>
 
-            <div className="ct-panel rounded-[28px] p-6">
+            <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <ClipboardList className="h-6 w-6 text-[#0F766E]" />
               <h2 className="ct-card-title mt-4 text-[#1F2937]">Create referral</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">Saved to admin review and the patient dashboard.</p>
@@ -238,7 +236,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
               </form>
             </div>
 
-            <div className="ct-panel rounded-[28px] p-6">
+            <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <FileText className="h-6 w-6 text-[#0F766E]" />
               <h2 className="ct-card-title mt-4 text-[#1F2937]">Create care plan</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">Keep it concise: complaint, plan, follow-up.</p>
@@ -278,7 +276,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
             </div>
           </div>
 
-          <div className="ct-panel rounded-[28px] p-6">
+          <div className="ct-panel rounded-[8px] p-5 sm:p-6">
             <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h2 className="ct-card-title text-[#1F2937]">Patient history</h2>
@@ -293,7 +291,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 <div className="grid gap-3">
                   <p className="text-sm font-semibold text-[#1F2937]">Consultations</p>
                   {previousAppointments.length ? previousAppointments.map((item) => (
-                    <div key={item.id} className="rounded-[18px] border border-slate-200 bg-slate-50 p-4">
+                    <div key={item.id} className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <p className="break-words text-sm font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
                         <StatusBadge value={item.status} />
@@ -305,7 +303,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 <div className="grid gap-3">
                   <p className="text-sm font-semibold text-[#1F2937]">Care plans</p>
                   {patientCarePlans.length ? patientCarePlans.map((plan) => (
-                    <div key={plan.id} className="rounded-[18px] border border-slate-200 bg-slate-50 p-4">
+                    <div key={plan.id} className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
                       <p className="line-clamp-2 text-sm font-semibold text-[#1F2937]">{plan.complaint_summary || "Care plan"}</p>
                       <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{plan.care_steps || plan.medications || "No care plan instructions added."}</p>
                       <p className="mt-2 text-sm text-slate-500">Follow-up: {plan.follow_up_date || "Not set"}</p>

@@ -53,13 +53,13 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="ct-surface rounded-[24px] p-5">
-      <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#ECFEFF] text-[#0F766E]">
+    <div className="ct-surface rounded-[8px] p-4 sm:p-5">
+      <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#ECFEFF] text-[#0F766E]">
         <Icon className="h-5 w-5" />
       </span>
       <p className="mt-4 text-sm font-semibold text-slate-500">{label}</p>
       <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{value}</p>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
     </div>
   );
 }
@@ -78,10 +78,10 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="ct-hover-lift rounded-[20px] border border-slate-200 bg-slate-50 p-4 hover:border-cyan-100 hover:bg-white hover:shadow-[0_18px_44px_-34px_rgba(15,118,110,0.24)]"
+      className="ct-hover-lift rounded-[8px] border border-slate-200 bg-slate-50 p-4 hover:border-cyan-100 hover:bg-white hover:shadow-[0_18px_44px_-34px_rgba(15,118,110,0.24)]"
     >
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white text-[#0F766E] shadow-sm">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-white text-[#0F766E] shadow-sm">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
@@ -96,7 +96,7 @@ function QuickAction({
 function AppointmentRow({ appointment }: { appointment: Appointment }) {
   const patientName = appointment.patient_profile?.display_name || "Patient";
   return (
-    <Link href={`/appointments/${appointment.id}`} className="ct-hover-lift block rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 hover:border-cyan-100 hover:bg-white">
+    <Link href={`/appointments/${appointment.id}`} className="ct-hover-lift block rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4 hover:border-cyan-100 hover:bg-white">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="break-words font-semibold text-[#1F2937]">{formatDateTime(appointment.scheduled_at)}</p>
@@ -111,7 +111,7 @@ function AppointmentRow({ appointment }: { appointment: Appointment }) {
 
 function ReferralRow({ referral }: { referral: Referral }) {
   return (
-    <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4">
+    <div className="rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="break-words font-semibold text-[#1F2937]">{referral.referred_to || "Referral"}</p>
@@ -128,7 +128,7 @@ function ThreadRow({ thread }: { thread: Thread }) {
   const patientName = thread.patient_profile?.display_name || `Patient #${thread.patient}`;
   const preview = thread.last_message?.body || thread.triage_summary?.symptoms?.join(", ") || "Open consultation thread";
   return (
-    <Link href="/messages" className="ct-hover-lift block rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 hover:border-cyan-100 hover:bg-white">
+    <Link href="/messages" className="ct-hover-lift block rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4 hover:border-cyan-100 hover:bg-white">
       <p className="truncate font-semibold text-[#1F2937]">{patientName}</p>
       <p className="mt-1 line-clamp-1 text-sm text-slate-600">{preview}</p>
     </Link>
@@ -211,12 +211,12 @@ export function DoctorDashboardClient() {
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-[22px] border border-white/70 bg-[linear-gradient(135deg,#0F766E_0%,#2563EB_58%,#60A5FA_100%)] p-5 text-white shadow-[0_24px_64px_-42px_rgba(15,118,110,0.4)] sm:p-6">
+        <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#0F766E_0%,#2563EB_58%,#60A5FA_100%)] p-5 text-white shadow-[0_24px_64px_-42px_rgba(15,118,110,0.4)] sm:p-6">
           <p className="ct-caption text-cyan-50">Doctor workspace</p>
           <h2 className="mt-3 font-heading text-2xl font-semibold leading-tight text-white sm:text-[2rem]">
             {todayAppointments.length ? `${todayAppointments.length} consultation${todayAppointments.length === 1 ? "" : "s"} today` : "No consultations scheduled for today"}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-cyan-50/90">Open each consultation to continue patient care.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-cyan-50/90">Open consultations and continue care.</p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/appointments" className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-white px-4 text-sm font-semibold text-[#0F766E] shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5">
               View consultations
@@ -227,9 +227,9 @@ export function DoctorDashboardClient() {
           </div>
         </div>
 
-        <div className="ct-panel rounded-[22px] p-5">
+        <div className="ct-panel rounded-[8px] p-5">
           <p className="ct-card-title text-[#1F2937]">Quick actions</p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Start from a booked consultation.</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">Start from a consultation.</p>
           <div className="mt-4 grid gap-3">
             <QuickAction href="/appointments" label="View appointments" description="Today and upcoming." icon={CalendarClock} />
             <QuickAction href="/messages" label="Open messages" description="Patient conversations." icon={MessageSquareText} />
@@ -249,7 +249,7 @@ export function DoctorDashboardClient() {
       <ProviderWalletPanel role="doctor" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
-        <div className="ct-panel rounded-[28px] p-6">
+        <div className="ct-panel rounded-[8px] p-5 sm:p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
               <h2 className="ct-card-title text-[#1F2937]">{"Today's appointments"}</h2>
@@ -272,7 +272,7 @@ export function DoctorDashboardClient() {
           )}
         </div>
 
-        <div className="ct-panel rounded-[28px] p-6">
+        <div className="ct-panel rounded-[8px] p-5 sm:p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
               <h2 className="ct-card-title text-[#1F2937]">Recent patients</h2>
@@ -285,7 +285,7 @@ export function DoctorDashboardClient() {
           ) : recentPatients.length ? (
             <div className="grid gap-3">
               {recentPatients.map(([patientId, patientName]) => (
-                <div key={patientId} className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                <div key={patientId} className="rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-3">
                   <p className="truncate font-semibold text-[#1F2937]">{patientName}</p>
                   <p className="mt-1 text-sm text-slate-600">Open a consultation for next actions.</p>
                 </div>
@@ -298,7 +298,7 @@ export function DoctorDashboardClient() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <div className="ct-panel rounded-[28px] p-6">
+        <div className="ct-panel rounded-[8px] p-5 sm:p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
               <h2 className="ct-card-title text-[#1F2937]">Patient messages</h2>
@@ -321,7 +321,7 @@ export function DoctorDashboardClient() {
           )}
         </div>
 
-        <div className="ct-panel rounded-[28px] p-6">
+        <div className="ct-panel rounded-[8px] p-5 sm:p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
               <h2 className="ct-card-title text-[#1F2937]">Referral notes</h2>

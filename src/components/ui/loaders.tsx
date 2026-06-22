@@ -56,7 +56,7 @@ export function FullPageLoader({
       aria-busy="true"
       aria-live="polite"
     >
-      <div className="w-full max-w-lg rounded-[28px] border border-white/80 bg-white/95 px-6 py-10 text-center shadow-[0_24px_72px_-44px_rgba(15,23,42,0.34)] backdrop-blur">
+      <div className="w-full max-w-lg rounded-[8px] border border-white/80 bg-white/95 px-6 py-10 text-center shadow-[0_24px_72px_-44px_rgba(15,23,42,0.34)] backdrop-blur">
         <div className="flex justify-center">
           <LoaderPulseMark />
         </div>
@@ -80,7 +80,7 @@ export function InlineLoader({
   return (
     <div
       className={cn(
-        "rounded-[22px] border border-[rgba(219,229,241,0.92)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,251,255,0.98)_100%)] px-4 py-4 shadow-[0_18px_50px_-40px_rgba(15,23,42,0.24)]",
+        "rounded-[8px] border border-[rgba(219,229,241,0.92)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,251,255,0.98)_100%)] px-4 py-4 shadow-[0_18px_50px_-40px_rgba(15,23,42,0.24)]",
         compact ? "px-4 py-3" : "px-5 py-5",
         className,
       )}
@@ -88,7 +88,7 @@ export function InlineLoader({
       aria-live="polite"
     >
       <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[var(--primary-soft)] text-[var(--primary)]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[var(--primary-soft)] text-[var(--primary)]">
           <LoaderDots />
         </span>
         <div className="min-w-0">
@@ -109,7 +109,7 @@ export function PageTransitionLoader({
       aria-busy="true"
       aria-live="polite"
     >
-      <div className="rounded-[24px] border border-white/80 bg-white/92 px-6 py-6 shadow-[0_20px_60px_-42px_rgba(15,23,42,0.28)] backdrop-blur">
+      <div className="rounded-[8px] border border-white/80 bg-white/92 px-6 py-6 shadow-[0_20px_60px_-42px_rgba(15,23,42,0.28)] backdrop-blur">
         <div className="flex items-center gap-4">
           <LoaderPulseMark className="h-14 w-14" />
           <div>

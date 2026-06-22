@@ -44,7 +44,7 @@ function DoctorRatingForm({ appointment, onRated }: { appointment: Appointment; 
   }
 
   return (
-    <div className="mt-4 rounded-[18px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+    <div className="mt-4 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
       <p className="text-sm font-semibold text-[#1F2937]">Rate your doctor</p>
       <div className="mt-3 flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Doctor rating">
         {[1, 2, 3, 4, 5].map((value) => (
@@ -138,7 +138,7 @@ export function AppointmentsClient() {
     >
       {user?.role === "patient" ? (
         <form
-          className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6"
+          className="ct-panel grid gap-4 rounded-[8px] p-5 sm:p-6"
           onSubmit={form.handleSubmit((values) =>
             createAppointment.mutate({
               doctor: values.doctor,
@@ -150,7 +150,7 @@ export function AppointmentsClient() {
           )}
         >
           <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
+            <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
               <CalendarPlus2 className="h-5 w-5" />
             </span>
             <div>
@@ -176,7 +176,7 @@ export function AppointmentsClient() {
           <Field label="Selected Doctor" error={form.formState.errors.doctor?.message}>
             <div className="grid gap-3">
               {selectedDoctor ? (
-                <div className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-[#1F2937]">{selectedDoctor.display_name}</p>
@@ -186,7 +186,7 @@ export function AppointmentsClient() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+                <div className="rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
                   No doctor selected.
                 </div>
               )}
@@ -232,7 +232,7 @@ export function AppointmentsClient() {
             <button
               type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[#2563EB] px-4 text-sm font-extrabold text-white"
+              className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white"
             >
               Book your first appointment
             </button>
@@ -241,7 +241,7 @@ export function AppointmentsClient() {
         onNext={appointments.data?.next ? () => setPage((current) => current + 1) : undefined}
         onPrevious={appointments.data?.previous ? () => setPage((current) => Math.max(1, current - 1)) : undefined}
         renderItem={(item) => (
-          <article key={item.id} className="rounded-[24px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.45)]">
+          <article key={item.id} className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.38)]">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
@@ -255,7 +255,7 @@ export function AppointmentsClient() {
                 {isDoctor ? (
                   <Link
                     href={`/appointments/${item.id}`}
-                    className="inline-flex min-h-10 items-center justify-center rounded-[12px] bg-[#0F766E] px-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5"
+                    className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-[#0F766E] px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5"
                   >
                     View consultation
                   </Link>
@@ -274,7 +274,7 @@ export function AppointmentsClient() {
 
       {doctorPickerOpen ? (
         <div className="fixed inset-0 z-[70] bg-slate-950/40 px-4 py-8 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="mx-auto w-full max-w-4xl rounded-[28px] bg-white p-5 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.55)] sm:p-6">
+          <div className="mx-auto w-full max-w-4xl rounded-[8px] bg-white p-5 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.55)] sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="ct-card-title text-[#1F2937]">Choose Doctor</h2>
@@ -288,9 +288,9 @@ export function AppointmentsClient() {
             {availableDoctors.isLoading ? (
               <div className="mt-5 grid gap-3 md:grid-cols-2" aria-busy="true" aria-label="Loading doctors">
                 {[0, 1, 2, 3].map((item) => (
-                  <div key={item} className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+                  <div key={item} className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
                     <div className="flex gap-3">
-                      <div className="h-12 w-12 animate-pulse rounded-[16px] bg-white" />
+                      <div className="h-12 w-12 animate-pulse rounded-[8px] bg-white" />
                       <div className="flex-1">
                         <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
                         <div className="mt-3 h-3 w-28 animate-pulse rounded-full bg-slate-200" />
@@ -313,7 +313,7 @@ export function AppointmentsClient() {
                       key={doctor.id}
                       name={doctor.display_name}
                       subtitle={doctorSpecialtyLabel(doctor)}
-                      primaryDetail={doctor.rating ? `Star ${doctor.rating} (${doctor.review_count ?? 0} reviews)` : "No reviews yet"}
+                      primaryDetail={doctor.rating ? `${doctor.rating}/5 (${doctor.review_count ?? 0} reviews)` : "New doctor"}
                       secondaryDetail={`${doctor.completed_consultations ?? 0} completed consultations`}
                       imageUrl={doctor.profile_image_url}
                       status={doctor.availability_status}

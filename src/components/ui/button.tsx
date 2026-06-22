@@ -11,9 +11,9 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: "min-h-9 rounded-[10px] px-3 text-sm",
-  md: "min-h-11 rounded-[12px] px-4 text-[15px]",
-  lg: "min-h-13 rounded-[14px] px-6 text-base",
+  sm: "min-h-9 rounded-[8px] px-3 text-sm",
+  md: "min-h-11 rounded-[8px] px-4 text-[15px]",
+  lg: "min-h-13 rounded-[8px] px-6 text-base",
 };
 
 const variantStyles: Record<ButtonVariant, string> = {
