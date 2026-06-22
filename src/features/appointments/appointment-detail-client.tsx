@@ -59,6 +59,16 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
     queryFn: () => appointmentsApi.detail(appointmentId),
     enabled: userQuery.data?.role === "doctor" || userQuery.data?.role === "admin",
   });
+  const historyAppointments = useQuery({
+    queryKey: ["appointments", "patient-history", appointmentId],
+    queryFn: () => appointmentsApi.list({ page_size: 50 }),
+    enabled: userQuery.data?.role === "doctor",
+  });
+  const carePlans = useQuery({
+    queryKey: ["care-plans", "patient-history", appointmentId],
+    queryFn: () => profilesApi.carePlans({ page_size: 50 }),
+    enabled: userQuery.data?.role === "doctor",
+  });
   const createThread = useMutation({
     mutationFn: (patient: number) => messagingApi.createThread({ patient }),
     onSuccess: async () => {
@@ -94,6 +104,12 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
 
   const appointment = appointmentQuery.data;
   const patient = appointment?.patient_profile;
+  const previousAppointments = (historyAppointments.data?.results ?? [])
+    .filter((item) => item.patient === appointment?.patient && item.id !== appointment?.id)
+    .slice(0, 4);
+  const patientCarePlans = (carePlans.data?.results ?? [])
+    .filter((item) => item.patient === appointment?.patient)
+    .slice(0, 4);
 
   return (
     <Section
@@ -260,6 +276,46 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 </Button>
               </form>
             </div>
+          </div>
+
+          <div className="ct-panel rounded-[28px] p-6">
+            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="ct-card-title text-[#1F2937]">Patient history</h2>
+                <p className="mt-1 text-sm text-slate-500">Previous complaints, care plans, and follow-ups for this patient.</p>
+              </div>
+              <UserRoundCheck className="h-5 w-5 text-[#0F766E]" />
+            </div>
+            {historyAppointments.isLoading || carePlans.isLoading ? (
+              <InlineLoader compact label="Loading patient history" />
+            ) : previousAppointments.length || patientCarePlans.length ? (
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="grid gap-3">
+                  <p className="text-sm font-semibold text-[#1F2937]">Consultations</p>
+                  {previousAppointments.length ? previousAppointments.map((item) => (
+                    <div key={item.id} className="rounded-[18px] border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <p className="break-words text-sm font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
+                        <StatusBadge value={item.status} />
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{item.reason || "No complaint summary added."}</p>
+                    </div>
+                  )) : <Notice title="No previous consultations" tone="neutral" />}
+                </div>
+                <div className="grid gap-3">
+                  <p className="text-sm font-semibold text-[#1F2937]">Care plans</p>
+                  {patientCarePlans.length ? patientCarePlans.map((plan) => (
+                    <div key={plan.id} className="rounded-[18px] border border-slate-200 bg-slate-50 p-4">
+                      <p className="line-clamp-2 text-sm font-semibold text-[#1F2937]">{plan.complaint_summary || "Care plan"}</p>
+                      <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{plan.care_steps || plan.medications || "No care plan instructions added."}</p>
+                      <p className="mt-2 text-sm text-slate-500">Follow-up: {plan.follow_up_date || "Not set"}</p>
+                    </div>
+                  )) : <Notice title="No care plans yet" tone="neutral" />}
+                </div>
+              </div>
+            ) : (
+              <Notice title="No prior history for this patient" tone="neutral" />
+            )}
           </div>
         </>
       ) : null}

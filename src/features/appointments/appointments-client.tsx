@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarPlus2 } from "lucide-react";
+import { CalendarPlus2, Star } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -29,6 +29,49 @@ type AppointmentInput = z.output<typeof appointmentSchema>;
 
 function doctorSpecialtyLabel(doctor: ProviderDoctor) {
   return doctor.specialties?.map((specialty) => specialty.name).filter(Boolean).join(", ") || "General consultation";
+}
+
+function DoctorRatingForm({ appointment, onRated }: { appointment: Appointment; onRated: () => void }) {
+  const [score, setScore] = useState(5);
+  const [feedback, setFeedback] = useState("");
+  const rating = useMutation({
+    mutationFn: () => appointmentsApi.submitRating(appointment.id, { score, feedback: feedback.trim() }),
+    onSuccess: onRated,
+  });
+
+  if (appointment.status !== "completed" || appointment.rating) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 rounded-[18px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+      <p className="text-sm font-semibold text-[#1F2937]">Rate your doctor</p>
+      <div className="mt-3 flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Doctor rating">
+        {[1, 2, 3, 4, 5].map((value) => (
+          <button
+            key={value}
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] border border-slate-200 bg-white text-amber-500 transition hover:border-amber-200 hover:bg-amber-50"
+            onClick={() => setScore(value)}
+            aria-checked={score === value}
+            role="radio"
+          >
+            <Star className={score >= value ? "h-5 w-5 fill-current" : "h-5 w-5"} />
+          </button>
+        ))}
+      </div>
+      <Textarea
+        className="mt-3"
+        placeholder="Optional feedback"
+        value={feedback}
+        onChange={(event) => setFeedback(event.target.value)}
+      />
+      <ErrorMessage error={rating.error} context="appointments" />
+      <Button className="mt-3 w-full sm:w-fit" type="button" disabled={rating.isPending} onClick={() => rating.mutate()}>
+        {rating.isPending ? "Submitting..." : "Submit rating"}
+      </Button>
+    </div>
+  );
 }
 
 export function AppointmentsClient() {
@@ -59,6 +102,10 @@ export function AppointmentsClient() {
     mutationFn: appointmentsApi.cancel,
     onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["appointments"] }),
   });
+  const handleRatingUpdated = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    await queryClient.invalidateQueries({ queryKey: ["appointments", "available-doctors"] });
+  };
   const form = useForm<AppointmentFormValues, unknown, AppointmentInput>({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
@@ -199,6 +246,9 @@ export function AppointmentsClient() {
               <div>
                 <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
                 {item.reason ? <p className="mt-3 text-sm leading-7 text-slate-600">{item.reason}</p> : null}
+                {user?.role === "patient" && item.rating ? (
+                  <p className="mt-3 text-sm font-semibold text-[#1F2937]">Rated {item.rating.score}/5</p>
+                ) : null}
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge value={item.status} />
@@ -217,6 +267,7 @@ export function AppointmentsClient() {
                 ) : null}
               </div>
             </div>
+            {user?.role === "patient" ? <DoctorRatingForm appointment={item} onRated={handleRatingUpdated} /> : null}
           </article>
         )}
       />
@@ -262,6 +313,8 @@ export function AppointmentsClient() {
                       key={doctor.id}
                       name={doctor.display_name}
                       subtitle={doctorSpecialtyLabel(doctor)}
+                      primaryDetail={doctor.rating ? `Star ${doctor.rating} (${doctor.review_count ?? 0} reviews)` : "No reviews yet"}
+                      secondaryDetail={`${doctor.completed_consultations ?? 0} completed consultations`}
                       imageUrl={doctor.profile_image_url}
                       status={doctor.availability_status}
                       selected={selected}

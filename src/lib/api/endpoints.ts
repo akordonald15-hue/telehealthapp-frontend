@@ -7,6 +7,7 @@ import type {
   AdminUser,
   Appointment,
   AppointmentBookingResponse,
+  AppointmentRating,
   AuditEvent,
   AvailabilitySlot,
   CarePlan,
@@ -157,6 +158,8 @@ export const appointmentsApi = {
   update: (id: number, body: Partial<Pick<Appointment, "doctor" | "scheduled_at" | "status" | "reason" | "notes">>) =>
     apiRequest<Appointment>(`/appointments/${id}/`, { method: "PATCH", body }),
   cancel: (id: number) => apiRequest<DetailResponse>(`/appointments/${id}/cancel/`, { method: "POST" }),
+  submitRating: (id: number, body: { score: number; feedback?: string }) =>
+    apiRequest<AppointmentRating>(`/appointments/${id}/rating/`, { method: "POST", body }),
   reschedule: (id: number, body: { scheduled_at: string }) =>
     apiRequest<DetailResponse>(`/appointments/${id}/reschedule/`, { method: "POST", body }),
   availability: (query?: { doctor_id?: number; page?: number; page_size?: number }) =>

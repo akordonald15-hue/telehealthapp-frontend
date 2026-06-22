@@ -82,6 +82,10 @@ export type DoctorProfile = {
   preferred_availability_status: ProviderAvailabilityStatus;
   last_active_at: string | null;
   specialties: Specialty[];
+  rating?: number | null;
+  review_count?: number;
+  completed_consultations?: number;
+  rating_breakdown?: RatingBreakdown;
 };
 
 export type NurseProfile = {
@@ -163,7 +167,22 @@ export type CarePlan = {
   updated_at: string;
 };
 
-export type AppointmentStatus = "scheduled" | "completed" | "cancelled";
+export type AppointmentStatus =
+  | "pending_payment"
+  | "confirmed"
+  | "scheduled"
+  | "accepted"
+  | "in_progress"
+  | "completed"
+  | "cancelled"
+  | "missed";
+
+export type AppointmentRating = {
+  id: number;
+  score: number;
+  feedback: string;
+  created_at: string;
+};
 
 export type Appointment = {
   id: number;
@@ -187,6 +206,7 @@ export type Appointment = {
   status: AppointmentStatus;
   reason: string;
   notes: string;
+  rating?: AppointmentRating | null;
 };
 
 export type AvailabilitySlot = {
@@ -289,6 +309,9 @@ export type ProviderDoctor = DoctorProfile & {
   display_name: string;
   profile_image_url: string | null;
   rating: number | null;
+  review_count?: number;
+  completed_consultations?: number;
+  rating_breakdown?: RatingBreakdown;
   active_workload: number;
   next_available_time: string | null;
   updated_at: string;

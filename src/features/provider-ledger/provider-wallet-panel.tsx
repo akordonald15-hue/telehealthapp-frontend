@@ -98,7 +98,7 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
           <div>
             <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Wallet summary</h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">
-              {role === "nurse" ? "Earnings unlock after paid care, nurse completion, and patient confirmation." : `Backend-calculated earnings and settlement history for your ${role} account.`}
+              {role === "nurse" ? "Earnings unlock after paid care, nurse completion, and patient confirmation." : "Your consultation earnings at a glance."}
             </p>
           </div>
         </div>
@@ -106,13 +106,13 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
       </div>
 
       <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <MoneyCard label="Lifetime earnings" value={wallet.lifetime_net_earning} currency={wallet.currency} description="Historical net earnings recorded by Caretekk." />
-        <MoneyCard label="Pending earnings" value={wallet.pending_balance} currency={wallet.currency} description={role === "nurse" ? "Awaiting confirmation, review, or settlement." : "Completed services still inside the settlement period."} />
-        <MoneyCard label="Available balance" value={wallet.available_balance} currency={wallet.currency} description="Eligible for payout after Caretekk rules are met." />
-        <MoneyCard label="Paid out" value={wallet.paid_out_balance} currency={wallet.currency} description="Provider payouts marked paid by Caretekk admin." />
+        <MoneyCard label="Available balance" value={wallet.available_balance} currency={wallet.currency} description={role === "doctor" ? "Ready for payout." : "Eligible for payout after Caretekk rules are met."} />
+        <MoneyCard label="Pending earnings" value={wallet.pending_balance} currency={wallet.currency} description={role === "doctor" ? "Awaiting payout release." : "Awaiting confirmation, review, or settlement."} />
+        <MoneyCard label="Lifetime earnings" value={wallet.lifetime_net_earning} currency={wallet.currency} description={role === "doctor" ? "Total doctor earnings." : "Historical net earnings recorded by Caretekk."} />
+        <MoneyCard label={role === "doctor" ? "Paid out" : "Paid out"} value={wallet.paid_out_balance} currency={wallet.currency} description={role === "doctor" ? "Total paid to you." : "Provider payouts marked paid by Caretekk admin."} />
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
+      {role === "doctor" ? null : <div className="mt-4 grid gap-3 md:grid-cols-3">
         <div className="rounded-[20px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
           <div className="flex items-center gap-2 text-sm font-semibold text-[var(--primary)]">
             <Clock3 className="h-4 w-4" />
@@ -136,9 +136,9 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
             {formatMoney(wallet.refunded_balance, wallet.currency)} refunded
           </p>
         </div>
-      </div>
+      </div>}
 
-      <div className="mt-6">
+      <div className={role === "doctor" ? "mt-4" : "mt-6"}>
         <div className="mb-4 flex items-center gap-2">
           <History className="h-5 w-5 text-[var(--primary)]" />
           <h3 className="font-heading text-lg font-semibold text-[#1F2937]">Transaction history</h3>
