@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, FileText, Loader2, MessageSquareText, Stethoscope, UserRoundCheck } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,15 @@ function InfoTile({ label, value }: { label: string; value: string | number }) {
     <div className="ct-soft-panel rounded-[18px] px-4 py-3">
       <p className="text-sm font-semibold text-[#1F2937]">{label}</p>
       <p className="mt-1 break-words text-sm leading-6 text-slate-600">{value || "Not available"}</p>
+    </div>
+  );
+}
+
+function ClinicalNote({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+      <p className="text-sm font-semibold text-[#1F2937]">{title}</p>
+      <div className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-600">{children}</div>
     </div>
   );
 }
@@ -88,7 +98,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
   return (
     <Section
       title={appointment ? `Consultation #${appointment.id}` : "Consultation detail"}
-      description="Review patient context, consultation status, message access, and follow-up options."
+      description="Patient context, messaging, care plan, and referral actions for this consultation."
       action={<Link href="/appointments" className="text-sm font-semibold text-[#0F766E]">Back to consultations</Link>}
     >
       {appointmentQuery.isError ? (
@@ -119,21 +129,19 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 <InfoTile label="Patient" value={patient?.display_name || "Patient"} />
                 <InfoTile label="Doctor" value={appointment.doctor_profile?.display_name || "Assigned care provider"} />
                 <InfoTile label="Consultation status" value={appointment.status} />
+                <InfoTile label="Consultation fee" value="NGN 2,000" />
+                <InfoTile label="Session window" value="20 minutes from first doctor reply" />
               </div>
 
-              <div className="mt-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
-                <p className="text-sm font-semibold text-[#1F2937]">Reason for visit</p>
-                <p className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-600">
+              <div className="mt-4 grid gap-4">
+                <ClinicalNote title="Reason for visit">
                   {appointment.reason || "No reason was provided for this appointment."}
-                </p>
-              </div>
+                </ClinicalNote>
 
-              {appointment.notes ? (
-                <div className="mt-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
-                  <p className="text-sm font-semibold text-[#1F2937]">Consultation notes</p>
-                  <p className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-600">{appointment.notes}</p>
-                </div>
-              ) : null}
+                {appointment.notes ? (
+                  <ClinicalNote title="Consultation notes">{appointment.notes}</ClinicalNote>
+                ) : null}
+              </div>
             </div>
 
             <div className="ct-panel rounded-[28px] p-6">
@@ -155,7 +163,6 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 <InfoTile label="Gender" value={patient?.gender || "Not added"} />
                 <InfoTile label="State / LGA" value={[patient?.state, patient?.lga].filter(Boolean).join(" / ") || "Not added"} />
                 <InfoTile label="Phone" value={patient?.phone || "Not added"} />
-                <InfoTile label="Patient ID" value={appointment.patient} />
               </div>
             </div>
           </div>
@@ -164,7 +171,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
             <div className="ct-panel rounded-[28px] p-6">
               <MessageSquareText className="h-6 w-6 text-[#0F766E]" />
               <h2 className="ct-card-title mt-4 text-[#1F2937]">Message patient</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Create or open a patient conversation for follow-up questions and care instructions.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">The 20-minute timer starts when you send the first reply.</p>
               <ErrorMessage error={createThread.error} context="messages" />
               {createThread.isSuccess ? (
                 <Notice title="Conversation ready" tone="success">
@@ -185,7 +192,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
             <div className="ct-panel rounded-[28px] p-6">
               <ClipboardList className="h-6 w-6 text-[#0F766E]" />
               <h2 className="ct-card-title mt-4 text-[#1F2937]">Create referral</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Patient and consultation are linked automatically.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Saved to admin review and the patient dashboard.</p>
               <form
                 className="mt-5 grid gap-3"
                 onSubmit={(event) => {
@@ -218,7 +225,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
             <div className="ct-panel rounded-[28px] p-6">
               <FileText className="h-6 w-6 text-[#0F766E]" />
               <h2 className="ct-card-title mt-4 text-[#1F2937]">Create care plan</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Write a structured follow-up plan for this patient.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Keep it concise: complaint, plan, follow-up.</p>
               <form
                 className="mt-5 grid gap-3"
                 onSubmit={(event) => {

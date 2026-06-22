@@ -129,7 +129,7 @@ function formatStatus(value?: string | null) {
   return value.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function consultationWindowLabel(thread: Thread | null) {
+function consultationWindowLabel(thread: Thread | null, nowMs = Date.now()) {
   if (!thread?.consultation_expires_at) {
     return "Timer starts when doctor replies";
   }
@@ -137,12 +137,20 @@ function consultationWindowLabel(thread: Thread | null) {
   if (Number.isNaN(expiresAt)) {
     return "20-minute consultation";
   }
-  const remainingMs = expiresAt - Date.now();
+  const remainingMs = expiresAt - nowMs;
   if (remainingMs <= 0 || thread.can_send_messages === false) {
     return "Consultation ended";
   }
   const minutes = Math.max(1, Math.ceil(remainingMs / 60_000));
   return `${minutes} min left`;
+}
+
+function threadExpiredByClock(thread: Thread | null, nowMs = Date.now()) {
+  if (!thread?.consultation_expires_at) {
+    return false;
+  }
+  const expiresAt = new Date(thread.consultation_expires_at).getTime();
+  return Number.isFinite(expiresAt) && expiresAt <= nowMs;
 }
 
 function orderedMessages(messages?: Message[]) {
@@ -189,6 +197,7 @@ export function MessagesClient() {
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [recordingError, setRecordingError] = useState<Error | null>(null);
+  const [clockNow, setClockNow] = useState(() => Date.now());
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
@@ -289,8 +298,34 @@ export function MessagesClient() {
   const latestOrderedMessageId = orderedMessageItems.at(-1)?.id;
   const sectionTitle = currentUser?.role === "patient" ? "Consultation" : "Messages";
   const sectionDescription = "Secure care consultation.";
-  const canSendInActiveThread = Boolean(activeThread && activeThreadDetails?.can_send_messages !== false);
+  const activeThreadExpired = threadExpiredByClock(activeThreadDetails, clockNow);
+  const canSendInActiveThread = Boolean(activeThread && activeThreadDetails?.can_send_messages !== false && !activeThreadExpired);
   const canRecordVoice = Boolean(currentUser?.role === "patient" && canSendInActiveThread);
+
+  useEffect(() => {
+    if (!activeThreadDetails?.consultation_expires_at || activeThreadDetails.can_send_messages === false) {
+      return;
+    }
+    const interval = window.setInterval(() => setClockNow(Date.now()), 15_000);
+    return () => window.clearInterval(interval);
+  }, [activeThreadDetails?.consultation_expires_at, activeThreadDetails?.can_send_messages]);
+
+  useEffect(() => {
+    if (!activeThreadDetails?.consultation_expires_at || activeThreadDetails.can_send_messages === false) {
+      return;
+    }
+    const expiresAt = new Date(activeThreadDetails.consultation_expires_at).getTime();
+    if (!Number.isFinite(expiresAt)) {
+      return;
+    }
+    const delay = Math.max(0, expiresAt - Date.now() + 500);
+    const timeout = window.setTimeout(async () => {
+      setClockNow(Date.now());
+      await queryClient.invalidateQueries({ queryKey: ["threads"] });
+      await queryClient.invalidateQueries({ queryKey: ["messages", activeThread] });
+    }, delay);
+    return () => window.clearTimeout(timeout);
+  }, [activeThread, activeThreadDetails?.consultation_expires_at, activeThreadDetails?.can_send_messages, queryClient]);
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
@@ -596,9 +631,11 @@ export function MessagesClient() {
             <ConsultationHeader
               role={currentUser?.role}
               thread={activeThreadDetails}
+              nowMs={clockNow}
               liveConnected={liveConnected}
               realtimeUnavailable={realtimeUnavailable}
               isEnding={endConsultation.isPending}
+              canEndConsultation={Boolean(activeThreadDetails?.can_end_consultation && !activeThreadExpired)}
               onEndConsultation={handleEndConsultation}
               onBack={() => setIsMobileChatOpen(false)}
             />
@@ -670,7 +707,9 @@ export function MessagesClient() {
               disabled={!activeThread || !canSendInActiveThread}
               disabledReason={
                 activeThread && !canSendInActiveThread
-                  ? "This consultation is closed. History remains available, but new messages and uploads are disabled."
+                  ? activeThreadExpired
+                    ? "The 20-minute consultation window has ended. History remains available, but new messages and voice notes are disabled."
+                    : "This consultation is closed. History remains available, but new messages and uploads are disabled."
                   : ""
               }
               isSending={createMessage.isPending || uploadAttachment.isPending}
@@ -939,24 +978,28 @@ function ConsultationListItem({
 function ConsultationHeader({
   role,
   thread,
+  nowMs,
   liveConnected,
   realtimeUnavailable,
   isEnding,
+  canEndConsultation,
   onEndConsultation,
   onBack,
 }: {
   role?: UserRole;
   thread: Thread | null;
+  nowMs: number;
   liveConnected: boolean;
   realtimeUnavailable: boolean;
   isEnding: boolean;
+  canEndConsultation: boolean;
   onEndConsultation: () => void;
   onBack: () => void;
 }) {
   const title = participantName(thread, role);
   const subtitle = participantRole(thread, role);
   const status = formatStatus(thread?.consultation_status || thread?.appointment?.status);
-  const windowLabel = consultationWindowLabel(thread);
+  const windowLabel = consultationWindowLabel(thread, nowMs);
 
   return (
     <div className="flex min-h-20 items-center justify-between gap-3 border-b border-[#E5E7EB] bg-white px-4 py-3 sm:px-6">
@@ -982,7 +1025,7 @@ function ConsultationHeader({
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        {thread?.can_end_consultation ? (
+        {canEndConsultation ? (
           <Button type="button" variant="secondary" size="sm" disabled={isEnding} onClick={onEndConsultation}>
             {isEnding ? "Ending..." : "End Consultation"}
           </Button>
