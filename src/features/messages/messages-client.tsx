@@ -1015,39 +1015,54 @@ function ConsultationHeader({
   const windowLabel = consultationWindowLabel(thread, nowMs);
 
   return (
-    <div className="flex min-h-20 items-center justify-between gap-3 border-b border-[#E5E7EB] bg-white px-4 py-3 sm:px-6">
-      <div className="flex min-w-0 items-center gap-3">
+    <div className="border-b border-[#E5E7EB] bg-white px-4 py-4 sm:px-6">
+      <div className="flex min-w-0 items-start gap-3">
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-[#EFF6FF] hover:text-[#2563EB] lg:hidden"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-[#EFF6FF] hover:text-[#2563EB] lg:hidden"
           onClick={onBack}
           aria-label="Back to consultations"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <Avatar label={role === "patient" ? "Dr" : "Pt"} tone="blue" size="lg" />
-        <div className="min-w-0">
-          <h2 className="truncate font-heading text-lg font-semibold text-[#1F2937]">
+        <div className="min-w-0 flex-1 pt-0.5">
+          <h2 className="break-words font-heading text-lg font-semibold leading-6 text-[#1F2937] sm:text-xl">
             {title}
           </h2>
-          <p className="mt-0.5 flex min-w-0 items-center gap-2 text-sm text-slate-500">
-            <span className="h-2 w-2 rounded-full bg-[#10B981]" />
-            <span className="truncate">{status ? `${subtitle} · ${status}` : subtitle}</span>
+          <p className="mt-1 flex min-w-0 items-start gap-2 text-sm leading-5 text-slate-500">
+            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#10B981]" />
+            <span className="min-w-0 break-words">{status ? `${subtitle} · ${status}` : subtitle}</span>
           </p>
-          <p className="mt-0.5 text-xs font-semibold text-[#2563EB]">{windowLabel}</p>
+          <p className="mt-1 text-xs font-semibold leading-5 text-[#2563EB] sm:hidden">{windowLabel}</p>
+        </div>
+        <div className="hidden shrink-0 items-center gap-2 sm:flex">
+          <p className="mr-1 text-xs font-semibold text-[#2563EB]">{windowLabel}</p>
+          {canEndConsultation ? (
+            <Button type="button" variant="secondary" size="sm" disabled={isEnding} onClick={onEndConsultation}>
+              {isEnding ? "Ending..." : "End Consultation"}
+            </Button>
+          ) : null}
+          <div className="hidden items-center gap-2 rounded-full bg-[#ECFDF5] px-3 py-2 text-xs font-semibold text-[#047857] md:inline-flex">
+            <Stethoscope className="h-4 w-4" />
+            {liveConnected ? "Live chat" : realtimeUnavailable ? "Manual refresh" : "Secure chat"}
+          </div>
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-2">
-        {canEndConsultation ? (
-          <Button type="button" variant="secondary" size="sm" disabled={isEnding} onClick={onEndConsultation}>
+      {canEndConsultation ? (
+        <div className="mt-3 flex justify-end border-t border-slate-100 pt-3 sm:hidden">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="w-full"
+            disabled={isEnding}
+            onClick={onEndConsultation}
+          >
             {isEnding ? "Ending..." : "End Consultation"}
           </Button>
-        ) : null}
-        <div className="hidden items-center gap-2 rounded-full bg-[#ECFDF5] px-3 py-2 text-xs font-semibold text-[#047857] sm:inline-flex">
-          <Stethoscope className="h-4 w-4" />
-          {liveConnected ? "Live chat" : realtimeUnavailable ? "Manual refresh" : "Secure chat"}
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
