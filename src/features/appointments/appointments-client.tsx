@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarPlus2, Star } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -76,6 +77,7 @@ function DoctorRatingForm({ appointment, onRated }: { appointment: Appointment; 
 
 export function AppointmentsClient() {
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
   const userQuery = useCurrentUser();
   const [page, setPage] = useState(1);
   const [doctorPickerOpen, setDoctorPickerOpen] = useState(false);
@@ -130,6 +132,8 @@ export function AppointmentsClient() {
   const doctorItems = availableDoctors.data?.results ?? [];
   const doctorCanBeBooked = selectedDoctor?.availability_status === "available";
   const profileIncomplete = Boolean(user?.role === "patient" && patientProfile.data && !patientProfile.data.profile_complete);
+  const triageSessionParam = Number(searchParams.get("triage_session"));
+  const triageSessionId = Number.isInteger(triageSessionParam) && triageSessionParam > 0 ? triageSessionParam : null;
 
   return (
     <Section
@@ -142,6 +146,7 @@ export function AppointmentsClient() {
           onSubmit={form.handleSubmit((values) =>
             createAppointment.mutate({
               doctor: values.doctor,
+              triage_session: triageSessionId as number,
               scheduled_at: values.scheduled_at,
               reason: values.reason,
               notes: "",
@@ -165,6 +170,18 @@ export function AppointmentsClient() {
               <Link className="ml-2 font-semibold text-amber-800 underline" href="/profile">Update profile</Link>
             </Notice>
           ) : null}
+          {triageSessionId ? (
+            <Notice title="Care check-in ready" tone="success">
+              This consultation will include the triage summary you just completed.
+            </Notice>
+          ) : (
+            <Notice title="Complete a care check-in before booking" tone="warning">
+              Each doctor consultation needs a fresh symptom check-in so the doctor receives the right context.
+              <Link className="ml-2 font-semibold text-amber-800 underline" href="/triage?booking=1">
+                Start care check-in
+              </Link>
+            </Notice>
+          )}
           {createAppointment.isSuccess ? (
             <div className="grid gap-3">
               <Notice title="Checkout ready" tone="success">
@@ -205,8 +222,8 @@ export function AppointmentsClient() {
           <Field label="Reason" error={form.formState.errors.reason?.message}>
             <Textarea placeholder="Why do you need to see a doctor?" {...form.register("reason")} />
           </Field>
-          <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending || !doctorCanBeBooked || profileIncomplete}>
-            {createAppointment.isPending ? "Starting checkout..." : "Book Appointment"}
+          <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending || !doctorCanBeBooked || profileIncomplete || !triageSessionId}>
+            {createAppointment.isPending ? "Starting checkout..." : triageSessionId ? "Book Appointment" : "Complete care check-in first"}
           </Button>
         </form>
       ) : isDoctor ? (
@@ -246,6 +263,12 @@ export function AppointmentsClient() {
               <div>
                 <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
                 {item.reason ? <p className="mt-3 text-sm leading-7 text-slate-600">{item.reason}</p> : null}
+                {item.triage_summary?.symptoms?.length ? (
+                  <div className="mt-3 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
+                    <span className="font-semibold text-[#1F2937]">Care check-in:</span>{" "}
+                    {item.triage_summary.symptoms.join(", ")}
+                  </div>
+                ) : null}
                 {user?.role === "patient" && item.rating ? (
                   <p className="mt-3 text-sm font-semibold text-[#1F2937]">Rated {item.rating.score}/5</p>
                 ) : null}

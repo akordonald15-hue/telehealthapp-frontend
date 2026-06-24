@@ -70,7 +70,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
     enabled: userQuery.data?.role === "doctor",
   });
   const createThread = useMutation({
-    mutationFn: (patient: number) => messagingApi.createThread({ patient }),
+    mutationFn: (patient: number) => messagingApi.createThread({ patient, appointment_id: appointmentId }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["threads"] });
     },
@@ -157,6 +157,22 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 {appointment.notes ? (
                   <ClinicalNote title="Consultation notes">{appointment.notes}</ClinicalNote>
                 ) : null}
+                {appointment.triage_summary ? (
+                  <ClinicalNote title="Consultation triage">
+                    <span className="font-semibold text-[#1F2937]">Symptoms:</span>{" "}
+                    {appointment.triage_summary.symptoms.join(", ") || "Not recorded"}
+                    {"\n"}
+                    <span className="font-semibold text-[#1F2937]">Severity:</span>{" "}
+                    {appointment.triage_summary.severity || appointment.triage_summary.risk_level || "Not recorded"}
+                    {"\n"}
+                    <span className="font-semibold text-[#1F2937]">Summary:</span>{" "}
+                    {appointment.triage_summary.recommendation || "No summary available."}
+                    {"\n\n"}
+                    {appointment.triage_summary.disclaimer}
+                  </ClinicalNote>
+                ) : (
+                  <ClinicalNote title="Consultation triage">No triage was provided for this consultation.</ClinicalNote>
+                )}
               </div>
             </div>
 

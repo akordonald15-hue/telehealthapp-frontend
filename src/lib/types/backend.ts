@@ -188,6 +188,22 @@ export type Appointment = {
   id: number;
   patient: number;
   doctor: number;
+  triage_session?: number | null;
+  triage_summary?: {
+    label: string;
+    symptoms: string[];
+    duration: string;
+    severity: string;
+    risk_level: string;
+    recommendation: string;
+    department: string;
+    red_flags: string[];
+    possible_causes?: string[];
+    urgency_guidance?: string[];
+    self_care_guidance?: string[];
+    created_at: string;
+    disclaimer: string;
+  } | null;
   patient_profile?: {
     id: number;
     display_name: string;

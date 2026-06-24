@@ -12,7 +12,8 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import type { ComponentType, ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
-import { messagingApi, triageApi } from "@/lib/api/endpoints";
+import { triageApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import type {
   TriageConversationResult,
@@ -250,20 +251,15 @@ function AssistantBubble({
 }
 
 export function TriageClient() {
+  const searchParams = useSearchParams();
   const userQuery = useCurrentUser();
   const user = userQuery.data;
+  const bookingMode = searchParams.get("booking") === "1";
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [symptomText, setSymptomText] = useState("");
   const [submittedSymptomText, setSubmittedSymptomText] = useState("");
   const [selectedSeverity, setSelectedSeverity] = useState<TriageSeverity | null>(null);
-  const autoStartedRef = useRef(false);
-
-  const consultations = useQuery({
-    queryKey: ["threads", "triage-journey"],
-    queryFn: () => messagingApi.threads({ page_size: 5 }),
-    enabled: user?.role === "patient",
-  });
 
   const startConversation = useMutation({
     mutationFn: (id: number) => triageApi.startConversation({ session_id: id }),
@@ -297,25 +293,6 @@ export function TriageClient() {
     },
   });
 
-  const hasConsultation = (consultations.data?.results.length ?? 0) > 0;
-  const consultationsReady = user?.role !== "patient" || consultations.isSuccess;
-
-  useEffect(() => {
-    if (
-      user?.role !== "patient" ||
-      !consultationsReady ||
-      hasConsultation ||
-      autoStartedRef.current ||
-      sessionId ||
-      conversationId
-    ) {
-      return;
-    }
-
-    autoStartedRef.current = true;
-    startSession.mutate();
-  }, [consultationsReady, conversationId, hasConsultation, sessionId, startSession, user?.role]);
-
   const bootError = startSession.error || startConversation.error;
   const booting = startSession.isPending || startConversation.isPending || (sessionId !== null && !conversationId);
   const waitingForSymptomText = Boolean(conversationId) && !submittedSymptomText;
@@ -326,7 +303,7 @@ export function TriageClient() {
 
   const canSubmitSymptomText = symptomText.trim().length > 0 && Boolean(conversationId);
 
-  const assistantOpen = user?.role === "patient" && consultationsReady && !hasConsultation;
+  const assistantOpen = user?.role === "patient" && Boolean(sessionId || conversationId || startSession.isPending);
 
   function handleSymptomSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -347,14 +324,15 @@ export function TriageClient() {
     sendMessage.mutate({ message: submittedSymptomText, severity });
   }
 
-  const nextStepLabel = hasConsultation ? "Continue to doctor" : "Book a consultation";
-  const pageDescription = hasConsultation
-    ? "Your latest check-in and conversation are ready in one calm place."
-    : "A quick care check-in helps us guide you to the right next step.";
+  const nextStepLabel = bookingMode ? "Continue booking" : "Book a consultation";
+  const nextStepHref = sessionId ? `/appointments?triage_session=${sessionId}` : "/appointments";
+  const pageDescription = bookingMode
+    ? "Complete a fresh check-in for this doctor consultation."
+    : "Start a new check-in whenever you are preparing for a consultation.";
 
   return (
     <Section title="Care check-in" description={pageDescription}>
-      {!consultationsReady ? (
+      {userQuery.isLoading ? (
         <div className="ct-panel grid gap-4 rounded-[28px] p-6">
           <InlineLoader label="Preparing your care check-in" />
         </div>
@@ -478,7 +456,7 @@ export function TriageClient() {
                       </p>
                       <div className="mt-4 flex flex-col gap-3 rounded-[18px] border border-slate-200 bg-white/96 p-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] sm:flex-row sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
                         <Link
-                          href={hasConsultation ? "/messages" : "/appointments"}
+                          href={nextStepHref}
                           className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] px-4 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(37,99,235,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(37,99,235,0.3)]"
                         >
                           {nextStepLabel}
@@ -512,30 +490,34 @@ export function TriageClient() {
           </div>
         </div>
       ) : (
-        <div className="ct-panel grid gap-4 rounded-[28px] p-6">
+        <div className="ct-panel grid gap-4 rounded-[8px] p-6">
           <div className="flex items-start gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
               <HeartPulse className="h-5 w-5" />
             </span>
             <div>
-              <p className="ct-card-title text-[#1F2937]">Your consultation is already in motion</p>
+              <p className="ct-card-title text-[#1F2937]">
+                {bookingMode ? "Prepare your consultation" : "Start a new care check-in"}
+              </p>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                You already have an active conversation with your care team, so the next best step is to continue there.
+                Each consultation gets its own symptom summary. Previous check-ins remain attached to their original consultations.
               </p>
             </div>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/messages"
-              className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] px-4 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(37,99,235,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(37,99,235,0.3)]"
+            <Button
+              type="button"
+              onClick={() => startSession.mutate()}
+              disabled={startSession.isPending}
+              className="w-full sm:w-fit"
             >
-              Continue to doctor
-            </Link>
+              {startSession.isPending ? "Preparing..." : "Start care check-in"}
+            </Button>
             <Link
-              href="/care-plan"
+              href="/appointments"
               className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white px-4 text-sm font-extrabold text-[#1F2937] shadow-[0_8px_24px_rgba(31,41,55,0.05)] transition duration-200 hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:bg-[#F8FBFF]"
             >
-              Open care plan
+              Back to appointments
             </Link>
           </div>
         </div>

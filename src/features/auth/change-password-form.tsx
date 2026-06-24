@@ -34,7 +34,7 @@ export function ChangePasswordForm() {
       return;
     }
     if (userQuery.data && !userQuery.data.must_change_password) {
-      router.replace(userQuery.data.role === "patient" ? "/triage" : "/dashboard");
+      router.replace("/dashboard");
     }
   }, [router, userQuery.data]);
 
