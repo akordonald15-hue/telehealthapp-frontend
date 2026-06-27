@@ -23,8 +23,13 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ApiError, extractErrorMessage } from "@/lib/api/client";
 import { adminApi, appointmentsApi, auditApi, homeCareApi, paymentsApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
-import type { AdminDashboardResponse, AdminProvider, AdminProviderCreateResponse, AdminUser, ProviderAvailabilityStatus, ReferralStatus, UserRole } from "@/lib/types/backend";
+import type { AdminDashboardResponse, AdminProvider, AdminProviderCreateResponse, AdminUser, HomeCareZone, ProviderAvailabilityStatus, ReferralStatus, UserRole } from "@/lib/types/backend";
 import { formatDateTime, formatMoney } from "@/lib/utils";
+
+const HOMECARE_ZONES: Array<{ value: HomeCareZone; label: string }> = [
+  { value: "eket", label: "Eket" },
+  { value: "uyo", label: "Uyo" },
+];
 
 function Metric({
   label,
@@ -217,6 +222,12 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
             Active workload: {provider.active_workload} | Completed: {provider.completed_workload}
             {provider.rating ? ` | Rating: ${provider.rating}` : ""}
           </p>
+          {provider.provider_type === "nurse" ? (
+            <p className="mt-1 text-xs font-semibold text-slate-600">
+              Zone: {provider.service_zone_label || "Zone not set"}
+              {provider.base_address ? ` | Base: ${provider.base_address}` : ""}
+            </p>
+          ) : null}
           <p className="mt-1 text-xs text-slate-500">
             {provider.active_job_label}
             {provider.last_active_at ? ` | Last active ${formatDateTime(provider.last_active_at)}` : ""}
@@ -254,14 +265,27 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
             onConfirm={() => resendInvite.mutate()}
           />
           {provider.provider_type === "nurse" ? (
-            <ConfirmActionButton
-              label="Approve"
-              title="Approve this nurse?"
-              description="The nurse will be approved and marked active for dispatch."
-              tone="primary"
-              disabled={updateProvider.isPending}
-              onConfirm={() => updateProvider.mutate({ onboarding_status: "approved", active_for_dispatch: true })}
-            />
+            <>
+              {HOMECARE_ZONES.map((item) => (
+                <ConfirmActionButton
+                  key={item.value}
+                  label={`Zone: ${item.label}`}
+                  title={`Set nurse zone to ${item.label}?`}
+                  description="This controls where the nurse appears for patient home care bookings."
+                  tone="primary"
+                  disabled={updateProvider.isPending || provider.service_zone === item.value}
+                  onConfirm={() => updateProvider.mutate({ service_zone: item.value })}
+                />
+              ))}
+              <ConfirmActionButton
+                label="Approve"
+                title="Approve this nurse?"
+                description="The nurse will be approved and marked active for dispatch."
+                tone="primary"
+                disabled={updateProvider.isPending || !provider.service_zone}
+                onConfirm={() => updateProvider.mutate({ onboarding_status: "approved", active_for_dispatch: true })}
+              />
+            </>
           ) : null}
         </div>
       </div>
@@ -290,6 +314,8 @@ function ProviderCreatePanel() {
     phone: "",
     specialty: "General Medicine",
     service_type: "Home care nursing",
+    service_zone: "eket" as HomeCareZone,
+    base_address: "",
     availability_status: "offline" as ProviderAvailabilityStatus,
     provider_status: "pending" as "pending" | "approved" | "suspended",
     active_for_dispatch: false,
@@ -305,6 +331,8 @@ function ProviderCreatePanel() {
         phone: form.phone,
         specialty: form.role === "doctor" ? form.specialty : undefined,
         service_type: form.role === "nurse" ? form.service_type : undefined,
+        service_zone: form.role === "nurse" ? form.service_zone : undefined,
+        base_address: form.role === "nurse" ? form.base_address : undefined,
         availability_status: form.availability_status,
         provider_status: form.role === "nurse" ? form.provider_status : undefined,
         active_for_dispatch: form.role === "nurse" ? form.active_for_dispatch : undefined,
@@ -314,7 +342,7 @@ function ProviderCreatePanel() {
     onSuccess: async (data) => {
       setCreated(data);
       setCreateError(null);
-      setForm((current) => ({ ...current, name: "", email: "", phone: "" }));
+      setForm((current) => ({ ...current, name: "", email: "", phone: "", base_address: "" }));
       await queryClient.invalidateQueries({ queryKey: ["admin"] });
     },
     onError: (error) => {
@@ -399,6 +427,34 @@ function ProviderCreatePanel() {
               />
             </label>
           )}
+          {form.role === "nurse" ? (
+            <>
+              <label className="grid gap-1 text-sm font-semibold text-slate-600">
+                Service zone
+                <select
+                  required
+                  value={form.service_zone}
+                  onChange={(event) => setForm((current) => ({ ...current, service_zone: event.target.value as HomeCareZone }))}
+                  className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+                >
+                  {HOMECARE_ZONES.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-1 text-sm font-semibold text-slate-600">
+                Base address
+                <input
+                  value={form.base_address}
+                  onChange={(event) => setForm((current) => ({ ...current, base_address: event.target.value }))}
+                  className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+                  placeholder="Optional nurse base address"
+                />
+              </label>
+            </>
+          ) : null}
           <label className="grid gap-1 text-sm font-semibold text-slate-600">
             Availability
             <select

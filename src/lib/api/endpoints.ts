@@ -138,7 +138,7 @@ export const profilesApi = {
 export const providersApi = {
   doctors: (query?: { page?: number; page_size?: number; specialty?: string; search?: string }) =>
     apiList<ProviderDoctor>("/providers/doctors/", query),
-  nurses: (query?: { page?: number; page_size?: number; service_type?: string; search?: string }) =>
+  nurses: (query?: { page?: number; page_size?: number; service_type?: string; zone?: string; search?: string }) =>
     apiList<ProviderNurse>("/providers/nurses/", query),
   myAvailability: () => apiRequest<ProviderAvailabilityState>("/providers/me/availability/"),
   updateAvailability: (body: { availability_status: ProviderAvailabilityStatus }) =>
@@ -299,6 +299,8 @@ export const adminApi = {
     phone?: string;
     specialty?: string;
     service_type?: string;
+    service_zone?: string;
+    base_address?: string;
     license_no?: string;
     availability_status: ProviderAvailabilityStatus;
     provider_status?: NurseProfile["onboarding_status"];
@@ -316,6 +318,9 @@ export const adminApi = {
       is_active?: boolean;
       onboarding_status?: NurseProfile["onboarding_status"];
       active_for_dispatch?: boolean;
+      service_zone?: string;
+      base_address?: string;
+      license_no?: string;
     },
   ) => apiRequest<DetailResponse>(`/admin/providers/${providerType}/${providerId}/status/`, { method: "PATCH", body }),
 };

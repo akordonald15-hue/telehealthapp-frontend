@@ -364,7 +364,7 @@ export function HomeCareBookingClient() {
                   ))}
                 </div>
               ) : (
-                <EmptyHomeCareNurseState />
+                <EmptyHomeCareNurseState zoneLabel={HOMECARE_ZONES.find((item) => item.value === zone)?.label} />
               )}
             </div>
           </div>
@@ -374,12 +374,14 @@ export function HomeCareBookingClient() {
   );
 }
 
-function EmptyHomeCareNurseState() {
+function EmptyHomeCareNurseState({ zoneLabel }: { zoneLabel?: string }) {
   return (
     <div className="ct-surface rounded-[24px] p-6 text-center">
       <Home className="mx-auto h-6 w-6 text-[var(--primary)]" />
-      <p className="mt-3 font-semibold text-[#1F2937]">No nurses available right now.</p>
-      <p className="mt-1 text-sm text-slate-600">You can continue with automatic assignment.</p>
+      <p className="mt-3 font-semibold text-[#1F2937]">No available nurse in this location right now.</p>
+      <p className="mt-1 text-sm text-slate-600">
+        {zoneLabel ? `Caretekk will only show nurses assigned to ${zoneLabel}.` : "Select a location to see matching nurses."}
+      </p>
     </div>
   );
 }

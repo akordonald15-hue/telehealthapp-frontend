@@ -96,6 +96,8 @@ export type NurseProfile = {
   preferred_availability_status: ProviderAvailabilityStatus;
   service_radius_km: number;
   service_type: string;
+  service_zone: HomeCareZone | "";
+  service_zone_label?: string;
   base_address: string;
   base_latitude: string | null;
   base_longitude: string | null;
@@ -345,6 +347,8 @@ export type ProviderNurse = {
   rating_breakdown?: RatingBreakdown;
   availability_status: ProviderAvailabilityStatus;
   service_radius_km: number;
+  service_zone: HomeCareZone | "";
+  service_zone_label?: string;
   location_area: string;
   active_workload: number;
   updated_at: string;
@@ -706,6 +710,9 @@ export type AdminProvider = {
   is_active: boolean;
   onboarding_status: string | null;
   active_for_dispatch: boolean | null;
+  service_zone?: HomeCareZone | "" | null;
+  service_zone_label?: string | null;
+  base_address?: string | null;
   active_workload: number;
   active_job_label: string;
   completed_workload: number;

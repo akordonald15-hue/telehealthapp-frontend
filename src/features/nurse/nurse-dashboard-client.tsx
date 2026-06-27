@@ -133,6 +133,11 @@ export function NurseDashboardClient() {
                 <p className="mt-1 text-xs text-slate-500">Issued by Caretekk. Contact admin for changes.</p>
               </div>
               <div className="ct-soft-panel rounded-[18px] px-4 py-3">
+                <p className="font-semibold text-[#1F2937]">Service zone</p>
+                <p className="mt-1">{profileQuery.data.service_zone_label || "Zone not set"}</p>
+                <p className="mt-1 text-xs text-slate-500">Managed by Caretekk operations.</p>
+              </div>
+              <div className="ct-soft-panel rounded-[18px] px-4 py-3">
                 <p className="font-semibold text-[#1F2937]">Rating</p>
                 <p className="mt-1 flex items-center gap-1">
                   <Star className="h-4 w-4 fill-amber-400 text-amber-400" />

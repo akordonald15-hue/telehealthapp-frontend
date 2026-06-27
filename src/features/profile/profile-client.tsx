@@ -116,6 +116,13 @@ export function ProfileClient() {
                   readOnly
                 />
               </Field>
+              <Field label="Service zone">
+                <Input
+                  value={(profile.data as NurseProfile | undefined)?.service_zone_label || "Zone not set"}
+                  disabled
+                  readOnly
+                />
+              </Field>
               <Field label="Service type">
                 <Input
                   defaultValue={(profile.data as NurseProfile | undefined)?.service_type || ""}
