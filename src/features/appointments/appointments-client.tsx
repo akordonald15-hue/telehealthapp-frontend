@@ -24,6 +24,8 @@ import { appointmentsApi, paymentsApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import type { Appointment, PatientProfile, ProviderDoctor } from "@/lib/types/backend";
+import type { PaymentInitiation } from "@/lib/types/backend";
+import { useFormDraft } from "@/lib/use-form-draft";
 import { formatDateTime } from "@/lib/utils";
 import { appointmentSchema } from "@/lib/validation/features";
 
@@ -84,6 +86,7 @@ export function AppointmentsClient() {
   const [page, setPage] = useState(1);
   const [doctorPickerOpen, setDoctorPickerOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<ProviderDoctor | null>(null);
+  const [manualPayment, setManualPayment] = useState<PaymentInitiation | null>(null);
   const appointments = useQuery({
     queryKey: ["appointments", page],
     queryFn: () => appointmentsApi.list({ page, page_size: 10 }),
@@ -91,11 +94,17 @@ export function AppointmentsClient() {
   const createAppointment = useMutation({
     mutationFn: appointmentsApi.book,
     onSuccess: async (data) => {
+      appointmentDraft.clearDraft();
+      paymentDraft.clearDraft();
       form.reset();
       setSelectedDoctor(null);
       setDoctorPickerOpen(false);
       setPage(1);
       await queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      if (data.payment.provider === "bank_transfer") {
+        setManualPayment(data.payment);
+        return;
+      }
       const authorizationUrl = data.payment.authorization_url;
       if (authorizationUrl) {
         window.location.assign(authorizationUrl);
@@ -105,6 +114,7 @@ export function AppointmentsClient() {
   const submitTransfer = useMutation({
     mutationFn: paymentsApi.submitTransfer,
     onSuccess: async () => {
+      paymentDraft.clearDraft();
       await queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
   });
@@ -142,6 +152,50 @@ export function AppointmentsClient() {
   const profileIncomplete = Boolean(user?.role === "patient" && patientProfile.data && !patientProfile.data.profile_complete);
   const triageSessionParam = Number(searchParams.get("triage_session"));
   const triageSessionId = Number.isInteger(triageSessionParam) && triageSessionParam > 0 ? triageSessionParam : null;
+  const activeBankTransferPayment =
+    manualPayment ?? (createAppointment.data?.payment.provider === "bank_transfer" ? createAppointment.data.payment : null);
+  const watchedAppointment = form.watch();
+  const appointmentDraftKey = user?.id ? `caretekk:draft:consultation-booking:${user.id}` : null;
+  const appointmentDraftValue = {
+    doctor: selectedDoctor?.id ?? watchedAppointment.doctor ?? 0,
+    selectedDoctor,
+    scheduled_at: watchedAppointment.scheduled_at ?? "",
+    reason: watchedAppointment.reason ?? "",
+  };
+  const appointmentDraft = useFormDraft({
+    key: appointmentDraftKey,
+    value: appointmentDraftValue,
+    enabled: user?.role === "patient" && !createAppointment.isSuccess,
+    expiresInMs: 24 * 60 * 60 * 1000,
+    onRestore: (draft) => {
+      if (draft.selectedDoctor) {
+        setSelectedDoctor(draft.selectedDoctor);
+      }
+      form.reset({
+        doctor: draft.doctor || 0,
+        scheduled_at: draft.scheduled_at || "",
+        reason: draft.reason || "",
+        notes: "",
+      });
+    },
+    isSignificant: (draft) => Boolean(draft.doctor || draft.scheduled_at || draft.reason?.trim()),
+    sanitize: (draft) => ({
+      doctor: draft.doctor,
+      selectedDoctor: draft.selectedDoctor,
+      scheduled_at: draft.scheduled_at,
+      reason: draft.reason,
+    }),
+  });
+  const paymentDraftKey = user?.id ? `caretekk:draft:bank-transfer:consultation:${user.id}` : null;
+  const paymentDraft = useFormDraft({
+    key: paymentDraftKey,
+    value: manualPayment,
+    enabled: user?.role === "patient" && Boolean(manualPayment),
+    expiresInMs: 2 * 60 * 60 * 1000,
+    onRestore: (draft) => setManualPayment(draft),
+    isSignificant: (draft) => Boolean(draft?.provider === "bank_transfer" && draft.bank_transfer),
+    sanitize: (draft) => draft,
+  });
 
   return (
     <Section
@@ -172,6 +226,14 @@ export function AppointmentsClient() {
             </div>
           </div>
           <ErrorMessage error={createAppointment.error} context="appointments" />
+          {appointmentDraft.restored ? (
+            <Notice title="Your previous progress was restored." tone="success">
+              You can continue this consultation booking or clear the draft.
+              <button type="button" className="ml-2 font-semibold underline" onClick={appointmentDraft.clearDraft}>
+                Clear draft
+              </button>
+            </Notice>
+          ) : null}
           {profileIncomplete ? (
             <Notice title="Complete your profile before booking" tone="warning">
               Doctors need your name, phone, date of birth, gender, state, and LGA before consultation.
@@ -198,14 +260,21 @@ export function AppointmentsClient() {
               <InlineLoader label="Preparing secure payment" />
             </div>
           ) : null}
-          {createAppointment.isSuccess && createAppointment.data.payment.provider === "bank_transfer" ? (
-            <BankTransferPaymentPanel
-              payment={createAppointment.data.payment}
-              isSubmitting={submitTransfer.isPending}
-              submitted={submitTransfer.isSuccess}
-              error={submitTransfer.error ? getFriendlyErrorMessage(submitTransfer.error, "payments") : null}
-              onSubmit={() => submitTransfer.mutate(createAppointment.data.payment.payment_id)}
-            />
+          <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
+            <span className="font-semibold text-[#1F2937]">Payment method:</span> Bank transfer is active for launch.
+            Paystack is hidden until gateway verification is complete.
+          </div>
+          {activeBankTransferPayment ? (
+            <div className="grid gap-3">
+              {paymentDraft.restored ? <Notice title="Your payment details were restored." tone="success" /> : null}
+              <BankTransferPaymentPanel
+                payment={activeBankTransferPayment}
+                isSubmitting={submitTransfer.isPending}
+                submitted={submitTransfer.isSuccess || manualPayment?.status === "awaiting_manual_verification"}
+                error={submitTransfer.error ? getFriendlyErrorMessage(submitTransfer.error, "payments") : null}
+                onSubmit={() => submitTransfer.mutate(activeBankTransferPayment.payment_id)}
+              />
+            </div>
           ) : null}
           <Field label="Selected Doctor" error={form.formState.errors.doctor?.message}>
             <div className="grid gap-3">

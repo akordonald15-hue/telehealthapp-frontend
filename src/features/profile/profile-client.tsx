@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
@@ -14,6 +14,7 @@ import { authApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { NIGERIA_STATE_LGAS, NIGERIA_STATES } from "@/lib/nigeria-locations";
 import type { DoctorProfile, NurseProfile, PatientProfile } from "@/lib/types/backend";
+import { useFormDraft } from "@/lib/use-form-draft";
 
 export function ProfileClient() {
   const queryClient = useQueryClient();
@@ -32,17 +33,49 @@ export function ProfileClient() {
   const patientProfile = profile.data as PatientProfile | undefined;
   const selectedState = profileDraft.state ?? patientProfile?.state ?? "";
   const lgaOptions = selectedState ? (NIGERIA_STATE_LGAS[selectedState] ?? []) : [];
+  const accountDraftValue = useMemo(
+    () => ({
+      full_name: nameDraft ?? "",
+      phone: phoneDraft ?? "",
+    }),
+    [nameDraft, phoneDraft],
+  );
+  const restoreAccountDraft = useCallback((draft: typeof accountDraftValue) => {
+    setNameDraft(draft.full_name || null);
+    setPhoneDraft(draft.phone || null);
+  }, []);
+  const accountDraft = useFormDraft({
+    key: user?.id ? `caretekk:draft:profile-account:${user.id}` : null,
+    value: accountDraftValue,
+    enabled: Boolean(user),
+    expiresInMs: 7 * 24 * 60 * 60 * 1000,
+    onRestore: restoreAccountDraft,
+    isSignificant: (draft) => Boolean(draft.full_name.trim() || draft.phone.trim()),
+  });
+  const profileFormDraft = useFormDraft({
+    key: user?.id ? `caretekk:draft:profile:${user.id}` : null,
+    value: profileDraft,
+    enabled: Boolean(user),
+    expiresInMs: 7 * 24 * 60 * 60 * 1000,
+    onRestore: (draft) => setProfileDraft(draft),
+    isSignificant: (draft) => Object.values(draft).some((value) => value.trim().length > 0),
+  });
   const updateUser = useMutation({
     mutationFn: () => authApi.updateMe({ phone, full_name: fullName }),
     onSuccess: async () => {
       setPhoneDraft(null);
       setNameDraft(null);
+      accountDraft.clearDraft();
       await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
     },
   });
   const updateProfile = useMutation({
     mutationFn: () => profilesApi.updateMe(profileDraft),
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["profile", "me"] }),
+    onSuccess: async () => {
+      setProfileDraft({});
+      profileFormDraft.clearDraft();
+      await queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
+    },
   });
 
   const isDoctor = user?.role === "doctor";
@@ -60,6 +93,11 @@ export function ProfileClient() {
             <p className="mt-1 text-sm leading-6 text-slate-600">Your account information.</p>
           </div>
           <ErrorMessage error={updateUser.error} context="profile" />
+          {accountDraft.restored ? (
+            <Notice title="Your previous progress was restored." tone="success">
+              You can continue editing your account details.
+            </Notice>
+          ) : null}
           {updateUser.isSuccess ? <Notice title="Details saved" tone="success" /> : null}
           <Field label="Full Name">
             <Input value={fullName} onChange={(event) => setNameDraft(event.target.value)} />
@@ -84,6 +122,14 @@ export function ProfileClient() {
             <p className="mt-1 text-sm leading-6 text-slate-600">Keep your details up to date.</p>
           </div>
           <ErrorMessage error={updateProfile.error} context="profile" />
+          {profileFormDraft.restored ? (
+            <Notice title="Your previous progress was restored." tone="success">
+              You can continue your profile update or clear the draft.
+              <button type="button" className="ml-2 font-semibold underline" onClick={profileFormDraft.clearDraft}>
+                Clear draft
+              </button>
+            </Notice>
+          ) : null}
           {updateProfile.isSuccess ? <Notice title="Profile saved" tone="success" /> : null}
           {profile.isLoading ? <InlineLoader compact label="Loading your profile" /> : null}
           {isDoctor ? (
@@ -141,13 +187,13 @@ export function ProfileClient() {
               <Field label="Date of birth">
                 <Input
                   type="date"
-                  defaultValue={(profile.data as PatientProfile | undefined)?.dob || ""}
+                  value={profileDraft.dob ?? (profile.data as PatientProfile | undefined)?.dob ?? ""}
                   onChange={(event) => setProfileDraft((draft) => ({ ...draft, dob: event.target.value }))}
                 />
               </Field>
               <Field label="Gender">
                 <Select
-                  defaultValue={(profile.data as PatientProfile | undefined)?.gender || ""}
+                  value={profileDraft.gender ?? (profile.data as PatientProfile | undefined)?.gender ?? ""}
                   onChange={(event) => setProfileDraft((draft) => ({ ...draft, gender: event.target.value }))}
                 >
                   <option value="">Select gender</option>
@@ -185,7 +231,7 @@ export function ProfileClient() {
               </Field>
               <Field label="Address">
                 <Textarea
-                  defaultValue={(profile.data as PatientProfile | undefined)?.address || ""}
+                  value={profileDraft.address ?? (profile.data as PatientProfile | undefined)?.address ?? ""}
                   onChange={(event) => setProfileDraft((draft) => ({ ...draft, address: event.target.value }))}
                 />
               </Field>

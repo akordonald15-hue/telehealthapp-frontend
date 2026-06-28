@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { ComponentType, ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import type {
   TriageSeverity,
 } from "@/lib/types/backend";
 import { cn } from "@/lib/utils";
+import { useFormDraft } from "@/lib/use-form-draft";
 
 type TriageResultData = TriageConversationResult | TriageProcessingResponse;
 
@@ -260,6 +261,7 @@ export function TriageClient() {
   const [symptomText, setSymptomText] = useState("");
   const [submittedSymptomText, setSubmittedSymptomText] = useState("");
   const [selectedSeverity, setSelectedSeverity] = useState<TriageSeverity | null>(null);
+  const [resultRequested, setResultRequested] = useState(false);
 
   const startConversation = useMutation({
     mutationFn: (id: number) => triageApi.startConversation({ session_id: id }),
@@ -281,12 +283,13 @@ export function TriageClient() {
         message: values.message,
         severity: values.severity,
       }),
+    onSuccess: () => setResultRequested(true),
   });
 
   const result = useQuery({
     queryKey: ["triage", "conversation-result", conversationId],
     queryFn: () => triageApi.conversationResult(conversationId as string),
-    enabled: Boolean(conversationId) && sendMessage.isSuccess,
+    enabled: Boolean(conversationId) && (sendMessage.isSuccess || resultRequested),
     refetchInterval: (query) => {
       const data = query.state.data;
       return data && "status" in data && data.status === "processing" ? 3000 : false;
@@ -304,6 +307,41 @@ export function TriageClient() {
   const canSubmitSymptomText = symptomText.trim().length > 0 && Boolean(conversationId);
 
   const assistantOpen = user?.role === "patient" && Boolean(sessionId || conversationId || startSession.isPending);
+  const triageDraftValue = useMemo(
+    () => ({
+      sessionId,
+      conversationId,
+      symptomText,
+      submittedSymptomText,
+      selectedSeverity,
+      resultRequested,
+    }),
+    [conversationId, resultRequested, selectedSeverity, sessionId, submittedSymptomText, symptomText],
+  );
+  const restoreTriageDraft = useCallback((draft: typeof triageDraftValue) => {
+    setSessionId(draft.sessionId ?? null);
+    setConversationId(draft.conversationId ?? null);
+    setSymptomText(draft.symptomText || "");
+    setSubmittedSymptomText(draft.submittedSymptomText || "");
+    setSelectedSeverity(draft.selectedSeverity ?? null);
+    setResultRequested(Boolean(draft.resultRequested || draft.selectedSeverity));
+  }, []);
+  const triageDraft = useFormDraft({
+    key: user?.id ? `caretekk:draft:triage:${user.id}` : null,
+    value: triageDraftValue,
+    enabled: user?.role === "patient" && !finishedResult,
+    expiresInMs: 24 * 60 * 60 * 1000,
+    onRestore: restoreTriageDraft,
+    isSignificant: (draft) => Boolean(draft.sessionId || draft.conversationId || draft.symptomText.trim() || draft.submittedSymptomText.trim()),
+    sanitize: (draft) => ({
+      sessionId: draft.sessionId,
+      conversationId: draft.conversationId,
+      symptomText: draft.symptomText,
+      submittedSymptomText: draft.submittedSymptomText,
+      selectedSeverity: draft.selectedSeverity,
+      resultRequested: draft.resultRequested,
+    }),
+  });
 
   function handleSymptomSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -340,6 +378,14 @@ export function TriageClient() {
         <div className="mx-auto w-full max-w-6xl">
           <div className="ct-surface grid w-full min-w-0 gap-4 rounded-[26px] p-3 sm:rounded-[34px] sm:p-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.85fr)]">
               <div className="ct-panel grid min-w-0 gap-4 rounded-[22px] p-4 sm:rounded-[28px] sm:p-6">
+                {triageDraft.restored ? (
+                  <Notice title="Your previous progress was restored." tone="success">
+                    You can continue this care check-in or clear the draft.
+                    <button type="button" className="ml-2 font-semibold underline" onClick={triageDraft.clearDraft}>
+                      Clear draft
+                    </button>
+                  </Notice>
+                ) : null}
                 <div className="flex items-start gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
                     <BrainCircuit className="h-5 w-5" />
@@ -457,6 +503,7 @@ export function TriageClient() {
                       <div className="mt-4 flex flex-col gap-3 rounded-[18px] border border-slate-200 bg-white/96 p-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] sm:flex-row sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
                         <Link
                           href={nextStepHref}
+                          onClick={triageDraft.clearDraft}
                           className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] px-4 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(37,99,235,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(37,99,235,0.3)]"
                         >
                           {nextStepLabel}

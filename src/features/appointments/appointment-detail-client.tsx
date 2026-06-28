@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, FileText, Loader2, MessageSquareText, Stethoscope, UserRoundCheck } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
@@ -18,6 +18,7 @@ import { appointmentsApi, messagingApi, profilesApi, referralsApi } from "@/lib/
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { appointmentCompanionLabel } from "@/lib/ui/humanize";
+import { useFormDraft } from "@/lib/use-form-draft";
 import { formatDateTime } from "@/lib/utils";
 
 function InfoTile({ label, value }: { label: string; value: string | number }) {
@@ -78,12 +79,16 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
   const createReferral = useMutation({
     mutationFn: referralsApi.create,
     onSuccess: async () => {
+      setReferralDraft({ referred_to: "", notes: "" });
+      referralFormDraft.clearDraft();
       await queryClient.invalidateQueries({ queryKey: ["referrals"] });
     },
   });
   const createCarePlan = useMutation({
     mutationFn: profilesApi.createCarePlan,
     onSuccess: async () => {
+      setCarePlanDraft({ complaint_summary: "", care_plan: "", follow_up_date: "" });
+      carePlanFormDraft.clearDraft();
       await queryClient.invalidateQueries({ queryKey: ["care-plans"] });
     },
   });
@@ -92,6 +97,31 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
     complaint_summary: "",
     care_plan: "",
     follow_up_date: "",
+  });
+  const doctorUserId = userQuery.data?.id;
+  const referralDraftKey = useMemo(
+    () => (doctorUserId ? `caretekk:draft:referral:${appointmentId}:${doctorUserId}` : null),
+    [appointmentId, doctorUserId],
+  );
+  const referralFormDraft = useFormDraft({
+    key: referralDraftKey,
+    value: referralDraft,
+    enabled: userQuery.data?.role === "doctor",
+    expiresInMs: 24 * 60 * 60 * 1000,
+    onRestore: (draft) => setReferralDraft(draft),
+    isSignificant: (draft) => Boolean(draft.referred_to.trim() || draft.notes.trim()),
+  });
+  const carePlanDraftKey = useMemo(
+    () => (doctorUserId ? `caretekk:draft:care-plan:${appointmentId}:${doctorUserId}` : null),
+    [appointmentId, doctorUserId],
+  );
+  const carePlanFormDraft = useFormDraft({
+    key: carePlanDraftKey,
+    value: carePlanDraft,
+    enabled: userQuery.data?.role === "doctor",
+    expiresInMs: 24 * 60 * 60 * 1000,
+    onRestore: (draft) => setCarePlanDraft(draft),
+    isSignificant: (draft) => Boolean(draft.complaint_summary.trim() || draft.care_plan.trim() || draft.follow_up_date),
   });
 
   if (userQuery.data?.role !== "doctor" && userQuery.data?.role !== "admin") {
@@ -236,6 +266,14 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 }}
               >
                 <ErrorMessage error={createReferral.error} context="referrals" />
+                {referralFormDraft.restored ? (
+                  <Notice title="Your previous progress was restored." tone="success">
+                    You can continue this referral or clear the draft.
+                    <button type="button" className="ml-2 font-semibold underline" onClick={referralFormDraft.clearDraft}>
+                      Clear draft
+                    </button>
+                  </Notice>
+                ) : null}
                 {createReferral.isSuccess ? <Notice title="Referral saved" tone="success">Patient notification has been queued.</Notice> : null}
                 <Field label="Patient">
                   <Input value={patient?.display_name || `Patient #${appointment.patient}`} disabled />
@@ -270,6 +308,14 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 }}
               >
                 <ErrorMessage error={createCarePlan.error} context="records" />
+                {carePlanFormDraft.restored ? (
+                  <Notice title="Your previous progress was restored." tone="success">
+                    You can continue this care plan or clear the draft.
+                    <button type="button" className="ml-2 font-semibold underline" onClick={carePlanFormDraft.clearDraft}>
+                      Clear draft
+                    </button>
+                  </Notice>
+                ) : null}
                 {createCarePlan.isSuccess ? <Notice title="Care plan saved" tone="success">The patient can view it from Care Plan.</Notice> : null}
                 <Field label="Complaint summary">
                   <Textarea value={carePlanDraft.complaint_summary} onChange={(event) => setCarePlanDraft((draft) => ({ ...draft, complaint_summary: event.target.value }))} />

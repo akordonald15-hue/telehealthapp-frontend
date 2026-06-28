@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Home, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -17,6 +17,7 @@ import { homeCareApi, paymentsApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import type { HomeCareRequestCreate, HomeCareService, HomeCareZone, PatientProfile, PaymentInitiation, ProviderNurse } from "@/lib/types/backend";
+import { useFormDraft } from "@/lib/use-form-draft";
 import { formatMoney } from "@/lib/utils";
 
 const HOMECARE_ZONES: Array<{ value: HomeCareZone; label: string }> = [
@@ -80,12 +81,14 @@ export function HomeCareBookingClient() {
   const createRequest = useMutation({
     mutationFn: (body: HomeCareRequestCreate & { callback_url: string }) => homeCareApi.bookRequest(body),
     onSuccess: (response) => {
-      if (response.payment.authorization_url) {
-        window.location.assign(response.payment.authorization_url);
-        return;
-      }
+      homecareDraft.clearDraft();
+      paymentDraft.clearDraft();
       if (response.payment.provider === "bank_transfer") {
         setManualPayment(response.payment);
+        return;
+      }
+      if (response.payment.authorization_url) {
+        window.location.assign(response.payment.authorization_url);
         return;
       }
       router.replace(`/home-care/requests/${response.request.id}`);
@@ -93,16 +96,11 @@ export function HomeCareBookingClient() {
   });
   const submitTransfer = useMutation({
     mutationFn: paymentsApi.submitTransfer,
-    onSuccess: (payment) => setManualPayment(payment),
+    onSuccess: (payment) => {
+      paymentDraft.clearDraft();
+      setManualPayment(payment);
+    },
   });
-
-  if (userQuery.data?.role !== "patient") {
-    return (
-      <Section title="Home Care" description="Home care is available for patient accounts.">
-        <Notice title="This view is not available for your account." tone="warning" />
-      </Section>
-    );
-  }
 
   const nurseItems = nursesQuery.data?.results ?? [];
   const effectiveContactName = contactName || userQuery.data?.full_name || profileQuery.data?.full_name || "";
@@ -117,6 +115,82 @@ export function HomeCareBookingClient() {
       preferredTime &&
       (assignmentMode === "auto" || selectedNurse),
   );
+  const homecareDraftValue = useMemo(
+    () => ({
+      zone,
+      selectedServiceId,
+      contactName,
+      contactPhone,
+      address,
+      landmark,
+      preferredTime,
+      notes,
+      selectedNurse,
+      assignmentMode,
+    }),
+    [address, assignmentMode, contactName, contactPhone, landmark, notes, preferredTime, selectedNurse, selectedServiceId, zone],
+  );
+  const restoreHomecareDraft = useCallback((draft: typeof homecareDraftValue) => {
+    setZone(draft.zone || "");
+    setSelectedServiceId(draft.selectedServiceId || "");
+    setContactName(draft.contactName || "");
+    setContactPhone(draft.contactPhone || "");
+    setAddress(draft.address || "");
+    setLandmark(draft.landmark || "");
+    setPreferredTime(draft.preferredTime || "");
+    setNotes(draft.notes || "");
+    setSelectedNurse(draft.selectedNurse || null);
+    setAssignmentMode(draft.assignmentMode || "auto");
+  }, []);
+  const draftUserId = userQuery.data?.id;
+  const homecareDraft = useFormDraft({
+    key: draftUserId ? `caretekk:draft:homecare-booking:${draftUserId}` : null,
+    value: homecareDraftValue,
+    enabled: userQuery.data?.role === "patient" && !manualPayment,
+    expiresInMs: 24 * 60 * 60 * 1000,
+    onRestore: restoreHomecareDraft,
+    isSignificant: (draft) =>
+      Boolean(
+        draft.zone ||
+          draft.selectedServiceId ||
+          draft.contactName.trim() ||
+          draft.contactPhone.trim() ||
+          draft.address.trim() ||
+          draft.landmark.trim() ||
+          draft.preferredTime ||
+          draft.notes.trim() ||
+          draft.selectedNurse,
+      ),
+    sanitize: (draft) => ({
+      zone: draft.zone,
+      selectedServiceId: draft.selectedServiceId,
+      contactName: draft.contactName,
+      contactPhone: draft.contactPhone,
+      address: draft.address,
+      landmark: draft.landmark,
+      preferredTime: draft.preferredTime,
+      notes: draft.notes,
+      selectedNurse: draft.selectedNurse,
+      assignmentMode: draft.assignmentMode,
+    }),
+  });
+  const paymentDraft = useFormDraft({
+    key: draftUserId ? `caretekk:draft:bank-transfer:homecare:${draftUserId}` : null,
+    value: manualPayment,
+    enabled: userQuery.data?.role === "patient" && Boolean(manualPayment),
+    expiresInMs: 2 * 60 * 60 * 1000,
+    onRestore: (draft) => setManualPayment(draft),
+    isSignificant: (draft) => Boolean(draft?.provider === "bank_transfer" && draft.bank_transfer),
+    sanitize: (draft) => draft,
+  });
+
+  if (userQuery.data?.role !== "patient") {
+    return (
+      <Section title="Home Care" description="Home care is available for patient accounts.">
+        <Notice title="This view is not available for your account." tone="warning" />
+      </Section>
+    );
+  }
 
   return (
     <Section
@@ -154,14 +228,25 @@ export function HomeCareBookingClient() {
             {getFriendlyErrorMessage(createRequest.error, "homeCare")}
           </Notice>
         ) : null}
+        {homecareDraft.restored ? (
+          <Notice title="Your previous progress was restored." tone="success">
+            You can continue this home care booking or clear the draft.
+            <button type="button" className="ml-2 font-semibold underline" onClick={homecareDraft.clearDraft}>
+              Clear draft
+            </button>
+          </Notice>
+        ) : null}
         {manualPayment ? (
-          <BankTransferPaymentPanel
-            payment={manualPayment}
-            isSubmitting={submitTransfer.isPending}
-            submitted={submitTransfer.isSuccess || manualPayment.status === "awaiting_manual_verification"}
-            error={submitTransfer.error ? getFriendlyErrorMessage(submitTransfer.error, "payments") : null}
-            onSubmit={() => submitTransfer.mutate(manualPayment.payment_id)}
-          />
+          <div className="grid gap-3">
+            {paymentDraft.restored ? <Notice title="Your payment details were restored." tone="success" /> : null}
+            <BankTransferPaymentPanel
+              payment={manualPayment}
+              isSubmitting={submitTransfer.isPending}
+              submitted={submitTransfer.isSuccess || manualPayment.status === "awaiting_manual_verification"}
+              error={submitTransfer.error ? getFriendlyErrorMessage(submitTransfer.error, "payments") : null}
+              onSubmit={() => submitTransfer.mutate(manualPayment.payment_id)}
+            />
+          </div>
         ) : null}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -176,6 +261,11 @@ export function HomeCareBookingClient() {
           <Button type="button" variant="secondary" disabled={!zone || !selectedService} onClick={() => setSelectorOpen(true)}>
             Choose nurse
           </Button>
+        </div>
+
+        <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
+          <span className="font-semibold text-[#1F2937]">Payment method:</span> Bank transfer is active for launch.
+          Paystack is hidden until gateway verification is complete.
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
