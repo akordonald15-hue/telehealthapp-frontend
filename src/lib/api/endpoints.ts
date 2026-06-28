@@ -33,6 +33,7 @@ import type {
   Payment,
   PasswordResetVerifyResponse,
   PaymentInitiation,
+  PaymentProvider,
   ProviderSetupVerifyResponse,
   ProviderLedgerTransaction,
   ProviderPayoutRequest,
@@ -246,7 +247,7 @@ export const homeCareApi = {
 export const paymentsApi = {
   list: (query?: { page?: number; page_size?: number }) => apiList<Payment>("/payments/", query),
   initiate: (body: {
-    provider: "paystack" | "flutterwave";
+    provider: PaymentProvider;
     amount?: number;
     currency?: string;
     appointment_id?: number;
@@ -255,6 +256,7 @@ export const paymentsApi = {
   }) => apiRequest<PaymentInitiation>("/payments/initiate/", { method: "POST", body }),
   detail: (id: number) => apiRequest<Payment>(`/payments/${id}/`),
   retry: (id: number) => apiRequest<PaymentInitiation>(`/payments/${id}/retry/`, { method: "POST" }),
+  submitTransfer: (id: number) => apiRequest<PaymentInitiation>(`/payments/${id}/submit-transfer/`, { method: "POST", body: {} }),
   refund: (body: { payment: number; amount: string | number }) =>
     apiRequest<Refund>("/payments/refunds/", { method: "POST", body }),
 };
@@ -323,6 +325,18 @@ export const adminApi = {
       license_no?: string;
     },
   ) => apiRequest<DetailResponse>(`/admin/providers/${providerType}/${providerId}/status/`, { method: "PATCH", body }),
+  pendingManualPayments: (query?: { page?: number; page_size?: number }) =>
+    apiList<Payment>("/admin/payments/manual-verification/", query),
+  confirmManualPayment: (paymentId: number, body?: { provider_reference?: string; note?: string }) =>
+    apiRequest<DetailResponse & { payment: Payment }>(`/admin/payments/${paymentId}/confirm/`, {
+      method: "POST",
+      body: body || {},
+    }),
+  rejectManualPayment: (paymentId: number, body?: { note?: string }) =>
+    apiRequest<DetailResponse & { payment: Payment }>(`/admin/payments/${paymentId}/reject/`, {
+      method: "POST",
+      body: body || {},
+    }),
 };
 
 export const triageApi = {

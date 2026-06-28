@@ -18,9 +18,11 @@ import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
 import { ProviderPickerCard } from "@/features/providers/provider-picker-card";
-import { appointmentsApi, profilesApi } from "@/lib/api/endpoints";
+import { appointmentsApi, paymentsApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
+import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import type { Appointment, PatientProfile, ProviderDoctor } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
 import { appointmentSchema } from "@/lib/validation/features";
@@ -98,6 +100,12 @@ export function AppointmentsClient() {
       if (authorizationUrl) {
         window.location.assign(authorizationUrl);
       }
+    },
+  });
+  const submitTransfer = useMutation({
+    mutationFn: paymentsApi.submitTransfer,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
   });
   const cancelAppointment = useMutation({
@@ -182,13 +190,22 @@ export function AppointmentsClient() {
               </Link>
             </Notice>
           )}
-          {createAppointment.isSuccess ? (
+          {createAppointment.isSuccess && createAppointment.data.payment.provider !== "bank_transfer" ? (
             <div className="grid gap-3">
               <Notice title="Checkout ready" tone="success">
                 Your appointment is saved. Paystack will verify payment before this consultation is marked paid.
               </Notice>
               <InlineLoader label="Preparing secure payment" />
             </div>
+          ) : null}
+          {createAppointment.isSuccess && createAppointment.data.payment.provider === "bank_transfer" ? (
+            <BankTransferPaymentPanel
+              payment={createAppointment.data.payment}
+              isSubmitting={submitTransfer.isPending}
+              submitted={submitTransfer.isSuccess}
+              error={submitTransfer.error ? getFriendlyErrorMessage(submitTransfer.error, "payments") : null}
+              onSubmit={() => submitTransfer.mutate(createAppointment.data.payment.payment_id)}
+            />
           ) : null}
           <Field label="Selected Doctor" error={form.formState.errors.doctor?.message}>
             <div className="grid gap-3">

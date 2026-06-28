@@ -13,7 +13,7 @@ export const messageSchema = z.object({
 });
 
 export const paymentInitiateSchema = z.object({
-  provider: z.enum(["paystack", "flutterwave"]),
+  provider: z.enum(["paystack", "flutterwave", "bank_transfer"]),
   amount: z.coerce.number().int().positive(),
   currency: z.string().max(8).default("NGN"),
   appointment_id: z.coerce.number().int().positive().optional().or(z.literal("")),

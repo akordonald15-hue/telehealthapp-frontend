@@ -49,7 +49,7 @@ export function PaymentsClient() {
       description="Read-only checkout history for booked Caretekk services. Payments start only from consultation or homecare booking."
     >
       <Notice title="Service payments only" tone="neutral">
-        Caretekk does not support manual payment entry. To pay, book a doctor consultation or home nurse request and continue to the secure checkout created for that service.
+        To pay, book a doctor consultation or home nurse request and follow the payment instructions created for that service.
       </Notice>
       {retryError ? (
         <Notice title="Payment could not be initialized." tone="warning">

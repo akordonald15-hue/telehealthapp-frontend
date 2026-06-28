@@ -171,6 +171,8 @@ export type CarePlan = {
 
 export type AppointmentStatus =
   | "pending_payment"
+  | "awaiting_payment_verification"
+  | "payment_rejected"
   | "confirmed"
   | "scheduled"
   | "accepted"
@@ -375,6 +377,9 @@ export type HomeCareService = {
 };
 export type HomeCareRequestStatus =
   | "requested"
+  | "awaiting_payment"
+  | "awaiting_payment_verification"
+  | "payment_rejected"
   | "matching"
   | "assigned"
   | "accepted"
@@ -491,12 +496,31 @@ export type HomeCareRating = {
   created_at: string;
 };
 
-export type PaymentProvider = "paystack" | "flutterwave";
-export type PaymentStatus = "pending" | "success" | "failed" | "refunded";
+export type PaymentProvider = "paystack" | "flutterwave" | "bank_transfer";
+export type PaymentStatus =
+  | "pending"
+  | "awaiting_transfer"
+  | "transfer_submitted"
+  | "awaiting_manual_verification"
+  | "success"
+  | "rejected"
+  | "failed"
+  | "cancelled"
+  | "refunded";
+
+export type BankTransferDetails = {
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  instructions: string;
+  reference: string;
+};
 
 export type Payment = {
   id: number;
   patient: number;
+  patient_name?: string;
+  patient_phone?: string;
   appointment: number | null;
   homecare_request: number | null;
   provider: string;
@@ -505,6 +529,10 @@ export type Payment = {
   status: PaymentStatus;
   external_ref: string;
   provider_reference: string;
+  transfer_notified_at?: string | null;
+  manual_reviewed_at?: string | null;
+  manual_review_note?: string;
+  bank_transfer?: BankTransferDetails | null;
 };
 
 export type PaymentInitiation = {
@@ -512,10 +540,15 @@ export type PaymentInitiation = {
   provider: string;
   amount: string;
   currency: string;
+  status: PaymentStatus;
   appointment_id: number | null;
   homecare_request_id: number | null;
   authorization_url: string | null;
   external_ref: string;
+  initialization_status?: string;
+  transfer_notified_at?: string | null;
+  bank_transfer?: BankTransferDetails | null;
+  can_submit_transfer_notification?: boolean;
 };
 
 export type AppointmentBookingResponse = {

@@ -11,11 +11,12 @@ import { Field } from "@/components/ui/field";
 import { Input, Textarea } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
+import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
 import { ProviderPickerCard } from "@/features/providers/provider-picker-card";
-import { homeCareApi, profilesApi } from "@/lib/api/endpoints";
+import { homeCareApi, paymentsApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
-import type { HomeCareRequestCreate, HomeCareService, HomeCareZone, PatientProfile, ProviderNurse } from "@/lib/types/backend";
+import type { HomeCareRequestCreate, HomeCareService, HomeCareZone, PatientProfile, PaymentInitiation, ProviderNurse } from "@/lib/types/backend";
 import { formatMoney } from "@/lib/utils";
 
 const HOMECARE_ZONES: Array<{ value: HomeCareZone; label: string }> = [
@@ -45,6 +46,7 @@ export function HomeCareBookingClient() {
   const [selectedNurse, setSelectedNurse] = useState<ProviderNurse | null>(null);
   const [assignmentMode, setAssignmentMode] = useState<"auto" | "choose">("auto");
   const [selectorOpen, setSelectorOpen] = useState(false);
+  const [manualPayment, setManualPayment] = useState<PaymentInitiation | null>(null);
 
   const profileQuery = useQuery({
     queryKey: ["profile", "me", "patient", "homecare-booking"],
@@ -82,8 +84,16 @@ export function HomeCareBookingClient() {
         window.location.assign(response.payment.authorization_url);
         return;
       }
+      if (response.payment.provider === "bank_transfer") {
+        setManualPayment(response.payment);
+        return;
+      }
       router.replace(`/home-care/requests/${response.request.id}`);
     },
+  });
+  const submitTransfer = useMutation({
+    mutationFn: paymentsApi.submitTransfer,
+    onSuccess: (payment) => setManualPayment(payment),
   });
 
   if (userQuery.data?.role !== "patient") {
@@ -143,6 +153,15 @@ export function HomeCareBookingClient() {
           <Notice title="We couldn't start home care." tone="warning">
             {getFriendlyErrorMessage(createRequest.error, "homeCare")}
           </Notice>
+        ) : null}
+        {manualPayment ? (
+          <BankTransferPaymentPanel
+            payment={manualPayment}
+            isSubmitting={submitTransfer.isPending}
+            submitted={submitTransfer.isSuccess || manualPayment.status === "awaiting_manual_verification"}
+            error={submitTransfer.error ? getFriendlyErrorMessage(submitTransfer.error, "payments") : null}
+            onSubmit={() => submitTransfer.mutate(manualPayment.payment_id)}
+          />
         ) : null}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
