@@ -71,7 +71,7 @@ export function referralSummary(role?: UserRole) {
 }
 
 export function paymentSummary(provider: string, role?: UserRole) {
-  const label = provider ? titleize(provider) : "Payment";
+  const label = provider === "bank_transfer" ? "Bank transfer" : provider ? titleize(provider) : "Payment";
   if (role === "patient") {
     return label;
   }

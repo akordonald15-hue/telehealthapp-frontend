@@ -12,7 +12,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { appointmentsApi, messagingApi, paymentsApi, profilesApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
-import { appointmentCompanionLabel } from "@/lib/ui/humanize";
+import { appointmentCompanionLabel, paymentSummary } from "@/lib/ui/humanize";
 import type { PaginatedResponse, PatientProfile } from "@/lib/types/backend";
 import { formatDateTime, formatMoney } from "@/lib/utils";
 import { DoctorDashboardClient } from "@/features/dashboard/doctor-dashboard-client";
@@ -336,7 +336,7 @@ export function DashboardClient() {
                     <div key={item.id} className="flex flex-col gap-3 rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm font-semibold text-[#1F2937]">{formatMoney(item.amount, item.currency)}</p>
-                        <p className="mt-1 text-sm text-slate-600">{item.provider}</p>
+                        <p className="mt-1 text-sm text-slate-600">{paymentSummary(item.provider, user?.role)}</p>
                       </div>
                       <StatusBadge value={item.status} />
                     </div>

@@ -24,6 +24,7 @@ import { ApiError, extractErrorMessage } from "@/lib/api/client";
 import { adminApi, appointmentsApi, auditApi, homeCareApi, paymentsApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import type { AdminDashboardResponse, AdminProvider, AdminProviderCreateResponse, AdminUser, HomeCareZone, Payment, ProviderAvailabilityStatus, ReferralStatus, UserRole } from "@/lib/types/backend";
+import { paymentSummary } from "@/lib/ui/humanize";
 import { formatDateTime, formatMoney } from "@/lib/utils";
 
 const HOMECARE_ZONES: Array<{ value: HomeCareZone; label: string }> = [
@@ -535,28 +536,30 @@ function ManualPaymentRow({ payment }: { payment: Payment }) {
     },
   });
 
+  const bookingLabel = payment.appointment ? `Doctor consultation #${payment.appointment}` : payment.homecare_request ? `Home care request #${payment.homecare_request}` : "Service booking";
+
   return (
     <article className="rounded-[16px] border border-amber-100 bg-amber-50/70 p-3">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <p className="text-sm font-bold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)}</p>
-          <p className="mt-1 break-words text-xs text-slate-600">
-            Ref: {payment.external_ref || payment.bank_transfer?.reference || "No reference"}
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            {payment.patient_name || `Patient #${payment.patient}`} {payment.patient_phone ? `| ${payment.patient_phone}` : ""}
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            {payment.appointment ? `Consultation #${payment.appointment}` : payment.homecare_request ? `Homecare #${payment.homecare_request}` : "Service payment"}
-            {payment.transfer_notified_at ? ` | Notified ${formatDateTime(payment.transfer_notified_at)}` : ""}
-          </p>
+            <p className="mt-1 break-words text-xs text-slate-600">
+              Reference: {payment.external_ref || payment.bank_transfer?.reference || "No reference"}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {payment.patient_name || `Patient #${payment.patient}`} {payment.patient_phone ? `| ${payment.patient_phone}` : ""}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {bookingLabel}
+              {payment.transfer_notified_at ? ` | Payment notice ${formatDateTime(payment.transfer_notified_at)}` : ""}
+            </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <StatusBadge value={payment.status} />
           <ConfirmActionButton
             label="Confirm Payment"
             title="Confirm this bank transfer?"
-            description="This will mark the payment as paid and unlock the booked service."
+            description="Confirm only after the bank inflow has been checked. This unlocks the booked service."
             tone="primary"
             disabled={confirmPayment.isPending || rejectPayment.isPending}
             onConfirm={() => confirmPayment.mutate()}
@@ -732,7 +735,7 @@ export function AdminDashboardClient() {
           <div className="grid gap-3">
             <div className="rounded-[18px] border border-amber-100 bg-white p-3">
               <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <h3 className="text-sm font-bold text-[#1F2937]">Pending Payment Verification</h3>
+              <h3 className="text-sm font-bold text-[#1F2937]">Payments - Pending Manual Verification</h3>
                 <Badge tone="amber">{manualPayments.data?.results.length ?? 0} pending</Badge>
               </div>
               <div className="grid gap-3">
@@ -741,7 +744,7 @@ export function AdminDashboardClient() {
                 ) : manualPayments.data?.results.length ? (
                   manualPayments.data.results.map((payment) => <ManualPaymentRow key={payment.id} payment={payment} />)
                 ) : (
-                  <EmptyState title="No pending manual payments" description="Patient transfer notifications will appear here." />
+                  <EmptyState title="No pending manual payments" description="Patient bank-transfer notifications will appear here." />
                 )}
               </div>
             </div>
@@ -752,7 +755,7 @@ export function AdminDashboardClient() {
             </div>
             {payments.data?.results.map((payment) => (
               <div key={payment.id} className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-sm font-semibold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)} | {payment.provider}</span>
+                <span className="text-sm font-semibold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)} | {paymentSummary(payment.provider, "admin")}</span>
                 <StatusBadge value={payment.status} />
               </div>
             ))}
