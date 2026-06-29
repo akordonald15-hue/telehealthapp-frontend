@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarPlus2, Star } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -15,6 +15,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
 import { Input, Textarea } from "@/components/ui/input";
 import { InlineLoader } from "@/components/ui/loaders";
+import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -23,7 +24,7 @@ import { ProviderPickerCard } from "@/features/providers/provider-picker-card";
 import { appointmentsApi, paymentsApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
-import type { Appointment, PatientProfile, ProviderDoctor } from "@/lib/types/backend";
+import type { Appointment, PatientProfile, Payment, ProviderDoctor } from "@/lib/types/backend";
 import type { PaymentInitiation } from "@/lib/types/backend";
 import { useFormDraft } from "@/lib/use-form-draft";
 import { formatDateTime } from "@/lib/utils";
@@ -31,6 +32,7 @@ import { appointmentSchema } from "@/lib/validation/features";
 
 type AppointmentFormValues = z.input<typeof appointmentSchema>;
 type AppointmentInput = z.output<typeof appointmentSchema>;
+const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
 
 function doctorSpecialtyLabel(doctor: ProviderDoctor) {
   return doctor.specialties?.map((specialty) => specialty.name).filter(Boolean).join(", ") || "General consultation";
@@ -157,6 +159,20 @@ export function AppointmentsClient() {
   const triageSessionId = Number.isInteger(triageSessionParam) && triageSessionParam > 0 ? triageSessionParam : null;
   const activeBankTransferPayment =
     manualPayment ?? (createAppointment.data?.payment.provider === "bank_transfer" ? createAppointment.data.payment : null);
+  const activePaymentId = activeBankTransferPayment?.payment_id;
+  const activePaymentQuery = useQuery({
+    queryKey: ["payments", activePaymentId],
+    queryFn: () => paymentsApi.detail(activePaymentId as number),
+    enabled: user?.role === "patient" && Boolean(activePaymentId),
+    refetchInterval: (query) => {
+      const payment = query.state.data as Payment | undefined;
+      return !payment || MANUAL_PAYMENT_WAITING_STATUSES.has(payment.status) ? 12000 : false;
+    },
+  });
+  const activePaymentStatus = activePaymentQuery.data?.status ?? activeBankTransferPayment?.status;
+  const paymentConfirmed = activePaymentStatus === "success";
+  const paymentRejected = activePaymentStatus === "rejected";
+  const paymentAwaitingVerification = activePaymentStatus === "awaiting_manual_verification" || activePaymentStatus === "transfer_submitted";
   const watchedAppointment = form.watch();
   const appointmentDraftKey = user?.id ? `caretekk:draft:consultation-booking:${user.id}` : null;
   const appointmentDraftValue = {
@@ -199,6 +215,12 @@ export function AppointmentsClient() {
     isSignificant: (draft) => Boolean(draft?.provider === "bank_transfer" && draft.bank_transfer),
     sanitize: (draft) => draft,
   });
+
+  useEffect(() => {
+    if (!paymentConfirmed) return;
+    void queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    void queryClient.invalidateQueries({ queryKey: ["payments"] });
+  }, [paymentConfirmed, queryClient]);
 
   return (
     <Section
@@ -269,13 +291,31 @@ export function AppointmentsClient() {
           {activeBankTransferPayment ? (
             <div className="grid gap-3">
               {paymentDraft.restored ? <Notice title="Your payment details were restored." tone="success" /> : null}
-              <BankTransferPaymentPanel
-                payment={activeBankTransferPayment}
-                isSubmitting={submitTransfer.isPending}
-                submitted={submitTransfer.isSuccess || manualPayment?.status === "awaiting_manual_verification"}
-                error={submitTransfer.error ? getFriendlyErrorMessage(submitTransfer.error, "payments") : null}
-                onSubmit={(proofFile) => submitTransfer.mutate({ paymentId: activeBankTransferPayment.payment_id, proofFile })}
-              />
+              {paymentConfirmed ? (
+                <Notice title="Payment confirmed" tone="success">
+                  Your consultation is now active.
+                  <Link className="ml-2 font-semibold text-emerald-800 underline" href="/messages">
+                    Open Consultation
+                  </Link>
+                </Notice>
+              ) : paymentRejected ? (
+                <Notice title="We could not verify your payment." tone="warning">
+                  Please contact Caretekk support or resubmit your payment confirmation.
+                </Notice>
+              ) : paymentAwaitingVerification ? (
+                <Notice title="Awaiting verification" tone="neutral">
+                  Your payment notification has been received. We&apos;re verifying your transfer.
+                </Notice>
+              ) : null}
+              {!paymentConfirmed ? (
+                <BankTransferPaymentPanel
+                  payment={{ ...activeBankTransferPayment, status: activePaymentStatus ?? activeBankTransferPayment.status }}
+                  isSubmitting={submitTransfer.isPending}
+                  submitted={submitTransfer.isSuccess || paymentAwaitingVerification}
+                  error={submitTransfer.error ? getFriendlyErrorMessage(submitTransfer.error, "payments") : null}
+                  onSubmit={(proofFile) => submitTransfer.mutate({ paymentId: activeBankTransferPayment.payment_id, proofFile })}
+                />
+              ) : null}
             </div>
           ) : null}
           <Field label="Selected Doctor" error={form.formState.errors.doctor?.message}>
@@ -389,69 +429,61 @@ export function AppointmentsClient() {
         )}
       />
 
-      {doctorPickerOpen ? (
-        <div className="fixed inset-0 z-[70] bg-slate-950/40 px-4 py-8 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="mx-auto w-full max-w-4xl rounded-[8px] bg-white p-5 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.55)] sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 className="ct-card-title text-[#1F2937]">Choose Doctor</h2>
-                <p className="mt-1 text-sm text-slate-600">Select a doctor for this consultation.</p>
-              </div>
-              <Button type="button" variant="ghost" onClick={() => setDoctorPickerOpen(false)}>
-                Close
-              </Button>
-            </div>
-
-            {availableDoctors.isLoading ? (
-              <div className="mt-5 grid gap-3 md:grid-cols-2" aria-busy="true" aria-label="Loading doctors">
-                {[0, 1, 2, 3].map((item) => (
-                  <div key={item} className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex gap-3">
-                      <div className="h-12 w-12 animate-pulse rounded-[8px] bg-white" />
-                      <div className="flex-1">
-                        <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
-                        <div className="mt-3 h-3 w-28 animate-pulse rounded-full bg-slate-200" />
-                      </div>
-                    </div>
+      <Modal
+        open={doctorPickerOpen}
+        title="Choose doctor"
+        description="Select a doctor for this consultation."
+        onClose={() => setDoctorPickerOpen(false)}
+        size="xl"
+      >
+        {availableDoctors.isLoading ? (
+          <div className="grid gap-3 md:grid-cols-2" aria-busy="true" aria-label="Loading doctors">
+            {[0, 1, 2, 3].map((item) => (
+              <div key={item} className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
+                <div className="flex gap-3">
+                  <div className="h-12 w-12 animate-pulse rounded-[8px] bg-white" />
+                  <div className="flex-1">
+                    <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
+                    <div className="mt-3 h-3 w-28 animate-pulse rounded-full bg-slate-200" />
                   </div>
-                ))}
+                </div>
               </div>
-            ) : availableDoctors.isError ? (
-              <Notice title="Doctor list could not load." tone="warning">
-                Please try again.
-              </Notice>
-            ) : doctorItems.length ? (
-              <div className="mt-5 grid gap-3 md:grid-cols-2">
-                {doctorItems.map((doctor) => {
-                  const available = doctor.availability_status === "available";
-                  const selected = selectedDoctor?.id === doctor.id;
-                  return (
-                    <ProviderPickerCard
-                      key={doctor.id}
-                      name={doctor.display_name}
-                      subtitle={doctorSpecialtyLabel(doctor)}
-                      primaryDetail={doctor.rating ? `${doctor.rating}/5 (${doctor.review_count ?? 0} reviews)` : "New doctor"}
-                      secondaryDetail={`${doctor.completed_consultations ?? 0} completed consultations`}
-                      imageUrl={doctor.profile_image_url}
-                      status={doctor.availability_status}
-                      selected={selected}
-                      disabled={!available}
-                      actionLabel="Select"
-                      onSelect={() => {
-                        setSelectedDoctor(doctor);
-                        form.setValue("doctor", doctor.id, { shouldValidate: true });
-                        setDoctorPickerOpen(false);
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              <Notice title="No doctors available right now." tone="neutral" />
-            )}
+            ))}
           </div>
-        </div>
-      ) : null}
+        ) : availableDoctors.isError ? (
+          <Notice title="Doctor list could not load." tone="warning">
+            Please try again.
+          </Notice>
+        ) : doctorItems.length ? (
+          <div className="grid gap-3 md:grid-cols-2">
+            {doctorItems.map((doctor) => {
+              const available = doctor.availability_status === "available";
+              const selected = selectedDoctor?.id === doctor.id;
+              return (
+                <ProviderPickerCard
+                  key={doctor.id}
+                  name={doctor.display_name}
+                  subtitle={doctorSpecialtyLabel(doctor)}
+                  primaryDetail={doctor.rating ? `${doctor.rating}/5 (${doctor.review_count ?? 0} reviews)` : "New doctor"}
+                  secondaryDetail={`${doctor.completed_consultations ?? 0} completed consultations`}
+                  imageUrl={doctor.profile_image_url}
+                  status={doctor.availability_status}
+                  selected={selected}
+                  disabled={!available}
+                  actionLabel="Select"
+                  onSelect={() => {
+                    setSelectedDoctor(doctor);
+                    form.setValue("doctor", doctor.id, { shouldValidate: true });
+                    setDoctorPickerOpen(false);
+                  }}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <Notice title="No doctors available right now." tone="neutral" />
+        )}
+      </Modal>
     </Section>
   );
 }

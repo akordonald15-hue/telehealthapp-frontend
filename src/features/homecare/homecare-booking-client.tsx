@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Home, Loader2, X } from "lucide-react";
+import { CheckCircle2, Home, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
@@ -9,6 +9,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input, Textarea } from "@/components/ui/input";
+import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
@@ -421,63 +422,52 @@ export function HomeCareBookingClient() {
         </Button>
       </form>
 
-      {selectorOpen ? (
-        <div className="fixed inset-0 z-[70] bg-slate-950/40 px-4 py-8 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="mx-auto flex max-h-full w-full max-w-4xl flex-col overflow-hidden rounded-[30px] bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
-              <h2 className="ct-card-title text-[#1F2937]">Select nurse</h2>
-              <button
-                type="button"
-                onClick={() => setSelectorOpen(false)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
-                aria-label="Close nurse selector"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="overflow-y-auto p-5 sm:p-6">
-              {nursesQuery.isLoading ? (
-                <div className="grid gap-3 md:grid-cols-2">
-                  {[0, 1, 2, 3].map((item) => (
-                    <div key={item} className="ct-surface rounded-[22px] p-4">
-                      <div className="h-32 animate-pulse rounded-[16px] bg-slate-100" />
-                    </div>
-                  ))}
-                </div>
-              ) : nursesQuery.isError ? (
-                <Notice title="We couldn't load nurses." tone="warning">
-                  {getFriendlyErrorMessage(nursesQuery.error, "homeCare")}
-                </Notice>
-              ) : nurseItems.length ? (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {nurseItems.map((nurse) => (
-                    <ProviderPickerCard
-                      key={nurse.id}
-                      name={nurse.display_name}
-                      subtitle={nurse.service_type || "Home care"}
-                      imageUrl={nurse.profile_image_url}
-                      status={nurse.availability_status}
-                      selected={selectedNurse?.id === nurse.id}
-                      disabled={nurse.availability_status !== "available"}
-                      primaryDetail={nurse.rating ? `Star ${nurse.rating} (${nurse.review_count ?? 0} reviews)` : "No reviews yet"}
-                      secondaryDetail={`${nurse.completed_visits ?? 0} completed visits`}
-                      actionLabel="Select"
-                      onSelect={() => {
-                        setAssignmentMode("choose");
-                        setSelectedNurse(nurse);
-                        setSelectorOpen(false);
-                      }}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <EmptyHomeCareNurseState zoneLabel={HOMECARE_ZONES.find((item) => item.value === zone)?.label} />
-              )}
-            </div>
+      <Modal
+        open={selectorOpen}
+        title="Select nurse"
+        description="Choose an available nurse assigned to your selected location."
+        onClose={() => setSelectorOpen(false)}
+        size="xl"
+        closeLabel="Close nurse selector"
+      >
+        {nursesQuery.isLoading ? (
+          <div className="grid gap-3 md:grid-cols-2">
+            {[0, 1, 2, 3].map((item) => (
+              <div key={item} className="ct-surface rounded-[22px] p-4">
+                <div className="h-32 animate-pulse rounded-[16px] bg-slate-100" />
+              </div>
+            ))}
           </div>
-        </div>
-      ) : null}
+        ) : nursesQuery.isError ? (
+          <Notice title="We couldn't load nurses." tone="warning">
+            {getFriendlyErrorMessage(nursesQuery.error, "homeCare")}
+          </Notice>
+        ) : nurseItems.length ? (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {nurseItems.map((nurse) => (
+              <ProviderPickerCard
+                key={nurse.id}
+                name={nurse.display_name}
+                subtitle={nurse.service_type || "Home care"}
+                imageUrl={nurse.profile_image_url}
+                status={nurse.availability_status}
+                selected={selectedNurse?.id === nurse.id}
+                disabled={nurse.availability_status !== "available"}
+                primaryDetail={nurse.rating ? `Star ${nurse.rating} (${nurse.review_count ?? 0} reviews)` : "No reviews yet"}
+                secondaryDetail={`${nurse.completed_visits ?? 0} completed visits`}
+                actionLabel="Select"
+                onSelect={() => {
+                  setAssignmentMode("choose");
+                  setSelectedNurse(nurse);
+                  setSelectorOpen(false);
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyHomeCareNurseState zoneLabel={HOMECARE_ZONES.find((item) => item.value === zone)?.label} />
+        )}
+      </Modal>
     </Section>
   );
 }

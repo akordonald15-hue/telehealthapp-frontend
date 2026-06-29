@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, Copy, Landmark, UploadCloud } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
 import type { PaymentInitiation } from "@/lib/types/backend";
 import { beginFilePickerGrace } from "@/lib/pwa/file-picker-guard";
@@ -151,91 +152,85 @@ export function BankTransferPaymentPanel({
         </Notice>
       ) : null}
 
-      {confirmOpen ? (
-        <div className="fixed inset-0 z-[80] grid place-items-center bg-slate-950/40 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="w-full max-w-md rounded-[8px] bg-white p-5 shadow-2xl">
-            <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-emerald-50 text-emerald-700">
-                <CheckCircle2 className="h-5 w-5" />
-              </span>
-              <div>
-                <h3 className="font-heading text-xl font-semibold text-[#1F2937]">Confirm payment notification?</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Only continue after you have completed the bank transfer and attached the correct receipt. Caretekk will verify it before the service opens.
-                </p>
-              </div>
-            </div>
-            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <Button type="button" variant="secondary" onClick={() => setConfirmOpen(false)}>
-                Cancel
-              </Button>
+      <Modal
+        open={confirmOpen}
+        title="Confirm payment notification?"
+        description="Only continue after you have completed the bank transfer and attached the correct receipt. Caretekk will verify it before the service opens."
+        onClose={() => setConfirmOpen(false)}
+        size="sm"
+        footer={
+          <>
+            <Button type="button" variant="secondary" onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setConfirmOpen(false);
+                if (proofFile) {
+                  onSubmit(proofFile);
+                }
+              }}
+            >
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-emerald-50 text-emerald-700">
+          <CheckCircle2 className="h-5 w-5" />
+        </span>
+      </Modal>
+
+      <Modal
+        open={detailsOpen}
+        title="Transfer to Caretekk"
+        description="Use the details below, then return here to notify Caretekk after payment."
+        onClose={() => setDetailsOpen(false)}
+        size="md"
+        footer={
+          <>
+            <Button type="button" variant="secondary" onClick={() => setDetailsOpen(false)}>
+              Close
+            </Button>
+            {!awaitingVerification ? (
               <Button
                 type="button"
+                disabled={isSubmitting || !proofFile}
                 onClick={() => {
-                  setConfirmOpen(false);
-                  if (proofFile) {
-                    onSubmit(proofFile);
+                  if (!proofFile) {
+                    setProofError("Please upload your payment proof before submitting.");
+                    return;
                   }
+                  setDetailsOpen(false);
+                  setConfirmOpen(true);
                 }}
               >
-                Confirm
+                {isSubmitting ? "Submitting..." : "I Have Made Payment"}
               </Button>
-            </div>
-          </div>
+            ) : null}
+          </>
+        }
+      >
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
+            <Landmark className="h-5 w-5" />
+          </span>
+          <p className="text-sm leading-6 text-slate-600">Copy the account details exactly before making your transfer.</p>
         </div>
-      ) : null}
 
-      {detailsOpen ? (
-        <div className="fixed inset-0 z-[80] grid place-items-center overflow-y-auto bg-slate-950/40 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="w-full max-w-lg rounded-[8px] bg-white p-5 shadow-2xl">
-            <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
-                <Landmark className="h-5 w-5" />
-              </span>
-              <div>
-                <h3 className="font-heading text-xl font-semibold text-[#1F2937]">Transfer to Caretekk</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Use the details below, then return here to notify Caretekk after payment.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 text-sm">
-              <PaymentLine label="Bank name" value={details.bank_name} />
-              <PaymentLine label="Account name" value={details.account_name} />
-              <PaymentLine label="Account number" value={details.account_number} copyValue={details.account_number} copyLabel="Copy account" />
-              <PaymentLine label="Amount to pay" value={amountLabel} copyValue={payment.amount} copyLabel="Copy amount" />
-              <PaymentLine label="Payment reference" value={payment.external_ref || details.reference} copyValue={payment.external_ref || details.reference} copyLabel="Copy reference" />
-            </div>
-
-            <p className="mt-4 text-sm leading-6 text-slate-600">
-              {details.instructions || "Please include this reference as your transfer narration whenever possible."}
-            </p>
-
-            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <Button type="button" variant="secondary" onClick={() => setDetailsOpen(false)}>
-                Close
-              </Button>
-              {!awaitingVerification ? (
-                <Button
-                  type="button"
-                  disabled={isSubmitting || !proofFile}
-                  onClick={() => {
-                    if (!proofFile) {
-                      setProofError("Please upload your payment proof before submitting.");
-                      return;
-                    }
-                    setDetailsOpen(false);
-                    setConfirmOpen(true);
-                  }}
-                >
-                  {isSubmitting ? "Submitting..." : "I Have Made Payment"}
-                </Button>
-              ) : null}
-            </div>
-          </div>
+        <div className="mt-5 grid gap-3 text-sm">
+          <PaymentLine label="Bank name" value={details.bank_name} />
+          <PaymentLine label="Account name" value={details.account_name} />
+          <PaymentLine label="Account number" value={details.account_number} copyValue={details.account_number} copyLabel="Copy account" />
+          <PaymentLine label="Amount to pay" value={amountLabel} copyValue={payment.amount} copyLabel="Copy amount" />
+          <PaymentLine label="Payment reference" value={payment.external_ref || details.reference} copyValue={payment.external_ref || details.reference} copyLabel="Copy reference" />
         </div>
-      ) : null}
+
+        <p className="mt-4 text-sm leading-6 text-slate-600">
+          {details.instructions || "Please include this reference as your transfer narration whenever possible."}
+        </p>
+      </Modal>
     </div>
   );
 }

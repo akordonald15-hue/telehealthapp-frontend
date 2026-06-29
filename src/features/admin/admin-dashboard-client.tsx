@@ -17,6 +17,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -110,33 +111,34 @@ function ConfirmActionButton({
       >
         {label}
       </button>
-      {open ? (
-        <div className="fixed inset-0 z-[70] grid place-items-center bg-slate-950/40 px-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="admin-confirm-title">
-          <div className="w-full max-w-md rounded-[24px] border border-white/70 bg-white p-5 shadow-2xl">
-            <h3 id="admin-confirm-title" className="font-heading text-xl font-semibold text-[#1F2937]">{title}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="min-h-10 rounded-[12px] border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  onConfirm();
-                }}
-                className={`min-h-10 rounded-[12px] px-4 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${tone === "danger" ? "bg-rose-700 text-white hover:bg-rose-800" : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"}`}
-              >
-                {confirmLabel}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <Modal
+        open={open}
+        title={title}
+        description={description}
+        onClose={() => setOpen(false)}
+        size="sm"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="min-h-10 rounded-[8px] border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onConfirm();
+              }}
+              className={`min-h-10 rounded-[8px] px-4 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${tone === "danger" ? "bg-rose-700 text-white hover:bg-rose-800" : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"}`}
+            >
+              {confirmLabel}
+            </button>
+          </>
+        }
+      />
     </>
   );
 }
