@@ -40,7 +40,7 @@ type NavItem = {
 const navItems: readonly NavItem[] = [
   { href: "/dashboard", label: "Dashboard", patientLabel: "Your Care Journey", icon: LayoutDashboard, roles: ["patient", "doctor", "admin", "nurse"] },
   { href: "/triage", label: "Care check-in", patientLabel: "Care Check-in", icon: HeartPulse, roles: ["patient"] },
-  { href: "/messages", label: "Messages", patientLabel: "Consultation", adminLabel: "Communications", icon: MessageSquare, roles: ["patient", "doctor", "admin"] },
+  { href: "/messages", label: "Messages", patientLabel: "Consultation / Messages", adminLabel: "Communications", icon: MessageSquare, roles: ["patient", "doctor", "admin"] },
   { href: "/care-plan", label: "Care Plan", patientLabel: "Care Plan", icon: ClipboardList, roles: ["patient"] },
   { href: "/home-care/book", label: "Home Care", patientLabel: "Home Care", icon: Home, roles: ["patient"] },
   { href: "/appointments", label: "Appointments", doctorLabel: "Consultations", adminLabel: "Bookings", icon: CalendarDays, roles: ["patient", "doctor", "admin"] },
