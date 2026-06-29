@@ -153,8 +153,11 @@ function consultationWindowLabel(thread: Thread | null, nowMs = Date.now()) {
     return "20-minute consultation";
   }
   const remainingMs = expiresAt - nowMs;
-  if (remainingMs <= 0 || thread.can_send_messages === false) {
+  if (thread.can_send_messages === false) {
     return "Consultation ended";
+  }
+  if (remainingMs <= 0) {
+    return "Checking consultation time";
   }
   const minutes = Math.max(1, Math.ceil(remainingMs / 60_000));
   return `${minutes} min left`;
@@ -312,10 +315,14 @@ export function MessagesClient() {
   const activeThreadDetails = threadItems.find((thread) => thread.id === activeThread) ?? null;
   const orderedMessageItems = useMemo(() => orderedMessages(messages.data?.results), [messages.data?.results]);
   const latestOrderedMessageId = orderedMessageItems.at(-1)?.id;
-  const sectionTitle = currentUser?.role === "patient" ? "Consultation" : "Messages";
+  const sectionTitle = currentUser?.role === "patient" ? "Consultation / Messages" : "Messages";
   const sectionDescription = "Secure care consultation.";
   const activeThreadExpired = threadExpiredByClock(activeThreadDetails, clockNow);
-  const canSendInActiveThread = Boolean(activeThread && activeThreadDetails?.can_send_messages !== false && !activeThreadExpired);
+  const canSendInActiveThread = Boolean(
+    activeThread &&
+      activeThreadDetails?.can_send_messages !== false &&
+      (!activeThreadExpired || activeThreadDetails?.can_send_messages === true),
+  );
   const canRecordVoice = Boolean(currentUser?.role === "patient" && canSendInActiveThread);
 
   useEffect(() => {
