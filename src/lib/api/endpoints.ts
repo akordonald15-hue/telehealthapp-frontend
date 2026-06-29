@@ -256,7 +256,11 @@ export const paymentsApi = {
   }) => apiRequest<PaymentInitiation>("/payments/initiate/", { method: "POST", body }),
   detail: (id: number) => apiRequest<Payment>(`/payments/${id}/`),
   retry: (id: number) => apiRequest<PaymentInitiation>(`/payments/${id}/retry/`, { method: "POST" }),
-  submitTransfer: (id: number) => apiRequest<PaymentInitiation>(`/payments/${id}/submit-transfer/`, { method: "POST", body: {} }),
+  submitTransfer: ({ paymentId, proofFile }: { paymentId: number; proofFile: File }) => {
+    const body = new FormData();
+    body.append("proof", proofFile);
+    return apiRequest<PaymentInitiation>(`/payments/${paymentId}/submit-transfer/`, { method: "POST", body });
+  },
   refund: (body: { payment: number; amount: string | number }) =>
     apiRequest<Refund>("/payments/refunds/", { method: "POST", body }),
 };

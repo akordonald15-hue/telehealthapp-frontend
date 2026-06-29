@@ -543,16 +543,30 @@ function ManualPaymentRow({ payment }: { payment: Payment }) {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <p className="text-sm font-bold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)}</p>
-            <p className="mt-1 break-words text-xs text-slate-600">
-              Reference: {payment.external_ref || payment.bank_transfer?.reference || "No reference"}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              {payment.patient_name || `Patient #${payment.patient}`} {payment.patient_phone ? `| ${payment.patient_phone}` : ""}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              {bookingLabel}
-              {payment.transfer_notified_at ? ` | Payment notice ${formatDateTime(payment.transfer_notified_at)}` : ""}
-            </p>
+          <p className="mt-1 break-words text-xs text-slate-600">
+            Reference: {payment.external_ref || payment.bank_transfer?.reference || "No reference"}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            {payment.patient_name || `Patient #${payment.patient}`} {payment.patient_phone ? `| ${payment.patient_phone}` : ""}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            {bookingLabel}
+            {payment.transfer_notified_at ? ` | Payment notice ${formatDateTime(payment.transfer_notified_at)}` : ""}
+          </p>
+          <div className="mt-2">
+            {payment.transfer_proof_uploaded ? (
+              <a
+                href={payment.transfer_proof_url || `/api/admin/payments/${payment.id}/proof/`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-8 items-center rounded-[8px] border border-amber-200 bg-white px-3 text-xs font-semibold text-amber-800 transition hover:bg-amber-50"
+              >
+                View payment proof
+              </a>
+            ) : (
+              <p className="text-xs font-semibold text-amber-700">No payment proof uploaded.</p>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <StatusBadge value={payment.status} />

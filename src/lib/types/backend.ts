@@ -530,6 +530,11 @@ export type Payment = {
   external_ref: string;
   provider_reference: string;
   transfer_notified_at?: string | null;
+  transfer_proof_uploaded?: boolean;
+  transfer_proof_url?: string | null;
+  transfer_proof_original_name?: string;
+  transfer_proof_content_type?: string;
+  transfer_proof_size?: number;
   manual_reviewed_at?: string | null;
   manual_review_note?: string;
   bank_transfer?: BankTransferDetails | null;
@@ -547,6 +552,10 @@ export type PaymentInitiation = {
   external_ref: string;
   initialization_status?: string;
   transfer_notified_at?: string | null;
+  transfer_proof_uploaded?: boolean;
+  transfer_proof_original_name?: string;
+  transfer_proof_content_type?: string;
+  transfer_proof_size?: number;
   bank_transfer?: BankTransferDetails | null;
   can_submit_transfer_notification?: boolean;
 };

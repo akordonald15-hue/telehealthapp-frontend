@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Copy, Landmark } from "lucide-react";
+import { CheckCircle2, Copy, Landmark, UploadCloud } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Notice } from "@/components/ui/notice";
@@ -37,16 +37,40 @@ export function BankTransferPaymentPanel({
   isSubmitting: boolean;
   submitted: boolean;
   error?: string | null;
-  onSubmit: () => void;
+  onSubmit: (proofFile: File) => void;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofError, setProofError] = useState("");
   const details = payment.bank_transfer;
   if (!details) {
     return null;
   }
   const amountLabel = formatMoney(payment.amount, payment.currency);
   const awaitingVerification = submitted || payment.status === "awaiting_manual_verification";
+  const proofUploaded = Boolean(payment.transfer_proof_uploaded);
+  const proofReady = Boolean(proofFile || proofUploaded);
+
+  function handleProofFile(file: File | null) {
+    setProofError("");
+    if (!file) {
+      setProofFile(null);
+      return;
+    }
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (!allowedTypes.includes(file.type)) {
+      setProofFile(null);
+      setProofError("Upload a JPG, PNG, WebP, or PDF payment proof.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setProofFile(null);
+      setProofError("Payment proof must be 5 MB or smaller.");
+      return;
+    }
+    setProofFile(file);
+  }
 
   return (
     <div className="grid gap-4 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
@@ -74,12 +98,49 @@ export function BankTransferPaymentPanel({
 
       {awaitingVerification ? (
         <Notice title="Awaiting Payment Verification" tone="warning">
-          We have received your payment notification. Our team is verifying your transfer. This usually takes only a few minutes during working hours.
+          We have received your payment proof. Our team is verifying your transfer. This usually takes only a few minutes during working hours.
         </Notice>
       ) : (
-        <Button type="button" className="w-full sm:w-fit" disabled={isSubmitting} onClick={() => setConfirmOpen(true)}>
-          {isSubmitting ? "Submitting..." : "I Have Made Payment"}
-        </Button>
+        <div className="grid gap-3 rounded-[8px] border border-dashed border-[#BFDBFE] bg-white p-4">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[#EFF6FF] text-[#2563EB]">
+              <UploadCloud className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-[#1F2937]">Upload payment proof</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                Add a transfer screenshot, receipt image, or PDF so admin can verify your payment.
+              </p>
+            </div>
+          </div>
+          <label className="grid cursor-pointer gap-2 rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition hover:bg-slate-100">
+            <span className="font-semibold text-[#1F2937]">{proofFile ? "Change payment proof" : "Choose payment proof"}</span>
+            <span className="break-words text-xs text-slate-500">
+              {proofFile ? proofFile.name : "JPG, PNG, WebP, or PDF. Maximum 5 MB."}
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+              className="sr-only"
+              onChange={(event) => handleProofFile(event.target.files?.[0] ?? null)}
+            />
+          </label>
+          {proofError ? <p className="text-sm font-semibold text-amber-700">{proofError}</p> : null}
+          <Button
+            type="button"
+            className="w-full sm:w-fit"
+            disabled={isSubmitting || !proofReady}
+            onClick={() => {
+              if (!proofFile) {
+                setProofError("Please upload your payment proof before submitting.");
+                return;
+              }
+              setConfirmOpen(true);
+            }}
+          >
+            {isSubmitting ? "Submitting..." : "Submit Payment Proof"}
+          </Button>
+        </div>
       )}
 
       {error ? (
@@ -98,7 +159,7 @@ export function BankTransferPaymentPanel({
               <div>
                 <h3 className="font-heading text-xl font-semibold text-[#1F2937]">Confirm payment notification?</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Only continue after you have completed the bank transfer. Caretekk will verify the bank alert before the consultation opens.
+                  Only continue after you have completed the bank transfer and attached the correct receipt. Caretekk will verify it before the service opens.
                 </p>
               </div>
             </div>
@@ -110,7 +171,9 @@ export function BankTransferPaymentPanel({
                 type="button"
                 onClick={() => {
                   setConfirmOpen(false);
-                  onSubmit();
+                  if (proofFile) {
+                    onSubmit(proofFile);
+                  }
                 }}
               >
                 Confirm

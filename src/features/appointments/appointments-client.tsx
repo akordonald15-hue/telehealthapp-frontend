@@ -275,7 +275,7 @@ export function AppointmentsClient() {
                 isSubmitting={submitTransfer.isPending}
                 submitted={submitTransfer.isSuccess || manualPayment?.status === "awaiting_manual_verification"}
                 error={submitTransfer.error ? getFriendlyErrorMessage(submitTransfer.error, "payments") : null}
-                onSubmit={() => submitTransfer.mutate(activeBankTransferPayment.payment_id)}
+                onSubmit={(proofFile) => submitTransfer.mutate({ paymentId: activeBankTransferPayment.payment_id, proofFile })}
               />
             </div>
           ) : null}
