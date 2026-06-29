@@ -264,8 +264,7 @@ export function HomeCareBookingClient() {
         </div>
 
         <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
-          <span className="font-semibold text-[#1F2937]">Payment method:</span> Bank transfer is active for launch.
-          Paystack is hidden until gateway verification is complete.
+          <span className="font-semibold text-[#1F2937]">Payment method:</span> Secure bank transfer.
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
