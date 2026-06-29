@@ -148,7 +148,10 @@ export function AppointmentsClient() {
     enabled: user?.role === "patient",
   });
   const doctorItems = availableDoctors.data?.results ?? [];
-  const doctorCanBeBooked = selectedDoctor?.availability_status === "available";
+  const selectedDoctorLive = selectedDoctor
+    ? doctorItems.find((doctor) => doctor.id === selectedDoctor.id) ?? (availableDoctors.isSuccess ? null : selectedDoctor)
+    : null;
+  const doctorCanBeBooked = selectedDoctorLive?.availability_status === "available";
   const profileIncomplete = Boolean(user?.role === "patient" && patientProfile.data && !patientProfile.data.profile_complete);
   const triageSessionParam = Number(searchParams.get("triage_session"));
   const triageSessionId = Number.isInteger(triageSessionParam) && triageSessionParam > 0 ? triageSessionParam : null;
@@ -157,8 +160,8 @@ export function AppointmentsClient() {
   const watchedAppointment = form.watch();
   const appointmentDraftKey = user?.id ? `caretekk:draft:consultation-booking:${user.id}` : null;
   const appointmentDraftValue = {
-    doctor: selectedDoctor?.id ?? watchedAppointment.doctor ?? 0,
-    selectedDoctor,
+    doctor: selectedDoctorLive?.id ?? selectedDoctor?.id ?? watchedAppointment.doctor ?? 0,
+    selectedDoctor: selectedDoctorLive ?? selectedDoctor,
     scheduled_at: watchedAppointment.scheduled_at ?? "",
     reason: watchedAppointment.reason ?? "",
   };
@@ -278,14 +281,14 @@ export function AppointmentsClient() {
           ) : null}
           <Field label="Selected Doctor" error={form.formState.errors.doctor?.message}>
             <div className="grid gap-3">
-              {selectedDoctor ? (
+              {selectedDoctorLive ? (
                 <div className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-[#1F2937]">{selectedDoctor.display_name}</p>
-                      <p className="mt-1 text-sm text-slate-600">{doctorSpecialtyLabel(selectedDoctor)}</p>
+                      <p className="text-sm font-semibold text-[#1F2937]">{selectedDoctorLive.display_name}</p>
+                      <p className="mt-1 text-sm text-slate-600">{doctorSpecialtyLabel(selectedDoctorLive)}</p>
                     </div>
-                    <StatusBadge value={selectedDoctor.availability_status} />
+                    <StatusBadge value={selectedDoctorLive.availability_status} />
                   </div>
                 </div>
               ) : (
@@ -309,7 +312,13 @@ export function AppointmentsClient() {
             <Textarea placeholder="Why do you need to see a doctor?" {...form.register("reason")} />
           </Field>
           <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending || !doctorCanBeBooked || profileIncomplete || !triageSessionId}>
-            {createAppointment.isPending ? "Starting checkout..." : triageSessionId ? "Book Appointment" : "Complete care check-in first"}
+            {createAppointment.isPending
+              ? "Starting checkout..."
+              : !triageSessionId
+                ? "Complete care check-in first"
+                : !doctorCanBeBooked
+                  ? "Choose an available doctor"
+                  : "Book Appointment"}
           </Button>
         </form>
       ) : isDoctor ? (

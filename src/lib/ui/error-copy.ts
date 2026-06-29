@@ -65,6 +65,22 @@ const MESSAGE_OVERRIDES: Array<{ pattern: RegExp; replacement: string }> = [
   { pattern: /method .* not allowed/i, replacement: "That action isn't available right now." },
   { pattern: /throttled|too many requests/i, replacement: "You've made a few requests in a short time. Please wait a moment and try again." },
   {
+    pattern: /doctor.*not available for booking|not available for an immediate consultation/i,
+    replacement: "That doctor is not available right now. Please choose another available doctor.",
+  },
+  {
+    pattern: /care check-in.*already linked|triage_session.*already linked/i,
+    replacement: "This care check-in has already been used. Please start a fresh care check-in for this consultation.",
+  },
+  {
+    pattern: /complete the care check-in before booking/i,
+    replacement: "Please finish your care check-in before booking the consultation.",
+  },
+  {
+    pattern: /already has a consultation in that time window/i,
+    replacement: "That doctor already has a consultation at that time. Please choose another time.",
+  },
+  {
     pattern: /valid phone number in 080|phone number.*\+234|invalid phone/i,
     replacement: "Enter a valid phone number in 080... or +234... format.",
   },
