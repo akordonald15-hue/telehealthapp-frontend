@@ -33,6 +33,21 @@ const HOMECARE_ZONES: Array<{ value: HomeCareZone; label: string }> = [
   { value: "uyo", label: "Uyo" },
 ];
 
+function providerPresence(provider: AdminProvider): { tone: "green" | "amber" | "rose"; label: string } {
+  if (provider.availability_status === "available") {
+    return { tone: "green", label: "Available" };
+  }
+  if (provider.availability_status === "offline") {
+    return { tone: "rose", label: "Offline" };
+  }
+  if (!provider.last_active_at) {
+    return { tone: "amber", label: "No recent heartbeat" };
+  }
+  const minutes = Math.max(0, Math.round((Date.now() - new Date(provider.last_active_at).getTime()) / 60_000));
+  const label = minutes < 1 ? "Last active just now" : `Last active ${minutes} min ago`;
+  return { tone: "amber", label };
+}
+
 function Metric({
   label,
   value,
@@ -198,6 +213,7 @@ function AdminUserRow({ user }: { user: AdminUser }) {
 
 function ProviderRow({ provider }: { provider: AdminProvider }) {
   const queryClient = useQueryClient();
+  const presence = providerPresence(provider);
   const updateProvider = useMutation({
     mutationFn: (body: Parameters<typeof adminApi.updateProviderStatus>[2]) =>
       adminApi.updateProviderStatus(provider.provider_type, provider.id, body),
@@ -218,6 +234,7 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
           <div className="mt-2 flex flex-wrap gap-2">
             <Badge tone={provider.provider_type === "doctor" ? "cyan" : "green"}>{provider.provider_type}</Badge>
             <StatusBadge value={provider.availability_status} />
+            <Badge tone={presence.tone}>{presence.label}</Badge>
             <Badge tone={provider.is_active ? "green" : "rose"}>{provider.is_active ? "active" : "inactive"}</Badge>
             {provider.onboarding_status ? <StatusBadge value={provider.onboarding_status} /> : null}
           </div>
@@ -233,7 +250,7 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
           ) : null}
           <p className="mt-1 text-xs text-slate-500">
             {provider.active_job_label}
-            {provider.last_active_at ? ` | Last active ${formatDateTime(provider.last_active_at)}` : ""}
+            {provider.last_active_at ? ` | Heartbeat ${formatDateTime(provider.last_active_at)}` : ""}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
