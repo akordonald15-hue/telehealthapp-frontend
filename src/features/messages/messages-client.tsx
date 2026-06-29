@@ -22,6 +22,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { Section } from "@/components/ui/section";
 import { messagingApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
+import { beginFilePickerGrace } from "@/lib/pwa/file-picker-guard";
 import { buildWebSocketUrl } from "@/lib/realtime";
 import type { Message, Thread, UserRole } from "@/lib/types/backend";
 import { cn } from "@/lib/utils";
@@ -732,7 +733,10 @@ export function MessagesClient() {
               recordingSeconds={recordingSeconds}
               onValueChange={setComposerValue}
               onSubmit={handleSubmit}
-              onPickAttachment={() => fileInputRef.current?.click()}
+              onPickAttachment={() => {
+                beginFilePickerGrace();
+                fileInputRef.current?.click();
+              }}
               onStartVoiceRecording={startVoiceRecording}
               onStopVoiceRecording={stopVoiceRecording}
               onClearAttachment={clearAttachment}
@@ -742,6 +746,7 @@ export function MessagesClient() {
               className="hidden"
               type="file"
               accept="image/*,.pdf,.doc,.docx"
+              onClick={() => beginFilePickerGrace()}
               onChange={handleAttachmentChange}
             />
           </main>

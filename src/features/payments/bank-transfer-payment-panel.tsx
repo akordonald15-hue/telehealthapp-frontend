@@ -6,6 +6,7 @@ import { CheckCircle2, Copy, Landmark, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Notice } from "@/components/ui/notice";
 import type { PaymentInitiation } from "@/lib/types/backend";
+import { beginFilePickerGrace } from "@/lib/pwa/file-picker-guard";
 import { formatMoney } from "@/lib/utils";
 
 function CopyButton({ value, label }: { value: string; label: string }) {
@@ -122,6 +123,7 @@ export function BankTransferPaymentPanel({
               type="file"
               accept="image/jpeg,image/png,image/webp,application/pdf"
               className="sr-only"
+              onClick={() => beginFilePickerGrace()}
               onChange={(event) => handleProofFile(event.target.files?.[0] ?? null)}
             />
           </label>
@@ -217,8 +219,12 @@ export function BankTransferPaymentPanel({
               {!awaitingVerification ? (
                 <Button
                   type="button"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !proofFile}
                   onClick={() => {
+                    if (!proofFile) {
+                      setProofError("Please upload your payment proof before submitting.");
+                      return;
+                    }
                     setDetailsOpen(false);
                     setConfirmOpen(true);
                   }}

@@ -1,25 +1,64 @@
 "use client";
 
 import { WifiOff } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { FILE_PICKER_GRACE_EVENT, FILE_PICKER_GRACE_MS } from "@/lib/pwa/file-picker-guard";
+
+const OFFLINE_BANNER_GRACE_MS = 30 * 1000;
 
 export function OfflineStatusBanner() {
   const [isOnline, setIsOnline] = useState(true);
+  const filePickerGraceUntilRef = useRef(0);
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
-    const syncStatus = () => setIsOnline(window.navigator.onLine);
+    let offlineTimer: number | null = null;
+
+    const clearOfflineTimer = () => {
+      if (offlineTimer !== null) {
+        window.clearTimeout(offlineTimer);
+        offlineTimer = null;
+      }
+    };
+
+    const syncStatus = () => {
+      clearOfflineTimer();
+      if (window.navigator.onLine) {
+        setIsOnline(true);
+        return;
+      }
+      const graceRemaining = Math.max(0, filePickerGraceUntilRef.current - Date.now());
+      const delayMs = Math.max(OFFLINE_BANNER_GRACE_MS, graceRemaining);
+      offlineTimer = window.setTimeout(() => {
+        if (!window.navigator.onLine && document.visibilityState === "visible") {
+          setIsOnline(false);
+        }
+      }, delayMs);
+    };
+
+    const handleFilePickerGrace = (event: Event) => {
+      const detail = (event as CustomEvent<{ until?: number }>).detail;
+      filePickerGraceUntilRef.current = Math.max(
+        filePickerGraceUntilRef.current,
+        typeof detail?.until === "number" ? detail.until : Date.now() + FILE_PICKER_GRACE_MS,
+      );
+      syncStatus();
+    };
 
     syncStatus();
     window.addEventListener("online", syncStatus);
     window.addEventListener("offline", syncStatus);
+    window.addEventListener(FILE_PICKER_GRACE_EVENT, handleFilePickerGrace);
 
     return () => {
+      clearOfflineTimer();
       window.removeEventListener("online", syncStatus);
       window.removeEventListener("offline", syncStatus);
+      window.removeEventListener(FILE_PICKER_GRACE_EVENT, handleFilePickerGrace);
     };
   }, []);
 
