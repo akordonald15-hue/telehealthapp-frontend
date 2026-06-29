@@ -115,7 +115,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/42 px-4 py-5 backdrop-blur-sm sm:px-6"
+      className="fixed inset-0 z-[80] flex items-stretch justify-center bg-slate-950/42 p-0 backdrop-blur-sm sm:items-center sm:px-6 sm:py-5"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
@@ -129,12 +129,12 @@ export function Modal({
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
         className={cn(
-          "flex max-h-[85dvh] w-[94vw] flex-col overflow-hidden rounded-[8px] border border-white/75 bg-white shadow-[0_30px_90px_-42px_rgba(15,23,42,0.55)] outline-none",
+          "flex h-[100dvh] max-h-[100dvh] w-screen flex-col overflow-hidden border-0 bg-white shadow-[0_30px_90px_-42px_rgba(15,23,42,0.55)] outline-none sm:h-auto sm:max-h-[85dvh] sm:w-[94vw] sm:rounded-[8px] sm:border sm:border-white/75",
           sizeClasses[size],
           className,
         )}
       >
-        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+        <div className="sticky top-0 z-10 flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 bg-white px-5 py-4 sm:px-6">
           <div className="min-w-0">
             <h2 id={titleId} className="font-heading text-lg font-semibold leading-7 text-[#1F2937] sm:text-xl">
               {title}
@@ -157,10 +157,10 @@ export function Modal({
           ) : null}
         </div>
 
-        {children ? <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">{children}</div> : null}
+        {children ? <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5 sm:px-6">{children}</div> : null}
 
         {footer ? (
-          <div className="shrink-0 border-t border-slate-100 bg-white px-5 py-4 sm:px-6">
+          <div className="sticky bottom-0 z-10 shrink-0 border-t border-slate-100 bg-white px-5 py-4 sm:px-6">
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">{footer}</div>
           </div>
         ) : null}
