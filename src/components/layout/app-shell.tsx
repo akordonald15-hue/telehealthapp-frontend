@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { OfflineStatusBanner } from "@/components/pwa/offline-status-banner";
@@ -40,7 +40,7 @@ type NavItem = {
 const navItems: readonly NavItem[] = [
   { href: "/dashboard", label: "Dashboard", patientLabel: "Your Care Journey", icon: LayoutDashboard, roles: ["patient", "doctor", "admin", "nurse"] },
   { href: "/triage", label: "Care check-in", patientLabel: "Care Check-in", icon: HeartPulse, roles: ["patient"] },
-  { href: "/messages", label: "Messages", patientLabel: "Consultation / Messages", adminLabel: "Communications", icon: MessageSquare, roles: ["patient", "doctor", "admin"] },
+  { href: "/messages", label: "Messages", patientLabel: "Messages", adminLabel: "Communications", icon: MessageSquare, roles: ["patient", "doctor", "admin"] },
   { href: "/care-plan", label: "Care Plan", patientLabel: "Care Plan", icon: ClipboardList, roles: ["patient"] },
   { href: "/home-care/book", label: "Home Care", patientLabel: "Home Care", icon: Home, roles: ["patient"] },
   { href: "/appointments", label: "Appointments", doctorLabel: "Consultations", adminLabel: "Bookings", icon: CalendarDays, roles: ["patient", "doctor", "admin"] },
@@ -98,10 +98,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     const patientOrder = [
       "/dashboard",
       "/triage",
-        "/messages",
-        "/care-plan",
-        "/referrals",
-        "/home-care/book",
+      "/messages",
+      "/care-plan",
+      "/referrals",
+      "/home-care/book",
       "/appointments",
       "/records",
       "/profile",
@@ -144,27 +144,33 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           const Icon = item.icon;
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                "group flex items-center gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15",
-                active
-                  ? "border-[rgba(66,107,179,0.18)] bg-[var(--primary-soft)] text-[var(--primary)] shadow-[0_18px_34px_-30px_rgba(66,107,179,0.28)]"
-                  : "border-transparent bg-white/70 text-slate-600 hover:border-slate-200 hover:bg-white hover:text-[#1F2937] hover:shadow-[0_14px_30px_-30px_rgba(15,23,42,0.24)]",
-              )}
-            >
-              <span
+            <Fragment key={item.href}>
+              {user?.role === "patient" && item.href === "/triage" ? (
+                <p className="px-4 pt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  Consultation / Messages
+                </p>
+              ) : null}
+              <Link
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-[14px] transition",
-                  active ? "bg-white text-[var(--primary)]" : "bg-slate-100 text-slate-500 group-hover:bg-[var(--primary-soft)] group-hover:text-[var(--primary)]",
+                  "group flex items-center gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15",
+                  active
+                    ? "border-[rgba(66,107,179,0.18)] bg-[var(--primary-soft)] text-[var(--primary)] shadow-[0_18px_34px_-30px_rgba(66,107,179,0.28)]"
+                    : "border-transparent bg-white/70 text-slate-600 hover:border-slate-200 hover:bg-white hover:text-[#1F2937] hover:shadow-[0_14px_30px_-30px_rgba(15,23,42,0.24)]",
                 )}
               >
-                <Icon className="h-4 w-4" />
-              </span>
-              <span className="flex-1">{navLabelForRole(item, user?.role)}</span>
-            </Link>
+                <span
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-[14px] transition",
+                    active ? "bg-white text-[var(--primary)]" : "bg-slate-100 text-slate-500 group-hover:bg-[var(--primary-soft)] group-hover:text-[var(--primary)]",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="flex-1">{navLabelForRole(item, user?.role)}</span>
+              </Link>
+            </Fragment>
           );
         })}
       </nav>
