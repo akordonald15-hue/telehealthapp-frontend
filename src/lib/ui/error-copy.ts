@@ -69,12 +69,16 @@ const MESSAGE_OVERRIDES: Array<{ pattern: RegExp; replacement: string }> = [
     replacement: "That doctor is not available right now. Please choose another available doctor.",
   },
   {
-    pattern: /care check-in.*already linked|triage_session.*already linked/i,
-    replacement: "This care check-in has already been used. Please start a fresh care check-in for this consultation.",
+    pattern: /care check.*already.*used|care check-in.*already linked|triage_session.*already linked/i,
+    replacement: "This care check has already been used for a consultation. Please start a new care check.",
   },
   {
-    pattern: /complete the care check-in before booking/i,
-    replacement: "Please finish your care check-in before booking the consultation.",
+    pattern: /complete a care check before booking|complete the care check-in before booking/i,
+    replacement: "Please complete a care check before booking this consultation.",
+  },
+  {
+    pattern: /couldn.t find your completed care check|select a valid care check/i,
+    replacement: "We couldn't find your completed care check. Please start a new one.",
   },
   {
     pattern: /already has a consultation in that time window/i,

@@ -151,7 +151,7 @@ export const appointmentsApi = {
   list: (query?: { page?: number; page_size?: number }) => apiList<Appointment>("/appointments/", query),
   availableDoctors: (query?: { page?: number; page_size?: number; specialty?: string; search?: string }) =>
     apiList<ProviderDoctor>("/appointments/available-doctors/", query),
-  book: (body: { doctor: number; triage_session: number; scheduled_at: string; reason?: string; notes?: string; callback_url: string }) =>
+  book: (body: { doctor: number; triage_session?: number; scheduled_at: string; reason?: string; notes?: string; callback_url: string }) =>
     apiRequest<AppointmentBookingResponse>("/appointments/book/", { method: "POST", body }),
   create: (body: { doctor: number; scheduled_at: string; status?: string; reason?: string; notes?: string }) =>
     apiRequest<Appointment>("/appointments/", { method: "POST", body }),

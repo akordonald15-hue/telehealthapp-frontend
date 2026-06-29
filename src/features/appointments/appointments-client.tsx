@@ -233,7 +233,7 @@ export function AppointmentsClient() {
           onSubmit={form.handleSubmit((values) =>
             createAppointment.mutate({
               doctor: values.doctor,
-              triage_session: triageSessionId as number,
+              ...(triageSessionId ? { triage_session: triageSessionId } : {}),
               scheduled_at: values.scheduled_at,
               reason: values.reason,
               notes: "",
@@ -270,10 +270,10 @@ export function AppointmentsClient() {
               This consultation will include the triage summary you just completed.
             </Notice>
           ) : (
-            <Notice title="Complete a care check-in before booking" tone="warning">
-              Each doctor consultation needs a fresh symptom check-in so the doctor receives the right context.
+            <Notice title="Care check-in required" tone="warning">
+              Please complete a care check before booking this consultation. If you just completed one, we&apos;ll use your latest unused check.
               <Link className="ml-2 font-semibold text-amber-800 underline" href="/triage?booking=1">
-                Start care check-in
+                Start Care Check
               </Link>
             </Notice>
           )}
@@ -350,14 +350,12 @@ export function AppointmentsClient() {
           <Field label="Reason" error={form.formState.errors.reason?.message}>
             <Textarea placeholder="Why do you need to see a doctor?" {...form.register("reason")} />
           </Field>
-          <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending || !doctorCanBeBooked || profileIncomplete || !triageSessionId}>
+          <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending || !doctorCanBeBooked || profileIncomplete}>
             {createAppointment.isPending
               ? "Starting checkout..."
-              : !triageSessionId
-                ? "Complete care check-in first"
-                : !doctorCanBeBooked
-                  ? "Choose an available doctor"
-                  : "Book Appointment"}
+              : !doctorCanBeBooked
+                ? "Choose an available doctor"
+                : "Book Appointment"}
           </Button>
         </form>
       ) : isDoctor ? (
