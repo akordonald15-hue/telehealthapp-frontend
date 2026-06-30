@@ -1,7 +1,22 @@
 ﻿"use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, CalendarClock, ClipboardList, CreditCard, FileText, MessageSquareText, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Bell,
+  CalendarClock,
+  ClipboardList,
+  CreditCard,
+  FileText,
+  HeartPulse,
+  Home,
+  MessageSquareText,
+  ShieldCheck,
+  Sparkles,
+  Stethoscope,
+  UsersRound,
+  Video,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -15,7 +30,7 @@ import { appointmentsApi, messagingApi, paymentsApi, profilesApi, referralsApi }
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { appointmentCompanionLabel, paymentSummary } from "@/lib/ui/humanize";
-import type { PaginatedResponse, PatientProfile } from "@/lib/types/backend";
+import type { Appointment, PaginatedResponse, PatientProfile, Thread } from "@/lib/types/backend";
 import { formatDateTime, formatMoney } from "@/lib/utils";
 import { DoctorDashboardClient } from "@/features/dashboard/doctor-dashboard-client";
 import { NurseDashboardClient } from "@/features/nurse/nurse-dashboard-client";
@@ -58,6 +73,73 @@ function listMetric<T>(query: ListQuery<T>) {
     return "Error";
   }
   return query.data?.count ?? query.data?.results.length ?? 0;
+}
+
+function firstName(value?: string | null) {
+  return value?.trim().split(/\s+/)[0] || "there";
+}
+
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function upcomingAppointment(items: Appointment[] | undefined) {
+  const now = Date.now();
+  return (items ?? [])
+    .filter((item) => !["completed", "cancelled", "missed"].includes(item.status))
+    .sort((left, right) => new Date(left.scheduled_at).getTime() - new Date(right.scheduled_at).getTime())
+    .find((item) => new Date(item.scheduled_at).getTime() >= now) ?? (items ?? [])[0];
+}
+
+function latestThread(items: Thread[] | undefined) {
+  return (items ?? [])
+    .filter((thread) => thread.last_message)
+    .sort((left, right) => {
+      const leftTime = new Date(left.last_message?.created_at ?? left.updated_at ?? left.created_at).getTime();
+      const rightTime = new Date(right.last_message?.created_at ?? right.updated_at ?? right.created_at).getTime();
+      return rightTime - leftTime;
+    })[0];
+}
+
+function shortTime(value?: string | null) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(value));
+}
+
+function DashboardSkeleton({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded-[8px] bg-slate-100 ${className}`} />;
+}
+
+function QuickAction({
+  href,
+  title,
+  description,
+  icon: Icon,
+}: {
+  href: string;
+  title: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group grid min-h-[136px] rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_18px_48px_-42px_rgba(15,23,42,0.32)] transition duration-200 hover:-translate-y-0.5 hover:border-[#0F766E]/20 hover:shadow-[0_24px_54px_-42px_rgba(15,23,42,0.36)]"
+    >
+      <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-emerald-50 text-[#0F766E]">
+        <Icon className="h-5 w-5" />
+      </span>
+      <span className="mt-4 font-semibold text-[#1F2937]">{title}</span>
+      <span className="mt-1 text-sm leading-6 text-slate-600">{description}</span>
+      <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#0F766E]">
+        Open
+        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+      </span>
+    </Link>
+  );
 }
 
 export function DashboardClient() {
@@ -123,26 +205,13 @@ export function DashboardClient() {
     return <AdminDashboardClient />;
   }
 
-  const threadMetric = listMetric(threads);
-  const referralMetric = listMetric(referrals);
   const carePlanMetric = listMetric(carePlans);
   const paymentMetric = canLoadPayments ? listMetric(payments) : 0;
-  const patientHasConsultation = typeof threadMetric === "number" && threadMetric > 0;
   const patientHasCarePlan = typeof carePlanMetric === "number" && carePlanMetric > 0;
-  const patientHasReferral = typeof referralMetric === "number" && referralMetric > 0;
-  const nextPatientStep = patientHasConsultation
-    ? {
-        title: "Guided Journey",
-        description: "Your consultation is ready.",
-        href: "/messages",
-        cta: "Open Consultation",
-      }
-    : {
-        title: "Guided Journey",
-        description: "Start with the Caretekk Assistant.",
-        href: "/appointments",
-        cta: "Book Doctor",
-      };
+  const nextAppointment = upcomingAppointment(appointments.data?.results);
+  const recentThread = latestThread(threads.data?.results);
+  const patientName = firstName(user?.full_name || patientProfile.data?.full_name);
+  const carePlanProgress = patientHasCarePlan ? Math.min(100, Math.max(30, carePlanMetric * 30)) : 0;
   const dashboardErrors = [
     appointments.isError ? `Appointments: ${getFriendlyErrorMessage(appointments.error, "dashboard")}` : null,
     threads.isError ? `Messages: ${getFriendlyErrorMessage(threads.error, "dashboard")}` : null,
@@ -202,19 +271,201 @@ export function DashboardClient() {
             </div>
           </Modal>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_55%,#60A5FA_100%)] p-5 text-white shadow-[0_24px_64px_-42px_rgba(37,99,235,0.42)]">
-              <p className="ct-caption text-blue-100">Guided Journey</p>
-              <h2 className="mt-3 font-heading text-xl font-semibold text-white">{nextPatientStep.description}</h2>
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.36fr)]">
+            <div className="grid gap-5">
+              <div className="animate-[fadeIn_0.35s_ease-out]">
+                <h2 className="font-heading text-2xl font-semibold tracking-[-0.02em] text-[#1F2937] sm:text-3xl">
+                  {greeting()}, {patientName}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">How can we help you today?</p>
+              </div>
+
+              <Link
+                href="/appointments"
+                className="group overflow-hidden rounded-[8px] border border-emerald-100 bg-[linear-gradient(135deg,#ECFDF5_0%,#F8FBFF_100%)] p-5 shadow-[0_24px_70px_-50px_rgba(15,118,110,0.45)] transition duration-200 hover:-translate-y-0.5 sm:p-6"
+              >
+                <div className="grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-[8px] bg-white text-[#0F766E] shadow-sm sm:h-28 sm:w-28">
+                    <Sparkles className="h-10 w-10" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#0F766E]">AI Health Assistant</p>
+                    <h3 className="mt-2 font-heading text-2xl font-semibold leading-tight text-[#1F2937]">
+                      How are you feeling today?
+                    </h3>
+                    <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+                      Tell us how you feel and we&apos;ll recommend the right doctor.
+                    </p>
+                    <span className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-[8px] bg-[#0F766E] px-5 text-sm font-semibold text-white shadow-[0_18px_42px_-28px_rgba(15,118,110,0.65)] sm:w-auto sm:min-w-[260px]">
+                      Book a Doctor
+                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+
+              <section className="rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_20px_60px_-48px_rgba(15,23,42,0.36)] sm:p-5">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-emerald-50 text-[#0F766E]">
+                      <CalendarClock className="h-4 w-4" />
+                    </span>
+                    <h3 className="font-semibold text-[#1F2937]">Upcoming Appointment</h3>
+                  </div>
+                  {nextAppointment ? <StatusBadge value={nextAppointment.status} /> : null}
+                </div>
+                {appointments.isLoading ? (
+                  <div className="grid gap-3">
+                    <DashboardSkeleton className="h-16" />
+                    <DashboardSkeleton className="h-10" />
+                  </div>
+                ) : nextAppointment ? (
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-4">
+                      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[8px] bg-slate-100 text-lg font-semibold text-[#0F766E]">
+                        {nextAppointment.doctor_profile?.display_name?.slice(0, 2) || "Dr"}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-[#1F2937]">{nextAppointment.doctor_profile?.display_name || "Doctor"}</p>
+                        <p className="mt-1 text-sm text-slate-600">Doctor consultation</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                          <span className="inline-flex items-center gap-1 text-[#0F766E]">
+                            <CalendarClock className="h-4 w-4" />
+                            {formatDateTime(nextAppointment.scheduled_at)}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Video className="h-4 w-4" />
+                            Secure chat
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <Link
+                      href={`/appointments/${nextAppointment.id}`}
+                      className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-[#0F766E]/30 px-4 text-sm font-semibold text-[#0F766E]"
+                    >
+                      View Details
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="rounded-[8px] bg-slate-50 px-4 py-5">
+                    <p className="font-semibold text-[#1F2937]">No upcoming appointment</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">Book a doctor when you need care.</p>
+                    <Link href="/appointments" className="mt-3 inline-flex text-sm font-semibold text-[#0F766E]">
+                      Book a Doctor
+                    </Link>
+                  </div>
+                )}
+              </section>
+
+              <section>
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="font-semibold text-[#1F2937]">Quick Actions</h3>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <QuickAction href="/home-care/book" title="Home Care" description="Book a nurse at home" icon={Home} />
+                  <QuickAction href="/care-plan" title="Care Plan" description="View your care plan" icon={ClipboardList} />
+                  <QuickAction href="/records" title="Medical Records" description="Access health records" icon={FileText} />
+                  <QuickAction href="/referrals" title="Referrals" description="Specialist referrals" icon={UsersRound} />
+                </div>
+              </section>
+
+              <section>
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="font-semibold text-[#1F2937]">Recent Messages</h3>
+                  <Link href="/messages" className="text-sm font-semibold text-[#0F766E]">View all</Link>
+                </div>
+                {threads.isLoading ? (
+                  <DashboardSkeleton className="h-20" />
+                ) : recentThread ? (
+                  <Link
+                    href="/messages"
+                    className="flex items-center gap-4 rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_18px_50px_-44px_rgba(15,23,42,0.34)]"
+                  >
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[8px] bg-slate-100 text-sm font-semibold text-[#0F766E]">
+                      {(recentThread.doctor_profile?.display_name || recentThread.patient_profile?.display_name || "Ct").slice(0, 2)}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-[#1F2937]">
+                        {recentThread.doctor_profile?.display_name || recentThread.patient_profile?.display_name || "Caretekk"}
+                      </p>
+                      <p className="mt-1 truncate text-sm text-slate-600">{recentThread.last_message?.body || "Open consultation thread"}</p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-xs text-slate-500">{shortTime(recentThread.last_message?.created_at)}</p>
+                      {recentThread.unread_count ? (
+                        <span className="mt-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#0F766E] px-2 text-xs font-semibold text-white">
+                          {recentThread.unread_count}
+                        </span>
+                      ) : null}
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="rounded-[8px] border border-slate-100 bg-white p-4 text-sm text-slate-600">
+                    Your doctor messages will appear here.
+                  </div>
+                )}
+              </section>
             </div>
-            <Link href="/appointments" className="ct-surface rounded-[8px] p-4">
-              <p className="ct-caption text-[var(--primary)]">Book Doctor</p>
-              <p className="mt-3 text-sm font-semibold text-[#1F2937]">Start with AI Assistant</p>
-            </Link>
-            <Link href={patientHasConsultation ? "/messages" : "/appointments"} className="ct-surface rounded-[8px] p-4">
-              <p className="ct-caption text-[var(--primary)]">Next Step</p>
-              <p className="mt-3 text-sm font-semibold text-[#1F2937]">{patientHasConsultation ? "Open consultation" : "Review appointments"}</p>
-            </Link>
+
+            <aside className="grid gap-4 xl:sticky xl:top-24 xl:self-start">
+              <section className="rounded-[8px] border border-slate-100 bg-white p-5 shadow-[0_20px_58px_-48px_rgba(15,23,42,0.36)]">
+                <div className="flex items-center gap-2">
+                  <HeartPulse className="h-5 w-5 text-[#0F766E]" />
+                  <h3 className="font-semibold text-[#1F2937]">Health Summary</h3>
+                </div>
+                <div className="mt-5 grid gap-4 text-sm">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-slate-600">Last Consultation</span>
+                    <span className="font-medium text-[#1F2937]">{nextAppointment ? formatDateTime(nextAppointment.scheduled_at) : "None yet"}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-slate-600">Profile</span>
+                    <span className="font-medium text-[#1F2937]">{patientProfile.data?.profile_complete ? "Complete" : "Incomplete"}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-slate-600">Location</span>
+                    <span className="font-medium text-[#1F2937]">{patientProfile.data?.state || "Not added"}</span>
+                  </div>
+                </div>
+                <Link href="/profile" className="mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-[8px] bg-emerald-50 text-sm font-semibold text-[#0F766E]">
+                  View Full Summary
+                </Link>
+              </section>
+
+              <section className="rounded-[8px] border border-slate-100 bg-white p-5 shadow-[0_20px_58px_-48px_rgba(15,23,42,0.36)]">
+                <div className="flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5 text-[#0F766E]" />
+                  <h3 className="font-semibold text-[#1F2937]">Your Care Plan</h3>
+                </div>
+                <p className="mt-4 text-sm text-slate-600">
+                  {patientHasCarePlan ? `You have ${carePlanMetric} active care plan item${carePlanMetric === 1 ? "" : "s"}.` : "No active care plan yet."}
+                </p>
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-full rounded-full bg-[#0F766E]" style={{ width: `${carePlanProgress}%` }} />
+                </div>
+                <Link href="/care-plan" className="mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-[8px] bg-emerald-50 text-sm font-semibold text-[#0F766E]">
+                  View Care Plan
+                </Link>
+              </section>
+
+              <section className="rounded-[8px] border border-slate-100 bg-white p-5 shadow-[0_20px_58px_-48px_rgba(15,23,42,0.36)]">
+                <div className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-[#0F766E]" />
+                  <h3 className="font-semibold text-[#1F2937]">Reminders</h3>
+                </div>
+                <div className="mt-4 grid gap-3 text-sm">
+                  <div className="flex items-center gap-3 rounded-[8px] bg-slate-50 px-3 py-3">
+                    <ShieldCheck className="h-4 w-4 text-[#0F766E]" />
+                    <span className="text-slate-700">Keep your profile updated</span>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-[8px] bg-slate-50 px-3 py-3">
+                    <Stethoscope className="h-4 w-4 text-[#0F766E]" />
+                    <span className="text-slate-700">Start with AI before booking</span>
+                  </div>
+                </div>
+              </section>
+            </aside>
           </div>
 
           {dashboardErrors.length ? (
@@ -245,34 +496,6 @@ export function DashboardClient() {
               </div>
             </Notice>
           ) : null}
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="ct-surface rounded-[8px] p-4">
-              <p className="text-sm font-semibold text-slate-500">AI Assistant</p>
-              <p className="mt-2 font-heading text-xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Done" : "Next"}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Share symptoms as part of booking.</p>
-              <Link href="/appointments" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Start <ArrowRight className="h-4 w-4" /></Link>
-            </div>
-            <div className="ct-surface rounded-[8px] p-4">
-              <p className="text-sm font-semibold text-slate-500">Consultation</p>
-              <p className="mt-2 font-heading text-xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Ready" : "Waiting"}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Continue with your doctor.</p>
-              <Link href="/messages" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
-            </div>
-            <div className="ct-surface rounded-[8px] p-4">
-              <p className="text-sm font-semibold text-slate-500">Care plan</p>
-              <p className="mt-2 font-heading text-xl font-semibold text-[#1F2937]">{patientHasCarePlan ? "Available" : "Coming next"}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Review care updates.</p>
-              <Link href="/care-plan" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric label="Appointments" value={listMetric(appointments)} href="/appointments" icon={CalendarClock} description="Visits and booking details." />
-            <Metric label="Consultations" value={threadMetric} href="/messages" icon={MessageSquareText} description="Doctor conversations." />
-            <Metric label="Care Plans" value={carePlanMetric} href="/care-plan" icon={FileText} description="Doctor-written next steps." />
-            {patientHasReferral ? <Metric label="Referrals" value={referralMetric} href="/referrals" icon={ClipboardList} description="Specialist referrals." /> : null}
-          </div>
         </>
       ) : (
         <>

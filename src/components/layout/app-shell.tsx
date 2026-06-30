@@ -10,6 +10,7 @@ import {
   Menu,
   MessageSquare,
   ShieldCheck,
+  Stethoscope,
   UserRound,
   UserRoundCheck,
   X,
@@ -48,6 +49,14 @@ const navItems: readonly NavItem[] = [
   { href: "/referrals", label: "Referrals", patientLabel: "Referrals", icon: ClipboardList, roles: ["patient", "admin"] },
   { href: "/profile", label: "Profile", icon: UserRound, roles: ["patient", "doctor", "admin", "nurse"] },
   { href: "/audit", label: "Audit", icon: ShieldCheck, roles: ["admin"] },
+] as const;
+
+const patientBottomNav = [
+  { href: "/dashboard", label: "Home", icon: Home, primary: false },
+  { href: "/messages", label: "Messages", icon: MessageSquare, primary: false },
+  { href: "/appointments", label: "Book Doctor", icon: Stethoscope, primary: true },
+  { href: "/appointments", label: "Appointments", icon: CalendarDays, primary: false },
+  { href: "/profile", label: "Profile", icon: UserRound, primary: false },
 ] as const;
 
 function roleTone(role: string | undefined) {
@@ -247,11 +256,45 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <main className={cn("mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8", user?.role === "patient" && "pb-28 lg:pb-8")}>
             <ProviderHeartbeat />
             <OfflineStatusBanner />
             {children}
           </main>
+
+          {user?.role === "patient" ? (
+            <nav
+              className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 items-end rounded-[8px] border border-white/80 bg-white/95 px-2 py-2 shadow-[0_22px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur lg:hidden"
+              aria-label="Patient bottom navigation"
+            >
+              {patientBottomNav.map((item) => {
+                const Icon = item.icon;
+                const active = !item.primary && (pathname === item.href || pathname.startsWith(`${item.href}/`));
+                return (
+                  <Link
+                    key={`${item.href}-${item.label}`}
+                    href={item.href}
+                    className={cn(
+                      "flex min-w-0 flex-col items-center gap-1 rounded-[8px] px-1 py-2 text-[11px] font-semibold text-slate-500 transition",
+                      active && "text-[#0F766E]",
+                      item.primary && "-mt-7 text-[#0F766E]",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-[8px] bg-slate-50",
+                        active && "bg-emerald-50",
+                        item.primary && "h-14 w-14 rounded-full bg-[#0F766E] text-white shadow-[0_18px_38px_-22px_rgba(15,118,110,0.7)]",
+                      )}
+                    >
+                      <Icon className={item.primary ? "h-6 w-6" : "h-5 w-5"} />
+                    </span>
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          ) : null}
         </div>
       </div>
     </div>
