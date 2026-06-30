@@ -12,7 +12,6 @@ import {
   MessageCircle,
   SendHorizonal,
   ShieldCheck,
-  Star,
   Stethoscope,
 } from "lucide-react";
 import Link from "next/link";
@@ -143,49 +142,6 @@ function AssistantBubble({ speaker, children }: { speaker: "assistant" | "user";
   );
 }
 
-function DoctorRatingForm({ appointment, onRated }: { appointment: Appointment; onRated: () => void }) {
-  const [score, setScore] = useState(5);
-  const [feedback, setFeedback] = useState("");
-  const rating = useMutation({
-    mutationFn: () => appointmentsApi.submitRating(appointment.id, { score, feedback: feedback.trim() }),
-    onSuccess: onRated,
-  });
-
-  if (appointment.status !== "completed" || appointment.rating) {
-    return null;
-  }
-
-  return (
-    <div className="mt-4 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
-      <p className="text-sm font-semibold text-[#1F2937]">Rate your doctor</p>
-      <div className="mt-3 flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Doctor rating">
-        {[1, 2, 3, 4, 5].map((value) => (
-          <button
-            key={value}
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] border border-slate-200 bg-white text-amber-500 transition hover:border-amber-200 hover:bg-amber-50"
-            onClick={() => setScore(value)}
-            aria-checked={score === value}
-            role="radio"
-          >
-            <Star className={score >= value ? "h-5 w-5 fill-current" : "h-5 w-5"} />
-          </button>
-        ))}
-      </div>
-      <Textarea
-        className="mt-3"
-        placeholder="Optional feedback"
-        value={feedback}
-        onChange={(event) => setFeedback(event.target.value)}
-      />
-      <ErrorMessage error={rating.error} context="appointments" />
-      <Button className="mt-3 w-full sm:w-fit" type="button" disabled={rating.isPending} onClick={() => rating.mutate()}>
-        {rating.isPending ? "Submitting..." : "Submit rating"}
-      </Button>
-    </div>
-  );
-}
-
 export function AppointmentsClient() {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -243,14 +199,6 @@ export function AppointmentsClient() {
       await queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
   });
-  const cancelAppointment = useMutation({
-    mutationFn: appointmentsApi.cancel,
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["appointments"] }),
-  });
-  const handleRatingUpdated = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["appointments"] });
-    await queryClient.invalidateQueries({ queryKey: ["appointments", "available-doctors"] });
-  };
   const startConversation = useMutation({
     mutationFn: (id: number) => triageApi.startConversation({ session_id: id }),
     onSuccess: (data) => {
@@ -800,64 +748,46 @@ export function AppointmentsClient() {
         </Notice>
       )}
 
-      <DataList<Appointment>
-        data={appointments.data}
-        error={appointments.error}
-        isLoading={appointments.isLoading}
-        errorContext="appointments"
-        loadingLabel="Loading your appointments..."
-        emptyTitle={isDoctor ? "No consultations yet." : "No appointments yet."}
-        empty=""
-        emptyAction={
-          user?.role === "patient" ? (
-            <button
-              type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white"
-            >
-              Book your first appointment
-            </button>
-          ) : null
-        }
-        onNext={appointments.data?.next ? () => setPage((current) => current + 1) : undefined}
-        onPrevious={appointments.data?.previous ? () => setPage((current) => Math.max(1, current - 1)) : undefined}
-        renderItem={(item) => (
-          <article key={item.id} className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.38)]">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
-                {item.reason ? <p className="mt-3 text-sm leading-7 text-slate-600">{item.reason}</p> : null}
-                {item.triage_summary?.symptoms?.length ? (
-                  <div className="mt-3 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
-                    <span className="font-semibold text-[#1F2937]">Care check-in:</span>{" "}
-                    {item.triage_summary.symptoms.join(", ")}
-                  </div>
-                ) : null}
-                {user?.role === "patient" && item.rating ? (
-                  <p className="mt-3 text-sm font-semibold text-[#1F2937]">Rated {item.rating.score}/5</p>
-                ) : null}
+      {user?.role !== "patient" ? (
+        <DataList<Appointment>
+          data={appointments.data}
+          error={appointments.error}
+          isLoading={appointments.isLoading}
+          errorContext="appointments"
+          loadingLabel="Loading your appointments..."
+          emptyTitle={isDoctor ? "No consultations yet." : "No appointments yet."}
+          empty=""
+          onNext={appointments.data?.next ? () => setPage((current) => current + 1) : undefined}
+          onPrevious={appointments.data?.previous ? () => setPage((current) => Math.max(1, current - 1)) : undefined}
+          renderItem={(item) => (
+            <article key={item.id} className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.38)]">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
+                  {item.reason ? <p className="mt-3 text-sm leading-7 text-slate-600">{item.reason}</p> : null}
+                  {item.triage_summary?.symptoms?.length ? (
+                    <div className="mt-3 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
+                      <span className="font-semibold text-[#1F2937]">Care check-in:</span>{" "}
+                      {item.triage_summary.symptoms.join(", ")}
+                    </div>
+                  ) : null}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge value={item.status} />
+                  {isDoctor ? (
+                    <Link
+                      href={`/appointments/${item.id}`}
+                      className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+                    >
+                      View consultation
+                    </Link>
+                  ) : null}
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge value={item.status} />
-                {isDoctor ? (
-                  <Link
-                    href={`/appointments/${item.id}`}
-                    className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5"
-                  >
-                    View consultation
-                  </Link>
-                ) : null}
-                {user?.role === "patient" && item.status !== "cancelled" ? (
-                  <Button variant="secondary" onClick={() => cancelAppointment.mutate(item.id)} disabled={cancelAppointment.isPending}>
-                    Cancel
-                  </Button>
-                ) : null}
-              </div>
-            </div>
-            {user?.role === "patient" ? <DoctorRatingForm appointment={item} onRated={handleRatingUpdated} /> : null}
-          </article>
-        )}
-      />
+            </article>
+          )}
+        />
+      ) : null}
 
       <Modal
         open={doctorPickerOpen}
