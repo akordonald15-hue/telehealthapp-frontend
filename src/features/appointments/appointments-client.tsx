@@ -2,10 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarPlus2, Star } from "lucide-react";
+import { ArrowRight, BrainCircuit, CalendarPlus2, CheckCircle2, LoaderCircle, SendHorizonal, Star } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -21,21 +21,103 @@ import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
 import { ProviderPickerCard } from "@/features/providers/provider-picker-card";
-import { appointmentsApi, paymentsApi, profilesApi } from "@/lib/api/endpoints";
+import { appointmentsApi, paymentsApi, profilesApi, triageApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
-import type { Appointment, PatientProfile, Payment, ProviderDoctor } from "@/lib/types/backend";
+import type { Appointment, PatientProfile, Payment, ProviderDoctor, TriageConversationResult, TriageProcessingResponse, TriageSeverity } from "@/lib/types/backend";
 import type { PaymentInitiation } from "@/lib/types/backend";
 import { useFormDraft } from "@/lib/use-form-draft";
-import { formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime } from "@/lib/utils";
 import { appointmentSchema } from "@/lib/validation/features";
 
 type AppointmentFormValues = z.input<typeof appointmentSchema>;
 type AppointmentInput = z.output<typeof appointmentSchema>;
+type TriageResultData = TriageConversationResult | TriageProcessingResponse;
 const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
+const severityOptions: Array<{ value: TriageSeverity; label: string }> = [
+  { value: "mild", label: "Mild" },
+  { value: "moderate", label: "Moderate" },
+  { value: "severe", label: "Severe" },
+];
 
 function doctorSpecialtyLabel(doctor: ProviderDoctor) {
   return doctor.specialties?.map((specialty) => specialty.name).filter(Boolean).join(", ") || "General consultation";
+}
+
+function isConversationResult(data: TriageResultData | undefined): data is TriageConversationResult {
+  return Boolean(data && ("summary_preview" in data || "risk_level" in data || "extracted_symptoms" in data));
+}
+
+function readableTriageList(items: unknown[] | undefined) {
+  return (items ?? [])
+    .flatMap((item) => {
+      if (typeof item === "string") return [item];
+      if (item && typeof item === "object") {
+        const record = item as Record<string, unknown>;
+        return [record.name, record.symptom, record.value, record.label].filter(
+          (value): value is string => typeof value === "string" && value.trim().length > 0,
+        );
+      }
+      return [];
+    })
+    .map((value) => value.trim())
+    .filter((value, index, array) => array.indexOf(value) === index);
+}
+
+function formatSpecialty(value?: string | null) {
+  if (!value) return "General consultation";
+  return value.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function doctorMatchesSpecialty(doctor: ProviderDoctor, specialty?: string | null) {
+  if (!specialty) return false;
+  const normalized = specialty.toLowerCase().replace(/[_-]+/g, " ");
+  return doctorSpecialtyLabel(doctor).toLowerCase().includes(normalized);
+}
+
+function sortRecommendedDoctors(doctors: ProviderDoctor[], specialty?: string | null) {
+  return [...doctors].sort((left, right) => {
+    const leftScore =
+      (doctorMatchesSpecialty(left, specialty) ? 100 : 0) +
+      (left.availability_status === "available" ? 40 : 0) +
+      (left.rating ?? 0) * 4 -
+      (left.active_workload ?? 0);
+    const rightScore =
+      (doctorMatchesSpecialty(right, specialty) ? 100 : 0) +
+      (right.availability_status === "available" ? 40 : 0) +
+      (right.rating ?? 0) * 4 -
+      (right.active_workload ?? 0);
+    return rightScore - leftScore;
+  });
+}
+
+function TypingDots() {
+  return (
+    <span className="inline-flex items-center gap-1" aria-label="Caretekk Assistant is thinking">
+      {[0, 1, 2].map((item) => (
+        <span
+          key={item}
+          className="h-2 w-2 animate-pulse rounded-full bg-[#0F766E]"
+          style={{ animationDelay: `${item * 150}ms` }}
+        />
+      ))}
+    </span>
+  );
+}
+
+function AssistantBubble({ speaker, children }: { speaker: "assistant" | "user"; children: React.ReactNode }) {
+  return (
+    <div className={cn("flex", speaker === "user" ? "justify-end" : "justify-start")}>
+      <div
+        className={cn(
+          "max-w-[88%] rounded-[8px] px-4 py-3 text-sm leading-7 shadow-sm sm:max-w-[80%]",
+          speaker === "user" ? "bg-[#0F766E] text-white" : "border border-slate-200 bg-white text-slate-700",
+        )}
+      >
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function DoctorRatingForm({ appointment, onRated }: { appointment: Appointment; onRated: () => void }) {
@@ -89,6 +171,14 @@ export function AppointmentsClient() {
   const [doctorPickerOpen, setDoctorPickerOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<ProviderDoctor | null>(null);
   const [manualPayment, setManualPayment] = useState<PaymentInitiation | null>(null);
+  const [aiSessionId, setAiSessionId] = useState<number | null>(null);
+  const [aiConversationId, setAiConversationId] = useState<string | null>(null);
+  const [aiSymptomText, setAiSymptomText] = useState("");
+  const [aiSubmittedText, setAiSubmittedText] = useState("");
+  const [aiSeverity, setAiSeverity] = useState<TriageSeverity | null>(null);
+  const [aiResultRequested, setAiResultRequested] = useState(false);
+  const [aiStartedByUser, setAiStartedByUser] = useState(false);
+  const recommendationOpenedRef = useRef(false);
   const appointments = useQuery({
     queryKey: ["appointments", page],
     queryFn: () => appointmentsApi.list({ page, page_size: 10 }),
@@ -96,9 +186,17 @@ export function AppointmentsClient() {
   const createAppointment = useMutation({
     mutationFn: appointmentsApi.book,
     onSuccess: async (data) => {
+      consultationDraft.clearDraft();
       appointmentDraft.clearDraft();
       paymentDraft.clearDraft();
       form.reset();
+      setAiSessionId(null);
+      setAiConversationId(null);
+      setAiSymptomText("");
+      setAiSubmittedText("");
+      setAiSeverity(null);
+      setAiResultRequested(false);
+      setAiStartedByUser(false);
       setSelectedDoctor(null);
       setDoctorPickerOpen(false);
       setPage(1);
@@ -128,6 +226,38 @@ export function AppointmentsClient() {
     await queryClient.invalidateQueries({ queryKey: ["appointments"] });
     await queryClient.invalidateQueries({ queryKey: ["appointments", "available-doctors"] });
   };
+  const startConversation = useMutation({
+    mutationFn: (id: number) => triageApi.startConversation({ session_id: id }),
+    onSuccess: (data) => {
+      setAiConversationId(data.conversation.id);
+    },
+  });
+  const startAiSession = useMutation({
+    mutationFn: triageApi.start,
+    onSuccess: (data) => {
+      setAiSessionId(data.id);
+      setAiStartedByUser(true);
+      startConversation.mutate(data.id);
+    },
+  });
+  const sendAiMessage = useMutation({
+    mutationFn: (values: { message: string; severity: TriageSeverity }) =>
+      triageApi.sendConversationMessage(aiConversationId as string, {
+        session_id: aiSessionId || undefined,
+        message: values.message,
+        severity: values.severity,
+      }),
+    onSuccess: () => setAiResultRequested(true),
+  });
+  const aiResult = useQuery({
+    queryKey: ["triage", "consultation-flow", aiConversationId],
+    queryFn: () => triageApi.conversationResult(aiConversationId as string),
+    enabled: Boolean(aiConversationId) && (sendAiMessage.isSuccess || aiResultRequested),
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      return data && "status" in data && data.status === "processing" ? 2500 : false;
+    },
+  });
   const form = useForm<AppointmentFormValues, unknown, AppointmentInput>({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
@@ -149,14 +279,22 @@ export function AppointmentsClient() {
     queryFn: () => profilesApi.me<PatientProfile>(),
     enabled: user?.role === "patient",
   });
-  const doctorItems = availableDoctors.data?.results ?? [];
+  const profileIncomplete = Boolean(user?.role === "patient" && patientProfile.data && !patientProfile.data.profile_complete);
+  const triageSessionParam = Number(searchParams.get("triage_session"));
+  const triageSessionId = Number.isInteger(triageSessionParam) && triageSessionParam > 0 ? triageSessionParam : null;
+  const aiResultData = aiResult.data;
+  const aiFinished = isConversationResult(aiResultData) && aiResultData.status === "completed";
+  const effectiveTriageSessionId = triageSessionId ?? (aiFinished ? aiSessionId : null);
+  const suggestedSpecialty = isConversationResult(aiResultData) ? aiResultData.department : null;
+  const triageSymptoms = isConversationResult(aiResultData) ? readableTriageList(aiResultData.extracted_symptoms) : [];
+  const doctorItems = useMemo(
+    () => sortRecommendedDoctors(availableDoctors.data?.results ?? [], suggestedSpecialty),
+    [availableDoctors.data?.results, suggestedSpecialty],
+  );
   const selectedDoctorLive = selectedDoctor
     ? doctorItems.find((doctor) => doctor.id === selectedDoctor.id) ?? (availableDoctors.isSuccess ? null : selectedDoctor)
     : null;
   const doctorCanBeBooked = selectedDoctorLive?.availability_status === "available";
-  const profileIncomplete = Boolean(user?.role === "patient" && patientProfile.data && !patientProfile.data.profile_complete);
-  const triageSessionParam = Number(searchParams.get("triage_session"));
-  const triageSessionId = Number.isInteger(triageSessionParam) && triageSessionParam > 0 ? triageSessionParam : null;
   const activeBankTransferPayment =
     manualPayment ?? (createAppointment.data?.payment.provider === "bank_transfer" ? createAppointment.data.payment : null);
   const activePaymentId = activeBankTransferPayment?.payment_id;
@@ -174,10 +312,50 @@ export function AppointmentsClient() {
   const paymentRejected = activePaymentStatus === "rejected";
   const paymentAwaitingVerification = activePaymentStatus === "awaiting_manual_verification" || activePaymentStatus === "transfer_submitted";
   const watchedAppointment = form.watch();
+  const consultationDraftValue = useMemo(
+    () => ({
+      aiSessionId,
+      aiConversationId,
+      aiSymptomText,
+      aiSubmittedText,
+      aiSeverity,
+      aiResultRequested,
+      aiStartedByUser,
+    }),
+    [aiConversationId, aiResultRequested, aiSessionId, aiSeverity, aiStartedByUser, aiSubmittedText, aiSymptomText],
+  );
+  const restoreConsultationDraft = useCallback((draft: typeof consultationDraftValue) => {
+    setAiSessionId(draft.aiSessionId ?? null);
+    setAiConversationId(draft.aiConversationId ?? null);
+    setAiSymptomText(draft.aiSymptomText || "");
+    setAiSubmittedText(draft.aiSubmittedText || "");
+    setAiSeverity(draft.aiSeverity ?? null);
+    setAiResultRequested(Boolean(draft.aiResultRequested || draft.aiSeverity));
+    setAiStartedByUser(Boolean(draft.aiStartedByUser || draft.aiSessionId || draft.aiConversationId));
+  }, []);
+  const consultationDraft = useFormDraft({
+    key: user?.id ? `caretekk:draft:consultation-ai:${user.id}` : null,
+    value: consultationDraftValue,
+    enabled: user?.role === "patient" && !createAppointment.isSuccess && !triageSessionId,
+    expiresInMs: 24 * 60 * 60 * 1000,
+    onRestore: restoreConsultationDraft,
+    isSignificant: (draft) =>
+      Boolean(draft.aiSessionId || draft.aiConversationId || draft.aiSymptomText.trim() || draft.aiSubmittedText.trim()),
+    sanitize: (draft) => ({
+      aiSessionId: draft.aiSessionId,
+      aiConversationId: draft.aiConversationId,
+      aiSymptomText: draft.aiSymptomText,
+      aiSubmittedText: draft.aiSubmittedText,
+      aiSeverity: draft.aiSeverity,
+      aiResultRequested: draft.aiResultRequested,
+      aiStartedByUser: draft.aiStartedByUser,
+    }),
+  });
   const appointmentDraftKey = user?.id ? `caretekk:draft:consultation-booking:${user.id}` : null;
   const appointmentDraftValue = {
     doctor: selectedDoctorLive?.id ?? selectedDoctor?.id ?? watchedAppointment.doctor ?? 0,
     selectedDoctor: selectedDoctorLive ?? selectedDoctor,
+    triageSessionId: effectiveTriageSessionId,
     scheduled_at: watchedAppointment.scheduled_at ?? "",
     reason: watchedAppointment.reason ?? "",
   };
@@ -201,6 +379,7 @@ export function AppointmentsClient() {
     sanitize: (draft) => ({
       doctor: draft.doctor,
       selectedDoctor: draft.selectedDoctor,
+      triageSessionId: draft.triageSessionId,
       scheduled_at: draft.scheduled_at,
       reason: draft.reason,
     }),
@@ -222,18 +401,198 @@ export function AppointmentsClient() {
     void queryClient.invalidateQueries({ queryKey: ["payments"] });
   }, [paymentConfirmed, queryClient]);
 
+  useEffect(() => {
+    if (user?.role !== "patient" || profileIncomplete || triageSessionId || aiSessionId || startAiSession.isPending) {
+      return;
+    }
+    startAiSession.mutate();
+  }, [aiSessionId, profileIncomplete, startAiSession, triageSessionId, user?.role]);
+
+  useEffect(() => {
+    if (!aiFinished || recommendationOpenedRef.current || selectedDoctor) {
+      return;
+    }
+    recommendationOpenedRef.current = true;
+    const timer = window.setTimeout(() => setDoctorPickerOpen(true), 0);
+    return () => window.clearTimeout(timer);
+  }, [aiFinished, selectedDoctor]);
+
+  function handleAiSymptomSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const symptom = aiSymptomText.trim();
+    if (!symptom || !aiConversationId) return;
+    setAiSubmittedText(symptom);
+    setAiSymptomText("");
+  }
+
+  function handleAiSeveritySelect(severity: TriageSeverity) {
+    if (!aiConversationId || !aiSubmittedText || sendAiMessage.isPending) return;
+    setAiSeverity(severity);
+    sendAiMessage.mutate({ message: aiSubmittedText, severity });
+  }
+
   return (
     <Section
       title={isDoctor ? "Consultations" : "Appointments"}
       description={user?.role === "patient" ? "" : isDoctor ? "Open and manage assigned consultations." : undefined}
     >
-      {user?.role === "patient" ? (
+      {user?.role === "patient" && !effectiveTriageSessionId ? (
+        <div className="grid gap-4">
+          <div className="ct-panel overflow-hidden rounded-[8px] p-0">
+            <div className="grid gap-5 bg-[linear-gradient(135deg,#F0FDF4_0%,#F8FBFF_100%)] p-5 sm:p-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+              <div className="grid gap-4">
+                {consultationDraft.restored ? (
+                  <Notice title="Your previous progress was restored." tone="success">
+                    You can continue this consultation check or clear the draft.
+                    <button type="button" className="ml-2 font-semibold underline" onClick={consultationDraft.clearDraft}>
+                      Clear draft
+                    </button>
+                  </Notice>
+                ) : null}
+                {profileIncomplete ? (
+                  <Notice title="Complete your profile before booking" tone="warning">
+                    Doctors need your name, phone, date of birth, gender, state, and LGA before consultation.
+                    <Link className="ml-2 font-semibold text-amber-800 underline" href="/profile">Update profile</Link>
+                  </Notice>
+                ) : null}
+                <div className="flex items-start gap-4">
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[8px] bg-white text-[#0F766E] shadow-sm">
+                    <BrainCircuit className="h-7 w-7" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#0F766E]">Caretekk Health Assistant</p>
+                    <h2 className="mt-2 font-heading text-2xl font-semibold leading-tight text-[#1F2937] sm:text-3xl">
+                      Hi. I&apos;ll help match you with the right doctor.
+                    </h2>
+                    <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                      I&apos;ll ask a few questions, summarize what you share, and recommend doctors for this consultation.
+                    </p>
+                  </div>
+                </div>
+                {!aiSessionId && !startAiSession.isPending ? (
+                  <Button
+                    type="button"
+                    className="w-full sm:w-fit"
+                    disabled={profileIncomplete}
+                    onClick={() => startAiSession.mutate()}
+                  >
+                    Start with AI Assistant
+                  </Button>
+                ) : null}
+              </div>
+
+              <div className="rounded-[8px] border border-white/80 bg-white/95 p-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.35)] sm:p-5">
+                <ErrorMessage error={startAiSession.error || startConversation.error || sendAiMessage.error || aiResult.error} context="triage" />
+                <div className="grid max-h-[70dvh] gap-3 overflow-y-auto pr-1">
+                  <AssistantBubble speaker="assistant">
+                    <p className="font-semibold text-[#1F2937]">Hi, I&apos;m your Caretekk Health Assistant.</p>
+                    <p>I&apos;ll ask a few questions so I can understand how you&apos;re feeling and recommend the most appropriate doctor.</p>
+                  </AssistantBubble>
+
+                  {startAiSession.isPending || startConversation.isPending || (aiSessionId && !aiConversationId) ? (
+                    <AssistantBubble speaker="assistant">
+                      <span className="inline-flex items-center gap-2">
+                        <TypingDots />
+                        Preparing your consultation check...
+                      </span>
+                    </AssistantBubble>
+                  ) : null}
+
+                  {aiConversationId && !aiSubmittedText ? (
+                    <>
+                      <AssistantBubble speaker="assistant">What brings you here today? Tell me how you&apos;re feeling.</AssistantBubble>
+                      <form className="grid gap-3" onSubmit={handleAiSymptomSubmit}>
+                        <textarea
+                          value={aiSymptomText}
+                          onChange={(event) => setAiSymptomText(event.target.value)}
+                          placeholder="Type your symptoms here..."
+                          className="min-h-28 w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-4 text-sm text-[#1F2937] outline-none transition placeholder:text-[#94A3B8] focus:border-[#0F766E] focus:ring-4 focus:ring-[#0F766E]/10"
+                        />
+                        <Button type="submit" disabled={!aiSymptomText.trim()} className="w-full sm:w-fit">
+                          <SendHorizonal className="mr-2 h-4 w-4" />
+                          Continue
+                        </Button>
+                      </form>
+                    </>
+                  ) : null}
+
+                  {aiSubmittedText ? (
+                    <AssistantBubble speaker="user">
+                      <p>{aiSubmittedText}</p>
+                    </AssistantBubble>
+                  ) : null}
+
+                  {aiSubmittedText && !aiSeverity ? (
+                    <>
+                      <AssistantBubble speaker="assistant">How would you describe the severity?</AssistantBubble>
+                      <div className="grid gap-2 sm:flex sm:flex-wrap">
+                        {severityOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => handleAiSeveritySelect(option.value)}
+                            className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition hover:border-[#0F766E]/30 hover:bg-emerald-50"
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+
+                  {aiSeverity ? (
+                    <AssistantBubble speaker="user">
+                      {severityOptions.find((option) => option.value === aiSeverity)?.label ?? aiSeverity}
+                    </AssistantBubble>
+                  ) : null}
+
+                  {sendAiMessage.isPending || aiResult.isLoading || aiResultData?.status === "processing" ? (
+                    <AssistantBubble speaker="assistant">
+                      <div className="grid gap-2">
+                        <span className="inline-flex items-center gap-2 font-semibold text-[#1F2937]">
+                          <LoaderCircle className="h-4 w-4 animate-spin" />
+                          Understanding your symptoms...
+                        </span>
+                        <span className="text-slate-600">Looking for possible causes and the most appropriate specialist.</span>
+                      </div>
+                    </AssistantBubble>
+                  ) : null}
+
+                  {aiFinished && aiResultData ? (
+                    <div className="grid gap-3 rounded-[8px] border border-emerald-100 bg-emerald-50/70 p-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#0F766E]" />
+                        <div>
+                          <p className="font-semibold text-[#1F2937]">Your consultation summary is ready.</p>
+                          <p className="mt-1 text-sm leading-6 text-slate-600">{aiResultData.summary_preview || "Your symptoms have been summarized for the doctor."}</p>
+                        </div>
+                      </div>
+                      <div className="grid gap-2 text-sm text-slate-700">
+                        <p><span className="font-semibold text-[#1F2937]">Symptoms:</span> {triageSymptoms.join(", ") || "Shared with assistant"}</p>
+                        <p><span className="font-semibold text-[#1F2937]">Suggested specialty:</span> {formatSpecialty(aiResultData.department)}</p>
+                        <p><span className="font-semibold text-[#1F2937]">Risk level:</span> {formatSpecialty(aiResultData.risk_level)}</p>
+                      </div>
+                      <Notice title="This is not a diagnosis" tone="neutral">
+                        This assessment helps Caretekk match you with the most appropriate doctor.
+                      </Notice>
+                      <Button type="button" className="w-full sm:w-fit" onClick={() => setDoctorPickerOpen(true)}>
+                        View recommended doctors
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : user?.role === "patient" ? (
         <form
           className="ct-panel grid gap-4 rounded-[8px] p-5 sm:p-6"
           onSubmit={form.handleSubmit((values) =>
             createAppointment.mutate({
               doctor: values.doctor,
-              ...(triageSessionId ? { triage_session: triageSessionId } : {}),
+              ...(effectiveTriageSessionId ? { triage_session: effectiveTriageSessionId } : {}),
               scheduled_at: values.scheduled_at,
               reason: values.reason,
               notes: "",
@@ -265,16 +624,13 @@ export function AppointmentsClient() {
               <Link className="ml-2 font-semibold text-amber-800 underline" href="/profile">Update profile</Link>
             </Notice>
           ) : null}
-          {triageSessionId ? (
+          {effectiveTriageSessionId ? (
             <Notice title="Care check-in ready" tone="success">
-              This consultation will include the triage summary you just completed.
+              This consultation will include the AI summary you just completed.
             </Notice>
           ) : (
             <Notice title="Care check-in required" tone="warning">
-              Please complete a care check before booking this consultation. If you just completed one, we&apos;ll use your latest unused check.
-              <Link className="ml-2 font-semibold text-amber-800 underline" href="/triage?booking=1">
-                Start Care Check
-              </Link>
+              Please complete a care check before booking this consultation.
             </Notice>
           )}
           {createAppointment.isSuccess && createAppointment.data.payment.provider !== "bank_transfer" ? (

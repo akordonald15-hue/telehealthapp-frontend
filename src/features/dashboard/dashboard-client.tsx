@@ -3,9 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, CalendarClock, ClipboardList, CreditCard, FileText, MessageSquareText, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { InlineLoader } from "@/components/ui/loaders";
+import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -62,6 +64,7 @@ export function DashboardClient() {
   const userQuery = useCurrentUser();
   const user = userQuery.data;
   const isNurse = user?.role === "nurse";
+  const [assistantWelcomeOpen, setAssistantWelcomeOpen] = useState(false);
 
   const appointments = useQuery({
     queryKey: ["appointments", "dashboard"],
@@ -95,6 +98,19 @@ export function DashboardClient() {
     enabled: user?.role === "patient",
   });
 
+  useEffect(() => {
+    if (typeof window === "undefined" || user?.role !== "patient" || !patientProfile.data?.profile_complete) {
+      return;
+    }
+    const key = `caretekk:assistant-welcome-shown:${user.id}`;
+    if (window.localStorage.getItem(key)) {
+      return;
+    }
+    window.localStorage.setItem(key, "1");
+    const timer = window.setTimeout(() => setAssistantWelcomeOpen(true), 0);
+    return () => window.clearTimeout(timer);
+  }, [patientProfile.data?.profile_complete, user?.id, user?.role]);
+
   if (isNurse) {
     return <NurseDashboardClient />;
   }
@@ -123,9 +139,9 @@ export function DashboardClient() {
       }
     : {
         title: "Guided Journey",
-        description: "Start with a quick care check-in.",
-        href: "/triage",
-        cta: "Start Care Check-in",
+        description: "Start with the Caretekk Assistant.",
+        href: "/appointments",
+        cta: "Book Doctor",
       };
   const dashboardErrors = [
     appointments.isError ? `Appointments: ${getFriendlyErrorMessage(appointments.error, "dashboard")}` : null,
@@ -146,14 +162,54 @@ export function DashboardClient() {
     >
       {user?.role === "patient" ? (
         <>
+          <Modal
+            open={assistantWelcomeOpen}
+            title="Caretekk Health Assistant"
+            description="A guided start for every doctor consultation."
+            onClose={() => setAssistantWelcomeOpen(false)}
+            size="lg"
+            footer={
+              <>
+                <button
+                  type="button"
+                  onClick={() => setAssistantWelcomeOpen(false)}
+                  className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700"
+                >
+                  Not now
+                </button>
+                <Link
+                  href="/appointments"
+                  onClick={() => setAssistantWelcomeOpen(false)}
+                  className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#0F766E] px-5 text-sm font-semibold text-white"
+                >
+                  Start with AI Assistant
+                </Link>
+              </>
+            }
+          >
+            <div className="grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
+              <div className="flex h-24 w-24 items-center justify-center rounded-[8px] bg-emerald-50 text-[#0F766E]">
+                <Sparkles className="h-10 w-10" />
+              </div>
+              <div>
+                <p className="font-heading text-2xl font-semibold leading-tight text-[#1F2937]">
+                  Hi. I&apos;m your Caretekk Health Assistant.
+                </p>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  I&apos;ll ask a few questions so I can understand how you&apos;re feeling and recommend the most appropriate doctor.
+                </p>
+              </div>
+            </div>
+          </Modal>
+
           <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_55%,#60A5FA_100%)] p-5 text-white shadow-[0_24px_64px_-42px_rgba(37,99,235,0.42)]">
               <p className="ct-caption text-blue-100">Guided Journey</p>
               <h2 className="mt-3 font-heading text-xl font-semibold text-white">{nextPatientStep.description}</h2>
             </div>
-            <Link href="/triage" className="ct-surface rounded-[8px] p-4">
-              <p className="ct-caption text-[var(--primary)]">Care Check-in</p>
-              <p className="mt-3 text-sm font-semibold text-[#1F2937]">Start now</p>
+            <Link href="/appointments" className="ct-surface rounded-[8px] p-4">
+              <p className="ct-caption text-[var(--primary)]">Book Doctor</p>
+              <p className="mt-3 text-sm font-semibold text-[#1F2937]">Start with AI Assistant</p>
             </Link>
             <Link href={patientHasConsultation ? "/messages" : "/appointments"} className="ct-surface rounded-[8px] p-4">
               <p className="ct-caption text-[var(--primary)]">Next Step</p>
@@ -192,10 +248,10 @@ export function DashboardClient() {
 
           <div className="grid gap-4 md:grid-cols-3">
             <div className="ct-surface rounded-[8px] p-4">
-              <p className="text-sm font-semibold text-slate-500">Care Check-in</p>
+              <p className="text-sm font-semibold text-slate-500">AI Assistant</p>
               <p className="mt-2 font-heading text-xl font-semibold text-[#1F2937]">{patientHasConsultation ? "Done" : "Next"}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Share symptoms before booking.</p>
-              <Link href="/triage" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Open <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Share symptoms as part of booking.</p>
+              <Link href="/appointments" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">Start <ArrowRight className="h-4 w-4" /></Link>
             </div>
             <div className="ct-surface rounded-[8px] p-4">
               <p className="text-sm font-semibold text-slate-500">Consultation</p>

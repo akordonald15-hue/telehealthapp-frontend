@@ -4,7 +4,6 @@ import {
   CalendarDays,
   ClipboardList,
   FileText,
-  HeartPulse,
   Home,
   LayoutDashboard,
   LogOut,
@@ -39,7 +38,6 @@ type NavItem = {
 
 const navItems: readonly NavItem[] = [
   { href: "/dashboard", label: "Dashboard", patientLabel: "Your Care Journey", icon: LayoutDashboard, roles: ["patient", "doctor", "admin", "nurse"] },
-  { href: "/triage", label: "Care check-in", patientLabel: "Care Check-in", icon: HeartPulse, roles: ["patient"] },
   { href: "/messages", label: "Messages", patientLabel: "Messages", adminLabel: "Communications", icon: MessageSquare, roles: ["patient", "doctor", "admin"] },
   { href: "/care-plan", label: "Care Plan", patientLabel: "Care Plan", icon: ClipboardList, roles: ["patient"] },
   { href: "/home-care/book", label: "Home Care", patientLabel: "Home Care", icon: Home, roles: ["patient"] },
@@ -97,7 +95,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
     const patientOrder = [
       "/dashboard",
-      "/triage",
       "/messages",
       "/care-plan",
       "/referrals",
@@ -145,7 +142,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Fragment key={item.href}>
-              {user?.role === "patient" && item.href === "/triage" ? (
+              {user?.role === "patient" && item.href === "/messages" ? (
                 <p className="px-4 pt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                   Consultation / Messages
                 </p>
