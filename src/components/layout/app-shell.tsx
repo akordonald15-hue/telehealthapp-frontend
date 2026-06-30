@@ -132,7 +132,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="min-w-0">
-                  <BrandLockup href="/" wordmark="image" wordmarkClassName="h-5 max-w-[132px] sm:h-6 sm:max-w-[150px]" />
+                  <BrandLockup wordmark="image" wordmarkClassName="h-5 max-w-[132px] sm:h-6 sm:max-w-[150px]" />
                   {user?.role !== "patient" ? (
                     <h1 className="mt-1 truncate font-heading text-lg font-semibold tracking-[-0.025em] text-[#1F2937] sm:text-xl">{activeLabel}</h1>
                   ) : null}
@@ -195,7 +195,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       className={cn(
                         "flex h-9 w-9 items-center justify-center rounded-[8px] bg-slate-50 transition-all duration-200",
                         active && "scale-105 bg-[#DBEAFE]",
-                        item.primary && "h-[52px] w-[52px] rounded-full bg-[#2563EB] text-white shadow-[0_18px_38px_-22px_rgba(37,99,235,0.7)]",
+                        item.primary && "h-[52px] w-[52px] rounded-full bg-white text-[#2563EB] shadow-[0_18px_38px_-22px_rgba(37,99,235,0.45)] ring-2 ring-[#DBEAFE]",
                       )}
                     >
                       <Icon className={item.primary ? "h-6 w-6" : "h-5 w-5"} />
