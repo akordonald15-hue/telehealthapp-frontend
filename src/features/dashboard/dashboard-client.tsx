@@ -3,12 +3,14 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
+  Bot,
   CalendarClock,
+  ClipboardList,
   CreditCard,
   FileText,
+  Home,
   MessageSquareText,
   Sparkles,
-  Stethoscope,
   Video,
 } from "lucide-react";
 import Link from "next/link";
@@ -107,6 +109,38 @@ function DashboardSkeleton({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse rounded-[8px] bg-slate-100 ${className}`} />;
 }
 
+function QuickAction({
+  href,
+  title,
+  description,
+  icon: Icon,
+  className = "",
+  delay = 0,
+}: {
+  href: string;
+  title: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  className?: string;
+  delay?: number;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`ct-rise-in group flex min-h-[128px] flex-col justify-between rounded-[8px] border border-slate-100 p-4 shadow-[0_18px_48px_-42px_rgba(15,23,42,0.34)] transition duration-200 hover:-translate-y-0.5 ${className}`}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-white/72 text-[#2563EB] shadow-sm">
+        <Icon className="h-5 w-5" />
+      </span>
+      <span>
+        <span className="block text-sm font-semibold text-[#1F2937]">{title}</span>
+        <span className="mt-1 block text-xs leading-5 text-slate-600">{description}</span>
+      </span>
+    </Link>
+  );
+}
+
 export function DashboardClient() {
   const userQuery = useCurrentUser();
   const user = userQuery.data;
@@ -178,7 +212,7 @@ export function DashboardClient() {
 
   return (
     <Section
-      title={user?.role === "patient" ? "Your Care Journey" : "Dashboard"}
+      title={user?.role === "patient" ? "" : "Dashboard"}
       description={
         user?.role === "patient"
           ? ""
@@ -227,41 +261,48 @@ export function DashboardClient() {
             </div>
           </Modal>
 
-          <div className="grid gap-6">
-            <div className="grid gap-5">
-              <div className="animate-[fadeIn_0.35s_ease-out]">
-                <h2 className="font-heading text-2xl font-semibold tracking-[-0.02em] text-[#1F2937] sm:text-3xl">
+          <div className="grid gap-4">
+            <div className="grid gap-4">
+              <div className="ct-rise-in">
+                <h2 className="font-heading text-[1.65rem] font-semibold leading-tight tracking-[-0.02em] text-[#1F2937] sm:text-3xl">
                   {greeting()}, {patientName}
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">How can we help you today?</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">How can we help you today?</p>
               </div>
 
               <Link
                 href="/appointments"
-                className="group overflow-hidden rounded-[8px] border border-[#DBEAFE] bg-[linear-gradient(135deg,#EFF6FF_0%,#F8FBFF_100%)] p-5 shadow-[0_24px_70px_-50px_rgba(37,99,235,0.35)] transition duration-200 hover:-translate-y-0.5 sm:p-6"
+                className="ct-rise-in group overflow-hidden rounded-[8px] border border-[#DBEAFE] bg-[linear-gradient(135deg,#EFF6FF_0%,#F8FBFF_100%)] p-4 shadow-[0_24px_70px_-52px_rgba(37,99,235,0.42)] transition duration-200 hover:-translate-y-0.5 sm:p-6"
               >
-                <div className="grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
-                  <div className="flex h-24 w-24 items-center justify-center rounded-[8px] bg-white text-[#2563EB] shadow-sm sm:h-28 sm:w-28">
-                    <Stethoscope className="h-10 w-10 animate-pulse" />
+                <div className="grid grid-cols-[94px_minmax(0,1fr)] items-center gap-3 sm:grid-cols-[128px_minmax(0,1fr)] sm:gap-5">
+                  <div className="ct-float-gentle relative flex h-24 w-24 items-center justify-center sm:h-28 sm:w-28">
+                    <span className="absolute h-20 w-20 rounded-full bg-[#DBEAFE]" />
+                    <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-[0_18px_42px_-30px_rgba(37,99,235,0.48)]">
+                      <Bot className="h-9 w-9" />
+                    </span>
+                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#7CA4D7]" />
+                    <span className="absolute bottom-4 left-2 h-2.5 w-2.5 rounded-full bg-[#DBEAFE] ring-2 ring-white" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-[#2563EB]">AI Health Assistant</p>
-                    <h3 className="mt-2 font-heading text-2xl font-semibold leading-tight text-[#1F2937]">
+                    <h3 className="mt-1 font-heading text-[1.45rem] font-semibold leading-tight text-[#1F2937] sm:text-2xl">
                       How are you feeling today?
                     </h3>
-                    <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
-                      Tell us how you feel and we&apos;ll recommend the right doctor.
+                    <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-600 sm:text-sm">
+                      Tell me how you feel and I&apos;ll recommend the right doctor for you.
                     </p>
-                    <span className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-[8px] bg-[#2563EB] px-5 text-sm font-semibold text-white shadow-[0_18px_42px_-28px_rgba(37,99,235,0.65)] sm:w-auto sm:min-w-[260px]">
-                      Book a Doctor
-                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-                    </span>
                   </div>
                 </div>
+                <span className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-[8px] bg-[#2563EB] px-5 text-sm font-semibold text-white shadow-[0_18px_42px_-28px_rgba(37,99,235,0.65)] transition-transform duration-150 group-active:scale-[0.98]">
+                  Book a Doctor
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#2563EB]">
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </span>
+                </span>
               </Link>
 
-              <section className="rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_20px_60px_-48px_rgba(15,23,42,0.36)] sm:p-5">
-                <div className="mb-4 flex items-center justify-between gap-3">
+              <section className="ct-rise-in rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_20px_60px_-48px_rgba(15,23,42,0.36)] sm:p-5" style={{ animationDelay: "80ms" }}>
+                <div className="mb-3 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
                       <CalendarClock className="h-4 w-4" />
@@ -276,32 +317,31 @@ export function DashboardClient() {
                     <DashboardSkeleton className="h-10" />
                   </div>
                 ) : nextAppointment ? (
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex min-w-0 items-center gap-4">
-                      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[8px] bg-slate-100 text-lg font-semibold text-[#2563EB]">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[8px] bg-[#EFF6FF] text-lg font-semibold text-[#2563EB] shadow-inner">
                         {nextAppointment.doctor_profile?.display_name?.slice(0, 2) || "Dr"}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold text-[#1F2937]">{nextAppointment.doctor_profile?.display_name || "Doctor"}</p>
-                        <p className="mt-1 text-sm text-slate-600">Doctor consultation</p>
-                        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                          <span className="inline-flex items-center gap-1 text-[#2563EB]">
-                            <CalendarClock className="h-4 w-4" />
-                            {formatDateTime(nextAppointment.scheduled_at)}
-                          </span>
-                          <span className="inline-flex items-center gap-1">
-                            <Video className="h-4 w-4" />
-                            Secure chat
-                          </span>
-                        </div>
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-[#1F2937]">{nextAppointment.doctor_profile?.display_name || "Doctor"}</p>
+                      <p className="mt-0.5 truncate text-xs text-slate-600">Doctor consultation</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
+                        <span className="inline-flex items-center gap-1 text-[#2563EB]">
+                          <CalendarClock className="h-3.5 w-3.5" />
+                          {formatDateTime(nextAppointment.scheduled_at)}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Video className="h-3.5 w-3.5" />
+                          Secure chat
+                        </span>
                       </div>
                     </div>
                     <Link
                       href={`/appointments/${nextAppointment.id}`}
-                      className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-[#2563EB]/30 px-4 text-sm font-semibold text-[#2563EB]"
+                      className="hidden min-h-10 shrink-0 items-center justify-center rounded-[8px] border border-[#2563EB]/30 px-4 text-sm font-semibold text-[#2563EB] sm:inline-flex"
                     >
                       View Details
                     </Link>
+                    <ArrowRight className="h-5 w-5 shrink-0 text-slate-500 sm:hidden" />
                   </div>
                 ) : (
                   <div className="rounded-[8px] bg-slate-50 px-4 py-5">
@@ -316,6 +356,39 @@ export function DashboardClient() {
 
               <section>
                 <div className="mb-3 flex items-center justify-between">
+                  <h3 className="font-semibold text-[#1F2937]">Quick Actions</h3>
+                  <Link href="/profile" className="text-sm font-semibold text-[#2563EB]">View all</Link>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <QuickAction
+                    href="/home-care/book"
+                    title="Home Care"
+                    description="Book a nurse at home"
+                    icon={Home}
+                    className="bg-[#EFF6FF]"
+                    delay={120}
+                  />
+                  <QuickAction
+                    href="/care-plan"
+                    title="Care Plan"
+                    description="View your care plan"
+                    icon={ClipboardList}
+                    className="bg-white"
+                    delay={180}
+                  />
+                  <QuickAction
+                    href="/records"
+                    title="Medical Records"
+                    description="Access your health records"
+                    icon={FileText}
+                    className="bg-[#F8FBFF]"
+                    delay={240}
+                  />
+                </div>
+              </section>
+
+              <section className="ct-rise-in" style={{ animationDelay: "280ms" }}>
+                <div className="mb-3 flex items-center justify-between">
                   <h3 className="font-semibold text-[#1F2937]">Recent Messages</h3>
                   <Link href="/messages" className="text-sm font-semibold text-[#2563EB]">View all</Link>
                 </div>
@@ -324,10 +397,11 @@ export function DashboardClient() {
                 ) : recentThread ? (
                   <Link
                     href="/messages"
-                    className="flex items-center gap-4 rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_18px_50px_-44px_rgba(15,23,42,0.34)]"
+                    className="flex items-center gap-3 rounded-[8px] border border-slate-100 bg-white p-3.5 shadow-[0_18px_50px_-44px_rgba(15,23,42,0.34)]"
                   >
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[8px] bg-slate-100 text-sm font-semibold text-[#2563EB]">
+                    <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-semibold text-[#2563EB]">
                       {(recentThread.doctor_profile?.display_name || recentThread.patient_profile?.display_name || "Ct").slice(0, 2)}
+                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-[#2563EB]" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-[#1F2937]">
