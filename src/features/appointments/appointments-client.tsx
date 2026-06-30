@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { DataList } from "@/components/ui/data-list";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
-import { Input, Textarea } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { InlineLoader } from "@/components/ui/loaders";
 import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
@@ -44,8 +44,10 @@ import { appointmentSchema } from "@/lib/validation/features";
 type AppointmentFormValues = z.input<typeof appointmentSchema>;
 type AppointmentInput = z.output<typeof appointmentSchema>;
 type TriageResultData = TriageConversationResult | TriageProcessingResponse;
+type ConsultationTimingMode = "now" | "later";
 const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
 const symptomQuickReplies = ["Headache", "Fever", "Cough", "Stomach pain"];
+const hourlyConsultationSlots = Array.from({ length: 10 }, (_, index) => 8 + index);
 const severityOptions: Array<{ value: TriageSeverity; label: string }> = [
   { value: "mild", label: "Mild" },
   { value: "moderate", label: "Moderate" },
@@ -79,6 +81,36 @@ function readableTriageList(items: unknown[] | undefined) {
 function formatSpecialty(value?: string | null) {
   if (!value) return "General consultation";
   return value.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function isWithinConsultationHours(date = new Date()) {
+  const hour = date.getHours();
+  return hour >= 8 && hour < 18;
+}
+
+function padNumber(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function toDateInputValue(date: Date) {
+  return `${date.getFullYear()}-${padNumber(date.getMonth() + 1)}-${padNumber(date.getDate())}`;
+}
+
+function toDateTimeLocalValue(date: Date) {
+  return `${toDateInputValue(date)}T${padNumber(date.getHours())}:${padNumber(date.getMinutes())}`;
+}
+
+function displayHour(hour: number) {
+  if (hour === 0) return "12:00 AM";
+  if (hour < 12) return `${hour}:00 AM`;
+  if (hour === 12) return "12:00 PM";
+  return `${hour - 12}:00 PM`;
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
 }
 
 function doctorMatchesSpecialty(doctor: ProviderDoctor, specialty?: string | null) {
@@ -159,6 +191,10 @@ export function AppointmentsClient() {
   const [aiResultRequested, setAiResultRequested] = useState(false);
   const [aiStartedByUser, setAiStartedByUser] = useState(false);
   const [welcomeAccepted, setWelcomeAccepted] = useState(!firstTimeWelcome);
+  const [timingMode, setTimingMode] = useState<ConsultationTimingMode | null>(null);
+  const [scheduleDay, setScheduleDay] = useState<"today" | "tomorrow" | "another">("today");
+  const [customScheduleDate, setCustomScheduleDate] = useState("");
+  const [selectedSlotHour, setSelectedSlotHour] = useState<number | null>(null);
   const recommendationOpenedRef = useRef(false);
   const appointments = useQuery({
     queryKey: ["appointments", page],
@@ -179,6 +215,10 @@ export function AppointmentsClient() {
       setAiResultRequested(false);
       setAiStartedByUser(false);
       setSelectedDoctor(null);
+      setTimingMode(null);
+      setScheduleDay("today");
+      setCustomScheduleDate("");
+      setSelectedSlotHour(null);
       setDoctorPickerOpen(false);
       setPage(1);
       await queryClient.invalidateQueries({ queryKey: ["appointments"] });
@@ -267,7 +307,46 @@ export function AppointmentsClient() {
   const selectedDoctorLive = selectedDoctor
     ? doctorItems.find((doctor) => doctor.id === selectedDoctor.id) ?? (availableDoctors.isSuccess ? null : selectedDoctor)
     : null;
-  const doctorCanBeBooked = selectedDoctorLive?.availability_status === "available";
+  const doctorCanConsultNow = Boolean(selectedDoctorLive?.availability_status === "available" && isWithinConsultationHours());
+  const scheduleBaseDate = useMemo(() => {
+    const today = new Date();
+    if (scheduleDay === "tomorrow") return addDays(today, 1);
+    if (scheduleDay === "another" && customScheduleDate) {
+      const [year, month, day] = customScheduleDate.split("-").map(Number);
+      if (year && month && day) return new Date(year, month - 1, day);
+    }
+    return today;
+  }, [customScheduleDate, scheduleDay]);
+  const availableSlotHours = useMemo(() => {
+    if (scheduleDay === "another" && !customScheduleDate) {
+      return [];
+    }
+    const now = new Date();
+    const selectedDateValue = toDateInputValue(scheduleBaseDate);
+    const todayValue = toDateInputValue(now);
+    return hourlyConsultationSlots.filter((hour) => {
+      if (selectedDateValue !== todayValue) return true;
+      return hour > now.getHours();
+    });
+  }, [customScheduleDate, scheduleBaseDate, scheduleDay]);
+  const scheduledAtFromSelection = useMemo(() => {
+    if (timingMode === "now") {
+      return toDateTimeLocalValue(new Date());
+    }
+    if (timingMode === "later" && selectedSlotHour !== null) {
+      const scheduled = new Date(scheduleBaseDate);
+      scheduled.setHours(selectedSlotHour, 0, 0, 0);
+      return toDateTimeLocalValue(scheduled);
+    }
+    return "";
+  }, [scheduleBaseDate, selectedSlotHour, timingMode]);
+  const modalBookingReady = Boolean(
+    selectedDoctorLive &&
+      effectiveTriageSessionId &&
+      timingMode &&
+      scheduledAtFromSelection &&
+      (scheduleDay !== "another" || customScheduleDate),
+  );
   const activeBankTransferPayment =
     manualPayment ?? (createAppointment.data?.payment.provider === "bank_transfer" ? createAppointment.data.payment : null);
   const activePaymentId = activeBankTransferPayment?.payment_id;
@@ -405,6 +484,26 @@ export function AppointmentsClient() {
     if (!aiConversationId || !aiSubmittedText || sendAiMessage.isPending) return;
     setAiSeverity(severity);
     sendAiMessage.mutate({ message: aiSubmittedText, severity });
+  }
+
+  function handleContinueToPayment() {
+    if (!selectedDoctorLive || !effectiveTriageSessionId || !scheduledAtFromSelection) {
+      return;
+    }
+    const reason = aiSubmittedText || (isConversationResult(aiResultData) ? aiResultData.summary_preview : "") || "AI-assisted doctor consultation";
+
+    form.setValue("doctor", selectedDoctorLive.id, { shouldValidate: true });
+    form.setValue("scheduled_at", scheduledAtFromSelection, { shouldValidate: true });
+    form.setValue("reason", reason, { shouldValidate: true });
+
+    createAppointment.mutate({
+      doctor: selectedDoctorLive.id,
+      triage_session: effectiveTriageSessionId,
+      scheduled_at: scheduledAtFromSelection,
+      reason,
+      notes: "",
+      callback_url: `${window.location.origin}/appointments`,
+    });
   }
 
   return (
@@ -619,44 +718,17 @@ export function AppointmentsClient() {
               </div>
         </div>
       ) : user?.role === "patient" ? (
-        <form
-          className="ct-panel grid gap-4 rounded-[8px] p-5 sm:p-6"
-          onSubmit={form.handleSubmit((values) =>
-            createAppointment.mutate({
-              doctor: values.doctor,
-              ...(effectiveTriageSessionId ? { triage_session: effectiveTriageSessionId } : {}),
-              scheduled_at: values.scheduled_at,
-              reason: values.reason,
-              notes: "",
-              callback_url: `${window.location.origin}/appointments`,
-            }),
-          )}
-        >
+        <div className="ct-panel grid gap-4 rounded-[8px] p-5 sm:p-6">
           <div className="flex items-start gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
               <CalendarPlus2 className="h-5 w-5" />
             </span>
             <div>
-              <p className="ct-card-title text-[#1F2937]">Book Appointment</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">₦2,000 per consultation</p>
+              <p className="ct-card-title text-[#1F2937]">Choose your doctor and time</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">Your AI summary is ready. Continue inside the recommendation screen.</p>
             </div>
           </div>
           <ErrorMessage error={createAppointment.error} context="appointments" />
-          {profileIncomplete ? (
-            <Notice title="Complete your profile before booking" tone="warning">
-              Doctors need your name, phone, date of birth, gender, state, and LGA before consultation.
-              <Link className="ml-2 font-semibold text-amber-800 underline" href="/profile">Update profile</Link>
-            </Notice>
-          ) : null}
-          {effectiveTriageSessionId ? (
-            <Notice title="Care check-in ready" tone="success">
-              This consultation will include the AI summary you just completed.
-            </Notice>
-          ) : (
-            <Notice title="Care check-in required" tone="warning">
-              Please complete a care check before booking this consultation.
-            </Notice>
-          )}
           {createAppointment.isSuccess && createAppointment.data.payment.provider !== "bank_transfer" ? (
             <div className="grid gap-3">
               <Notice title="Checkout ready" tone="success">
@@ -665,12 +737,8 @@ export function AppointmentsClient() {
               <InlineLoader label="Preparing secure payment" />
             </div>
           ) : null}
-          <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
-            <span className="font-semibold text-[#1F2937]">Payment method:</span> Secure online payment with Paystack.
-          </div>
           {activeBankTransferPayment ? (
             <div className="grid gap-3">
-              {paymentDraft.restored ? <Notice title="Your payment details were restored." tone="success" /> : null}
               {paymentConfirmed ? (
                 <Notice title="Payment confirmed" tone="success">
                   Your consultation is now active.
@@ -698,46 +766,10 @@ export function AppointmentsClient() {
               ) : null}
             </div>
           ) : null}
-          <Field label="Selected Doctor" error={form.formState.errors.doctor?.message}>
-            <div className="grid gap-3">
-              {selectedDoctorLive ? (
-                <div className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-[#1F2937]">{selectedDoctorLive.display_name}</p>
-                      <p className="mt-1 text-sm text-slate-600">{doctorSpecialtyLabel(selectedDoctorLive)}</p>
-                    </div>
-                    <StatusBadge value={selectedDoctorLive.availability_status} />
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
-                  No doctor selected.
-                </div>
-              )}
-              <Button type="button" variant="secondary" className="w-full sm:w-fit" onClick={() => setDoctorPickerOpen(true)}>
-                Choose Doctor
-              </Button>
-            </div>
-          </Field>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Schedule Time" error={form.formState.errors.scheduled_at?.message}>
-              <Input type="datetime-local" {...form.register("scheduled_at")} />
-            </Field>
-            <div className="hidden md:block" />
-          </div>
-          <Field label="Reason" error={form.formState.errors.reason?.message}>
-            <Textarea placeholder="Why do you need to see a doctor?" {...form.register("reason")} />
-          </Field>
-          <Button className="w-full sm:w-fit" type="submit" disabled={createAppointment.isPending || !doctorCanBeBooked || profileIncomplete}>
-            {createAppointment.isPending
-              ? "Starting checkout..."
-              : !doctorCanBeBooked
-                ? "Choose an available doctor"
-                : "Continue to Paystack"}
+          <Button type="button" className="w-full sm:w-fit" onClick={() => setDoctorPickerOpen(true)}>
+            View recommended doctors
           </Button>
-        </form>
+        </div>
       ) : isDoctor ? (
         <Notice title="Doctor consultation queue" tone="neutral">
           Assigned consultations appear here.
@@ -791,13 +823,24 @@ export function AppointmentsClient() {
 
       <Modal
         open={doctorPickerOpen}
-        title="Choose doctor"
-        description="Select a doctor for this consultation."
+        title="Recommended doctors"
+        description="Based on what you've shared, I recommend speaking with one of our available doctors."
         onClose={() => setDoctorPickerOpen(false)}
         size="xl"
+        className="sm:max-w-5xl"
+        footer={
+          <Button
+            type="button"
+            className="w-full sm:w-fit"
+            disabled={!modalBookingReady || createAppointment.isPending}
+            onClick={handleContinueToPayment}
+          >
+            {createAppointment.isPending ? "Starting checkout..." : "Continue to Payment"}
+          </Button>
+        }
       >
         {availableDoctors.isLoading ? (
-          <div className="grid gap-3 md:grid-cols-2" aria-busy="true" aria-label="Loading doctors">
+          <div className="grid gap-3 md:grid-cols-2" aria-busy="true" aria-label="Loading recommended doctors">
             {[0, 1, 2, 3].map((item) => (
               <div key={item} className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
                 <div className="flex gap-3">
@@ -815,30 +858,146 @@ export function AppointmentsClient() {
             Please try again.
           </Notice>
         ) : doctorItems.length ? (
-          <div className="grid gap-3 md:grid-cols-2">
-            {doctorItems.map((doctor) => {
-              const available = doctor.availability_status === "available";
-              const selected = selectedDoctor?.id === doctor.id;
-              return (
-                <ProviderPickerCard
-                  key={doctor.id}
-                  name={doctor.display_name}
-                  subtitle={doctorSpecialtyLabel(doctor)}
-                  primaryDetail={doctor.rating ? `${doctor.rating}/5 (${doctor.review_count ?? 0} reviews)` : "New doctor"}
-                  secondaryDetail={`${doctor.completed_consultations ?? 0} completed consultations`}
-                  imageUrl={doctor.profile_image_url}
-                  status={doctor.availability_status}
-                  selected={selected}
-                  disabled={!available}
-                  actionLabel="Select"
-                  onSelect={() => {
-                    setSelectedDoctor(doctor);
-                    form.setValue("doctor", doctor.id, { shouldValidate: true });
-                    setDoctorPickerOpen(false);
-                  }}
-                />
-              );
-            })}
+          <div className="grid gap-5">
+            <AssistantBubble speaker="assistant">
+              <p className="font-semibold text-[#1F2937]">Based on what you&apos;ve shared, I recommend speaking with one of our available doctors.</p>
+            </AssistantBubble>
+
+            <div className="-mx-5 flex snap-x gap-3 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:grid-cols-2 md:px-0 lg:grid-cols-3">
+              {doctorItems.map((doctor, index) => {
+                const selected = selectedDoctor?.id === doctor.id;
+                const dimmed = Boolean(selectedDoctor && !selected);
+                return (
+                  <div
+                    key={doctor.id}
+                    className={cn("ct-rise-in min-w-[82%] snap-center transition duration-200 md:min-w-0", dimmed && "opacity-55")}
+                    style={{ animationDelay: `${index * 70}ms` }}
+                  >
+                    <ProviderPickerCard
+                      name={doctor.display_name}
+                      subtitle="General Medicine"
+                      primaryDetail={doctor.rating ? `★ ${doctor.rating} (${doctor.review_count ?? 0} reviews)` : "New doctor"}
+                      imageUrl={doctor.profile_image_url}
+                      status={doctor.availability_status === "available" ? "Available" : "Offline"}
+                      selected={selected}
+                      actionLabel={selected ? "Selected" : "Select Doctor"}
+                      onSelect={() => {
+                        setSelectedDoctor(doctor);
+                        setTimingMode(null);
+                        setSelectedSlotHour(null);
+                        form.setValue("doctor", doctor.id, { shouldValidate: true });
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+
+            {selectedDoctorLive ? (
+              <div className="ct-rise-in grid gap-4 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+                <div>
+                  <p className="text-sm font-semibold text-[#1F2937]">Choose when you want to consult</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    {isWithinConsultationHours()
+                      ? "You can consult now if the doctor is available, or schedule for later."
+                      : "Our doctors are currently offline. You can schedule a consultation for the next available time."}
+                  </p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {doctorCanConsultNow ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTimingMode("now");
+                        setSelectedSlotHour(null);
+                      }}
+                      className={cn(
+                        "rounded-[8px] border p-4 text-left transition",
+                        timingMode === "now" ? "border-[#2563EB] bg-white shadow-[0_18px_42px_-34px_rgba(37,99,235,0.45)]" : "border-slate-200 bg-white/75",
+                      )}
+                    >
+                      <span className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#2563EB]" />
+                        Consult Now
+                      </span>
+                      <span className="mt-2 block text-xs leading-5 text-slate-600">Doctor will respond within approximately 5-10 minutes.</span>
+                    </button>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() => setTimingMode("later")}
+                    className={cn(
+                      "rounded-[8px] border p-4 text-left transition",
+                      timingMode === "later" ? "border-[#2563EB] bg-white shadow-[0_18px_42px_-34px_rgba(37,99,235,0.45)]" : "border-slate-200 bg-white/75",
+                    )}
+                  >
+                    <span className="text-sm font-semibold text-[#1F2937]">Schedule for Later</span>
+                    <span className="mt-2 block text-xs leading-5 text-slate-600">Choose an available hourly consultation slot.</span>
+                  </button>
+                </div>
+
+                {timingMode === "later" ? (
+                  <div className="grid gap-4">
+                    <div className="grid grid-cols-3 gap-2">
+                      {(["today", "tomorrow", "another"] as const).map((day) => (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => {
+                            setScheduleDay(day);
+                            setSelectedSlotHour(null);
+                          }}
+                          className={cn(
+                            "min-h-10 rounded-[8px] border px-3 text-xs font-semibold capitalize transition",
+                            scheduleDay === day ? "border-[#2563EB] bg-[#DBEAFE] text-[#2563EB]" : "border-slate-200 bg-white text-slate-600",
+                          )}
+                        >
+                          {day === "another" ? "Another date" : day}
+                        </button>
+                      ))}
+                    </div>
+
+                    {scheduleDay === "another" ? (
+                      <Field label="Select date">
+                        <Input
+                          type="date"
+                          min={toDateInputValue(new Date())}
+                          value={customScheduleDate}
+                          onChange={(event) => {
+                            setCustomScheduleDate(event.target.value);
+                            setSelectedSlotHour(null);
+                          }}
+                        />
+                      </Field>
+                    ) : null}
+
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                      {availableSlotHours.length ? (
+                        availableSlotHours.map((hour) => (
+                          <button
+                            key={hour}
+                            type="button"
+                            onClick={() => setSelectedSlotHour(hour)}
+                            className={cn(
+                              "min-h-11 rounded-[8px] border px-3 text-sm font-semibold transition",
+                              selectedSlotHour === hour ? "border-[#2563EB] bg-[#2563EB] text-white" : "border-slate-200 bg-white text-[#1F2937]",
+                            )}
+                          >
+                            {displayHour(hour)}
+                          </button>
+                        ))
+                      ) : (
+                        <p className="col-span-full rounded-[8px] bg-white px-4 py-3 text-sm text-slate-600">
+                          No more hourly slots are available today. Please choose tomorrow or another date.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         ) : (
           <Notice title="No doctors available right now." tone="neutral" />
