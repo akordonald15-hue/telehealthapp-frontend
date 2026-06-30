@@ -6,25 +6,21 @@ import {
   FileText,
   Home,
   LayoutDashboard,
-  LogOut,
-  Menu,
   MessageSquare,
   ShieldCheck,
   Stethoscope,
   UserRound,
   UserRoundCheck,
-  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Fragment, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { OfflineStatusBanner } from "@/components/pwa/offline-status-banner";
 import { ProviderHeartbeat } from "@/components/providers/provider-heartbeat";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useCurrentUser, useLogout } from "@/lib/auth/use-auth";
+import { useCurrentUser } from "@/lib/auth/use-auth";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -63,7 +59,7 @@ function roleTone(role: string | undefined) {
   if (role === "admin") return "rose" as const;
   if (role === "doctor") return "cyan" as const;
   if (role === "nurse") return "blue" as const;
-  return "green" as const;
+  return "blue" as const;
 }
 
 function navLabelForRole(item: NavItem, role: string | undefined) {
@@ -82,8 +78,6 @@ function navLabelForRole(item: NavItem, role: string | undefined) {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const userQuery = useCurrentUser();
-  const logout = useLogout();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const user = userQuery.data;
 
   const visibleNav = useMemo(() => {
@@ -118,129 +112,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const activeItem = visibleNav.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
   const activeLabel = activeItem ? navLabelForRole(activeItem, user?.role) : user?.role === "patient" ? "Journey" : "Workspace";
 
-  const workspaceTitle =
-    user?.role === "nurse"
-      ? "Your home care workspace"
-      : user?.role === "doctor"
-        ? "Doctor clinical workspace"
-        : user?.role === "admin"
-          ? "Caretekk admin operations"
-          : "Everything you need for your care journey";
-  const workspaceDescription =
-    user?.role === "nurse"
-      ? "Requests, travel updates, visit progress, and history stay in one clean workflow."
-      : user?.role === "doctor"
-        ? "Consultations, patient messages, referrals, and care-plan notes stay focused on your clinical work."
-        : user?.role === "admin"
-          ? "Monitor users, providers, bookings, finances, communications, and audit activity from one secure workspace."
-          : "Appointments, messages, records, and care plans are organized here so you can move through your care with ease.";
-
-  const navigation = (
-    <>
-      <div className="rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-4 shadow-[0_24px_64px_-44px_rgba(15,23,42,0.32)]">
-        <BrandLockup href="/" wordmark="image" wordmarkClassName="h-6 max-w-[150px]" />
-        <div className="mt-4 rounded-[18px] border border-[rgba(66,107,179,0.1)] bg-[linear-gradient(180deg,#F7FAFF_0%,#EDF3FF_100%)] px-4 py-3 text-sm text-slate-600">
-          <p className="ct-card-title text-[#1F2937]">{user?.full_name || workspaceTitle}</p>
-          <p className="mt-1 leading-6">{user?.email || workspaceDescription}</p>
-        </div>
-      </div>
-
-      <nav className="mt-5 grid gap-2">
-        {visibleNav.map((item) => {
-          const Icon = item.icon;
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          return (
-            <Fragment key={item.href}>
-              {user?.role === "patient" && item.href === "/messages" ? (
-                <p className="px-4 pt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                  Consultation / Messages
-                </p>
-              ) : null}
-              <Link
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "group flex items-center gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15",
-                  active
-                    ? "border-[rgba(66,107,179,0.18)] bg-[var(--primary-soft)] text-[var(--primary)] shadow-[0_18px_34px_-30px_rgba(66,107,179,0.28)]"
-                    : "border-transparent bg-white/70 text-slate-600 hover:border-slate-200 hover:bg-white hover:text-[#1F2937] hover:shadow-[0_14px_30px_-30px_rgba(15,23,42,0.24)]",
-                )}
-              >
-                <span
-                  className={cn(
-                    "flex h-10 w-10 items-center justify-center rounded-[14px] transition",
-                    active ? "bg-white text-[var(--primary)]" : "bg-slate-100 text-slate-500 group-hover:bg-[var(--primary-soft)] group-hover:text-[var(--primary)]",
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span className="flex-1">{navLabelForRole(item, user?.role)}</span>
-              </Link>
-            </Fragment>
-          );
-        })}
-      </nav>
-
-      <div className="mt-5 rounded-[24px] border border-white/70 bg-white p-4 shadow-[0_22px_58px_-42px_rgba(15,23,42,0.28)]">
-        {user ? (
-          <div>
-            <p className="truncate text-sm font-semibold text-[#1F2937]">{user.full_name || "Caretekk user"}</p>
-            <p className="mt-1 truncate text-xs text-slate-500">{user.email}</p>
-          </div>
-        ) : null}
-        <Button
-          className="mt-4 w-full"
-          variant="secondary"
-          onClick={() => logout.mutate()}
-          disabled={logout.isPending}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          {logout.isPending ? "Signing out..." : "Sign out"}
-        </Button>
-      </div>
-    </>
-  );
+  const bottomNav = user?.role === "patient" ? patientBottomNav : visibleNav.map((item) => ({ ...item, primary: false }));
 
   return (
     <div className="ct-safe-area min-h-[100dvh] bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.15),_transparent_28%),linear-gradient(180deg,#F5F8FC_0%,#F7FAFE_40%,#FFFFFF_100%)]">
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1600px]">
-        <aside className="hidden w-[290px] shrink-0 px-5 py-6 lg:block xl:px-6">
-          <div className="sticky top-6">{navigation}</div>
-        </aside>
-
-        {mobileOpen ? (
-          <div className="fixed inset-0 z-50 bg-slate-950/38 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)}>
-            <aside
-              className="absolute inset-y-0 left-0 w-[86vw] max-w-sm overflow-y-auto border-r border-white/60 bg-[#F5F9FF] px-4 py-5 shadow-2xl"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <BrandLockup href="/" wordmark="image" wordmarkClassName="h-6 max-w-[150px]" />
-                <button
-                  type="button"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              {navigation}
-            </aside>
-          </div>
-        ) : null}
-
         <div className="flex min-h-[100dvh] min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 border-b border-white/65 bg-white/82 backdrop-blur-xl">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex min-w-0 items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setMobileOpen(true)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 lg:hidden"
-                  aria-label="Open navigation"
-                >
-                  <Menu className="h-5 w-5" />
-                </button>
                 <div className="min-w-0">
                   <BrandLockup href="/" wordmark="image" wordmarkClassName="h-5 max-w-[132px] sm:h-6 sm:max-w-[150px]" />
                   <h1 className="mt-1 truncate font-heading text-lg font-semibold tracking-[-0.025em] text-[#1F2937] sm:text-xl">{activeLabel}</h1>
@@ -256,18 +136,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className={cn("mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8", user?.role === "patient" && "pb-28 lg:pb-8")}>
+          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 pb-28 sm:px-6 sm:py-8 lg:px-8">
             <ProviderHeartbeat />
             <OfflineStatusBanner />
             {children}
           </main>
 
-          {user?.role === "patient" ? (
+          {user ? (
             <nav
-              className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 items-end rounded-[8px] border border-white/80 bg-white/95 px-2 py-2 shadow-[0_22px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur lg:hidden"
-              aria-label="Patient bottom navigation"
+              className={cn(
+                "fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-18px_54px_-42px_rgba(15,23,42,0.5)] backdrop-blur",
+                user.role === "patient" ? "grid grid-cols-5 items-end" : "flex gap-2 overflow-x-auto",
+              )}
+              aria-label="Bottom navigation"
             >
-              {patientBottomNav.map((item) => {
+              {bottomNav.map((item) => {
                 const Icon = item.icon;
                 const active = !item.primary && (pathname === item.href || pathname.startsWith(`${item.href}/`));
                 return (
@@ -276,15 +159,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={cn(
                       "flex min-w-0 flex-col items-center gap-1 rounded-[8px] px-1 py-2 text-[11px] font-semibold text-slate-500 transition",
-                      active && "text-[#0F766E]",
-                      item.primary && "-mt-7 text-[#0F766E]",
+                      user.role !== "patient" && "min-w-[92px]",
+                      active && "text-[#2563EB]",
+                      item.primary && "-mt-7 text-[#2563EB]",
                     )}
                   >
                     <span
                       className={cn(
                         "flex h-9 w-9 items-center justify-center rounded-[8px] bg-slate-50",
-                        active && "bg-emerald-50",
-                        item.primary && "h-14 w-14 rounded-full bg-[#0F766E] text-white shadow-[0_18px_38px_-22px_rgba(15,118,110,0.7)]",
+                        active && "bg-[#DBEAFE]",
+                        item.primary && "h-14 w-14 rounded-full bg-[#2563EB] text-white shadow-[0_18px_38px_-22px_rgba(37,99,235,0.7)]",
                       )}
                     >
                       <Icon className={item.primary ? "h-6 w-6" : "h-5 w-5"} />

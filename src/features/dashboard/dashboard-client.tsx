@@ -3,18 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
-  Bell,
   CalendarClock,
-  ClipboardList,
   CreditCard,
   FileText,
-  HeartPulse,
-  Home,
   MessageSquareText,
-  ShieldCheck,
   Sparkles,
   Stethoscope,
-  UsersRound,
   Video,
 } from "lucide-react";
 import Link from "next/link";
@@ -113,35 +107,6 @@ function DashboardSkeleton({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse rounded-[8px] bg-slate-100 ${className}`} />;
 }
 
-function QuickAction({
-  href,
-  title,
-  description,
-  icon: Icon,
-}: {
-  href: string;
-  title: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group grid min-h-[136px] rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_18px_48px_-42px_rgba(15,23,42,0.32)] transition duration-200 hover:-translate-y-0.5 hover:border-[#0F766E]/20 hover:shadow-[0_24px_54px_-42px_rgba(15,23,42,0.36)]"
-    >
-      <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-emerald-50 text-[#0F766E]">
-        <Icon className="h-5 w-5" />
-      </span>
-      <span className="mt-4 font-semibold text-[#1F2937]">{title}</span>
-      <span className="mt-1 text-sm leading-6 text-slate-600">{description}</span>
-      <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#0F766E]">
-        Open
-        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-      </span>
-    </Link>
-  );
-}
-
 export function DashboardClient() {
   const userQuery = useCurrentUser();
   const user = userQuery.data;
@@ -168,11 +133,6 @@ export function DashboardClient() {
     queryKey: ["referrals", "dashboard"],
     queryFn: () => referralsApi.list({ page_size: 5 }),
     enabled: !isNurse,
-  });
-  const carePlans = useQuery({
-    queryKey: ["care-plans", "dashboard"],
-    queryFn: () => profilesApi.carePlans({ page_size: 5 }),
-    enabled: user?.role === "patient",
   });
   const patientProfile = useQuery({
     queryKey: ["profile", "me", "patient"],
@@ -205,18 +165,14 @@ export function DashboardClient() {
     return <AdminDashboardClient />;
   }
 
-  const carePlanMetric = listMetric(carePlans);
   const paymentMetric = canLoadPayments ? listMetric(payments) : 0;
-  const patientHasCarePlan = typeof carePlanMetric === "number" && carePlanMetric > 0;
   const nextAppointment = upcomingAppointment(appointments.data?.results);
   const recentThread = latestThread(threads.data?.results);
   const patientName = firstName(user?.full_name || patientProfile.data?.full_name);
-  const carePlanProgress = patientHasCarePlan ? Math.min(100, Math.max(30, carePlanMetric * 30)) : 0;
   const dashboardErrors = [
     appointments.isError ? `Appointments: ${getFriendlyErrorMessage(appointments.error, "dashboard")}` : null,
     threads.isError ? `Messages: ${getFriendlyErrorMessage(threads.error, "dashboard")}` : null,
     referrals.isError ? `Referrals: ${getFriendlyErrorMessage(referrals.error, "dashboard")}` : null,
-    carePlans.isError ? `Care plans: ${getFriendlyErrorMessage(carePlans.error, "dashboard")}` : null,
     payments.isError ? `Payments: ${getFriendlyErrorMessage(payments.error, "dashboard")}` : null,
   ].filter(Boolean);
 
@@ -249,7 +205,7 @@ export function DashboardClient() {
                 <Link
                   href="/appointments"
                   onClick={() => setAssistantWelcomeOpen(false)}
-                  className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#0F766E] px-5 text-sm font-semibold text-white"
+                  className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-5 text-sm font-semibold text-white"
                 >
                   Start with AI Assistant
                 </Link>
@@ -257,8 +213,8 @@ export function DashboardClient() {
             }
           >
             <div className="grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
-              <div className="flex h-24 w-24 items-center justify-center rounded-[8px] bg-emerald-50 text-[#0F766E]">
-                <Sparkles className="h-10 w-10" />
+              <div className="flex h-24 w-24 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
+                <Sparkles className="h-10 w-10 animate-pulse" />
               </div>
               <div>
                 <p className="font-heading text-2xl font-semibold leading-tight text-[#1F2937]">
@@ -271,7 +227,7 @@ export function DashboardClient() {
             </div>
           </Modal>
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.36fr)]">
+          <div className="grid gap-6">
             <div className="grid gap-5">
               <div className="animate-[fadeIn_0.35s_ease-out]">
                 <h2 className="font-heading text-2xl font-semibold tracking-[-0.02em] text-[#1F2937] sm:text-3xl">
@@ -282,21 +238,21 @@ export function DashboardClient() {
 
               <Link
                 href="/appointments"
-                className="group overflow-hidden rounded-[8px] border border-emerald-100 bg-[linear-gradient(135deg,#ECFDF5_0%,#F8FBFF_100%)] p-5 shadow-[0_24px_70px_-50px_rgba(15,118,110,0.45)] transition duration-200 hover:-translate-y-0.5 sm:p-6"
+                className="group overflow-hidden rounded-[8px] border border-[#DBEAFE] bg-[linear-gradient(135deg,#EFF6FF_0%,#F8FBFF_100%)] p-5 shadow-[0_24px_70px_-50px_rgba(37,99,235,0.35)] transition duration-200 hover:-translate-y-0.5 sm:p-6"
               >
                 <div className="grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
-                  <div className="flex h-24 w-24 items-center justify-center rounded-[8px] bg-white text-[#0F766E] shadow-sm sm:h-28 sm:w-28">
-                    <Sparkles className="h-10 w-10" />
+                  <div className="flex h-24 w-24 items-center justify-center rounded-[8px] bg-white text-[#2563EB] shadow-sm sm:h-28 sm:w-28">
+                    <Stethoscope className="h-10 w-10 animate-pulse" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[#0F766E]">AI Health Assistant</p>
+                    <p className="text-sm font-semibold text-[#2563EB]">AI Health Assistant</p>
                     <h3 className="mt-2 font-heading text-2xl font-semibold leading-tight text-[#1F2937]">
                       How are you feeling today?
                     </h3>
                     <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
                       Tell us how you feel and we&apos;ll recommend the right doctor.
                     </p>
-                    <span className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-[8px] bg-[#0F766E] px-5 text-sm font-semibold text-white shadow-[0_18px_42px_-28px_rgba(15,118,110,0.65)] sm:w-auto sm:min-w-[260px]">
+                    <span className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-[8px] bg-[#2563EB] px-5 text-sm font-semibold text-white shadow-[0_18px_42px_-28px_rgba(37,99,235,0.65)] sm:w-auto sm:min-w-[260px]">
                       Book a Doctor
                       <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                     </span>
@@ -307,7 +263,7 @@ export function DashboardClient() {
               <section className="rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_20px_60px_-48px_rgba(15,23,42,0.36)] sm:p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-emerald-50 text-[#0F766E]">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
                       <CalendarClock className="h-4 w-4" />
                     </span>
                     <h3 className="font-semibold text-[#1F2937]">Upcoming Appointment</h3>
@@ -322,14 +278,14 @@ export function DashboardClient() {
                 ) : nextAppointment ? (
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 items-center gap-4">
-                      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[8px] bg-slate-100 text-lg font-semibold text-[#0F766E]">
+                      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[8px] bg-slate-100 text-lg font-semibold text-[#2563EB]">
                         {nextAppointment.doctor_profile?.display_name?.slice(0, 2) || "Dr"}
                       </span>
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-[#1F2937]">{nextAppointment.doctor_profile?.display_name || "Doctor"}</p>
                         <p className="mt-1 text-sm text-slate-600">Doctor consultation</p>
                         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                          <span className="inline-flex items-center gap-1 text-[#0F766E]">
+                          <span className="inline-flex items-center gap-1 text-[#2563EB]">
                             <CalendarClock className="h-4 w-4" />
                             {formatDateTime(nextAppointment.scheduled_at)}
                           </span>
@@ -342,7 +298,7 @@ export function DashboardClient() {
                     </div>
                     <Link
                       href={`/appointments/${nextAppointment.id}`}
-                      className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-[#0F766E]/30 px-4 text-sm font-semibold text-[#0F766E]"
+                      className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-[#2563EB]/30 px-4 text-sm font-semibold text-[#2563EB]"
                     >
                       View Details
                     </Link>
@@ -351,7 +307,7 @@ export function DashboardClient() {
                   <div className="rounded-[8px] bg-slate-50 px-4 py-5">
                     <p className="font-semibold text-[#1F2937]">No upcoming appointment</p>
                     <p className="mt-1 text-sm leading-6 text-slate-600">Book a doctor when you need care.</p>
-                    <Link href="/appointments" className="mt-3 inline-flex text-sm font-semibold text-[#0F766E]">
+                    <Link href="/appointments" className="mt-3 inline-flex text-sm font-semibold text-[#2563EB]">
                       Book a Doctor
                     </Link>
                   </div>
@@ -360,20 +316,8 @@ export function DashboardClient() {
 
               <section>
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="font-semibold text-[#1F2937]">Quick Actions</h3>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <QuickAction href="/home-care/book" title="Home Care" description="Book a nurse at home" icon={Home} />
-                  <QuickAction href="/care-plan" title="Care Plan" description="View your care plan" icon={ClipboardList} />
-                  <QuickAction href="/records" title="Medical Records" description="Access health records" icon={FileText} />
-                  <QuickAction href="/referrals" title="Referrals" description="Specialist referrals" icon={UsersRound} />
-                </div>
-              </section>
-
-              <section>
-                <div className="mb-3 flex items-center justify-between">
                   <h3 className="font-semibold text-[#1F2937]">Recent Messages</h3>
-                  <Link href="/messages" className="text-sm font-semibold text-[#0F766E]">View all</Link>
+                  <Link href="/messages" className="text-sm font-semibold text-[#2563EB]">View all</Link>
                 </div>
                 {threads.isLoading ? (
                   <DashboardSkeleton className="h-20" />
@@ -382,7 +326,7 @@ export function DashboardClient() {
                     href="/messages"
                     className="flex items-center gap-4 rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_18px_50px_-44px_rgba(15,23,42,0.34)]"
                   >
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[8px] bg-slate-100 text-sm font-semibold text-[#0F766E]">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[8px] bg-slate-100 text-sm font-semibold text-[#2563EB]">
                       {(recentThread.doctor_profile?.display_name || recentThread.patient_profile?.display_name || "Ct").slice(0, 2)}
                     </span>
                     <div className="min-w-0 flex-1">
@@ -394,7 +338,7 @@ export function DashboardClient() {
                     <div className="shrink-0 text-right">
                       <p className="text-xs text-slate-500">{shortTime(recentThread.last_message?.created_at)}</p>
                       {recentThread.unread_count ? (
-                        <span className="mt-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#0F766E] px-2 text-xs font-semibold text-white">
+                        <span className="mt-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#2563EB] px-2 text-xs font-semibold text-white">
                           {recentThread.unread_count}
                         </span>
                       ) : null}
@@ -407,65 +351,6 @@ export function DashboardClient() {
                 )}
               </section>
             </div>
-
-            <aside className="grid gap-4 xl:sticky xl:top-24 xl:self-start">
-              <section className="rounded-[8px] border border-slate-100 bg-white p-5 shadow-[0_20px_58px_-48px_rgba(15,23,42,0.36)]">
-                <div className="flex items-center gap-2">
-                  <HeartPulse className="h-5 w-5 text-[#0F766E]" />
-                  <h3 className="font-semibold text-[#1F2937]">Health Summary</h3>
-                </div>
-                <div className="mt-5 grid gap-4 text-sm">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-slate-600">Last Consultation</span>
-                    <span className="font-medium text-[#1F2937]">{nextAppointment ? formatDateTime(nextAppointment.scheduled_at) : "None yet"}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-slate-600">Profile</span>
-                    <span className="font-medium text-[#1F2937]">{patientProfile.data?.profile_complete ? "Complete" : "Incomplete"}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-slate-600">Location</span>
-                    <span className="font-medium text-[#1F2937]">{patientProfile.data?.state || "Not added"}</span>
-                  </div>
-                </div>
-                <Link href="/profile" className="mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-[8px] bg-emerald-50 text-sm font-semibold text-[#0F766E]">
-                  View Full Summary
-                </Link>
-              </section>
-
-              <section className="rounded-[8px] border border-slate-100 bg-white p-5 shadow-[0_20px_58px_-48px_rgba(15,23,42,0.36)]">
-                <div className="flex items-center gap-2">
-                  <ClipboardList className="h-5 w-5 text-[#0F766E]" />
-                  <h3 className="font-semibold text-[#1F2937]">Your Care Plan</h3>
-                </div>
-                <p className="mt-4 text-sm text-slate-600">
-                  {patientHasCarePlan ? `You have ${carePlanMetric} active care plan item${carePlanMetric === 1 ? "" : "s"}.` : "No active care plan yet."}
-                </p>
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-[#0F766E]" style={{ width: `${carePlanProgress}%` }} />
-                </div>
-                <Link href="/care-plan" className="mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-[8px] bg-emerald-50 text-sm font-semibold text-[#0F766E]">
-                  View Care Plan
-                </Link>
-              </section>
-
-              <section className="rounded-[8px] border border-slate-100 bg-white p-5 shadow-[0_20px_58px_-48px_rgba(15,23,42,0.36)]">
-                <div className="flex items-center gap-2">
-                  <Bell className="h-5 w-5 text-[#0F766E]" />
-                  <h3 className="font-semibold text-[#1F2937]">Reminders</h3>
-                </div>
-                <div className="mt-4 grid gap-3 text-sm">
-                  <div className="flex items-center gap-3 rounded-[8px] bg-slate-50 px-3 py-3">
-                    <ShieldCheck className="h-4 w-4 text-[#0F766E]" />
-                    <span className="text-slate-700">Keep your profile updated</span>
-                  </div>
-                  <div className="flex items-center gap-3 rounded-[8px] bg-slate-50 px-3 py-3">
-                    <Stethoscope className="h-4 w-4 text-[#0F766E]" />
-                    <span className="text-slate-700">Start with AI before booking</span>
-                  </div>
-                </div>
-              </section>
-            </aside>
           </div>
 
           {dashboardErrors.length ? (
@@ -518,7 +403,7 @@ export function DashboardClient() {
 
             <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-emerald-50 text-[#10B981]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
                   <Sparkles className="h-5 w-5" />
                 </span>
                 <div>

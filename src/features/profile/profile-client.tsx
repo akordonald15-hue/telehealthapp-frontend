@@ -1,6 +1,8 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ClipboardList, FileText, LogOut, Settings, UserRoundCheck } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +13,7 @@ import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { authApi, profilesApi } from "@/lib/api/endpoints";
-import { useCurrentUser } from "@/lib/auth/use-auth";
+import { useCurrentUser, useLogout } from "@/lib/auth/use-auth";
 import { NIGERIA_STATE_LGAS, NIGERIA_STATES } from "@/lib/nigeria-locations";
 import type { DoctorProfile, NurseProfile, PatientProfile } from "@/lib/types/backend";
 import { useFormDraft } from "@/lib/use-form-draft";
@@ -19,6 +21,7 @@ import { useFormDraft } from "@/lib/use-form-draft";
 export function ProfileClient() {
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
+  const logout = useLogout();
   const user = userQuery.data;
   const profile = useQuery({
     queryKey: ["profile", "me", user?.role],
@@ -83,8 +86,51 @@ export function ProfileClient() {
 
   return (
     <Section title="Profile">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <form className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6" onSubmit={(event) => {
+      <div className="grid gap-4">
+        {user?.role === "patient" ? (
+          <div className="ct-panel rounded-[8px] p-5 sm:p-6">
+            <div>
+              <h2 className="ct-card-title text-[#1F2937]">Profile shortcuts</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">Records, care updates, referrals, settings, and account access.</p>
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {[
+                { href: "/records", label: "Medical Records", icon: FileText },
+                { href: "/care-plan", label: "Care Plans", icon: ClipboardList },
+                { href: "/referrals", label: "Referrals", icon: UserRoundCheck },
+                { href: "#account-settings", label: "Settings", icon: Settings },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="flex min-h-20 items-center gap-3 rounded-[8px] border border-slate-100 bg-white px-4 py-3 text-sm font-semibold text-[#1F2937] shadow-[0_14px_42px_-36px_rgba(15,23,42,0.35)] transition hover:border-[#DBEAFE] hover:bg-[#F8FBFF]"
+                  >
+                    <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    {item.label}
+                  </Link>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => logout.mutate()}
+                disabled={logout.isPending}
+                className="flex min-h-20 items-center gap-3 rounded-[8px] border border-slate-100 bg-white px-4 py-3 text-left text-sm font-semibold text-[#1F2937] shadow-[0_14px_42px_-36px_rgba(15,23,42,0.35)] transition hover:border-[#DBEAFE] hover:bg-[#F8FBFF] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
+                  <LogOut className="h-5 w-5" />
+                </span>
+                {logout.isPending ? "Signing out..." : "Logout"}
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="grid gap-4 lg:grid-cols-2">
+        <form id="account-settings" className="ct-panel grid gap-4 rounded-[8px] p-5 sm:p-6" onSubmit={(event) => {
           event.preventDefault();
           updateUser.mutate();
         }}>
@@ -113,7 +159,7 @@ export function ProfileClient() {
           </Button>
         </form>
 
-        <form className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6" onSubmit={(event) => {
+        <form className="ct-panel grid gap-4 rounded-[8px] p-5 sm:p-6" onSubmit={(event) => {
           event.preventDefault();
           updateProfile.mutate();
         }}>
@@ -241,6 +287,7 @@ export function ProfileClient() {
             Save profile
           </Button>
         </form>
+        </div>
       </div>
     </Section>
   );
