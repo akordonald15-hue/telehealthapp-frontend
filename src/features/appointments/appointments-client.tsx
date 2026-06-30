@@ -2,7 +2,19 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, BrainCircuit, CalendarPlus2, CheckCircle2, LoaderCircle, SendHorizonal, Star } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  BrainCircuit,
+  CalendarPlus2,
+  CheckCircle2,
+  LoaderCircle,
+  MessageCircle,
+  SendHorizonal,
+  ShieldCheck,
+  Star,
+  Stethoscope,
+} from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -34,6 +46,7 @@ type AppointmentFormValues = z.input<typeof appointmentSchema>;
 type AppointmentInput = z.output<typeof appointmentSchema>;
 type TriageResultData = TriageConversationResult | TriageProcessingResponse;
 const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
+const symptomQuickReplies = ["Headache", "Fever", "Cough", "Stomach pain"];
 const severityOptions: Array<{ value: TriageSeverity; label: string }> = [
   { value: "mild", label: "Mild" },
   { value: "moderate", label: "Moderate" },
@@ -97,7 +110,7 @@ function TypingDots() {
       {[0, 1, 2].map((item) => (
         <span
           key={item}
-          className="h-2 w-2 animate-pulse rounded-full bg-[#0F766E]"
+          className="h-2 w-2 animate-pulse rounded-full bg-[#2563EB]"
           style={{ animationDelay: `${item * 150}ms` }}
         />
       ))}
@@ -111,7 +124,7 @@ function AssistantBubble({ speaker, children }: { speaker: "assistant" | "user";
       <div
         className={cn(
           "max-w-[88%] rounded-[8px] px-4 py-3 text-sm leading-7 shadow-sm sm:max-w-[80%]",
-          speaker === "user" ? "bg-[#0F766E] text-white" : "border border-slate-200 bg-white text-slate-700",
+          speaker === "user" ? "bg-[#2563EB] text-white" : "border border-slate-200 bg-white text-slate-700",
         )}
       >
         {children}
@@ -167,6 +180,7 @@ export function AppointmentsClient() {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const userQuery = useCurrentUser();
+  const firstTimeWelcome = searchParams.get("welcome") === "first";
   const [page, setPage] = useState(1);
   const [doctorPickerOpen, setDoctorPickerOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<ProviderDoctor | null>(null);
@@ -178,6 +192,7 @@ export function AppointmentsClient() {
   const [aiSeverity, setAiSeverity] = useState<TriageSeverity | null>(null);
   const [aiResultRequested, setAiResultRequested] = useState(false);
   const [aiStartedByUser, setAiStartedByUser] = useState(false);
+  const [welcomeAccepted, setWelcomeAccepted] = useState(!firstTimeWelcome);
   const recommendationOpenedRef = useRef(false);
   const appointments = useQuery({
     queryKey: ["appointments", page],
@@ -332,6 +347,9 @@ export function AppointmentsClient() {
     setAiSeverity(draft.aiSeverity ?? null);
     setAiResultRequested(Boolean(draft.aiResultRequested || draft.aiSeverity));
     setAiStartedByUser(Boolean(draft.aiStartedByUser || draft.aiSessionId || draft.aiConversationId));
+    if (draft.aiSessionId || draft.aiConversationId || draft.aiSymptomText || draft.aiSubmittedText) {
+      setWelcomeAccepted(true);
+    }
   }, []);
   const consultationDraft = useFormDraft({
     key: user?.id ? `caretekk:draft:consultation-ai:${user.id}` : null,
@@ -402,11 +420,11 @@ export function AppointmentsClient() {
   }, [paymentConfirmed, queryClient]);
 
   useEffect(() => {
-    if (user?.role !== "patient" || profileIncomplete || triageSessionId || aiSessionId || startAiSession.isPending) {
+    if (!welcomeAccepted || user?.role !== "patient" || profileIncomplete || triageSessionId || aiSessionId || startAiSession.isPending) {
       return;
     }
     startAiSession.mutate();
-  }, [aiSessionId, profileIncomplete, startAiSession, triageSessionId, user?.role]);
+  }, [aiSessionId, profileIncomplete, startAiSession, triageSessionId, user?.role, welcomeAccepted]);
 
   useEffect(() => {
     if (!aiFinished || recommendationOpenedRef.current || selectedDoctor) {
@@ -433,13 +451,13 @@ export function AppointmentsClient() {
 
   return (
     <Section
-      title={isDoctor ? "Consultations" : "Appointments"}
+      title={user?.role === "patient" ? "" : isDoctor ? "Consultations" : "Appointments"}
       description={user?.role === "patient" ? "" : isDoctor ? "Open and manage assigned consultations." : undefined}
     >
       {user?.role === "patient" && !effectiveTriageSessionId ? (
         <div className="grid gap-4">
           <div className="ct-panel overflow-hidden rounded-[8px] p-0">
-            <div className="grid gap-5 bg-[linear-gradient(135deg,#F0FDF4_0%,#F8FBFF_100%)] p-5 sm:p-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            <div className="grid gap-5 bg-[linear-gradient(135deg,#EFF6FF_0%,#F8FBFF_100%)] p-5 sm:p-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
               <div className="grid gap-4">
                 {consultationDraft.restored ? (
                   <Notice title="Your previous progress was restored." tone="success">
@@ -456,37 +474,71 @@ export function AppointmentsClient() {
                   </Notice>
                 ) : null}
                 <div className="flex items-start gap-4">
-                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[8px] bg-white text-[#0F766E] shadow-sm">
-                    <BrainCircuit className="h-7 w-7" />
+                  <span className="ct-float-gentle flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-[0_18px_42px_-30px_rgba(37,99,235,0.48)]">
+                    <Bot className="h-9 w-9" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[#0F766E]">Caretekk Health Assistant</p>
+                    <p className="text-sm font-semibold text-[#2563EB]">Caretekk Health Assistant</p>
                     <h2 className="mt-2 font-heading text-2xl font-semibold leading-tight text-[#1F2937] sm:text-3xl">
-                      Hi. I&apos;ll help match you with the right doctor.
+                      {firstTimeWelcome ? "Hi. I'm your Caretekk Health Assistant." : "Welcome back. Let's find the right doctor."}
                     </h2>
                     <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                      I&apos;ll ask a few questions, summarize what you share, and recommend doctors for this consultation.
+                      {firstTimeWelcome
+                        ? "I'll ask a few questions so I can understand how you're feeling and recommend the right doctor for you."
+                        : "Tell me how you're feeling today, and I'll recommend the most suitable doctor."}
                     </p>
                   </div>
                 </div>
-                {!aiSessionId && !startAiSession.isPending ? (
+                {firstTimeWelcome && !welcomeAccepted ? (
                   <Button
                     type="button"
                     className="w-full sm:w-fit"
                     disabled={profileIncomplete}
-                    onClick={() => startAiSession.mutate()}
+                    onClick={() => setWelcomeAccepted(true)}
                   >
-                    Start with AI Assistant
+                    Let&apos;s Get Started
                   </Button>
                 ) : null}
+                {!firstTimeWelcome && !aiSessionId && !startAiSession.isPending ? (
+                  <div className="rounded-[8px] border border-[#DBEAFE] bg-white/80 p-4 text-sm leading-6 text-slate-600">
+                    The assistant will begin with a few questions, then show recommended doctors before checkout.
+                  </div>
+                ) : null}
+                <div className="grid gap-3 rounded-[8px] border border-white/80 bg-white/90 p-4 shadow-[0_18px_44px_-38px_rgba(15,23,42,0.28)]">
+                  <p className="text-sm font-semibold text-[#1F2937]">Here&apos;s how it works:</p>
+                  {[
+                    { icon: MessageCircle, title: "You tell me how you're feeling", text: "Share your symptoms in your own words." },
+                    { icon: BrainCircuit, title: "I analyze your symptoms", text: "Caretekk prepares a care summary for this consultation." },
+                    { icon: Stethoscope, title: "I recommend the right doctor", text: "You'll see doctors matched to your needs." },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={item.title} className="flex items-start gap-3">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span>
+                          <span className="block text-sm font-semibold text-[#1F2937]">{item.title}</span>
+                          <span className="block text-xs leading-5 text-slate-600">{item.text}</span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="rounded-[8px] border border-white/80 bg-white/95 p-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.35)] sm:p-5">
                 <ErrorMessage error={startAiSession.error || startConversation.error || sendAiMessage.error || aiResult.error} context="triage" />
                 <div className="grid max-h-[70dvh] gap-3 overflow-y-auto pr-1">
                   <AssistantBubble speaker="assistant">
-                    <p className="font-semibold text-[#1F2937]">Hi, I&apos;m your Caretekk Health Assistant.</p>
-                    <p>I&apos;ll ask a few questions so I can understand how you&apos;re feeling and recommend the most appropriate doctor.</p>
+                    <p className="font-semibold text-[#1F2937]">
+                      {firstTimeWelcome ? "Hi 👋" : "Welcome back 👋"}
+                    </p>
+                    <p>
+                      {firstTimeWelcome
+                        ? "I'm your Caretekk Health Assistant. I'll ask you a few questions so I can recommend the right doctor."
+                        : "Tell me how you're feeling today, and I'll recommend the most suitable doctor."}
+                    </p>
                   </AssistantBubble>
 
                   {startAiSession.isPending || startConversation.isPending || (aiSessionId && !aiConversationId) ? (
@@ -500,13 +552,30 @@ export function AppointmentsClient() {
 
                   {aiConversationId && !aiSubmittedText ? (
                     <>
-                      <AssistantBubble speaker="assistant">What brings you here today? Tell me how you&apos;re feeling.</AssistantBubble>
+                      <AssistantBubble speaker="assistant">
+                        {firstTimeWelcome ? "How are you feeling today?" : "What symptoms are you experiencing today?"}
+                      </AssistantBubble>
+                      <div className="grid gap-2">
+                        <p className="text-xs font-semibold text-slate-500">Examples you can try:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {symptomQuickReplies.map((reply) => (
+                            <button
+                              key={reply}
+                              type="button"
+                              onClick={() => setAiSymptomText(reply)}
+                              className="inline-flex min-h-9 items-center justify-center rounded-full border border-[#DBEAFE] bg-white px-3 text-xs font-semibold text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                            >
+                              {reply}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                       <form className="grid gap-3" onSubmit={handleAiSymptomSubmit}>
                         <textarea
                           value={aiSymptomText}
                           onChange={(event) => setAiSymptomText(event.target.value)}
                           placeholder="Type your symptoms here..."
-                          className="min-h-28 w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-4 text-sm text-[#1F2937] outline-none transition placeholder:text-[#94A3B8] focus:border-[#0F766E] focus:ring-4 focus:ring-[#0F766E]/10"
+                          className="min-h-28 w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-4 text-sm text-[#1F2937] outline-none transition placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                         />
                         <Button type="submit" disabled={!aiSymptomText.trim()} className="w-full sm:w-fit">
                           <SendHorizonal className="mr-2 h-4 w-4" />
@@ -531,7 +600,7 @@ export function AppointmentsClient() {
                             key={option.value}
                             type="button"
                             onClick={() => handleAiSeveritySelect(option.value)}
-                            className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition hover:border-[#0F766E]/30 hover:bg-emerald-50"
+                            className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition hover:border-[#93C5FD] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
                           >
                             {option.label}
                           </button>
@@ -553,15 +622,17 @@ export function AppointmentsClient() {
                           <LoaderCircle className="h-4 w-4 animate-spin" />
                           Understanding your symptoms...
                         </span>
-                        <span className="text-slate-600">Looking for possible causes and the most appropriate specialist.</span>
+                        <span className="text-slate-600">Looking for possible causes...</span>
+                        <span className="text-slate-600">Identifying the most appropriate specialist...</span>
+                        <span className="text-slate-600">Finding available doctors...</span>
                       </div>
                     </AssistantBubble>
                   ) : null}
 
                   {aiFinished && aiResultData ? (
-                    <div className="grid gap-3 rounded-[8px] border border-emerald-100 bg-emerald-50/70 p-4">
+                    <div className="grid gap-3 rounded-[8px] border border-[#DBEAFE] bg-[#EFF6FF]/80 p-4">
                       <div className="flex items-start gap-3">
-                        <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#0F766E]" />
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#2563EB]" />
                         <div>
                           <p className="font-semibold text-[#1F2937]">Your consultation summary is ready.</p>
                           <p className="mt-1 text-sm leading-6 text-slate-600">{aiResultData.summary_preview || "Your symptoms have been summarized for the doctor."}</p>
@@ -581,6 +652,10 @@ export function AppointmentsClient() {
                       </Button>
                     </div>
                   ) : null}
+                </div>
+                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
+                  <ShieldCheck className="h-4 w-4 text-[#2563EB]" />
+                  Your conversation is private and secure.
                 </div>
               </div>
             </div>
@@ -650,7 +725,7 @@ export function AppointmentsClient() {
               {paymentConfirmed ? (
                 <Notice title="Payment confirmed" tone="success">
                   Your consultation is now active.
-                  <Link className="ml-2 font-semibold text-emerald-800 underline" href="/messages">
+                  <Link className="ml-2 font-semibold text-[#2563EB] underline" href="/messages">
                     Open Consultation
                   </Link>
                 </Notice>
@@ -766,7 +841,7 @@ export function AppointmentsClient() {
                 {isDoctor ? (
                   <Link
                     href={`/appointments/${item.id}`}
-                    className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-[#0F766E] px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+                    className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5"
                   >
                     View consultation
                   </Link>

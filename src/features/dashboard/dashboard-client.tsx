@@ -14,11 +14,9 @@ import {
   Video,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { InlineLoader } from "@/components/ui/loaders";
-import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -145,7 +143,6 @@ export function DashboardClient() {
   const userQuery = useCurrentUser();
   const user = userQuery.data;
   const isNurse = user?.role === "nurse";
-  const [assistantWelcomeOpen, setAssistantWelcomeOpen] = useState(false);
 
   const appointments = useQuery({
     queryKey: ["appointments", "dashboard"],
@@ -173,19 +170,6 @@ export function DashboardClient() {
     queryFn: () => profilesApi.me<PatientProfile>(),
     enabled: user?.role === "patient",
   });
-
-  useEffect(() => {
-    if (typeof window === "undefined" || user?.role !== "patient" || !patientProfile.data?.profile_complete) {
-      return;
-    }
-    const key = `caretekk:assistant-welcome-shown:${user.id}`;
-    if (window.localStorage.getItem(key)) {
-      return;
-    }
-    window.localStorage.setItem(key, "1");
-    const timer = window.setTimeout(() => setAssistantWelcomeOpen(true), 0);
-    return () => window.clearTimeout(timer);
-  }, [patientProfile.data?.profile_complete, user?.id, user?.role]);
 
   if (isNurse) {
     return <NurseDashboardClient />;
@@ -221,46 +205,6 @@ export function DashboardClient() {
     >
       {user?.role === "patient" ? (
         <>
-          <Modal
-            open={assistantWelcomeOpen}
-            title="Caretekk Health Assistant"
-            description="A guided start for every doctor consultation."
-            onClose={() => setAssistantWelcomeOpen(false)}
-            size="lg"
-            footer={
-              <>
-                <button
-                  type="button"
-                  onClick={() => setAssistantWelcomeOpen(false)}
-                  className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700"
-                >
-                  Not now
-                </button>
-                <Link
-                  href="/appointments"
-                  onClick={() => setAssistantWelcomeOpen(false)}
-                  className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-5 text-sm font-semibold text-white"
-                >
-                  Start with AI Assistant
-                </Link>
-              </>
-            }
-          >
-            <div className="grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
-              <div className="flex h-24 w-24 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
-                <Sparkles className="h-10 w-10 animate-pulse" />
-              </div>
-              <div>
-                <p className="font-heading text-2xl font-semibold leading-tight text-[#1F2937]">
-                  Hi. I&apos;m your Caretekk Health Assistant.
-                </p>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  I&apos;ll ask a few questions so I can understand how you&apos;re feeling and recommend the most appropriate doctor.
-                </p>
-              </div>
-            </div>
-          </Modal>
-
           <div className="grid gap-4">
             <div className="grid gap-4">
               <div className="ct-rise-in">

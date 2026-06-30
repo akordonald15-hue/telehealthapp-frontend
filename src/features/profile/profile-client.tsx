@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, FileText, LogOut, Settings, UserRoundCheck } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import { useFormDraft } from "@/lib/use-form-draft";
 
 export function ProfileClient() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const userQuery = useCurrentUser();
   const logout = useLogout();
   const user = userQuery.data;
@@ -72,12 +74,16 @@ export function ProfileClient() {
       await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
     },
   });
+  const wasIncompletePatientProfile = Boolean(user?.role === "patient" && patientProfile && !patientProfile.profile_complete);
   const updateProfile = useMutation({
     mutationFn: () => profilesApi.updateMe(profileDraft),
-    onSuccess: async () => {
+    onSuccess: async (updatedProfile) => {
       setProfileDraft({});
       profileFormDraft.clearDraft();
       await queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
+      if (user?.role === "patient" && wasIncompletePatientProfile && (updatedProfile as PatientProfile).profile_complete) {
+        router.push("/appointments?welcome=first");
+      }
     },
   });
 
