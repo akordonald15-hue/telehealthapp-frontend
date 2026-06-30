@@ -286,7 +286,7 @@ export function AppointmentsClient() {
             </div>
           ) : null}
           <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
-            <span className="font-semibold text-[#1F2937]">Payment method:</span> Secure bank transfer.
+            <span className="font-semibold text-[#1F2937]">Payment method:</span> Secure online payment with Paystack.
           </div>
           {activeBankTransferPayment ? (
             <div className="grid gap-3">
@@ -355,7 +355,7 @@ export function AppointmentsClient() {
               ? "Starting checkout..."
               : !doctorCanBeBooked
                 ? "Choose an available doctor"
-                : "Book Appointment"}
+                : "Continue to Paystack"}
           </Button>
         </form>
       ) : isDoctor ? (

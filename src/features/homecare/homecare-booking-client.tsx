@@ -265,7 +265,7 @@ export function HomeCareBookingClient() {
         </div>
 
         <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
-          <span className="font-semibold text-[#1F2937]">Payment method:</span> Secure bank transfer.
+          <span className="font-semibold text-[#1F2937]">Payment method:</span> Secure online payment with Paystack.
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -418,7 +418,7 @@ export function HomeCareBookingClient() {
 
         <Button type="submit" disabled={createRequest.isPending || !canSubmit}>
           {createRequest.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          {createRequest.isPending ? "Preparing checkout..." : "Review and pay"}
+          {createRequest.isPending ? "Preparing checkout..." : "Continue to Paystack"}
         </Button>
       </form>
 
