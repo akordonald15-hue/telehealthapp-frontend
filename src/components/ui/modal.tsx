@@ -17,6 +17,9 @@ type ModalProps = {
   size?: ModalSize;
   closeLabel?: string;
   showCloseButton?: boolean;
+  closeOnOverlayClick?: boolean;
+  closeOnEscape?: boolean;
+  bodyClassName?: string;
   className?: string;
 };
 
@@ -37,6 +40,9 @@ export function Modal({
   size = "md",
   closeLabel = "Close dialog",
   showCloseButton = true,
+  closeOnOverlayClick = true,
+  closeOnEscape = true,
+  bodyClassName,
   className,
 }: ModalProps) {
   const titleId = useId();
@@ -72,6 +78,7 @@ export function Modal({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        if (!closeOnEscape) return;
         event.preventDefault();
         onClose();
         return;
@@ -109,7 +116,7 @@ export function Modal({
       window.removeEventListener("keydown", handleKeyDown);
       previousFocusRef.current?.focus();
     };
-  }, [open, onClose]);
+  }, [closeOnEscape, open, onClose]);
 
   if (!open) return null;
 
@@ -118,7 +125,7 @@ export function Modal({
       className="fixed inset-0 z-[80] flex items-stretch justify-center bg-slate-950/42 p-0 backdrop-blur-sm sm:items-center sm:px-6 sm:py-5"
       role="presentation"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (closeOnOverlayClick && event.target === event.currentTarget) onClose();
       }}
     >
       <div
@@ -157,7 +164,7 @@ export function Modal({
           ) : null}
         </div>
 
-        {children ? <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5 sm:px-6">{children}</div> : null}
+        {children ? <div className={cn("min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5 sm:px-6", bodyClassName)}>{children}</div> : null}
 
         {footer ? (
           <div className="sticky bottom-0 z-10 shrink-0 border-t border-slate-100 bg-white px-5 py-4 sm:px-6">

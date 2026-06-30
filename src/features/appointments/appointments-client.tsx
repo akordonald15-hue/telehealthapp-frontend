@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Stethoscope,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -31,7 +32,6 @@ import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
-import { ProviderPickerCard } from "@/features/providers/provider-picker-card";
 import { appointmentsApi, paymentsApi, profilesApi, triageApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
@@ -105,6 +105,19 @@ function displayHour(hour: number) {
   if (hour < 12) return `${hour}:00 AM`;
   if (hour === 12) return "12:00 PM";
   return `${hour - 12}:00 PM`;
+}
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("");
+}
+
+function oneLineBio(doctor: ProviderDoctor) {
+  return doctor.bio?.trim() || "Available for secure online consultation today.";
 }
 
 function addDays(date: Date, days: number) {
@@ -825,9 +838,13 @@ export function AppointmentsClient() {
         open={doctorPickerOpen}
         title="Recommended doctors"
         description="Based on what you've shared, I recommend speaking with one of our available doctors."
-        onClose={() => setDoctorPickerOpen(false)}
+        onClose={() => undefined}
         size="xl"
-        className="sm:max-w-5xl"
+        showCloseButton={false}
+        closeOnOverlayClick={false}
+        closeOnEscape={false}
+        className="mt-auto h-[88dvh] max-h-[88dvh] rounded-t-[28px] border-0 sm:mt-auto sm:h-[88dvh] sm:max-h-[88dvh] sm:w-[min(760px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
+        bodyClassName="px-4 pb-5 sm:px-6"
         footer={
           <Button
             type="button"
@@ -840,7 +857,7 @@ export function AppointmentsClient() {
         }
       >
         {availableDoctors.isLoading ? (
-          <div className="grid gap-3 md:grid-cols-2" aria-busy="true" aria-label="Loading recommended doctors">
+          <div className="grid gap-3" aria-busy="true" aria-label="Loading recommended doctors">
             {[0, 1, 2, 3].map((item) => (
               <div key={item} className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
                 <div className="flex gap-3">
@@ -859,36 +876,78 @@ export function AppointmentsClient() {
           </Notice>
         ) : doctorItems.length ? (
           <div className="grid gap-5">
-            <AssistantBubble speaker="assistant">
-              <p className="font-semibold text-[#1F2937]">Based on what you&apos;ve shared, I recommend speaking with one of our available doctors.</p>
-            </AssistantBubble>
+            <div className="mx-auto h-1.5 w-16 rounded-full bg-slate-200" aria-hidden="true" />
+            <div className="rounded-[8px] border border-[#DBEAFE] bg-[#EFF6FF] p-4">
+              <p className="text-sm font-semibold text-[#2563EB]">Caretekk AI</p>
+              <p className="mt-2 text-sm leading-6 text-[#1F2937]">
+                Based on what you&apos;ve shared, I recommend speaking with one of our available general physicians today.
+              </p>
+            </div>
+            <div className="inline-flex w-fit items-center gap-2 rounded-full bg-[#EFF6FF] px-4 py-2 text-sm font-semibold text-[#1F2937]">
+              <ShieldCheck className="h-4 w-4 text-[#2563EB]" />
+              {doctorItems.length} doctor{doctorItems.length === 1 ? "" : "s"} available • Estimated response: 5-10 min
+            </div>
 
-            <div className="-mx-5 flex snap-x gap-3 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:grid-cols-2 md:px-0 lg:grid-cols-3">
+            <div className="grid gap-4">
               {doctorItems.map((doctor, index) => {
                 const selected = selectedDoctor?.id === doctor.id;
                 const dimmed = Boolean(selectedDoctor && !selected);
+                const available = doctor.availability_status === "available";
                 return (
-                  <div
+                  <article
                     key={doctor.id}
-                    className={cn("ct-rise-in min-w-[82%] snap-center transition duration-200 md:min-w-0", dimmed && "opacity-55")}
+                    className={cn(
+                      "ct-rise-in grid gap-4 rounded-[8px] border bg-white p-4 shadow-[0_22px_56px_-46px_rgba(15,23,42,0.42)] transition duration-200",
+                      selected ? "border-[#2563EB] ring-2 ring-[#DBEAFE]" : "border-slate-100",
+                      index === 0 && !selectedDoctor ? "border-[#93C5FD] bg-[#F8FBFF]" : "",
+                      dimmed && "opacity-55",
+                    )}
                     style={{ animationDelay: `${index * 70}ms` }}
                   >
-                    <ProviderPickerCard
-                      name={doctor.display_name}
-                      subtitle="General Medicine"
-                      primaryDetail={doctor.rating ? `★ ${doctor.rating} (${doctor.review_count ?? 0} reviews)` : "New doctor"}
-                      imageUrl={doctor.profile_image_url}
-                      status={doctor.availability_status === "available" ? "Available" : "Offline"}
-                      selected={selected}
-                      actionLabel={selected ? "Selected" : "Select Doctor"}
-                      onSelect={() => {
+                    {index === 0 ? (
+                      <span className="w-fit rounded-full bg-[#DBEAFE] px-3 py-1 text-xs font-semibold text-[#2563EB]">Best Match</span>
+                    ) : null}
+                    <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-4 sm:grid-cols-[88px_minmax(0,1fr)_auto] sm:items-center">
+                      <div className="relative h-[72px] w-[72px] overflow-hidden rounded-full bg-[#EFF6FF] text-[#2563EB] sm:h-[88px] sm:w-[88px]">
+                        {doctor.profile_image_url ? (
+                          <Image src={doctor.profile_image_url} alt="" width={88} height={88} className="h-full w-full object-cover" unoptimized />
+                        ) : (
+                          <span className="grid h-full w-full place-items-center text-lg font-bold">{initials(doctor.display_name)}</span>
+                        )}
+                        <span className={cn("absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white", available ? "bg-[#2563EB]" : "bg-slate-300")} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="truncate text-base font-semibold text-[#1F2937]">{doctor.display_name}</p>
+                          {selected ? <span className="rounded-full bg-[#DBEAFE] px-2 py-0.5 text-xs font-semibold text-[#2563EB]">Selected</span> : null}
+                        </div>
+                        <p className="mt-1 text-sm text-slate-600">General Physician</p>
+                        <p className="mt-2 line-clamp-1 text-sm text-slate-600">{oneLineBio(doctor)}</p>
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                          <span className="rounded-full bg-slate-50 px-3 py-1">★ {doctor.rating ?? "New"} ({doctor.review_count ?? 0} reviews)</span>
+                          <span className="rounded-full bg-slate-50 px-3 py-1">{doctor.years_experience ?? 0} yrs exp.</span>
+                          <span className="rounded-full bg-slate-50 px-3 py-1">English</span>
+                          <span className="rounded-full bg-slate-50 px-3 py-1">Video</span>
+                        </div>
+                      </div>
+                      <div className="col-span-2 grid gap-3 sm:col-span-1 sm:min-w-36">
+                        <StatusBadge value={available ? "Available" : "Offline"} />
+                        <span className="text-sm font-semibold text-slate-600">{index === 0 ? "5 min" : `${Math.min(10, 5 + index * 2)} min`}</span>
+                        <button
+                          type="button"
+                          className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
+                          onClick={() => {
                         setSelectedDoctor(doctor);
                         setTimingMode(null);
                         setSelectedSlotHour(null);
                         form.setValue("doctor", doctor.id, { shouldValidate: true });
-                      }}
-                    />
-                  </div>
+                          }}
+                        >
+                          {selected ? "Selected" : "Select Doctor"}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
                 );
               })}
             </div>
