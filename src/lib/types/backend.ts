@@ -52,6 +52,10 @@ export type PatientProfile = {
   emergency_contact_name: string;
   emergency_contact_phone: string;
   medical_history: Record<string, unknown>;
+  // Onboarding fields (backend to add columns; optional until then).
+  age_range?: string;
+  state?: string;
+  lga?: string;
 };
 
 export type DoctorProfile = {

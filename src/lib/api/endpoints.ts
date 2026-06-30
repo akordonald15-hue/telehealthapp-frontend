@@ -73,7 +73,7 @@ export const authApi = {
   me: () => apiRequest<User>(authPath("/auth/me/")),
   changePassword: (body: { old_password: string; new_password: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/change-password/"), { method: "POST", body }),
-  updateMe: (body: Partial<Pick<User, "email" | "phone">>) =>
+  updateMe: (body: Partial<Pick<User, "email" | "phone" | "full_name">>) =>
     apiRequest<User>(authPath("/auth/me/"), { method: "PATCH", body }),
   passwordResetRequest: (body: { email: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/password-reset/request/"), { method: "POST", body, auth: false }),
