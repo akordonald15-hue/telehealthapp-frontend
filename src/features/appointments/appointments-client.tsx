@@ -120,14 +120,24 @@ function TypingDots() {
 
 function AssistantBubble({ speaker, children }: { speaker: "assistant" | "user"; children: React.ReactNode }) {
   return (
-    <div className={cn("flex", speaker === "user" ? "justify-end" : "justify-start")}>
-      <div
-        className={cn(
-          "max-w-[88%] rounded-[8px] px-4 py-3 text-sm leading-7 shadow-sm sm:max-w-[80%]",
-          speaker === "user" ? "bg-[#2563EB] text-white" : "border border-slate-200 bg-white text-slate-700",
-        )}
-      >
-        {children}
+    <div className={cn("ct-rise-in flex items-end gap-2", speaker === "user" ? "justify-end" : "justify-start")}>
+      {speaker === "assistant" ? (
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-[0_10px_28px_-20px_rgba(37,99,235,0.5)] ring-1 ring-[#DBEAFE]">
+          <Bot className="h-5 w-5" />
+        </span>
+      ) : null}
+      <div className={cn("grid max-w-[82%] gap-1 sm:max-w-[70%]", speaker === "user" && "justify-items-end")}>
+        <div
+          className={cn(
+            "rounded-[18px] px-4 py-3 text-sm leading-6 shadow-sm",
+            speaker === "user"
+              ? "rounded-br-[6px] bg-[#2563EB] text-white"
+              : "rounded-bl-[6px] border border-[#DBEAFE] bg-[#EFF6FF] text-slate-700",
+          )}
+        >
+          {children}
+        </div>
+        <span className="px-1 text-[11px] font-medium text-slate-400">Just now</span>
       </div>
     </div>
   );
@@ -455,39 +465,41 @@ export function AppointmentsClient() {
       description={user?.role === "patient" ? "" : isDoctor ? "Open and manage assigned consultations." : undefined}
     >
       {user?.role === "patient" && !effectiveTriageSessionId ? (
-        <div className="grid gap-4">
-          <div className="ct-panel overflow-hidden rounded-[8px] p-0">
-            <div className="grid gap-5 bg-[linear-gradient(135deg,#EFF6FF_0%,#F8FBFF_100%)] p-5 sm:p-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-              <div className="grid gap-4">
-                {consultationDraft.restored ? (
-                  <Notice title="Your previous progress was restored." tone="success">
-                    You can continue this consultation check or clear the draft.
-                    <button type="button" className="ml-2 font-semibold underline" onClick={consultationDraft.clearDraft}>
-                      Clear draft
-                    </button>
-                  </Notice>
-                ) : null}
+        <div className="-mx-4 -mt-5 grid min-h-[calc(100dvh-132px)] gap-5 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_42%,#F8FBFF_100%)] px-4 py-4 pb-6 sm:mx-0 sm:mt-0 sm:rounded-[8px] sm:p-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+              <div className="grid content-start gap-4">
                 {profileIncomplete ? (
                   <Notice title="Complete your profile before booking" tone="warning">
                     Doctors need your name, phone, date of birth, gender, state, and LGA before consultation.
                     <Link className="ml-2 font-semibold text-amber-800 underline" href="/profile">Update profile</Link>
                   </Notice>
                 ) : null}
-                <div className="flex items-start gap-4">
-                  <span className="ct-float-gentle flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-[0_18px_42px_-30px_rgba(37,99,235,0.48)]">
-                    <Bot className="h-9 w-9" />
-                  </span>
+                {firstTimeWelcome ? (
+                  <div className="mx-auto flex w-40 items-center justify-center gap-2 sm:hidden" aria-hidden="true">
+                    <span className="h-1.5 w-12 rounded-full bg-[#2563EB]" />
+                    <span className="h-1.5 w-12 rounded-full bg-slate-200" />
+                    <span className="h-1.5 w-12 rounded-full bg-slate-200" />
+                  </div>
+                ) : null}
+                <div className="grid grid-cols-[minmax(0,1fr)_112px] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_140px]">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[#2563EB]">Caretekk Health Assistant</p>
-                    <h2 className="mt-2 font-heading text-2xl font-semibold leading-tight text-[#1F2937] sm:text-3xl">
-                      {firstTimeWelcome ? "Hi. I'm your Caretekk Health Assistant." : "Welcome back. Let's find the right doctor."}
+                    <h2 className="font-heading text-[1.75rem] font-semibold leading-tight text-[#1F2937] sm:text-3xl">
+                      Hi {user?.full_name?.trim().split(/\s+/)[0] || "there"}! 👋
                     </h2>
-                    <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                    <p className="mt-1 font-heading text-[1.55rem] font-semibold leading-tight text-[#2563EB] sm:text-2xl">
+                      I&apos;m your Caretekk Assistant
+                    </p>
+                    <p className="mt-3 max-w-sm text-sm leading-7 text-slate-600">
                       {firstTimeWelcome
                         ? "I'll ask a few questions so I can understand how you're feeling and recommend the right doctor for you."
                         : "Tell me how you're feeling today, and I'll recommend the most suitable doctor."}
                     </p>
                   </div>
+                  <span className="ct-float-gentle relative flex h-28 w-28 items-center justify-center justify-self-end sm:h-36 sm:w-36">
+                    <span className="absolute h-24 w-24 rounded-full bg-[#DBEAFE] sm:h-32 sm:w-32" />
+                    <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-[0_18px_42px_-30px_rgba(37,99,235,0.48)] sm:h-20 sm:w-20">
+                      <Bot className="h-9 w-9 sm:h-11 sm:w-11" />
+                    </span>
+                  </span>
                 </div>
                 {firstTimeWelcome && !welcomeAccepted ? (
                   <Button
@@ -499,12 +511,7 @@ export function AppointmentsClient() {
                     Let&apos;s Get Started
                   </Button>
                 ) : null}
-                {!firstTimeWelcome && !aiSessionId && !startAiSession.isPending ? (
-                  <div className="rounded-[8px] border border-[#DBEAFE] bg-white/80 p-4 text-sm leading-6 text-slate-600">
-                    The assistant will begin with a few questions, then show recommended doctors before checkout.
-                  </div>
-                ) : null}
-                <div className="grid gap-3 rounded-[8px] border border-white/80 bg-white/90 p-4 shadow-[0_18px_44px_-38px_rgba(15,23,42,0.28)]">
+                <div className="grid gap-3 rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_18px_44px_-38px_rgba(15,23,42,0.28)]">
                   <p className="text-sm font-semibold text-[#1F2937]">Here&apos;s how it works:</p>
                   {[
                     { icon: MessageCircle, title: "You tell me how you're feeling", text: "Share your symptoms in your own words." },
@@ -527,9 +534,9 @@ export function AppointmentsClient() {
                 </div>
               </div>
 
-              <div className="rounded-[8px] border border-white/80 bg-white/95 p-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.35)] sm:p-5">
+              <div className="flex min-h-[58dvh] flex-col gap-4 lg:min-h-[72dvh]">
                 <ErrorMessage error={startAiSession.error || startConversation.error || sendAiMessage.error || aiResult.error} context="triage" />
-                <div className="grid max-h-[70dvh] gap-3 overflow-y-auto pr-1">
+                <div className="grid flex-1 content-start gap-3 overflow-y-auto pr-1">
                   <AssistantBubble speaker="assistant">
                     <p className="font-semibold text-[#1F2937]">
                       {firstTimeWelcome ? "Hi 👋" : "Welcome back 👋"}
@@ -570,17 +577,21 @@ export function AppointmentsClient() {
                           ))}
                         </div>
                       </div>
-                      <form className="grid gap-3" onSubmit={handleAiSymptomSubmit}>
-                        <textarea
+                      <form className="sticky bottom-0 flex min-h-14 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-[0_18px_42px_-32px_rgba(15,23,42,0.35)]" onSubmit={handleAiSymptomSubmit}>
+                        <input
                           value={aiSymptomText}
                           onChange={(event) => setAiSymptomText(event.target.value)}
                           placeholder="Type your symptoms here..."
-                          className="min-h-28 w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-4 text-sm text-[#1F2937] outline-none transition placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                          className="min-w-0 flex-1 bg-transparent px-2 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8]"
                         />
-                        <Button type="submit" disabled={!aiSymptomText.trim()} className="w-full sm:w-fit">
-                          <SendHorizonal className="mr-2 h-4 w-4" />
-                          Continue
-                        </Button>
+                        <button
+                          type="submit"
+                          disabled={!aiSymptomText.trim()}
+                          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                          aria-label="Send symptoms"
+                        >
+                          <SendHorizonal className="h-5 w-5" />
+                        </button>
                       </form>
                     </>
                   ) : null}
@@ -658,8 +669,6 @@ export function AppointmentsClient() {
                   Your conversation is private and secure.
                 </div>
               </div>
-            </div>
-          </div>
         </div>
       ) : user?.role === "patient" ? (
         <form
@@ -685,14 +694,6 @@ export function AppointmentsClient() {
             </div>
           </div>
           <ErrorMessage error={createAppointment.error} context="appointments" />
-          {appointmentDraft.restored ? (
-            <Notice title="Your previous progress was restored." tone="success">
-              You can continue this consultation booking or clear the draft.
-              <button type="button" className="ml-2 font-semibold underline" onClick={appointmentDraft.clearDraft}>
-                Clear draft
-              </button>
-            </Notice>
-          ) : null}
           {profileIncomplete ? (
             <Notice title="Complete your profile before booking" tone="warning">
               Doctors need your name, phone, date of birth, gender, state, and LGA before consultation.
