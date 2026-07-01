@@ -1007,7 +1007,7 @@ export function AppointmentsClient() {
                 disabled={!modalBookingReady || createAppointment.isPending}
                 onClick={handleContinueToPayment}
               >
-                {createAppointment.isPending ? "Starting checkout..." : "Continue to Payment"}
+                {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
               </Button>
             </div>
           </div>
@@ -1158,6 +1158,22 @@ export function AppointmentsClient() {
                       <p className="col-span-full rounded-[8px] bg-slate-50 p-3 text-sm text-slate-600">No available hourly slots for this date.</p>
                     )}
                   </div>
+
+                  {selectedSlotHour !== null && !unavailableSlotHours.has(selectedSlotHour) ? (
+                    <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-3">
+                      <p className="text-sm text-slate-600">
+                        <span className="font-semibold text-[#1F2937]">Selected:</span> {selectedTimeSummary}
+                      </p>
+                      <Button
+                        type="button"
+                        className="mt-3 w-full"
+                        disabled={!modalBookingReady || createAppointment.isPending}
+                        onClick={handleContinueToPayment}
+                      >
+                        {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>
