@@ -385,6 +385,18 @@ export function AppointmentsClient() {
       (timingMode !== "later" || selectedSlotHour === null || !unavailableSlotHours.has(selectedSlotHour)) &&
       (scheduleDay !== "another" || customScheduleDate),
   );
+  const selectedTimeSummary = useMemo(() => {
+    if (timingMode === "now") {
+      return "Consult now";
+    }
+    if (timingMode === "later" && selectedSlotHour !== null) {
+      return `${scheduleBaseDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })} at ${displayHour(selectedSlotHour)}`;
+    }
+    if (timingMode === "later") {
+      return "Choose a time slot";
+    }
+    return "Choose now or schedule later";
+  }, [scheduleBaseDate, selectedSlotHour, timingMode]);
   const activeBankTransferPayment =
     manualPayment ?? (createAppointment.data?.payment.provider === "bank_transfer" ? createAppointment.data.payment : null);
   const activePaymentId = activeBankTransferPayment?.payment_id;
@@ -971,29 +983,34 @@ export function AppointmentsClient() {
         showCloseButton={false}
         closeOnOverlayClick={false}
         closeOnEscape={false}
-        className="mt-auto h-[100dvh] max-h-[100dvh] rounded-none border-0 sm:mt-auto sm:h-[88dvh] sm:max-h-[88dvh] sm:w-[min(720px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
-        bodyClassName="scroll-pb-28 px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:px-6"
+        className="mt-auto h-[90dvh] max-h-[90dvh] rounded-t-[28px] border-0 sm:mt-auto sm:h-[88dvh] sm:max-h-[88dvh] sm:w-[min(720px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
+        bodyClassName="scroll-pb-40 px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-6"
         footer={
-          <>
-            <button
-              type="button"
-              className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition active:scale-[0.98]"
-              onClick={() => {
-                setScheduleSheetOpen(false);
-                setDoctorPickerOpen(true);
-              }}
-            >
-              Change doctor
-            </button>
-            <Button
-              type="button"
-              className="w-full sm:w-fit"
-              disabled={!modalBookingReady || createAppointment.isPending}
-              onClick={handleContinueToPayment}
-            >
-              {createAppointment.isPending ? "Starting checkout..." : "Continue to Payment"}
-            </Button>
-          </>
+          <div className="grid w-full gap-3">
+            <div className="rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
+              <span className="font-semibold text-[#1F2937]">Selected time:</span> {selectedTimeSummary}
+            </div>
+            <div className="grid gap-2 sm:grid-cols-[auto_1fr]">
+              <button
+                type="button"
+                className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition active:scale-[0.98]"
+                onClick={() => {
+                  setScheduleSheetOpen(false);
+                  setDoctorPickerOpen(true);
+                }}
+              >
+                Change doctor
+              </button>
+              <Button
+                type="button"
+                className="w-full"
+                disabled={!modalBookingReady || createAppointment.isPending}
+                onClick={handleContinueToPayment}
+              >
+                {createAppointment.isPending ? "Starting checkout..." : "Continue to Payment"}
+              </Button>
+            </div>
+          </div>
         }
       >
         {selectedDoctorLive ? (
@@ -1078,11 +1095,11 @@ export function AppointmentsClient() {
 
               {timingMode === "later" ? (
                 <div className="grid gap-4">
-                  <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="grid grid-cols-3 rounded-[8px] border border-slate-200 bg-slate-50 p-1">
                     {[
                       { value: "today", label: "Today" },
                       { value: "tomorrow", label: "Tomorrow" },
-                      { value: "another", label: "Pick date" },
+                      { value: "another", label: "Date" },
                     ].map((item) => (
                       <button
                         key={item.value}
@@ -1092,8 +1109,8 @@ export function AppointmentsClient() {
                           setSelectedSlotHour(null);
                         }}
                         className={cn(
-                          "min-h-11 rounded-[8px] border px-4 text-sm font-semibold transition active:scale-[0.98]",
-                          scheduleDay === item.value ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]" : "border-slate-200 bg-white text-[#1F2937]",
+                          "min-h-10 rounded-[8px] px-2 text-sm font-semibold transition active:scale-[0.98]",
+                          scheduleDay === item.value ? "bg-white text-[#2563EB] shadow-sm" : "text-[#1F2937]",
                         )}
                       >
                         {item.label}
@@ -1127,7 +1144,7 @@ export function AppointmentsClient() {
                             setSelectedSlotHour(hour);
                           }}
                           className={cn(
-                            "min-h-11 rounded-[8px] border px-3 text-sm font-semibold transition active:scale-[0.98]",
+                            "min-h-14 rounded-[8px] border px-3 text-sm font-semibold transition active:scale-[0.98]",
                             selectedSlotHour === hour ? "border-[#2563EB] bg-[#2563EB] text-white" : "border-slate-200 bg-white text-[#1F2937]",
                             unavailableSlotHours.has(hour) && "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400 line-through active:scale-100",
                           )}

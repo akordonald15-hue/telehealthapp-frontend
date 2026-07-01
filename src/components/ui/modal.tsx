@@ -122,7 +122,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-stretch justify-center bg-slate-950/42 p-0 backdrop-blur-sm sm:items-center sm:px-6 sm:py-5"
+      className="fixed inset-0 z-[120] flex items-stretch justify-center bg-slate-950/42 p-0 backdrop-blur-sm sm:items-center sm:px-6 sm:py-5"
       role="presentation"
       onMouseDown={(event) => {
         if (closeOnOverlayClick && event.target === event.currentTarget) onClose();
@@ -167,7 +167,7 @@ export function Modal({
         {children ? <div className={cn("min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5 sm:px-6", bodyClassName)}>{children}</div> : null}
 
         {footer ? (
-          <div className="sticky bottom-0 z-10 shrink-0 border-t border-slate-100 bg-white px-5 py-4 sm:px-6">
+          <div className="sticky bottom-0 z-10 shrink-0 border-t border-slate-100 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6">
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">{footer}</div>
           </div>
         ) : null}
