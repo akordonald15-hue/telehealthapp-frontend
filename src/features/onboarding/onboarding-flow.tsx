@@ -50,7 +50,13 @@ type OnboardingFlowProps = {
 export function OnboardingFlow({ open = true, onComplete, onClose, dismissible = false }: OnboardingFlowProps) {
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
-  const user = userQuery.data;
+  const accountQuery = useQuery({
+    queryKey: ["auth", "me", "onboarding"],
+    queryFn: authApi.me,
+    enabled: open,
+    retry: false,
+  });
+  const user = userQuery.data || accountQuery.data;
 
   const profileQuery = useQuery({
     queryKey: ["profile", "me", "patient"],
@@ -61,7 +67,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"next" | "back">("next");
   const [completed, setCompleted] = useState(false);
-  const [accountFallback, setAccountFallback] = useState<Partial<User>>(() => {
+  const [accountFallback] = useState<Partial<User>>(() => {
     if (typeof window === "undefined") {
       return {};
     }
@@ -93,34 +99,52 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   }, [accountFallback.email, accountFallback.full_name, accountFallback.phone, form, user]);
 
   useEffect(() => {
-    if (user?.email || typeof window === "undefined") return;
-    let active = true;
-    const loadAccount = async () => {
-      try {
-        const response = await fetch("/api/auth/me/", {
-          credentials: "include",
-          cache: "no-store",
-        });
-        if (!response.ok) return;
-        const data = (await response.json()) as Partial<User>;
-        if (active) {
-          setAccountFallback((current) => ({
-            ...current,
-            full_name: current.full_name || data.full_name || "",
-            email: current.email || data.email || "",
-            phone: current.phone || data.phone || "",
-          }));
-        }
-      } catch {
-        // Visible fallback is rendered in Step 1 if email is still unavailable.
-      }
-    };
-    void loadAccount();
+    if (!accountQuery.data) return;
+    queryClient.setQueryData(authKeys.me, accountQuery.data);
+  }, [accountQuery.data, queryClient]);
 
-    return () => {
-      active = false;
-    };
-  }, [user?.email]);
+  useEffect(() => {
+    const formEmail = form.getValues("email") || "";
+    const emailSource = user?.email
+      ? "authUser.email"
+      : accountQuery.data?.email
+        ? "authApi.me.email"
+        : accountFallback.email
+          ? "sessionStorage:last-login-email"
+          : profileQuery.data?.email
+            ? "profile.email"
+            : formEmail
+              ? "form.email"
+              : "missing";
+
+    console.log("authUser", user ?? null);
+    console.log("session", {
+      authQueryStatus: userQuery.status,
+      onboardingAuthQueryStatus: accountQuery.status,
+      profileQueryStatus: profileQuery.status,
+      storedEmailPresent: Boolean(accountFallback.email),
+    });
+    console.log("token", {
+      source: "httpOnly-cookie",
+      readableInBrowser: false,
+      note: "Token values are intentionally not logged.",
+    });
+    console.log("email source", {
+      source: emailSource,
+      emailPresent: Boolean(
+        user?.email || accountQuery.data?.email || accountFallback.email || profileQuery.data?.email || formEmail,
+      ),
+    });
+  }, [
+    accountFallback.email,
+    accountQuery.data,
+    accountQuery.status,
+    form,
+    profileQuery.data,
+    profileQuery.status,
+    user,
+    userQuery.status,
+  ]);
 
   const prefilledProfile = useRef(false);
   useEffect(() => {
@@ -171,33 +195,27 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   });
 
   const goNext = async () => {
-    const emailValue = user?.email || accountFallback.email || profileQuery.data?.email || form.getValues("email") || "";
+    const emailValue =
+      user?.email ||
+      accountQuery.data?.email ||
+      accountFallback.email ||
+      profileQuery.data?.email ||
+      form.getValues("email") ||
+      "";
     if (step === 0 && emailValue) {
       form.setValue("email", emailValue, { shouldValidate: false });
     }
     const valid = await form.trigger(STEP_FIELDS[step], { shouldFocus: true });
     const values = form.getValues();
-    if (process.env.NODE_ENV !== "production") {
-      console.debug("[Caretekk onboarding]", {
-        currentStep: step + 1,
-        validationErrors: form.formState.errors,
-        emailValue: values.email,
-        fullNameValue: values.full_name,
-        phoneNumberValue: values.phone,
-        profileLoading: profileQuery.isLoading,
-        buttonDisabled: save.isPending || loading,
-      });
-    } else {
-      console.debug("[Caretekk onboarding]", {
-        currentStep: step + 1,
-        hasValidationErrors: Object.keys(form.formState.errors).length > 0,
-        emailPresent: Boolean(values.email),
-        fullNamePresent: Boolean(values.full_name),
-        phoneNumberPresent: Boolean(values.phone),
-        profileLoading: profileQuery.isLoading,
-        buttonDisabled: save.isPending || loading,
-      });
-    }
+    console.log("[Caretekk onboarding]", {
+      currentStep: step + 1,
+      validationErrors: form.formState.errors,
+      emailValue: values.email,
+      fullNameValue: values.full_name,
+      phoneNumberValue: values.phone,
+      profileLoading: profileQuery.isLoading,
+      buttonDisabled: save.isPending || loading,
+    });
     if (!valid) return;
     if (step === 0 && !form.getValues("email")) {
       form.setError("email", {
@@ -221,7 +239,13 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   };
 
   const isLastStep = step === TOTAL_STEPS - 1;
-  const loading = userQuery.isLoading;
+  const hasAccountEmail =
+    Boolean(user?.email) ||
+    Boolean(accountQuery.data?.email) ||
+    Boolean(accountFallback.email) ||
+    Boolean(profileQuery.data?.email) ||
+    Boolean(form.getValues("email"));
+  const loading = (userQuery.isLoading || accountQuery.isLoading) && !hasAccountEmail;
 
   if (completed) {
     return (
