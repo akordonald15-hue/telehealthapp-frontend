@@ -59,6 +59,8 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"next" | "back">("next");
+  const [completed, setCompleted] = useState(false);
+  const completeTimerRef = useRef<number | null>(null);
   const form = useForm<OnboardingValues>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: emptyValues,
@@ -82,6 +84,14 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     prefilled.current = true;
   }, [user, profileQuery.data, profileQuery.isLoading, form]);
 
+  useEffect(() => {
+    return () => {
+      if (completeTimerRef.current !== null) {
+        window.clearTimeout(completeTimerRef.current);
+      }
+    };
+  }, []);
+
   const save = useMutation({
     mutationFn: async (values: OnboardingValues) => {
       await authApi.updateMe({ full_name: values.full_name, phone: values.phone });
@@ -95,7 +105,10 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: authKeys.me });
       await queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
-      onComplete?.();
+      setCompleted(true);
+      completeTimerRef.current = window.setTimeout(() => {
+        onComplete?.();
+      }, 1800);
     },
   });
 
@@ -119,6 +132,33 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   const isLastStep = step === TOTAL_STEPS - 1;
   const loading = userQuery.isLoading || profileQuery.isLoading;
 
+  if (completed) {
+    return (
+      <ModalSheet
+        open={open}
+        dismissible={false}
+        title="Congratulations"
+        description="You have completed your profile."
+        className="sm:max-w-lg"
+      >
+        <div className="grid justify-items-center gap-5 py-4 text-center">
+          <div className="relative h-24 w-24 animate-pulse">
+            <span className="absolute left-1/2 top-0 h-10 w-10 -translate-x-1/2 rounded-full bg-[#DBEAFE]" />
+            <span className="absolute bottom-0 left-1/2 h-10 w-10 -translate-x-1/2 rounded-full bg-[#DBEAFE]" />
+            <span className="absolute left-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-[#EFF6FF]" />
+            <span className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-[#EFF6FF]" />
+            <span className="absolute left-1/2 top-1/2 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-[#2563EB] text-white shadow-[0_18px_42px_-26px_rgba(37,99,235,0.55)]">
+              <Check className="h-6 w-6" />
+            </span>
+          </div>
+          <p className="max-w-sm text-sm leading-6 text-slate-600">
+            Your care profile is ready. We are taking you to your dashboard now.
+          </p>
+        </div>
+      </ModalSheet>
+    );
+  }
+
   return (
     <ModalSheet
       open={open}
@@ -139,7 +179,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
             {isLastStep ? (
               <>
                 <Check className="h-4 w-4" />
-                {save.isPending ? "Finishing..." : "Finish"}
+                {save.isPending ? "Finishing..." : "Complete profile"}
               </>
             ) : (
               <>
