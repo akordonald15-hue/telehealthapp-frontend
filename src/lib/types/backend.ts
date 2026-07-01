@@ -3,7 +3,10 @@ export type UserRole = "patient" | "doctor" | "nurse" | "admin";
 export type User = {
   id: number;
   email: string;
+  first_name?: string;
+  last_name?: string;
   full_name: string;
+  avatar_url?: string;
   phone: string;
   role: UserRole;
   must_change_password: boolean;
@@ -16,6 +19,7 @@ export type RegisterResponse = Pick<User, "id" | "email" | "phone" | "role">;
 export type TokenPair = {
   access: string;
   refresh?: string;
+  user?: User;
 };
 
 export type DetailResponse = {

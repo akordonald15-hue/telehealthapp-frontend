@@ -37,6 +37,19 @@ const emptyValues: OnboardingValues = {
   lga: "",
 };
 
+const STORED_AUTH_USER_KEY = "caretekk:auth-user";
+
+function getStoredAuthUser(): Partial<User> {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  try {
+    return JSON.parse(window.sessionStorage.getItem(STORED_AUTH_USER_KEY) || "{}") as Partial<User>;
+  } catch {
+    return {};
+  }
+}
+
 type OnboardingFlowProps = {
   open?: boolean;
   /** Called after the profile is saved successfully. */
@@ -71,7 +84,11 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     if (typeof window === "undefined") {
       return {};
     }
-    return { email: window.sessionStorage.getItem("caretekk:last-login-email") || "" };
+    const storedUser = getStoredAuthUser();
+    return {
+      ...storedUser,
+      email: storedUser.email || window.sessionStorage.getItem("caretekk:last-login-email") || "",
+    };
   });
   const completeTimerRef = useRef<number | null>(null);
   const form = useForm<OnboardingValues>({
@@ -135,6 +152,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
         user?.email || accountQuery.data?.email || accountFallback.email || profileQuery.data?.email || formEmail,
       ),
     });
+    console.log("Onboarding email:", formEmail || user?.email || accountQuery.data?.email || accountFallback.email || "");
   }, [
     accountFallback.email,
     accountQuery.data,
