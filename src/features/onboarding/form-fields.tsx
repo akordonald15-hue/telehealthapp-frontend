@@ -49,7 +49,7 @@ export function TextField({
         autoComplete={autoComplete}
         inputMode={inputMode}
         readOnly={readOnly}
-        className={cn(readOnly && "cursor-not-allowed bg-ash-50 text-ash-500")}
+        className={cn(readOnly && "cursor-not-allowed border-ash-200 bg-white text-ash-800")}
         {...register(name)}
       />
     </Field>

@@ -67,22 +67,33 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     mode: "onTouched",
   });
 
-  // Prefill once account + profile data is available.
-  const prefilled = useRef(false);
+  // Prefill account fields as soon as auth is ready. The profile request can
+  // arrive later, but it should never block the first Continue action.
   useEffect(() => {
-    if (prefilled.current || !user || profileQuery.isLoading) return;
-    const profile = profileQuery.data;
+    if (!user) return;
+    const current = form.getValues();
     form.reset({
-      full_name: user.full_name ?? "",
-      email: user.email ?? "",
-      phone: user.phone ?? "",
-      age_range: (profile?.age_range as OnboardingValues["age_range"]) ?? ("" as OnboardingValues["age_range"]),
-      gender: (profile?.gender as OnboardingValues["gender"]) ?? ("" as OnboardingValues["gender"]),
-      state: profile?.state ?? "",
-      lga: profile?.lga ?? "",
+      ...current,
+      full_name: current.full_name || user.full_name || "",
+      email: user.email || current.email || "",
+      phone: current.phone || user.phone || "",
     });
-    prefilled.current = true;
-  }, [user, profileQuery.data, profileQuery.isLoading, form]);
+  }, [form, user]);
+
+  const prefilledProfile = useRef(false);
+  useEffect(() => {
+    if (prefilledProfile.current || !profileQuery.data) return;
+    const profile = profileQuery.data;
+    const current = form.getValues();
+    form.reset({
+      ...current,
+      age_range: current.age_range || (profile.age_range as OnboardingValues["age_range"]) || ("" as OnboardingValues["age_range"]),
+      gender: current.gender || (profile.gender as OnboardingValues["gender"]) || ("" as OnboardingValues["gender"]),
+      state: current.state || profile.state || "",
+      lga: current.lga || profile.lga || "",
+    });
+    prefilledProfile.current = true;
+  }, [profileQuery.data, form]);
 
   useEffect(() => {
     return () => {
@@ -113,6 +124,9 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   });
 
   const goNext = async () => {
+    if (step === 0 && user?.email) {
+      form.setValue("email", user.email, { shouldValidate: true });
+    }
     const valid = await form.trigger(STEP_FIELDS[step], { shouldFocus: true });
     if (!valid) return;
     if (step < TOTAL_STEPS - 1) {
@@ -130,7 +144,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   };
 
   const isLastStep = step === TOTAL_STEPS - 1;
-  const loading = userQuery.isLoading || profileQuery.isLoading;
+  const loading = userQuery.isLoading;
 
   if (completed) {
     return (
