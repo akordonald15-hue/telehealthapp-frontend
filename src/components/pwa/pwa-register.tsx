@@ -1,7 +1,7 @@
 "use client";
 
 import { Download, Smartphone } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 const SW_PATH = "/sw.js";
 
@@ -16,26 +16,37 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 };
 
+function subscribeToClientMount() {
+  return () => undefined;
+}
+
+function getClientMountSnapshot() {
+  return true;
+}
+
+function getServerMountSnapshot() {
+  return false;
+}
+
+function isStandaloneMode() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
 export function PwaRegister() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(subscribeToClientMount, getClientMountSnapshot, getServerMountSnapshot);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showManualHint, setShowManualHint] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    if (typeof window === "undefined") return;
-    setIsInstalled(
-      window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true,
-    );
-  }, []);
-
   const supportsStandalone = useMemo(() => {
     if (!mounted || typeof window === "undefined") {
       return false;
     }
-    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    return isStandaloneMode();
   }, [mounted]);
 
   const showIosHint = useMemo(() => {

@@ -30,7 +30,7 @@ const emptyValues: OnboardingValues = {
   full_name: "",
   email: "",
   phone: "",
-  age_range: "" as OnboardingValues["age_range"],
+  dob: "",
   gender: "" as OnboardingValues["gender"],
   state: "",
   lga: "",
@@ -74,7 +74,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
       full_name: user.full_name ?? "",
       email: user.email ?? "",
       phone: user.phone ?? "",
-      age_range: (profile?.age_range as OnboardingValues["age_range"]) ?? ("" as OnboardingValues["age_range"]),
+      dob: profile?.dob ?? "",
       gender: (profile?.gender as OnboardingValues["gender"]) ?? ("" as OnboardingValues["gender"]),
       state: profile?.state ?? "",
       lga: profile?.lga ?? "",
@@ -87,7 +87,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
       await authApi.updateMe({ full_name: values.full_name, phone: values.phone });
       await profilesApi.updateMe<PatientProfile>({
         gender: values.gender,
-        age_range: values.age_range,
+        dob: values.dob,
         state: values.state,
         lga: values.lga,
       });

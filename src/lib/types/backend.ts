@@ -69,8 +69,6 @@ export type PatientProfile = {
   emergency_contact_name: string;
   emergency_contact_phone: string;
   medical_history: Record<string, unknown>;
-  // Onboarding age range (backend to add column; optional until then).
-  age_range?: string;
   profile_complete?: boolean;
 };
 

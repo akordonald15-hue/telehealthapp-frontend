@@ -391,7 +391,7 @@ export function DashboardClient() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <span>Doctors need your name, phone, date of birth, gender, state, and LGA before consultation.</span>
                 <Link
-                  href="/profile"
+                  href="/onboarding"
                   className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-white px-4 text-sm font-semibold text-amber-800"
                 >
                   Complete profile
