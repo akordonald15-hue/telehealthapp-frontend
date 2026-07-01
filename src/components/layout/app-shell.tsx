@@ -163,7 +163,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 pb-28 sm:px-6 sm:py-8 lg:px-8">
+          <main className="mx-auto w-full max-w-7xl flex-1 scroll-pb-44 px-4 py-5 pb-[calc(11rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-8 lg:px-8">
             <ProviderHeartbeat />
             <OfflineStatusBanner />
             {children}
