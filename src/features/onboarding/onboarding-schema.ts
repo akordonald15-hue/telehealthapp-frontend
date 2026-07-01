@@ -22,7 +22,6 @@ const phoneRegex = /^\+?\d{10,14}$/;
 export const onboardingSchema = z.object({
   // Step 1 - Basic information
   full_name: z.string().trim().min(2, "Enter your full name.").max(120),
-  email: z.string().trim().optional(),
   phone: z
     .string()
     .trim()
@@ -41,7 +40,7 @@ export type OnboardingValues = z.infer<typeof onboardingSchema>;
 
 /** Field groups per step, used to trigger step-scoped validation before advancing. */
 export const STEP_FIELDS: (keyof OnboardingValues)[][] = [
-  ["full_name", "email", "phone"],
+  ["full_name", "phone"],
   ["age_range", "gender"],
   ["state", "lga"],
 ];

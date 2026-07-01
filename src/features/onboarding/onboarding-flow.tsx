@@ -29,7 +29,6 @@ const TOTAL_STEPS = STEP_FIELDS.length;
 
 const emptyValues: OnboardingValues = {
   full_name: "",
-  email: "",
   phone: "",
   age_range: "" as OnboardingValues["age_range"],
   gender: "" as OnboardingValues["gender"],
@@ -85,10 +84,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
       return {};
     }
     const storedUser = getStoredAuthUser();
-    return {
-      ...storedUser,
-      email: storedUser.email || window.sessionStorage.getItem("caretekk:last-login-email") || "",
-    };
+    return storedUser;
   });
   const completeTimerRef = useRef<number | null>(null);
   const form = useForm<OnboardingValues>({
@@ -102,67 +98,21 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   useEffect(() => {
     const source = {
       full_name: user?.full_name || accountFallback.full_name || "",
-      email: user?.email || accountFallback.email || "",
       phone: user?.phone || accountFallback.phone || "",
     };
-    if (!source.full_name && !source.email && !source.phone) return;
+    if (!source.full_name && !source.phone) return;
     const current = form.getValues();
     form.reset({
       ...current,
       full_name: current.full_name || source.full_name,
-      email: source.email || current.email,
       phone: current.phone || source.phone,
     });
-  }, [accountFallback.email, accountFallback.full_name, accountFallback.phone, form, user]);
+  }, [accountFallback.full_name, accountFallback.phone, form, user]);
 
   useEffect(() => {
     if (!accountQuery.data) return;
     queryClient.setQueryData(authKeys.me, accountQuery.data);
   }, [accountQuery.data, queryClient]);
-
-  useEffect(() => {
-    const formEmail = form.getValues("email") || "";
-    const emailSource = user?.email
-      ? "authUser.email"
-      : accountQuery.data?.email
-        ? "authApi.me.email"
-        : accountFallback.email
-          ? "sessionStorage:last-login-email"
-          : profileQuery.data?.email
-            ? "profile.email"
-            : formEmail
-              ? "form.email"
-              : "missing";
-
-    console.log("authUser", user ?? null);
-    console.log("session", {
-      authQueryStatus: userQuery.status,
-      onboardingAuthQueryStatus: accountQuery.status,
-      profileQueryStatus: profileQuery.status,
-      storedEmailPresent: Boolean(accountFallback.email),
-    });
-    console.log("token", {
-      source: "httpOnly-cookie",
-      readableInBrowser: false,
-      note: "Token values are intentionally not logged.",
-    });
-    console.log("email source", {
-      source: emailSource,
-      emailPresent: Boolean(
-        user?.email || accountQuery.data?.email || accountFallback.email || profileQuery.data?.email || formEmail,
-      ),
-    });
-    console.log("Onboarding email:", formEmail || user?.email || accountQuery.data?.email || accountFallback.email || "");
-  }, [
-    accountFallback.email,
-    accountQuery.data,
-    accountQuery.status,
-    form,
-    profileQuery.data,
-    profileQuery.status,
-    user,
-    userQuery.status,
-  ]);
 
   const prefilledProfile = useRef(false);
   useEffect(() => {
@@ -172,7 +122,6 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     form.reset({
       ...current,
       full_name: current.full_name || profile.full_name || "",
-      email: current.email || profile.email || "",
       phone: current.phone || profile.phone || "",
       age_range:
         current.age_range || (profile.age_range as OnboardingValues["age_range"]) || ("" as OnboardingValues["age_range"]),
@@ -213,35 +162,17 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   });
 
   const goNext = async () => {
-    const emailValue =
-      user?.email ||
-      accountQuery.data?.email ||
-      accountFallback.email ||
-      profileQuery.data?.email ||
-      form.getValues("email") ||
-      "";
-    if (step === 0 && emailValue) {
-      form.setValue("email", emailValue, { shouldValidate: false });
-    }
     const valid = await form.trigger(STEP_FIELDS[step], { shouldFocus: true });
     const values = form.getValues();
     console.log("[Caretekk onboarding]", {
       currentStep: step + 1,
       validationErrors: form.formState.errors,
-      emailValue: values.email,
       fullNameValue: values.full_name,
       phoneNumberValue: values.phone,
       profileLoading: profileQuery.isLoading,
       buttonDisabled: save.isPending || loading,
     });
     if (!valid) return;
-    if (step === 0 && !form.getValues("email")) {
-      form.setError("email", {
-        type: "required",
-        message: "Email not found. Please log in again.",
-      });
-      return;
-    }
     if (step < TOTAL_STEPS - 1) {
       setDirection("next");
       setStep((current) => current + 1);
@@ -257,13 +188,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   };
 
   const isLastStep = step === TOTAL_STEPS - 1;
-  const hasAccountEmail =
-    Boolean(user?.email) ||
-    Boolean(accountQuery.data?.email) ||
-    Boolean(accountFallback.email) ||
-    Boolean(profileQuery.data?.email) ||
-    Boolean(form.getValues("email"));
-  const loading = (userQuery.isLoading || accountQuery.isLoading) && !hasAccountEmail;
+  const loading = false;
 
   if (completed) {
     return (
