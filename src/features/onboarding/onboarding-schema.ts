@@ -29,7 +29,7 @@ export const onboardingSchema = z.object({
     .regex(phoneRegex, "Enter a valid phone number (e.g. 08012345678)."),
 
   // Step 2 - Personal information
-  dob: z.string().min(1, "Enter your date of birth."),
+  age_range: z.enum(AGE_RANGES, { message: "Select your age range." }),
   gender: z.enum(["female", "male", "prefer_not_to_say"], { message: "Select your gender." }),
 
   // Step 3 - Location
@@ -42,7 +42,7 @@ export type OnboardingValues = z.infer<typeof onboardingSchema>;
 /** Field groups per step, used to trigger step-scoped validation before advancing. */
 export const STEP_FIELDS: (keyof OnboardingValues)[][] = [
   ["full_name", "email", "phone"],
-  ["dob", "gender"],
+  ["age_range", "gender"],
   ["state", "lga"],
 ];
 

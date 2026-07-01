@@ -389,7 +389,7 @@ export function DashboardClient() {
           {patientProfile.data && !patientProfile.data.profile_complete ? (
             <Notice title="Complete your profile before booking" tone="warning">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <span>Doctors need your name, phone, date of birth, gender, state, and LGA before consultation.</span>
+                <span>Doctors need your name, phone, age range, gender, state, and LGA before consultation.</span>
                 <Link
                   href="/onboarding"
                   className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-white px-4 text-sm font-semibold text-amber-800"
