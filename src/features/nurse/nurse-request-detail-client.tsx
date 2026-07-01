@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -31,12 +32,12 @@ import {
 } from "@/features/nurse/nurse-utils";
 
 const workflowSteps = [
-  { key: "accepted", label: "Verify", description: "Confirm patient and address." },
-  { key: "confirmed", label: "Start trip", description: "Travel unlocks after verification." },
-  { key: "in_transit", label: "Arrive", description: "Mark arrival after trip starts." },
-  { key: "arrived", label: "Start care", description: "Begin care on site." },
-  { key: "care_in_progress", label: "Complete", description: "Close care after service." },
-  { key: "care_completed", label: "Done", description: "Wait for patient confirmation." },
+  { key: "accepted", label: "Verify" },
+  { key: "confirmed", label: "Start trip" },
+  { key: "in_transit", label: "Arrived" },
+  { key: "arrived", label: "Start care" },
+  { key: "care_in_progress", label: "Complete care" },
+  { key: "care_completed", label: "Patient confirmation" },
 ] as const;
 
 const workflowOrder: string[] = workflowSteps.map((step) => step.key);
@@ -65,7 +66,6 @@ function WorkflowStep({ step, status }: { step: (typeof workflowSteps)[number]; 
           {current ? "Now" : completed ? "Done" : "Locked"}
         </span>
       </div>
-      <p className="mt-1 text-sm leading-6 text-slate-600">{step.description}</p>
     </div>
   );
 }
@@ -230,7 +230,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
   return (
     <Section
       title={request ? request.contact_name_snapshot || "Request detail" : "Request detail"}
-      description="Review patient details, confirm the visit, manage travel, and keep the care workflow moving in the right order."
       action={<Link href="/nurse/requests" className="text-sm font-semibold text-[var(--primary)]">Back to requests</Link>}
     >
       {requestQuery.isError ? (
@@ -240,7 +239,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
       ) : null}
 
       {requestQuery.isLoading ? (
-        <div className="rounded-[24px] border border-slate-200 bg-white px-5 py-10 text-sm text-slate-600">Loading request details...</div>
+        <InlineLoader label="Preparing nurse request details" />
       ) : request ? (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
@@ -289,9 +288,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                 </span>
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">Current workflow</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                    Actions only appear when the request is ready for them.
-                  </p>
                 </div>
               </div>
 
@@ -318,7 +314,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
 
               <div className="mt-6">
                 <p className="font-heading text-lg font-semibold text-[#1F2937]">State-machine progress</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">Each action unlocks only after the previous visit step is complete.</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {workflowSteps.map((step) => (
                     <WorkflowStep key={step.key} step={step} status={request.status} />
@@ -336,7 +331,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                 </span>
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">Pre-visit verification</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Confirm the patient details before starting your trip.</p>
                 </div>
               </div>
               <div className="mt-6 grid gap-3">
@@ -372,11 +366,8 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                   disabled={!assignment || !canVerifyRequest(assignment, request) || verifyMutation.isPending}
                 >
                   {verifyMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Save verification
+                  Verify
                 </Button>
-                {!assignment || !canVerifyRequest(assignment, request) ? (
-                  <p className="text-sm text-slate-500">Verification becomes available after the request has been accepted.</p>
-                ) : null}
               </div>
             </div>
 
@@ -387,7 +378,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                 </span>
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">Trip and tracking</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Start travel, share location when available, and mark arrival on site.</p>
                 </div>
               </div>
               <div className="mt-6 flex flex-col gap-3">
@@ -412,7 +402,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                   disabled={!assignment || !canMarkArrived(assignment, request) || arriveMutation.isPending}
                 >
                   {arriveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Mark arrived
+                  Arrived
                 </Button>
                 {locationMessage ? <p className="text-sm text-slate-600">{locationMessage}</p> : null}
               </div>
@@ -427,7 +417,6 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                 </span>
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">Care workflow</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Move from arrival into care and close the visit when your workflow is complete.</p>
                 </div>
               </div>
 
@@ -460,6 +449,9 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                   {careCompleteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Complete care
                 </Button>
+                {request.status === "care_completed" ? (
+                  <Notice title="Waiting for patient confirmation" tone="neutral" />
+                ) : null}
               </div>
             </div>
 
@@ -467,7 +459,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
               <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Request timeline</h2>
               <p className="mt-1 text-sm text-slate-500">A clear record of what has happened so far.</p>
               {eventsQuery.isLoading ? (
-                <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading timeline...</div>
+                <InlineLoader className="mt-5" compact label="Loading request timeline" />
               ) : eventsQuery.data?.results.length ? (
                 <div className="mt-5 grid gap-3">
                   {eventsQuery.data.results.map((event) => (
@@ -490,7 +482,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
             <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Travel tracking</h2>
             <p className="mt-1 text-sm text-slate-500">Recent shared tracking points for this request.</p>
             {trackingQuery.isLoading ? (
-              <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading travel updates...</div>
+              <InlineLoader className="mt-5" compact label="Loading travel updates" />
             ) : trackingQuery.data?.results.length ? (
               <div className="mt-5 grid gap-3 md:grid-cols-2">
                 {trackingQuery.data.results.map((point) => (

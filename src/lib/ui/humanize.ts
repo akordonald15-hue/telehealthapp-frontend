@@ -71,7 +71,7 @@ export function referralSummary(role?: UserRole) {
 }
 
 export function paymentSummary(provider: string, role?: UserRole) {
-  const label = provider ? titleize(provider) : "Payment";
+  const label = provider === "bank_transfer" ? "Bank transfer" : provider ? titleize(provider) : "Payment";
   if (role === "patient") {
     return label;
   }
@@ -97,6 +97,8 @@ export function humanizeAuditAction(action: string) {
       return "Referral details updated";
     case "referral_sent":
       return "Referral sent";
+    case "referral_patient_notified":
+      return "Referral patient notified";
     case "referral_email_failed":
       return "Referral delivery needs attention";
     case "payment_initiated":

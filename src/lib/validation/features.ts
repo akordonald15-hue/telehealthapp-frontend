@@ -13,7 +13,7 @@ export const messageSchema = z.object({
 });
 
 export const paymentInitiateSchema = z.object({
-  provider: z.enum(["paystack", "flutterwave"]),
+  provider: z.enum(["paystack", "flutterwave", "bank_transfer"]),
   amount: z.coerce.number().int().positive(),
   currency: z.string().max(8).default("NGN"),
   appointment_id: z.coerce.number().int().positive().optional().or(z.literal("")),
@@ -24,7 +24,7 @@ export const referralSchema = z.object({
   patient: z.coerce.number().int().positive(),
   referred_to: z.string().min(1).max(255),
   notes: z.string().optional(),
-  status: z.enum(["draft", "sent"]).default("draft"),
+  status: z.enum(["pending", "reviewed", "contacted", "completed", "cancelled"]).default("pending"),
 });
 
 export const triageSymptomsSchema = z.object({

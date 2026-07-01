@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Lexend } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -14,11 +14,31 @@ const lexend = Lexend({
 export const metadata: Metadata = {
   title: `${BRAND_NAME} | Trusted Telehealth And Home Care`,
   description: `Book appointments, message your care team, manage records, and coordinate home visits with ${BRAND_NAME}.`,
+  manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/Logo/newlogo.png",
-    shortcut: "/Logo/newlogo.png",
-    apple: "/Logo/newlogo.png",
+    icon: [
+      { url: "/pwa/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/pwa/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/pwa/icon-192.png",
+    apple: [{ url: "/pwa/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  appleWebApp: {
+    capable: true,
+    title: BRAND_NAME,
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#426BB3",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

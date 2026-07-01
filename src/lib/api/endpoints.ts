@@ -7,8 +7,11 @@ import type {
   AdminUser,
   Appointment,
   AppointmentBookingResponse,
+  AppointmentRating,
   AuditEvent,
   AvailabilitySlot,
+  CarePlan,
+  ConsultationDispute,
   DetailResponse,
   DoctorProfile,
   HomeCareAssignment,
@@ -18,6 +21,7 @@ import type {
   HomeCareRequestDetail,
   HomeCareRequestEvent,
   HomeCareRequestListItem,
+  HomeCareService,
   HomeCareTrackingPoint,
   MedicalFileDownload,
   MedicalFileUploadInit,
@@ -27,10 +31,14 @@ import type {
   NurseProfile,
   PatientProfile,
   Payment,
+  PasswordResetVerifyResponse,
   PaymentInitiation,
+  PaymentProvider,
+  ProviderSetupVerifyResponse,
   ProviderLedgerTransaction,
   ProviderPayoutRequest,
   ProviderAvailabilityStatus,
+  ProviderAvailabilityState,
   ProviderDoctor,
   ProviderNurse,
   ProviderWalletDashboard,
@@ -77,8 +85,14 @@ export const authApi = {
     apiRequest<User>(authPath("/auth/me/"), { method: "PATCH", body }),
   passwordResetRequest: (body: { email: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/password-reset/request/"), { method: "POST", body, auth: false }),
-  passwordResetConfirm: (body: { token: string; new_password: string }) =>
+  passwordResetVerify: (body: { email: string; code: string }) =>
+    apiRequest<PasswordResetVerifyResponse>(authPath("/auth/password-reset/verify/"), { method: "POST", body, auth: false }),
+  passwordResetConfirm: (body: { reset_token: string; new_password: string; confirm_password: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/password-reset/confirm/"), { method: "POST", body, auth: false }),
+  providerSetupVerify: (body: { token: string }) =>
+    apiRequest<ProviderSetupVerifyResponse>(authPath("/auth/provider-setup/verify/"), { method: "POST", body, auth: false }),
+  providerSetupComplete: (body: { token: string; new_password: string; confirm_password: string }) =>
+    apiRequest<DetailResponse>(authPath("/auth/provider-setup/complete/"), { method: "POST", body, auth: false }),
   otpRequest: (body: { email: string }) =>
     apiRequest<DetailResponse>(authPath("/auth/otp/request/"), { method: "POST", body, auth: false }),
   otpVerify: (body: { email: string; code: string }) =>
@@ -105,22 +119,39 @@ export const profilesApi = {
   ) => apiRequest<MedicalFileUploadInit>(`/profiles/medical-records/${recordId}/files/init/`, { method: "POST", body }),
   medicalFileDownload: (fileId: number) =>
     apiRequest<MedicalFileDownload>(`/profiles/medical-files/${fileId}/download/`),
+  carePlans: (query?: { page?: number; page_size?: number }) =>
+    apiList<CarePlan>("/profiles/care-plans/", query),
+  createCarePlan: (body: {
+    patient: number;
+    appointment: number;
+    complaint_summary?: string;
+    assessment_note?: string;
+    care_steps?: string;
+    medications?: string;
+    lifestyle_advice?: string;
+    referral_recommendation?: string;
+    follow_up_date?: string | null;
+    warning_signs?: string;
+  }) => apiRequest<CarePlan>("/profiles/care-plans/", { method: "POST", body }),
+  carePlan: (id: number) => apiRequest<CarePlan>(`/profiles/care-plans/${id}/`),
 };
 
 export const providersApi = {
   doctors: (query?: { page?: number; page_size?: number; specialty?: string; search?: string }) =>
     apiList<ProviderDoctor>("/providers/doctors/", query),
-  nurses: (query?: { page?: number; page_size?: number; service_type?: string; search?: string }) =>
+  nurses: (query?: { page?: number; page_size?: number; service_type?: string; zone?: string; search?: string }) =>
     apiList<ProviderNurse>("/providers/nurses/", query),
+  myAvailability: () => apiRequest<ProviderAvailabilityState>("/providers/me/availability/"),
   updateAvailability: (body: { availability_status: ProviderAvailabilityStatus }) =>
-    apiRequest<ProviderDoctor | ProviderNurse>("/providers/me/availability/", { method: "PATCH", body }),
+    apiRequest<ProviderAvailabilityState>("/providers/me/availability/", { method: "PATCH", body }),
+  heartbeat: () => apiRequest<ProviderAvailabilityState>("/providers/me/heartbeat/", { method: "POST", body: {} }),
 };
 
 export const appointmentsApi = {
   list: (query?: { page?: number; page_size?: number }) => apiList<Appointment>("/appointments/", query),
   availableDoctors: (query?: { page?: number; page_size?: number; specialty?: string; search?: string }) =>
     apiList<ProviderDoctor>("/appointments/available-doctors/", query),
-  book: (body: { doctor: number; scheduled_at: string; reason?: string; notes?: string; callback_url: string }) =>
+  book: (body: { doctor: number; triage_session?: number; scheduled_at: string; reason?: string; notes?: string; callback_url: string }) =>
     apiRequest<AppointmentBookingResponse>("/appointments/book/", { method: "POST", body }),
   create: (body: { doctor: number; scheduled_at: string; status?: string; reason?: string; notes?: string }) =>
     apiRequest<Appointment>("/appointments/", { method: "POST", body }),
@@ -128,6 +159,8 @@ export const appointmentsApi = {
   update: (id: number, body: Partial<Pick<Appointment, "doctor" | "scheduled_at" | "status" | "reason" | "notes">>) =>
     apiRequest<Appointment>(`/appointments/${id}/`, { method: "PATCH", body }),
   cancel: (id: number) => apiRequest<DetailResponse>(`/appointments/${id}/cancel/`, { method: "POST" }),
+  submitRating: (id: number, body: { score: number; feedback?: string }) =>
+    apiRequest<AppointmentRating>(`/appointments/${id}/rating/`, { method: "POST", body }),
   reschedule: (id: number, body: { scheduled_at: string }) =>
     apiRequest<DetailResponse>(`/appointments/${id}/reschedule/`, { method: "POST", body }),
   availability: (query?: { doctor_id?: number; page?: number; page_size?: number }) =>
@@ -136,24 +169,38 @@ export const appointmentsApi = {
 
 export const messagingApi = {
   threads: (query?: { page?: number; page_size?: number }) => apiList<Thread>("/messages/threads/", query),
-  createThread: (body: { patient?: number; doctor?: number }) =>
+  createThread: (body: { patient?: number; doctor?: number; appointment_id?: number }) =>
     apiRequest<Thread>("/messages/threads/", { method: "POST", body }),
   messages: (threadId: number, query?: { page?: number; page_size?: number }) =>
     apiList<Message>(`/messages/threads/${threadId}/messages/`, query),
   createMessage: (threadId: number, body: { body: string; attachment_id?: number }) =>
     apiRequest<Message>(`/messages/threads/${threadId}/messages/`, { method: "POST", body }),
+  endConsultation: (threadId: number) =>
+    apiRequest<DetailResponse>(`/messages/threads/${threadId}/end/`, { method: "POST", body: {} }),
+  createDispute: (threadId: number, body: { reason_category: string; explanation?: string }) =>
+    apiRequest<ConsultationDispute>(`/messages/threads/${threadId}/dispute/`, { method: "POST", body }),
   initAttachmentUpload: (
     threadId: number,
-    body: { filename: string; content_type?: string; size_bytes?: number },
+    body: { filename: string; content_type?: string; size_bytes?: number; duration_seconds?: number },
   ) =>
     apiRequest<MessageAttachmentUploadInit>(`/messages/threads/${threadId}/attachments/init/`, {
       method: "POST",
       body,
     }),
+  uploadAttachmentFile: (attachmentId: number, file: File) => {
+    const body = new FormData();
+    body.set("file", file);
+    return apiRequest<DetailResponse>(`/messages/attachments/${attachmentId}/upload/`, {
+      method: "POST",
+      body,
+    });
+  },
 };
 
 export const homeCareApi = {
-  availableNurses: (query?: { page?: number; page_size?: number; service_type?: string; search?: string }) =>
+  services: (query?: { zone?: string; page?: number; page_size?: number }) =>
+    apiList<HomeCareService>("/home-care/services/", query),
+  availableNurses: (query?: { page?: number; page_size?: number; service_type?: string; service_id?: number; zone?: string; search?: string }) =>
     apiList<ProviderNurse>("/home-care/available-nurses/", query),
   requests: (query?: { page?: number; page_size?: number }) => apiList<HomeCareRequestListItem>("/home-care/requests/", query),
   bookRequest: (body: HomeCareRequestCreate & { callback_url: string }) =>
@@ -200,7 +247,7 @@ export const homeCareApi = {
 export const paymentsApi = {
   list: (query?: { page?: number; page_size?: number }) => apiList<Payment>("/payments/", query),
   initiate: (body: {
-    provider: "paystack" | "flutterwave";
+    provider: PaymentProvider;
     amount?: number;
     currency?: string;
     appointment_id?: number;
@@ -209,6 +256,11 @@ export const paymentsApi = {
   }) => apiRequest<PaymentInitiation>("/payments/initiate/", { method: "POST", body }),
   detail: (id: number) => apiRequest<Payment>(`/payments/${id}/`),
   retry: (id: number) => apiRequest<PaymentInitiation>(`/payments/${id}/retry/`, { method: "POST" }),
+  submitTransfer: ({ paymentId, proofFile }: { paymentId: number; proofFile: File }) => {
+    const body = new FormData();
+    body.append("proof", proofFile);
+    return apiRequest<PaymentInitiation>(`/payments/${paymentId}/submit-transfer/`, { method: "POST", body });
+  },
   refund: (body: { payment: number; amount: string | number }) =>
     apiRequest<Refund>("/payments/refunds/", { method: "POST", body }),
 };
@@ -223,7 +275,7 @@ export const providerLedgerApi = {
 
 export const referralsApi = {
   list: (query?: { page?: number; page_size?: number }) => apiList<Referral>("/referrals/", query),
-  create: (body: { patient: number; referred_to: string; notes?: string; status?: string }) =>
+  create: (body: { patient: number; appointment?: number | null; referred_to: string; notes?: string; status?: string }) =>
     apiRequest<Referral>("/referrals/", { method: "POST", body }),
   detail: (id: number) => apiRequest<Referral>(`/referrals/${id}/`),
   update: (id: number, body: Partial<Pick<Referral, "patient" | "referred_to" | "notes" | "status">>) =>
@@ -253,6 +305,8 @@ export const adminApi = {
     phone?: string;
     specialty?: string;
     service_type?: string;
+    service_zone?: string;
+    base_address?: string;
     license_no?: string;
     availability_status: ProviderAvailabilityStatus;
     provider_status?: NurseProfile["onboarding_status"];
@@ -260,6 +314,8 @@ export const adminApi = {
     is_active?: boolean;
     is_email_verified?: boolean;
   }) => apiRequest<AdminProviderCreateResponse>("/admin/providers/create/", { method: "POST", body }),
+  resendProviderInvite: (providerType: "doctor" | "nurse", providerId: number) =>
+    apiRequest<DetailResponse>(`/admin/providers/${providerType}/${providerId}/resend-invite/`, { method: "POST" }),
   updateProviderStatus: (
     providerType: "doctor" | "nurse",
     providerId: number,
@@ -268,8 +324,23 @@ export const adminApi = {
       is_active?: boolean;
       onboarding_status?: NurseProfile["onboarding_status"];
       active_for_dispatch?: boolean;
+      service_zone?: string;
+      base_address?: string;
+      license_no?: string;
     },
   ) => apiRequest<DetailResponse>(`/admin/providers/${providerType}/${providerId}/status/`, { method: "PATCH", body }),
+  pendingManualPayments: (query?: { page?: number; page_size?: number }) =>
+    apiList<Payment>("/admin/payments/manual-verification/", query),
+  confirmManualPayment: (paymentId: number, body?: { provider_reference?: string; note?: string }) =>
+    apiRequest<DetailResponse & { payment: Payment }>(`/admin/payments/${paymentId}/confirm/`, {
+      method: "POST",
+      body: body || {},
+    }),
+  rejectManualPayment: (paymentId: number, body?: { note?: string }) =>
+    apiRequest<DetailResponse & { payment: Payment }>(`/admin/payments/${paymentId}/reject/`, {
+      method: "POST",
+      body: body || {},
+    }),
 };
 
 export const triageApi = {

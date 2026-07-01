@@ -44,10 +44,22 @@ export function PwaRegister() {
     }
 
     const ua = window.navigator.userAgent.toLowerCase();
-    const isIos = /iphone|ipad|ipod/.test(ua);
-    const isSafari = /safari/.test(ua) && !/crios|fxios|edgios/.test(ua);
-    return isIos && isSafari;
+    const isTouchMac = window.navigator.platform === "MacIntel" && window.navigator.maxTouchPoints > 1;
+    const isIosDevice = /iphone|ipad|ipod/.test(ua) || isTouchMac;
+    return isIosDevice;
   }, [mounted, supportsStandalone]);
+
+  const iosInstallCopy = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "Open this page in Safari, then tap Share > Add to Home Screen.";
+    }
+
+    const ua = window.navigator.userAgent.toLowerCase();
+    const isSafari = /safari/.test(ua) && !/crios|fxios|edgios|instagram|fbav|fb_iab/.test(ua);
+    return isSafari
+      ? "Tap Share, then choose Add to Home Screen."
+      : "Open this page in Safari, then tap Share > Add to Home Screen.";
+  }, []);
 
   const isInstallCapableBrowser = useMemo(() => {
     if (!mounted || typeof window === "undefined" || supportsStandalone) {
@@ -141,15 +153,21 @@ export function PwaRegister() {
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold leading-5 text-[#1F2937]">Install Caretekk</p>
             <p className="mt-0.5 text-xs leading-5 text-slate-600 sm:text-sm">
-              {showIosHint
-                ? "Use Share > Add to Home Screen."
-                : showManualHint
-                  ? "Use your browser menu to install."
-                  : "Add Caretekk to your device."}
+              {showIosHint ? iosInstallCopy : showManualHint ? "Use your browser menu to install." : "Add Caretekk to your device."}
             </p>
           </div>
         </div>
-        {showIosHint ? null : (
+        {showIosHint ? (
+          <div className="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setDismissed(true)}
+              className="lf-btn lf-btn-secondary min-h-11 w-full px-4"
+            >
+              Got it
+            </button>
+          </div>
+        ) : (
           <div className="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row sm:gap-3">
             <button
               type="button"

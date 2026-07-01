@@ -8,7 +8,7 @@ import { Section } from "@/components/ui/section";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { formatDateTime } from "@/lib/utils";
-import { bookingSourceLabel, homeCareStatusLabel, isHistoryRequest, preferredTimeLabel } from "@/features/nurse/nurse-utils";
+import { homeCareStatusLabel, isHistoryRequest, preferredTimeLabel } from "@/features/nurse/nurse-utils";
 import { useNurseRequests } from "@/features/nurse/use-nurse-requests";
 
 export function NurseHistoryClient() {
@@ -17,7 +17,7 @@ export function NurseHistoryClient() {
 
   if (userQuery.data?.role !== "nurse") {
     return (
-      <Section title="History" description="Completed and closed nurse requests appear here.">
+      <Section title="History">
         <Notice title="This view is not available for your account." tone="warning" />
       </Section>
     );
@@ -26,7 +26,7 @@ export function NurseHistoryClient() {
   const history = requestsQuery.requests.filter((item) => isHistoryRequest(item.status));
 
   return (
-    <Section title="Nurse history" description="Review completed, cancelled, and unreachable requests without losing the full care timeline.">
+    <Section title="History">
       {requestsQuery.isError ? (
         <Notice title="We couldn't load your home care updates." tone="warning">
           {getFriendlyErrorMessage(requestsQuery.error, "homeCare")}
@@ -54,11 +54,9 @@ export function NurseHistoryClient() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="font-heading text-xl font-semibold text-[#1F2937]">{request.contact_name_snapshot || "Patient request"}</p>
-                  <p className="mt-1 text-sm text-slate-600">{request.service_address_snapshot || "Address not captured"}</p>
+                  <p className="mt-1 text-sm text-slate-600">{request.service_name_snapshot || "Home care"}</p>
                   <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-500">
                     <span>{homeCareStatusLabel(request.status)}</span>
-                    <span>&bull;</span>
-                    <span>{bookingSourceLabel(request.booking_source)}</span>
                     <span>&bull;</span>
                     <span>{preferredTimeLabel(request)}</span>
                   </div>
@@ -69,7 +67,7 @@ export function NurseHistoryClient() {
           ))}
         </div>
       ) : (
-        <EmptyState title="No history yet" description="Completed and closed requests will appear here when visits begin to wrap up." />
+        <EmptyState title="No history yet" description="" />
       )}
     </Section>
   );

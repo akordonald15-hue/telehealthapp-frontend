@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { Textarea } from "@/components/ui/input";
@@ -15,7 +16,7 @@ import { homeCareApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { buildWebSocketUrl } from "@/lib/realtime";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, formatMoney } from "@/lib/utils";
 import {
   bookingSourceLabel,
   canCancelHomeCare,
@@ -33,7 +34,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
   const [cancelReason, setCancelReason] = useState("");
-  const [ratingScore, setRatingScore] = useState("5");
+  const [ratingScore, setRatingScore] = useState(5);
   const [ratingFeedback, setRatingFeedback] = useState("");
   const [liveTrackingConnected, setLiveTrackingConnected] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
@@ -140,7 +141,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
       ) : null}
 
       {requestQuery.isLoading ? (
-        <div className="rounded-[24px] border border-slate-200 bg-white px-5 py-10 text-sm text-slate-600">Loading request details...</div>
+        <InlineLoader label="Preparing your home care request" />
       ) : request ? (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.86fr)]">
@@ -153,6 +154,8 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <Info label="Assigned nurse" value={nurse ? nurse.display_name : "Waiting for assignment"} />
                 <Info label="Nurse status" value={nurse?.availability_status || "Not assigned yet"} />
+                <Info label="Service" value={request.service_name_snapshot || "Home care"} />
+                <Info label="Price" value={request.service_price_snapshot ? formatMoney(request.service_price_snapshot) : "Pending"} />
                 <Info label="Preferred time" value={preferredTimeLabel(request)} />
                 <Info label="Last update" value={formatDateTime(request.updated_at)} />
               </div>
@@ -265,21 +268,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
                 </Notice>
               ) : null}
               {ratingMutation.isSuccess ? <Notice title="Rating submitted" tone="success" /> : null}
-              <div className="grid gap-2">
-                <label className="text-sm font-semibold text-[#1F2937]">Score</label>
-                <select
-                  value={ratingScore}
-                  onChange={(event) => setRatingScore(event.target.value)}
-                  disabled={!canRateHomeCare(request.status)}
-                  className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
-                >
-                  {[5, 4, 3, 2, 1].map((score) => (
-                    <option key={score} value={score}>
-                      {score} star{score === 1 ? "" : "s"}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <StarRatingInput value={ratingScore} disabled={!canRateHomeCare(request.status)} onChange={setRatingScore} />
               <Textarea
                 value={ratingFeedback}
                 onChange={(event) => setRatingFeedback(event.target.value)}
@@ -302,7 +291,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
             <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Request activity</h2>
               {eventsQuery.isLoading ? (
-                <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading activity...</div>
+                <InlineLoader className="mt-5" compact label="Loading request activity" />
               ) : eventsQuery.data?.results.length ? (
                 <div className="mt-5 grid gap-3">
                   {eventsQuery.data.results.map((event) => (
@@ -331,7 +320,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
                 </div>
               </div>
               {trackingQuery.isLoading ? (
-                <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">Loading travel updates...</div>
+                <InlineLoader className="mt-5" compact label="Loading travel updates" />
               ) : trackingQuery.data?.results.length ? (
                 <div className="mt-5 grid gap-3">
                   {trackingQuery.data.results.map((point) => (
@@ -352,6 +341,42 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
         </>
       ) : null}
     </Section>
+  );
+}
+
+function StarRatingInput({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: number;
+  disabled: boolean;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div className="grid gap-2">
+      <p className="text-sm font-semibold text-[#1F2937]">Rating</p>
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Rate nurse">
+        {[1, 2, 3, 4, 5].map((score) => (
+          <button
+            key={score}
+            type="button"
+            role="radio"
+            aria-checked={value === score}
+            disabled={disabled}
+            onClick={() => onChange(score)}
+            className={[
+              "inline-flex h-11 w-11 items-center justify-center rounded-[10px] border text-lg transition",
+              score <= value ? "border-amber-200 bg-amber-50 text-amber-500" : "border-slate-200 bg-white text-slate-300",
+              disabled ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5",
+            ].join(" ")}
+          >
+            <Star className={score <= value ? "h-5 w-5 fill-current" : "h-5 w-5"} />
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-slate-500">{value} out of 5</p>
+    </div>
   );
 }
 

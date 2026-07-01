@@ -22,6 +22,18 @@ export type DetailResponse = {
   detail: string;
 };
 
+export type PasswordResetVerifyResponse = DetailResponse & {
+  reset_token: string;
+  expires_at: string;
+};
+
+export type ProviderSetupVerifyResponse = DetailResponse & {
+  email: string;
+  name: string;
+  role: "doctor" | "nurse";
+  expires_at: string;
+};
+
 export type BackendErrorPayload = {
   error?: string;
   message?: string | Record<string, string[] | string> | unknown[];
@@ -42,20 +54,24 @@ export type Specialty = {
   name: string;
 };
 
-export type ProviderAvailabilityStatus = "available" | "unavailable" | "busy" | "offline" | "on_break";
+export type ProviderAvailabilityStatus = "available" | "unavailable" | "busy" | "on_visit" | "offline" | "on_break";
 
 export type PatientProfile = {
   id: number;
+  full_name?: string;
+  email?: string;
+  phone?: string;
   dob: string | null;
   gender: string;
+  state?: string;
+  lga?: string;
   address: string;
   emergency_contact_name: string;
   emergency_contact_phone: string;
   medical_history: Record<string, unknown>;
-  // Onboarding fields (backend to add columns; optional until then).
+  // Onboarding age range (backend to add column; optional until then).
   age_range?: string;
-  state?: string;
-  lga?: string;
+  profile_complete?: boolean;
 };
 
 export type DoctorProfile = {
@@ -65,7 +81,13 @@ export type DoctorProfile = {
   bio: string;
   years_experience: number;
   availability_status: ProviderAvailabilityStatus;
+  preferred_availability_status: ProviderAvailabilityStatus;
+  last_active_at: string | null;
   specialties: Specialty[];
+  rating?: number | null;
+  review_count?: number;
+  completed_consultations?: number;
+  rating_breakdown?: RatingBreakdown;
 };
 
 export type NurseProfile = {
@@ -73,12 +95,32 @@ export type NurseProfile = {
   license_no: string;
   onboarding_status: "pending" | "approved" | "suspended";
   availability_status: ProviderAvailabilityStatus;
+  preferred_availability_status: ProviderAvailabilityStatus;
   service_radius_km: number;
   service_type: string;
+  service_zone: HomeCareZone | "";
+  service_zone_label?: string;
   base_address: string;
   base_latitude: string | null;
   base_longitude: string | null;
   active_for_dispatch: boolean;
+  last_active_at: string | null;
+  rating?: number | null;
+  review_count?: number;
+  completed_visits?: number;
+  rating_breakdown?: RatingBreakdown;
+};
+
+export type ProviderAvailabilityState = {
+  provider_type: "doctor" | "nurse";
+  availability_status: ProviderAvailabilityStatus;
+  preferred_availability_status: ProviderAvailabilityStatus;
+  last_active_at: string | null;
+  active_workload_count: number;
+  active_job_label: string;
+  can_self_update: boolean;
+  blocked_reason: string;
+  allowed_statuses: ProviderAvailabilityStatus[];
 };
 
 export type MedicalFile = {
@@ -109,16 +151,84 @@ export type MedicalFileDownload = {
   download_url: string;
 };
 
-export type AppointmentStatus = "scheduled" | "completed" | "cancelled";
+export type CarePlan = {
+  id: number;
+  patient: number;
+  patient_name?: string;
+  doctor: number;
+  doctor_name?: string;
+  appointment: number | null;
+  appointment_scheduled_at?: string | null;
+  complaint_summary: string;
+  assessment_note: string;
+  care_steps: string;
+  medications: string;
+  lifestyle_advice: string;
+  referral_recommendation: string;
+  follow_up_date: string | null;
+  warning_signs: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AppointmentStatus =
+  | "pending_payment"
+  | "awaiting_payment_verification"
+  | "payment_rejected"
+  | "confirmed"
+  | "scheduled"
+  | "accepted"
+  | "in_progress"
+  | "completed"
+  | "cancelled"
+  | "missed";
+
+export type AppointmentRating = {
+  id: number;
+  score: number;
+  feedback: string;
+  created_at: string;
+};
 
 export type Appointment = {
   id: number;
   patient: number;
   doctor: number;
+  triage_session?: number | null;
+  triage_summary?: {
+    label: string;
+    symptoms: string[];
+    duration: string;
+    severity: string;
+    risk_level: string;
+    recommendation: string;
+    department: string;
+    red_flags: string[];
+    possible_causes?: string[];
+    urgency_guidance?: string[];
+    self_care_guidance?: string[];
+    created_at: string;
+    disclaimer: string;
+  } | null;
+  patient_profile?: {
+    id: number;
+    display_name: string;
+    email?: string;
+    phone?: string;
+    dob?: string | null;
+    gender?: string;
+    state?: string;
+    lga?: string;
+  };
+  doctor_profile?: {
+    id: number;
+    display_name: string;
+  };
   scheduled_at: string;
   status: AppointmentStatus;
   reason: string;
   notes: string;
+  rating?: AppointmentRating | null;
 };
 
 export type AvailabilitySlot = {
@@ -131,9 +241,75 @@ export type AvailabilitySlot = {
 
 export type Thread = {
   id: number;
+  thread_id?: number;
   patient: number;
   doctor: number;
+  patient_profile?: {
+    id: number;
+    display_name: string;
+    email?: string;
+  };
+  doctor_profile?: {
+    id: number;
+    display_name: string;
+    specialty?: string;
+    specialties?: string[];
+  };
+  appointment?: {
+    id: number;
+    status: AppointmentStatus | string;
+    scheduled_at: string;
+  } | null;
+  last_message?: {
+    id: number;
+    body: string;
+    sender: number;
+    sender_role: UserRole;
+    sender_name: string;
+    created_at: string;
+  } | null;
+  unread_count?: number;
+  updated_at?: string;
+  consultation_status?: string;
+  consultation_lifecycle_status?: "open" | "doctor_ended" | "expired" | "disputed" | "resolved";
+  consultation_started_at?: string | null;
+  consultation_expires_at?: string | null;
+  ended_at?: string | null;
+  can_send_messages?: boolean;
+  can_end_consultation?: boolean;
+  can_raise_dispute?: boolean;
+  latest_dispute?: {
+    id: number;
+    reason_category: string;
+    review_status: string;
+    created_at: string;
+  } | null;
+  triage_summary?: {
+    label: string;
+    symptoms: string[];
+    duration: string;
+    severity: string;
+    risk_level: string;
+    recommendation: string;
+    department: string;
+    red_flags: string[];
+    possible_causes?: string[];
+    urgency_guidance?: string[];
+    self_care_guidance?: string[];
+    created_at: string;
+    disclaimer: string;
+  } | null;
   created_at: string;
+};
+
+export type ConsultationDispute = {
+  id: number;
+  thread: number;
+  reason_category: string;
+  explanation: string;
+  review_status: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Message = {
@@ -142,6 +318,11 @@ export type Message = {
   sender: number;
   body: string;
   attachment_url: string;
+  attachment_kind?: "file" | "image" | "voice" | "";
+  attachment_filename?: string;
+  attachment_content_type?: string;
+  attachment_size_bytes?: number;
+  attachment_duration_seconds?: number | null;
   created_at: string;
   read_at: string | null;
 };
@@ -150,8 +331,12 @@ export type ProviderDoctor = DoctorProfile & {
   display_name: string;
   profile_image_url: string | null;
   rating: number | null;
+  review_count?: number;
+  completed_consultations?: number;
+  rating_breakdown?: RatingBreakdown;
   active_workload: number;
   next_available_time: string | null;
+  unavailable_consultation_slots?: string[];
   updated_at: string;
 };
 
@@ -162,12 +347,19 @@ export type ProviderNurse = {
   service_type: string;
   profile_image_url: string | null;
   rating: number | null;
+  review_count?: number;
+  completed_visits?: number;
+  rating_breakdown?: RatingBreakdown;
   availability_status: ProviderAvailabilityStatus;
   service_radius_km: number;
+  service_zone: HomeCareZone | "";
+  service_zone_label?: string;
   location_area: string;
   active_workload: number;
   updated_at: string;
 };
+
+export type RatingBreakdown = Record<string, { count: number; percentage: number }>;
 
 export type MessageAttachmentUploadInit = {
   upload_url: string;
@@ -176,8 +368,21 @@ export type MessageAttachmentUploadInit = {
 };
 
 export type HomeCareBookingSource = "direct" | "doctor_referral";
+export type HomeCareZone = "eket" | "uyo";
+export type HomeCareService = {
+  id: number;
+  name: string;
+  zone: HomeCareZone;
+  zone_label: string;
+  description: string;
+  price: string;
+  is_active: boolean;
+};
 export type HomeCareRequestStatus =
   | "requested"
+  | "awaiting_payment"
+  | "awaiting_payment_verification"
+  | "payment_rejected"
   | "matching"
   | "assigned"
   | "accepted"
@@ -224,6 +429,10 @@ export type HomeCareRequestListItem = {
   id: number;
   booking_source: HomeCareBookingSource;
   status: HomeCareRequestStatus;
+  service: number | null;
+  service_name_snapshot: string;
+  service_price_snapshot: string | null;
+  service_zone: string;
   contact_name_snapshot: string;
   contact_phone_snapshot: string;
   service_address_snapshot: string;
@@ -248,6 +457,8 @@ export type HomeCareRequestDetail = HomeCareRequestListItem & {
 export type HomeCareRequestCreate = {
   booking_source: HomeCareBookingSource;
   referral?: number | null;
+  service?: number | null;
+  service_zone?: string;
   preferred_nurse?: number | null;
   contact_name_snapshot?: string;
   contact_phone_snapshot?: string;
@@ -288,12 +499,31 @@ export type HomeCareRating = {
   created_at: string;
 };
 
-export type PaymentProvider = "paystack" | "flutterwave";
-export type PaymentStatus = "pending" | "success" | "failed" | "refunded";
+export type PaymentProvider = "paystack" | "flutterwave" | "bank_transfer";
+export type PaymentStatus =
+  | "pending"
+  | "awaiting_transfer"
+  | "transfer_submitted"
+  | "awaiting_manual_verification"
+  | "success"
+  | "rejected"
+  | "failed"
+  | "cancelled"
+  | "refunded";
+
+export type BankTransferDetails = {
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  instructions: string;
+  reference: string;
+};
 
 export type Payment = {
   id: number;
   patient: number;
+  patient_name?: string;
+  patient_phone?: string;
   appointment: number | null;
   homecare_request: number | null;
   provider: string;
@@ -302,6 +532,15 @@ export type Payment = {
   status: PaymentStatus;
   external_ref: string;
   provider_reference: string;
+  transfer_notified_at?: string | null;
+  transfer_proof_uploaded?: boolean;
+  transfer_proof_url?: string | null;
+  transfer_proof_original_name?: string;
+  transfer_proof_content_type?: string;
+  transfer_proof_size?: number;
+  manual_reviewed_at?: string | null;
+  manual_review_note?: string;
+  bank_transfer?: BankTransferDetails | null;
 };
 
 export type PaymentInitiation = {
@@ -309,10 +548,19 @@ export type PaymentInitiation = {
   provider: string;
   amount: string;
   currency: string;
+  status: PaymentStatus;
   appointment_id: number | null;
   homecare_request_id: number | null;
   authorization_url: string | null;
   external_ref: string;
+  initialization_status?: string;
+  transfer_notified_at?: string | null;
+  transfer_proof_uploaded?: boolean;
+  transfer_proof_original_name?: string;
+  transfer_proof_content_type?: string;
+  transfer_proof_size?: number;
+  bank_transfer?: BankTransferDetails | null;
+  can_submit_transfer_notification?: boolean;
 };
 
 export type AppointmentBookingResponse = {
@@ -401,15 +649,21 @@ export type ProviderPayoutRequest = {
   notes: string;
 };
 
-export type ReferralStatus = "draft" | "sent";
+export type ReferralStatus = "pending" | "reviewed" | "contacted" | "completed" | "cancelled";
 
 export type Referral = {
   id: number;
   patient: number;
+  patient_name?: string;
   doctor: number;
+  doctor_name?: string;
+  appointment?: number | null;
+  appointment_scheduled_at?: string | null;
   referred_to: string;
   notes: string;
   status: ReferralStatus;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type AuditEvent = {
@@ -501,9 +755,14 @@ export type AdminProvider = {
   is_active: boolean;
   onboarding_status: string | null;
   active_for_dispatch: boolean | null;
+  service_zone?: HomeCareZone | "" | null;
+  service_zone_label?: string | null;
+  base_address?: string | null;
   active_workload: number;
+  active_job_label: string;
   completed_workload: number;
   rating: number | null;
+  last_active_at: string | null;
   updated_at: string;
 };
 

@@ -166,7 +166,7 @@ textarea {
   min-height: 52px;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
+  border-radius: 8px;
   padding-inline: 22px;
   font-size: 0.9375rem;
   font-weight: 600;
@@ -259,14 +259,57 @@ textarea {
   animation: ct-float 6s ease-in-out infinite;
 }
 
+.ct-float-gentle {
+  animation: ct-float-gentle 3.8s ease-in-out infinite;
+}
+
+.ct-rise-in {
+  animation: ct-rise-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ct-pop-in {
+  animation: ct-pop-in 240ms ease-out both;
+}
+
 @keyframes ct-float {
   0% { transform: translateY(0); }
   50% { transform: translateY(-12px); }
   100% { transform: translateY(0); }
 }
 
+@keyframes ct-float-gentle {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(-1.5deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes ct-rise-in {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ct-pop-in {
+  0% {
+    opacity: 0.45;
+    transform: scale(0.86);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .ct-float {
+  .ct-float,
+  .ct-float-gentle,
+  .ct-rise-in,
+  .ct-pop-in {
     animation: none;
   }
 }
@@ -382,6 +425,30 @@ textarea {
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@keyframes caretekk-ring {
+  0% {
+    opacity: 0.72;
+    transform: scale(0.82);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.24);
+  }
+}
+
+@keyframes caretekk-dot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.42;
+  }
+  40% {
+    transform: translateY(-2px);
+    opacity: 1;
   }
 }
 

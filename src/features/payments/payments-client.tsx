@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DataList } from "@/components/ui/data-list";
+import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -16,6 +17,8 @@ import { paymentSummary } from "@/lib/ui/humanize";
 import type { Payment } from "@/lib/types/backend";
 import { formatMoney } from "@/lib/utils";
 
+const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
+
 export function PaymentsClient() {
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
@@ -24,6 +27,10 @@ export function PaymentsClient() {
     queryKey: ["payments"],
     queryFn: () => paymentsApi.list(),
     enabled: userQuery.data?.role !== "doctor" && userQuery.data?.role !== "nurse",
+    refetchInterval: (query) => {
+      const items = query.state.data?.results ?? [];
+      return items.some((payment) => payment.provider === "bank_transfer" && MANUAL_PAYMENT_WAITING_STATUSES.has(payment.status)) ? 12000 : false;
+    },
   });
   const retryPayment = useMutation({
     mutationFn: paymentsApi.retry,
@@ -48,13 +55,14 @@ export function PaymentsClient() {
       description="Read-only checkout history for booked Caretekk services. Payments start only from consultation or homecare booking."
     >
       <Notice title="Service payments only" tone="neutral">
-        Caretekk does not support manual payment entry. To pay, book a doctor consultation or home nurse request and continue to the secure checkout created for that service.
+        To pay, book a doctor consultation or home nurse request and follow the payment instructions created for that service.
       </Notice>
       {retryError ? (
         <Notice title="Payment could not be initialized." tone="warning">
           Your booking request was saved. Please try payment again. {retryError}
         </Notice>
       ) : null}
+      {retryPayment.isPending ? <InlineLoader label="Preparing secure payment" /> : null}
 
       {userQuery.data?.role === "doctor" || userQuery.data?.role === "nurse" ? (
         <Notice title="Billing history is not available for this account." tone="neutral">
@@ -85,6 +93,19 @@ export function PaymentsClient() {
                 </div>
                 <div className="flex flex-col items-start gap-3 sm:items-end">
                   <StatusBadge value={payment.status} />
+                  {payment.provider === "bank_transfer" && payment.status === "awaiting_manual_verification" ? (
+                    <p className="max-w-xs text-left text-xs leading-5 text-slate-500 sm:text-right">
+                      Your payment notification has been received. We&apos;re verifying your transfer.
+                    </p>
+                  ) : payment.provider === "bank_transfer" && payment.status === "success" ? (
+                    <p className="max-w-xs text-left text-xs font-semibold leading-5 text-emerald-700 sm:text-right">
+                      Payment confirmed. Your consultation is now active.
+                    </p>
+                  ) : payment.provider === "bank_transfer" && payment.status === "rejected" ? (
+                    <p className="max-w-xs text-left text-xs leading-5 text-rose-700 sm:text-right">
+                      We could not verify your payment. Please contact Caretekk support or resubmit your payment confirmation.
+                    </p>
+                  ) : null}
                   {canRetryPayment(payment) ? (
                     <Button
                       variant="secondary"

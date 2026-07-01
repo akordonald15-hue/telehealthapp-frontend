@@ -11,7 +11,7 @@ import { Section } from "@/components/ui/section";
 import { homeCareApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, formatMoney } from "@/lib/utils";
 import { bookingSourceLabel, homeCareStatusLabel, preferredTimeLabel } from "@/features/homecare/homecare-utils";
 
 export function HomeCareRequestsClient() {
@@ -75,7 +75,7 @@ export function HomeCareRequestsClient() {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-heading text-xl font-semibold text-[#1F2937]">
-                        {request.contact_name_snapshot || "Home nurse request"}
+                        {request.service_name_snapshot || "Home nurse request"}
                       </h2>
                       <Badge tone="blue">{homeCareStatusLabel(request.status)}</Badge>
                       <Badge>{bookingSourceLabel(request.booking_source)}</Badge>
@@ -93,12 +93,12 @@ export function HomeCareRequestsClient() {
                         <p className="mt-1">{preferredTimeLabel(request)}</p>
                       </div>
                       <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-                        <p className="font-semibold text-[#1F2937]">Created</p>
-                        <p className="mt-1">{formatDateTime(request.created_at)}</p>
+                        <p className="font-semibold text-[#1F2937]">Price</p>
+                        <p className="mt-1">{request.service_price_snapshot ? formatMoney(request.service_price_snapshot) : "Pending"}</p>
                       </div>
                       <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-                        <p className="font-semibold text-[#1F2937]">Last update</p>
-                        <p className="mt-1">{formatDateTime(request.updated_at)}</p>
+                        <p className="font-semibold text-[#1F2937]">Created</p>
+                        <p className="mt-1">{formatDateTime(request.created_at)}</p>
                       </div>
                     </div>
                   </div>

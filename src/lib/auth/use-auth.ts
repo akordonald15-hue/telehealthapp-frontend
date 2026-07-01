@@ -34,7 +34,7 @@ async function handleAuthSuccess(
     router.replace("/change-password");
     return;
   }
-  router.replace(user.role === "patient" ? "/triage" : "/dashboard");
+  router.replace("/dashboard");
 }
 
 export function useLogin() {
@@ -65,11 +65,11 @@ export function useChangePassword() {
     mutationFn: authApi.changePassword,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: authKeys.me });
-      const user = await queryClient.fetchQuery({
+      await queryClient.fetchQuery({
         queryKey: authKeys.me,
         queryFn: authApi.me,
       });
-      router.replace(user.role === "patient" ? "/triage" : "/dashboard");
+      router.replace("/dashboard");
     },
   });
 }

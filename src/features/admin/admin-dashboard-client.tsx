@@ -17,13 +17,36 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { adminApi, appointmentsApi, auditApi, homeCareApi, paymentsApi } from "@/lib/api/endpoints";
+import { ApiError, extractErrorMessage } from "@/lib/api/client";
+import { adminApi, appointmentsApi, auditApi, homeCareApi, paymentsApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
-import type { AdminDashboardResponse, AdminProvider, AdminProviderCreateResponse, AdminUser, ProviderAvailabilityStatus, UserRole } from "@/lib/types/backend";
+import type { AdminDashboardResponse, AdminProvider, AdminProviderCreateResponse, AdminUser, HomeCareZone, Payment, ProviderAvailabilityStatus, ReferralStatus, UserRole } from "@/lib/types/backend";
+import { paymentSummary } from "@/lib/ui/humanize";
 import { formatDateTime, formatMoney } from "@/lib/utils";
+
+const HOMECARE_ZONES: Array<{ value: HomeCareZone; label: string }> = [
+  { value: "eket", label: "Eket" },
+  { value: "uyo", label: "Uyo" },
+];
+
+function providerPresence(provider: AdminProvider): { tone: "green" | "amber" | "rose"; label: string } {
+  if (provider.availability_status === "available") {
+    return { tone: "green", label: "Available" };
+  }
+  if (provider.availability_status === "offline") {
+    return { tone: "rose", label: "Offline" };
+  }
+  if (!provider.last_active_at) {
+    return { tone: "amber", label: "No recent heartbeat" };
+  }
+  const minutes = Math.max(0, Math.round((Date.now() - new Date(provider.last_active_at).getTime()) / 60_000));
+  const label = minutes < 1 ? "Last active just now" : `Last active ${minutes} min ago`;
+  return { tone: "amber", label };
+}
 
 function Metric({
   label,
@@ -103,33 +126,34 @@ function ConfirmActionButton({
       >
         {label}
       </button>
-      {open ? (
-        <div className="fixed inset-0 z-[70] grid place-items-center bg-slate-950/40 px-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="admin-confirm-title">
-          <div className="w-full max-w-md rounded-[24px] border border-white/70 bg-white p-5 shadow-2xl">
-            <h3 id="admin-confirm-title" className="font-heading text-xl font-semibold text-[#1F2937]">{title}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="min-h-10 rounded-[12px] border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  onConfirm();
-                }}
-                className={`min-h-10 rounded-[12px] px-4 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${tone === "danger" ? "bg-rose-700 text-white hover:bg-rose-800" : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"}`}
-              >
-                {confirmLabel}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <Modal
+        open={open}
+        title={title}
+        description={description}
+        onClose={() => setOpen(false)}
+        size="sm"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="min-h-10 rounded-[8px] border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onConfirm();
+              }}
+              className={`min-h-10 rounded-[8px] px-4 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${tone === "danger" ? "bg-rose-700 text-white hover:bg-rose-800" : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"}`}
+            >
+              {confirmLabel}
+            </button>
+          </>
+        }
+      />
     </>
   );
 }
@@ -189,9 +213,14 @@ function AdminUserRow({ user }: { user: AdminUser }) {
 
 function ProviderRow({ provider }: { provider: AdminProvider }) {
   const queryClient = useQueryClient();
+  const presence = providerPresence(provider);
   const updateProvider = useMutation({
     mutationFn: (body: Parameters<typeof adminApi.updateProviderStatus>[2]) =>
       adminApi.updateProviderStatus(provider.provider_type, provider.id, body),
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["admin"] }),
+  });
+  const resendInvite = useMutation({
+    mutationFn: () => adminApi.resendProviderInvite(provider.provider_type, provider.id),
     onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["admin"] }),
   });
   const setAvailability = (availability_status: ProviderAvailabilityStatus) => updateProvider.mutate({ availability_status });
@@ -205,12 +234,23 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
           <div className="mt-2 flex flex-wrap gap-2">
             <Badge tone={provider.provider_type === "doctor" ? "cyan" : "green"}>{provider.provider_type}</Badge>
             <StatusBadge value={provider.availability_status} />
+            <Badge tone={presence.tone}>{presence.label}</Badge>
             <Badge tone={provider.is_active ? "green" : "rose"}>{provider.is_active ? "active" : "inactive"}</Badge>
             {provider.onboarding_status ? <StatusBadge value={provider.onboarding_status} /> : null}
           </div>
           <p className="mt-2 text-xs text-slate-500">
             Active workload: {provider.active_workload} | Completed: {provider.completed_workload}
             {provider.rating ? ` | Rating: ${provider.rating}` : ""}
+          </p>
+          {provider.provider_type === "nurse" ? (
+            <p className="mt-1 text-xs font-semibold text-slate-600">
+              Zone: {provider.service_zone_label || "Zone not set"}
+              {provider.base_address ? ` | Base: ${provider.base_address}` : ""}
+            </p>
+          ) : null}
+          <p className="mt-1 text-xs text-slate-500">
+            {provider.active_job_label}
+            {provider.last_active_at ? ` | Heartbeat ${formatDateTime(provider.last_active_at)}` : ""}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -236,18 +276,49 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
             disabled={updateProvider.isPending}
             onConfirm={() => updateProvider.mutate({ is_active: !provider.is_active, availability_status: provider.is_active ? "offline" : "available" })}
           />
+          <ConfirmActionButton
+            label="Resend setup email"
+            title="Queue another provider setup email?"
+            description="Caretekk will queue a fresh password setup code for this provider."
+            tone="primary"
+            disabled={resendInvite.isPending}
+            onConfirm={() => resendInvite.mutate()}
+          />
           {provider.provider_type === "nurse" ? (
-            <ConfirmActionButton
-              label="Approve"
-              title="Approve this nurse?"
-              description="The nurse will be approved and marked active for dispatch."
-              tone="primary"
-              disabled={updateProvider.isPending}
-              onConfirm={() => updateProvider.mutate({ onboarding_status: "approved", active_for_dispatch: true })}
-            />
+            <>
+              {HOMECARE_ZONES.map((item) => (
+                <ConfirmActionButton
+                  key={item.value}
+                  label={`Zone: ${item.label}`}
+                  title={`Set nurse zone to ${item.label}?`}
+                  description="This controls where the nurse appears for patient home care bookings."
+                  tone="primary"
+                  disabled={updateProvider.isPending || provider.service_zone === item.value}
+                  onConfirm={() => updateProvider.mutate({ service_zone: item.value })}
+                />
+              ))}
+              <ConfirmActionButton
+                label="Approve"
+                title="Approve this nurse?"
+                description="The nurse will be approved and marked active for dispatch."
+                tone="primary"
+                disabled={updateProvider.isPending || !provider.service_zone}
+                onConfirm={() => updateProvider.mutate({ onboarding_status: "approved", active_for_dispatch: true })}
+              />
+            </>
           ) : null}
         </div>
       </div>
+      {resendInvite.isError ? (
+        <Notice title="Provider setup email could not be queued." tone="warning">
+          {resendInvite.error instanceof ApiError ? extractErrorMessage(resendInvite.error.payload) || resendInvite.error.message : "Please try again."}
+        </Notice>
+      ) : null}
+      {resendInvite.isSuccess ? (
+        <Notice title="Provider setup email queued." tone="success">
+          Caretekk queued a fresh setup code for this provider.
+        </Notice>
+      ) : null}
     </article>
   );
 }
@@ -255,6 +326,7 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
 function ProviderCreatePanel() {
   const queryClient = useQueryClient();
   const [created, setCreated] = useState<AdminProviderCreateResponse | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [form, setForm] = useState({
     role: "doctor" as "doctor" | "nurse",
     name: "",
@@ -262,6 +334,8 @@ function ProviderCreatePanel() {
     phone: "",
     specialty: "General Medicine",
     service_type: "Home care nursing",
+    service_zone: "eket" as HomeCareZone,
+    base_address: "",
     availability_status: "offline" as ProviderAvailabilityStatus,
     provider_status: "pending" as "pending" | "approved" | "suspended",
     active_for_dispatch: false,
@@ -277,6 +351,8 @@ function ProviderCreatePanel() {
         phone: form.phone,
         specialty: form.role === "doctor" ? form.specialty : undefined,
         service_type: form.role === "nurse" ? form.service_type : undefined,
+        service_zone: form.role === "nurse" ? form.service_zone : undefined,
+        base_address: form.role === "nurse" ? form.base_address : undefined,
         availability_status: form.availability_status,
         provider_status: form.role === "nurse" ? form.provider_status : undefined,
         active_for_dispatch: form.role === "nurse" ? form.active_for_dispatch : undefined,
@@ -285,8 +361,17 @@ function ProviderCreatePanel() {
       }),
     onSuccess: async (data) => {
       setCreated(data);
-      setForm((current) => ({ ...current, name: "", email: "", phone: "" }));
+      setCreateError(null);
+      setForm((current) => ({ ...current, name: "", email: "", phone: "", base_address: "" }));
       await queryClient.invalidateQueries({ queryKey: ["admin"] });
+    },
+    onError: (error) => {
+      setCreated(null);
+      if (error instanceof ApiError) {
+        setCreateError(extractErrorMessage(error.payload) || error.message);
+        return;
+      }
+      setCreateError("We couldn't create this provider right now.");
     },
   });
 
@@ -297,6 +382,7 @@ function ProviderCreatePanel() {
         onSubmit={(event) => {
           event.preventDefault();
           setCreated(null);
+          setCreateError(null);
           createProvider.mutate();
         }}
       >
@@ -361,6 +447,34 @@ function ProviderCreatePanel() {
               />
             </label>
           )}
+          {form.role === "nurse" ? (
+            <>
+              <label className="grid gap-1 text-sm font-semibold text-slate-600">
+                Service zone
+                <select
+                  required
+                  value={form.service_zone}
+                  onChange={(event) => setForm((current) => ({ ...current, service_zone: event.target.value as HomeCareZone }))}
+                  className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+                >
+                  {HOMECARE_ZONES.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-1 text-sm font-semibold text-slate-600">
+                Base address
+                <input
+                  value={form.base_address}
+                  onChange={(event) => setForm((current) => ({ ...current, base_address: event.target.value }))}
+                  className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+                  placeholder="Optional nurse base address"
+                />
+              </label>
+            </>
+          ) : null}
           <label className="grid gap-1 text-sm font-semibold text-slate-600">
             Availability
             <select
@@ -370,9 +484,7 @@ function ProviderCreatePanel() {
             >
               <option value="offline">Offline</option>
               <option value="available">Available</option>
-              <option value="unavailable">Unavailable</option>
               <option value="on_break">On break</option>
-              <option value="busy">Busy</option>
             </select>
           </label>
         </div>
@@ -403,13 +515,13 @@ function ProviderCreatePanel() {
             </>
           ) : null}
         </div>
-        {createProvider.isError ? <Notice title="Provider could not be created." tone="warning">Check that the email is unique and required provider details are complete.</Notice> : null}
+        {createError ? <Notice title="Provider could not be created." tone="warning">{createError}</Notice> : null}
         {created ? (
-          <Notice title="Provider setup email sent" tone="success">
+          <Notice title="Provider created. Setup email queued." tone="success">
             <div className="grid gap-1">
               <span>{created.email}</span>
               <span className="text-xs text-slate-600">
-                Caretekk sent a secure password setup link to this provider. No temporary password is shown in the admin console.
+                Caretekk queued a secure password setup code for this provider.
               </span>
             </div>
           </Notice>
@@ -419,6 +531,88 @@ function ProviderCreatePanel() {
         </button>
       </form>
     </Panel>
+  );
+}
+
+function ManualPaymentRow({ payment }: { payment: Payment }) {
+  const queryClient = useQueryClient();
+  const confirmPayment = useMutation({
+    mutationFn: () => adminApi.confirmManualPayment(payment.id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "manual-payments"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin", "payments"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin", "homecare"] });
+    },
+  });
+  const rejectPayment = useMutation({
+    mutationFn: () => adminApi.rejectManualPayment(payment.id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "manual-payments"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin", "payments"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+    },
+  });
+
+  const bookingLabel = payment.appointment ? `Doctor consultation #${payment.appointment}` : payment.homecare_request ? `Home care request #${payment.homecare_request}` : "Service booking";
+
+  return (
+    <article className="rounded-[16px] border border-amber-100 bg-amber-50/70 p-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)}</p>
+          <p className="mt-1 break-words text-xs text-slate-600">
+            Reference: {payment.external_ref || payment.bank_transfer?.reference || "No reference"}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            {payment.patient_name || `Patient #${payment.patient}`} {payment.patient_phone ? `| ${payment.patient_phone}` : ""}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            {bookingLabel}
+            {payment.transfer_notified_at ? ` | Payment notice ${formatDateTime(payment.transfer_notified_at)}` : ""}
+          </p>
+          <div className="mt-2">
+            {payment.transfer_proof_uploaded ? (
+              <a
+                href={payment.transfer_proof_url || `/api/admin/payments/${payment.id}/proof/`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-8 items-center rounded-[8px] border border-amber-200 bg-white px-3 text-xs font-semibold text-amber-800 transition hover:bg-amber-50"
+              >
+                View payment proof
+              </a>
+            ) : (
+              <p className="text-xs font-semibold text-amber-700">No payment proof uploaded.</p>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <StatusBadge value={payment.status} />
+          <ConfirmActionButton
+            label="Confirm Payment"
+            title="Confirm this bank transfer?"
+            description="Confirm only after the bank inflow has been checked. This unlocks the booked service."
+            tone="primary"
+            disabled={confirmPayment.isPending || rejectPayment.isPending}
+            onConfirm={() => confirmPayment.mutate()}
+          />
+          <ConfirmActionButton
+            label="Reject"
+            title="Reject this payment notification?"
+            description="The booking will stay locked and the patient can contact Caretekk support or submit again."
+            tone="danger"
+            disabled={confirmPayment.isPending || rejectPayment.isPending}
+            onConfirm={() => rejectPayment.mutate()}
+          />
+        </div>
+      </div>
+      {confirmPayment.isError || rejectPayment.isError ? (
+        <Notice title="Payment review action failed." tone="warning">
+          Please refresh and try again.
+        </Notice>
+      ) : null}
+    </article>
   );
 }
 
@@ -443,6 +637,7 @@ function exportFinancialReport(data?: AdminDashboardResponse) {
 
 export function AdminDashboardClient() {
   const userQuery = useCurrentUser();
+  const queryClient = useQueryClient();
   const [roleFilter, setRoleFilter] = useState<UserRole | "">("");
   const dashboard = useQuery({ queryKey: ["admin", "dashboard"], queryFn: adminApi.dashboard, enabled: userQuery.data?.role === "admin" });
   const users = useQuery({
@@ -454,7 +649,15 @@ export function AdminDashboardClient() {
   const appointments = useQuery({ queryKey: ["admin", "appointments"], queryFn: () => appointmentsApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
   const homecare = useQuery({ queryKey: ["admin", "homecare"], queryFn: () => homeCareApi.requests({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
   const payments = useQuery({ queryKey: ["admin", "payments"], queryFn: () => paymentsApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
+  const manualPayments = useQuery({ queryKey: ["admin", "manual-payments"], queryFn: () => adminApi.pendingManualPayments({ page_size: 20 }), enabled: userQuery.data?.role === "admin" });
+  const referrals = useQuery({ queryKey: ["admin", "referrals"], queryFn: () => referralsApi.list({ page_size: 8 }), enabled: userQuery.data?.role === "admin" });
   const audit = useQuery({ queryKey: ["admin", "audit"], queryFn: () => auditApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
+  const updateReferral = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: ReferralStatus }) => referralsApi.update(id, { status }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "referrals"] });
+    },
+  });
 
   if (userQuery.data && userQuery.data.role !== "admin") {
     return (
@@ -501,6 +704,39 @@ export function AdminDashboardClient() {
         </div>
       </Panel>
 
+      <Panel title="Referral queue">
+        {updateReferral.isError ? <Notice title="Referral status was not updated" tone="warning">Please try again in a moment.</Notice> : null}
+        <div className="grid gap-3">
+          {referrals.data?.results.length ? referrals.data.results.map((referral) => (
+            <article key={referral.id} className="rounded-[18px] border border-slate-200 bg-slate-50 p-3">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-[#1F2937]">{referral.referred_to}</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {referral.patient_name || `Patient #${referral.patient}`} | {referral.doctor_name || `Doctor #${referral.doctor}`} | {referral.created_at ? formatDateTime(referral.created_at) : "No date"}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <StatusBadge value={referral.status} />
+                  <select
+                    value={referral.status}
+                    disabled={updateReferral.isPending}
+                    onChange={(event) => updateReferral.mutate({ id: referral.id, status: event.target.value as ReferralStatus })}
+                    className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+              </div>
+            </article>
+          )) : <EmptyState title="No referrals found" description="Consultation-linked referrals will appear here." />}
+        </div>
+      </Panel>
+
       <div className="grid gap-4 xl:grid-cols-2">
         <Panel title="Booking management">
           <div className="grid gap-3">
@@ -530,6 +766,21 @@ export function AdminDashboardClient() {
           }
         >
           <div className="grid gap-3">
+            <div className="rounded-[18px] border border-amber-100 bg-white p-3">
+              <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-sm font-bold text-[#1F2937]">Payments - Pending Manual Verification</h3>
+                <Badge tone="amber">{manualPayments.data?.results.length ?? 0} pending</Badge>
+              </div>
+              <div className="grid gap-3">
+                {manualPayments.isError ? (
+                  <Notice title="Payment queue unavailable." tone="warning">Please try again.</Notice>
+                ) : manualPayments.data?.results.length ? (
+                  manualPayments.data.results.map((payment) => <ManualPaymentRow key={payment.id} payment={payment} />)
+                ) : (
+                  <EmptyState title="No pending manual payments" description="Patient bank-transfer notifications will appear here." />
+                )}
+              </div>
+            </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <Metric label="Provider payouts" value={overview ? formatMoney(overview.total_provider_payouts) : "..."} icon={Banknote} tone="green" />
               <Metric label="Refunded payments" value={overview?.refunded_payments ?? "..."} icon={Activity} tone="amber" />
@@ -537,7 +788,7 @@ export function AdminDashboardClient() {
             </div>
             {payments.data?.results.map((payment) => (
               <div key={payment.id} className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-sm font-semibold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)} | {payment.provider}</span>
+                <span className="text-sm font-semibold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)} | {paymentSummary(payment.provider, "admin")}</span>
                 <StatusBadge value={payment.status} />
               </div>
             ))}

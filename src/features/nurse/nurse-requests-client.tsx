@@ -43,7 +43,7 @@ export function NurseRequestsClient() {
 
   if (userQuery.data?.role !== "nurse") {
     return (
-      <Section title="Requests" description="Assigned offers and accepted requests appear here for nurse accounts.">
+      <Section title="Requests">
         <Notice title="This view is not available for your account." tone="warning" />
       </Section>
     );
@@ -56,7 +56,6 @@ export function NurseRequestsClient() {
   return (
     <Section
       title="Available requests"
-      description="Review assigned offers, confirm the next steps, and open a request when you are ready to continue."
     >
       {requestsQuery.isError ? (
         <Notice title="We couldn't load your home care updates." tone="warning">
@@ -154,7 +153,7 @@ export function NurseRequestsClient() {
                             className="w-full"
                           >
                             {acceptMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            Accept request
+                            Accept
                           </Button>
                         ) : null}
 
@@ -178,7 +177,7 @@ export function NurseRequestsClient() {
                               }
                               disabled={declineMutation.isPending}
                             >
-                              Decline request
+                              Decline
                             </Button>
                           </div>
                         ) : null}
@@ -192,8 +191,8 @@ export function NurseRequestsClient() {
         </div>
       ) : (
         <EmptyState
-          title="No active nurse requests yet"
-          description="Assigned offers and accepted visits will appear here when dispatch begins."
+          title="No active requests"
+          description=""
         />
       )}
     </Section>

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,15 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
 import { Input, PasswordInput } from "@/components/ui/input";
 import { GoogleAuthButton } from "@/features/auth/google-auth-button";
+import {
+  clearPendingVerificationEmail,
+  clearVerifiedRegistrationEmail,
+  readPendingVerificationEmail,
+  readVerifiedRegistrationEmail,
+  savePendingVerificationEmail,
+} from "@/features/auth/email-flow-storage";
 import { authApi } from "@/lib/api/endpoints";
+import { normalizeNigerianPhoneInput } from "@/lib/validation/phone";
 import {
   emailSchema,
   registerSchema,
@@ -23,7 +32,7 @@ export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialEmail = searchParams.get("email") ?? "";
-  const isCompletingAccount = searchParams.get("verified") === "1" && Boolean(initialEmail);
+  const isCompletingAccount = searchParams.get("verified") === "1";
   const requestCode = useMutation({ mutationFn: authApi.otpRequest });
   const register = useMutation({ mutationFn: authApi.register });
   const emailForm = useForm<EmailInput>({
@@ -39,6 +48,41 @@ export function RegisterForm() {
     },
   });
 
+  useEffect(() => {
+    if (!isCompletingAccount) {
+      if (initialEmail) {
+        savePendingVerificationEmail(initialEmail);
+        router.replace("/verify-email");
+        return;
+      }
+
+      const storedEmail = readPendingVerificationEmail();
+      if (storedEmail && emailForm.getValues("email") !== storedEmail) {
+        emailForm.reset({ email: storedEmail });
+      }
+      return;
+    }
+
+    const verifiedEmail = initialEmail || readVerifiedRegistrationEmail();
+    if (!verifiedEmail) {
+      router.replace("/register");
+      return;
+    }
+
+    if (initialEmail) {
+      router.replace("/register?verified=1");
+      return;
+    }
+
+    if (form.getValues("email") !== verifiedEmail) {
+      form.reset({
+        email: verifiedEmail,
+        phone: form.getValues("phone"),
+        password: form.getValues("password"),
+      });
+    }
+  }, [emailForm, form, initialEmail, isCompletingAccount, router]);
+
   return (
     <div className="grid gap-5">
       <GoogleAuthButton mode="signup" />
@@ -53,11 +97,15 @@ export function RegisterForm() {
           className="grid gap-5"
           onSubmit={emailForm.handleSubmit((values) =>
             requestCode.mutate(values, {
-              onSuccess: () => router.replace(`/verify-email?email=${encodeURIComponent(values.email)}`),
+              onSuccess: () => {
+                clearVerifiedRegistrationEmail();
+                savePendingVerificationEmail(values.email);
+                router.replace("/verify-email");
+              },
             }),
           )}
         >
-          <ErrorMessage error={requestCode.error} context="auth" />
+          <ErrorMessage error={requestCode.error} context="verification" />
           <Field label="Email" error={emailForm.formState.errors.email?.message} required>
             <Input type="email" autoComplete="email" placeholder="you@example.com" {...emailForm.register("email")} />
           </Field>
@@ -70,18 +118,28 @@ export function RegisterForm() {
       {isCompletingAccount ? (
         <form
           className="grid gap-5"
-          onSubmit={form.handleSubmit((values) =>
-            register.mutate(values, {
-              onSuccess: () => router.replace(`/login?email=${encodeURIComponent(values.email)}`),
-            }),
-          )}
+          onSubmit={form.handleSubmit((values) => {
+            register.mutate(
+              {
+                ...values,
+                phone: normalizeNigerianPhoneInput(values.phone ?? "") ?? values.phone?.trim(),
+              },
+              {
+                onSuccess: () => {
+                  clearPendingVerificationEmail();
+                  clearVerifiedRegistrationEmail();
+                  router.replace("/login");
+                },
+              },
+            );
+          })}
         >
-          <ErrorMessage error={register.error} context="auth" />
+          <ErrorMessage error={register.error} context="registration" />
           <Field label="Email" error={form.formState.errors.email?.message} required>
             <Input type="email" autoComplete="email" placeholder="you@example.com" readOnly {...form.register("email")} />
           </Field>
           <Field label="Phone" error={form.formState.errors.phone?.message} required>
-            <Input type="tel" autoComplete="tel" placeholder="+234..." {...form.register("phone")} />
+            <Input type="tel" autoComplete="tel" placeholder="08012345678 or +2348012345678" {...form.register("phone")} />
           </Field>
           <Field label="Password" error={form.formState.errors.password?.message} hint="Minimum 8 characters" required>
             <PasswordInput autoComplete="new-password" placeholder="Create a secure password" {...form.register("password")} />

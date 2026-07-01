@@ -1,5 +1,5 @@
-import { TriageClient } from "@/features/triage/triage-client";
+import { redirect } from "next/navigation";
 
 export default function TriagePage() {
-  return <TriageClient />;
+  redirect("/appointments");
 }

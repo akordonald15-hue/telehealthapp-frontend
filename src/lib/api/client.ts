@@ -21,6 +21,7 @@ if (!configuredApiBaseUrl) {
 }
 
 export const API_BASE_URL = configuredApiBaseUrl.replace(/\/$/, "");
+let authRedirectInFlight = false;
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
@@ -62,6 +63,9 @@ export function extractErrorMessage(payload: BackendErrorPayload | null) {
     return "";
   }
   if (payload.detail) {
+    if (Array.isArray(payload.detail)) {
+      return payload.detail.join(", ");
+    }
     return payload.detail;
   }
   if (typeof payload.message === "string") {
@@ -72,24 +76,57 @@ export function extractErrorMessage(payload: BackendErrorPayload | null) {
       .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
       .join(" ");
   }
+  const fieldMessages = Object.entries(payload as Record<string, unknown>)
+    .filter(([key]) => !["detail", "message", "error"].includes(key))
+    .map(([field, messages]) => {
+      if (Array.isArray(messages)) {
+        return `${field}: ${messages.join(", ")}`;
+      }
+      if (typeof messages === "string") {
+        return `${field}: ${messages}`;
+      }
+      return "";
+    })
+    .filter(Boolean);
+  if (fieldMessages.length) {
+    return fieldMessages.join(" ");
+  }
   return payload.error || "";
 }
 
 async function refreshAccessToken() {
-  const response = await fetch(buildUrl("/auth/refresh/"), {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  });
+  try {
+    const response = await fetch(buildUrl("/auth/refresh/"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
 
-  if (!response.ok) {
-    clearTokens();
+    if (!response.ok) {
+      handleAuthRefreshFailure();
+      return false;
+    }
+
+    await response.json();
+    return true;
+  } catch {
+    handleAuthRefreshFailure();
     return false;
   }
+}
 
-  await response.json();
-  return true;
+function handleAuthRefreshFailure() {
+  clearTokens();
+  if (typeof window === "undefined" || authRedirectInFlight) {
+    return;
+  }
+
+  authRedirectInFlight = true;
+  const currentPath = window.location.pathname;
+  if (!currentPath.startsWith("/login")) {
+    window.location.replace("/login");
+  }
 }
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -111,8 +148,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
   });
 
-  if (response.status === 401 && auth && retryOnUnauthorized && (await refreshAccessToken())) {
-    return apiRequest<T>(path, { ...options, retryOnUnauthorized: false });
+  if (response.status === 401 && auth && retryOnUnauthorized) {
+    if (await refreshAccessToken()) {
+      return apiRequest<T>(path, { ...options, retryOnUnauthorized: false });
+    }
+
+    throw new ApiError(401, {
+      detail: "Session expired. Please sign in again.",
+    });
   }
 
   const data = await parseResponse(response);

@@ -9,6 +9,8 @@ export function ErrorMessage({
   context?:
     | "generic"
     | "auth"
+    | "registration"
+    | "verification"
     | "dashboard"
     | "appointments"
     | "messages"
@@ -26,7 +28,7 @@ export function ErrorMessage({
   }
 
   return (
-    <div className="rounded-[18px] border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800 shadow-[0_10px_30px_rgba(225,29,72,0.08)]">
+    <div className="rounded-[8px] border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800 shadow-[0_10px_30px_rgba(225,29,72,0.08)]">
       {error instanceof ApiError || error instanceof Error
         ? getFriendlyErrorMessage(error, context)
         : "Something went wrong. Please try again."}

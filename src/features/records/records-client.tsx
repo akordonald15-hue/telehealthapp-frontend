@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShieldPlus } from "lucide-react";
+import { BrainCircuit, CalendarClock, ShieldPlus } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,11 @@ import { Field } from "@/components/ui/field";
 import { Input, Select } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
-import { profilesApi } from "@/lib/api/endpoints";
+import { appointmentsApi, profilesApi } from "@/lib/api/endpoints";
 import { uploadToPresignedUrl } from "@/lib/api/client";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { medicalRecordSummary, medicalRecordTitle } from "@/lib/ui/humanize";
-import type { MedicalRecord } from "@/lib/types/backend";
+import type { Appointment, MedicalRecord } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
 
 export function RecordsClient() {
@@ -25,6 +25,11 @@ export function RecordsClient() {
   const records = useQuery({
     queryKey: ["medical-records", page],
     queryFn: () => profilesApi.medicalRecords({ page, page_size: 10 }),
+  });
+  const appointments = useQuery({
+    queryKey: ["appointments", "records-care-checks"],
+    queryFn: () => appointmentsApi.list({ page_size: 20 }),
+    enabled: userQuery.data?.role === "patient",
   });
   const [recordId, setRecordId] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -57,6 +62,72 @@ export function RecordsClient() {
   return (
     <Section title="Medical Records">
       <div className="grid gap-4">
+        {userQuery.data?.role === "patient" ? (
+          <section className="ct-panel grid gap-4 rounded-[8px] p-5 sm:p-6">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
+                <BrainCircuit className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="ct-card-title text-[#1F2937]">Care Check-in Records</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  AI summaries are saved with the consultation they supported.
+                </p>
+              </div>
+            </div>
+            {appointments.isLoading ? (
+              <div className="grid gap-3">
+                {[0, 1].map((item) => (
+                  <div key={item} className="h-20 animate-pulse rounded-[8px] bg-slate-100" />
+                ))}
+              </div>
+            ) : appointments.isError ? (
+              <Notice title="We could not load care check-in records." tone="warning">
+                Please try again in a moment.
+              </Notice>
+            ) : appointments.data?.results.some((appointment) => appointment.triage_summary) ? (
+              <div className="grid gap-3">
+                {appointments.data.results
+                  .filter((appointment): appointment is Appointment & { triage_summary: NonNullable<Appointment["triage_summary"]> } =>
+                    Boolean(appointment.triage_summary),
+                  )
+                  .map((appointment) => (
+                    <article key={appointment.id} className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-[#1F2937]">
+                            {appointment.doctor_profile?.display_name || "Doctor consultation"}
+                          </p>
+                          <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+                            <CalendarClock className="h-3.5 w-3.5 text-[#2563EB]" />
+                            {formatDateTime(appointment.scheduled_at)}
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#2563EB]">
+                          {appointment.triage_summary.risk_level || appointment.triage_summary.severity || "Reviewed"}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-600">
+                        {appointment.triage_summary.symptoms?.length
+                          ? appointment.triage_summary.symptoms.join(", ")
+                          : appointment.triage_summary.recommendation || "Care check-in summary attached."}
+                      </p>
+                      {appointment.triage_summary.department ? (
+                        <p className="mt-2 text-xs font-semibold text-[#1F2937]">
+                          Suggested specialty: {appointment.triage_summary.department}
+                        </p>
+                      ) : null}
+                    </article>
+                  ))}
+              </div>
+            ) : (
+              <div className="rounded-[8px] border border-slate-100 bg-white px-4 py-5 text-sm text-slate-600">
+                Your care check-in records will appear here after you complete a doctor consultation booking.
+              </div>
+            )}
+          </section>
+        ) : null}
+
         <form
           className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6"
           onSubmit={(event) => {
