@@ -354,6 +354,18 @@ export function AppointmentsClient() {
       return hour > now.getHours();
     });
   }, [customScheduleDate, scheduleBaseDate, scheduleDay]);
+  const unavailableSlotHours = useMemo(() => {
+    if (!selectedDoctorLive?.unavailable_consultation_slots?.length) {
+      return new Set<number>();
+    }
+    const selectedDateValue = toDateInputValue(scheduleBaseDate);
+    return new Set(
+      selectedDoctorLive.unavailable_consultation_slots
+        .map((slot) => new Date(slot))
+        .filter((slotDate) => !Number.isNaN(slotDate.getTime()) && toDateInputValue(slotDate) === selectedDateValue)
+        .map((slotDate) => slotDate.getHours()),
+    );
+  }, [scheduleBaseDate, selectedDoctorLive]);
   const scheduledAtFromSelection = useMemo(() => {
     if (timingMode === "now") {
       return toDateTimeLocalValue(new Date());
@@ -370,6 +382,7 @@ export function AppointmentsClient() {
       effectiveTriageSessionId &&
       timingMode &&
       scheduledAtFromSelection &&
+      (timingMode !== "later" || selectedSlotHour === null || !unavailableSlotHours.has(selectedSlotHour)) &&
       (scheduleDay !== "another" || customScheduleDate),
   );
   const activeBankTransferPayment =
@@ -922,7 +935,7 @@ export function AppointmentsClient() {
                       </div>
                       <div className="col-span-2 grid gap-3 sm:col-span-1 sm:min-w-36">
                         <StatusBadge value={available ? "Available" : "Offline"} />
-                        <span className="text-sm font-semibold text-slate-600">{index === 0 ? "5 min" : `${Math.min(10, 5 + index * 2)} min`}</span>
+                        <span className="text-sm font-semibold text-slate-600">5-10 min</span>
                         <button
                           type="button"
                           className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
@@ -958,8 +971,8 @@ export function AppointmentsClient() {
         showCloseButton={false}
         closeOnOverlayClick={false}
         closeOnEscape={false}
-        className="mt-auto h-[88dvh] max-h-[88dvh] rounded-t-[28px] border-0 sm:mt-auto sm:h-[88dvh] sm:max-h-[88dvh] sm:w-[min(720px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
-        bodyClassName="px-4 pb-5 sm:px-6"
+        className="mt-auto h-[100dvh] max-h-[100dvh] rounded-none border-0 sm:mt-auto sm:h-[88dvh] sm:max-h-[88dvh] sm:w-[min(720px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
+        bodyClassName="scroll-pb-28 px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:px-6"
         footer={
           <>
             <button
@@ -1038,7 +1051,7 @@ export function AppointmentsClient() {
                 >
                   <p className="font-semibold text-[#1F2937]">Consult now</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    {doctorCanConsultNow ? "Start checkout for an immediate chat consultation." : "Available between 8:00 AM and 8:00 PM."}
+                    {doctorCanConsultNow ? "Start checkout for an immediate chat consultation." : "Available between 8:00 AM and 6:00 PM."}
                   </p>
                 </button>
                 <button
@@ -1053,7 +1066,7 @@ export function AppointmentsClient() {
                   )}
                 >
                   <p className="font-semibold text-[#1F2937]">Schedule for later</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Pick a time between 8:00 AM and 8:00 PM.</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Pick a time between 8:00 AM and 6:00 PM.</p>
                 </button>
               </div>
 
@@ -1108,13 +1121,20 @@ export function AppointmentsClient() {
                         <button
                           key={hour}
                           type="button"
-                          onClick={() => setSelectedSlotHour(hour)}
+                          disabled={unavailableSlotHours.has(hour)}
+                          onClick={() => {
+                            if (unavailableSlotHours.has(hour)) return;
+                            setSelectedSlotHour(hour);
+                          }}
                           className={cn(
                             "min-h-11 rounded-[8px] border px-3 text-sm font-semibold transition active:scale-[0.98]",
                             selectedSlotHour === hour ? "border-[#2563EB] bg-[#2563EB] text-white" : "border-slate-200 bg-white text-[#1F2937]",
+                            unavailableSlotHours.has(hour) && "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400 line-through active:scale-100",
                           )}
+                          title={unavailableSlotHours.has(hour) ? "This time is already booked" : undefined}
                         >
                           {displayHour(hour)}
+                          {unavailableSlotHours.has(hour) ? <span className="block text-[10px] font-semibold no-underline">Booked</span> : null}
                         </button>
                       ))
                     ) : (

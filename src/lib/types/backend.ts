@@ -334,6 +334,7 @@ export type ProviderDoctor = DoctorProfile & {
   rating_breakdown?: RatingBreakdown;
   active_workload: number;
   next_available_time: string | null;
+  unavailable_consultation_slots?: string[];
   updated_at: string;
 };
 
