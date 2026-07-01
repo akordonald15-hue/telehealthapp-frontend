@@ -19,6 +19,8 @@ import { StepBasicInfo } from "./steps/step-basic-info";
 import { StepLocation } from "./steps/step-location";
 import { StepPersonal } from "./steps/step-personal";
 import {
+  hasValidFullName,
+  isValidNigerianPhone,
   onboardingSchema,
   STEP_FIELDS,
   STEP_LABELS,
@@ -90,7 +92,8 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   const form = useForm<OnboardingValues>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: emptyValues,
-    mode: "onTouched",
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
   const fullNameValue = useWatch({ control: form.control, name: "full_name" }) || "";
   const phoneNumberValue = useWatch({ control: form.control, name: "phone" }) || "";
@@ -163,12 +166,24 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     },
   });
 
+  const fullNameComplete = hasValidFullName(fullNameValue);
+  const phoneComplete = isValidNigerianPhone(phoneNumberValue);
+  const stepOneDisabled = !fullNameComplete || !phoneComplete;
+
+  useEffect(() => {
+    if (step !== 0) return;
+    console.log("Validation Status:");
+    console.log(`- Full Name: ${fullNameComplete ? "PASS" : "FAIL (Enter first and last name)"}`);
+    console.log(`- Phone Number: ${phoneComplete ? "PASS" : "FAIL (Invalid format)"}`);
+    console.log(`- Button Enabled: ${stepOneDisabled ? "FALSE" : "TRUE"}`);
+  }, [fullNameComplete, phoneComplete, step, stepOneDisabled]);
+
   const goNext = async () => {
     if (step === 0) {
       const values = form.getValues();
       const fullName = values.full_name || "";
       const phoneNumber = values.phone || "";
-      const isStep1Valid = Boolean(fullName.trim()) && Boolean(phoneNumber.trim());
+      const isStep1Valid = hasValidFullName(fullName) && isValidNigerianPhone(phoneNumber);
 
       console.log("Continue clicked");
       console.log("currentStep before:", step + 1);
@@ -177,11 +192,11 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
       console.log("validation result:", isStep1Valid);
 
       if (!isStep1Valid) {
-        if (!fullName.trim()) {
-          form.setError("full_name", { type: "required", message: "Enter your full name." });
+        if (!hasValidFullName(fullName)) {
+          form.setError("full_name", { type: "required", message: "Enter your first and last name." });
         }
-        if (!phoneNumber.trim()) {
-          form.setError("phone", { type: "required", message: "Enter your phone number." });
+        if (!isValidNigerianPhone(phoneNumber)) {
+          form.setError("phone", { type: "required", message: "Enter a valid 11-digit Nigerian phone number." });
         }
         return;
       }
@@ -219,7 +234,6 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
 
   const isLastStep = step === TOTAL_STEPS - 1;
   const loading = false;
-  const stepOneDisabled = !fullNameValue.trim() || !phoneNumberValue.trim();
 
   if (completed) {
     return (
@@ -257,34 +271,42 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
       title={STEP_LABELS[step]}
       description={stepDescriptions[step]}
       footer={
-        <div className="flex items-center gap-3">
-          {step > 0 ? (
-            <Button type="button" variant="secondary" onClick={goBack} disabled={save.isPending}>
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
+        <div className="grid gap-3">
+          {step === 0 ? (
+            <StepOneRequirements fullNameComplete={fullNameComplete} phoneComplete={phoneComplete} />
           ) : null}
-          <Button
-            type="button"
-            className="flex-1"
-            onClick={(event) => {
-              event.preventDefault();
-              void goNext();
-            }}
-            disabled={step === 0 ? stepOneDisabled : save.isPending || loading}
-          >
-            {isLastStep ? (
-              <>
-                <Check className="h-4 w-4" />
-                {save.isPending ? "Finishing..." : "Complete profile"}
-              </>
-            ) : (
-              <>
-                Continue
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </Button>
+          {step === 0 && stepOneDisabled ? (
+            <p className="text-center text-xs font-semibold text-ash-500">Complete all required fields to continue.</p>
+          ) : null}
+          <div className="flex items-center gap-3">
+            {step > 0 ? (
+              <Button type="button" variant="secondary" onClick={goBack} disabled={save.isPending}>
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            ) : null}
+            <Button
+              type="button"
+              className={step === 0 && stepOneDisabled ? "flex-1 bg-ash-200 text-ash-500 shadow-none hover:bg-ash-200" : "flex-1"}
+              onClick={(event) => {
+                event.preventDefault();
+                void goNext();
+              }}
+              disabled={step === 0 ? stepOneDisabled : save.isPending || loading}
+            >
+              {isLastStep ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  {save.isPending ? "Finishing..." : "Complete profile"}
+                </>
+              ) : (
+                <>
+                  Continue
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       }
     >
@@ -312,3 +334,37 @@ const stepDescriptions = [
   "A little about you to match you with the right care.",
   "Where are you located? This helps us connect you with nearby providers.",
 ];
+
+function StepOneRequirements({
+  fullNameComplete,
+  phoneComplete,
+}: {
+  fullNameComplete: boolean;
+  phoneComplete: boolean;
+}) {
+  return (
+    <div className="rounded-[8px] border border-ash-200 bg-ash-50 px-4 py-3 text-sm">
+      <p className="font-semibold text-ash-800">Complete the following to continue:</p>
+      <div className="mt-2 grid gap-1.5 text-ash-600">
+        <RequirementItem complete={fullNameComplete} completeText="Full name completed" pendingText="Enter your first and last name" />
+        <RequirementItem complete={phoneComplete} completeText="Valid phone number" pendingText="Enter a valid phone number" />
+      </div>
+    </div>
+  );
+}
+
+function RequirementItem({
+  complete,
+  completeText,
+  pendingText,
+}: {
+  complete: boolean;
+  completeText: string;
+  pendingText: string;
+}) {
+  return (
+    <p className={complete ? "font-semibold text-primary" : "text-ash-600"}>
+      <span aria-hidden="true">{complete ? "[x]" : "[ ]"}</span> {complete ? completeText : pendingText}
+    </p>
+  );
+}
