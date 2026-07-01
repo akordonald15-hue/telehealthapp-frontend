@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
@@ -92,6 +92,8 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     defaultValues: emptyValues,
     mode: "onTouched",
   });
+  const fullNameValue = useWatch({ control: form.control, name: "full_name" }) || "";
+  const phoneNumberValue = useWatch({ control: form.control, name: "phone" }) || "";
 
   // Prefill account fields as soon as auth is ready. The profile request can
   // arrive later, but it should never block the first Continue action.
@@ -162,6 +164,34 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   });
 
   const goNext = async () => {
+    if (step === 0) {
+      const values = form.getValues();
+      const fullName = values.full_name || "";
+      const phoneNumber = values.phone || "";
+      const isStep1Valid = Boolean(fullName.trim()) && Boolean(phoneNumber.trim());
+
+      console.log("Continue clicked");
+      console.log("currentStep before:", step + 1);
+      console.log("fullName:", fullName);
+      console.log("phoneNumber:", phoneNumber);
+      console.log("validation result:", isStep1Valid);
+
+      if (!isStep1Valid) {
+        if (!fullName.trim()) {
+          form.setError("full_name", { type: "required", message: "Enter your full name." });
+        }
+        if (!phoneNumber.trim()) {
+          form.setError("phone", { type: "required", message: "Enter your phone number." });
+        }
+        return;
+      }
+
+      form.clearErrors(["full_name", "phone"]);
+      setDirection("next");
+      setStep((current) => current + 1);
+      return;
+    }
+
     const valid = await form.trigger(STEP_FIELDS[step], { shouldFocus: true });
     const values = form.getValues();
     console.log("[Caretekk onboarding]", {
@@ -189,6 +219,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
 
   const isLastStep = step === TOTAL_STEPS - 1;
   const loading = false;
+  const stepOneDisabled = !fullNameValue.trim() || !phoneNumberValue.trim();
 
   if (completed) {
     return (
@@ -233,7 +264,15 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
               Back
             </Button>
           ) : null}
-          <Button type="button" className="flex-1" onClick={goNext} disabled={save.isPending || loading}>
+          <Button
+            type="button"
+            className="flex-1"
+            onClick={(event) => {
+              event.preventDefault();
+              void goNext();
+            }}
+            disabled={step === 0 ? stepOneDisabled : save.isPending || loading}
+          >
             {isLastStep ? (
               <>
                 <Check className="h-4 w-4" />
