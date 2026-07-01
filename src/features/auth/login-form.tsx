@@ -42,7 +42,15 @@ export function LoginForm() {
   });
 
   return (
-    <form className="grid gap-5" onSubmit={form.handleSubmit((values) => login.mutate(values))}>
+    <form
+      className="grid gap-5"
+      onSubmit={form.handleSubmit((values) => {
+        if (typeof window !== "undefined") {
+          window.sessionStorage.setItem("caretekk:last-login-email", values.email);
+        }
+        login.mutate(values);
+      })}
+    >
       <GoogleAuthButton mode="login" />
       <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ash-400">
         <span className="h-px flex-1 bg-ash-200" />

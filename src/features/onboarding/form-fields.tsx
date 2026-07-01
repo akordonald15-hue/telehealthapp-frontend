@@ -21,6 +21,7 @@ export function TextField({
   hint,
   required,
   readOnly,
+  value,
   type = "text",
   placeholder,
   autoComplete,
@@ -31,6 +32,7 @@ export function TextField({
   hint?: string;
   required?: boolean;
   readOnly?: boolean;
+  value?: string;
   type?: string;
   placeholder?: string;
   autoComplete?: string;
@@ -50,6 +52,7 @@ export function TextField({
         inputMode={inputMode}
         readOnly={readOnly}
         className={cn(readOnly && "cursor-not-allowed border-ash-200 bg-white text-ash-800")}
+        value={value}
         {...register(name)}
       />
     </Field>

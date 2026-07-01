@@ -13,6 +13,7 @@ import { StepProgress } from "@/components/ui/step-progress";
 import { authApi, profilesApi } from "@/lib/api/endpoints";
 import { authKeys, useCurrentUser } from "@/lib/auth/use-auth";
 import type { PatientProfile } from "@/lib/types/backend";
+import type { User } from "@/lib/types/backend";
 
 import { StepBasicInfo } from "./steps/step-basic-info";
 import { StepLocation } from "./steps/step-location";
@@ -60,6 +61,12 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"next" | "back">("next");
   const [completed, setCompleted] = useState(false);
+  const [accountFallback, setAccountFallback] = useState<Partial<User>>(() => {
+    if (typeof window === "undefined") {
+      return {};
+    }
+    return { email: window.sessionStorage.getItem("caretekk:last-login-email") || "" };
+  });
   const completeTimerRef = useRef<number | null>(null);
   const form = useForm<OnboardingValues>({
     resolver: zodResolver(onboardingSchema),
@@ -70,15 +77,50 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   // Prefill account fields as soon as auth is ready. The profile request can
   // arrive later, but it should never block the first Continue action.
   useEffect(() => {
-    if (!user) return;
+    const source = {
+      full_name: user?.full_name || accountFallback.full_name || "",
+      email: user?.email || accountFallback.email || "",
+      phone: user?.phone || accountFallback.phone || "",
+    };
+    if (!source.full_name && !source.email && !source.phone) return;
     const current = form.getValues();
     form.reset({
       ...current,
-      full_name: current.full_name || user.full_name || "",
-      email: user.email || current.email || "",
-      phone: current.phone || user.phone || "",
+      full_name: current.full_name || source.full_name,
+      email: source.email || current.email,
+      phone: current.phone || source.phone,
     });
-  }, [form, user]);
+  }, [accountFallback.email, accountFallback.full_name, accountFallback.phone, form, user]);
+
+  useEffect(() => {
+    if (user?.email || typeof window === "undefined") return;
+    let active = true;
+    const loadAccount = async () => {
+      try {
+        const response = await fetch("/api/auth/me/", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const data = (await response.json()) as Partial<User>;
+        if (active) {
+          setAccountFallback((current) => ({
+            ...current,
+            full_name: current.full_name || data.full_name || "",
+            email: current.email || data.email || "",
+            phone: current.phone || data.phone || "",
+          }));
+        }
+      } catch {
+        // Visible fallback is rendered in Step 1 if email is still unavailable.
+      }
+    };
+    void loadAccount();
+
+    return () => {
+      active = false;
+    };
+  }, [user?.email]);
 
   const prefilledProfile = useRef(false);
   useEffect(() => {
@@ -87,8 +129,13 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     const current = form.getValues();
     form.reset({
       ...current,
-      age_range: current.age_range || (profile.age_range as OnboardingValues["age_range"]) || ("" as OnboardingValues["age_range"]),
-      gender: current.gender || (profile.gender as OnboardingValues["gender"]) || ("" as OnboardingValues["gender"]),
+      full_name: current.full_name || profile.full_name || "",
+      email: current.email || profile.email || "",
+      phone: current.phone || profile.phone || "",
+      age_range:
+        current.age_range || (profile.age_range as OnboardingValues["age_range"]) || ("" as OnboardingValues["age_range"]),
+      gender:
+        current.gender || (profile.gender as OnboardingValues["gender"]) || ("" as OnboardingValues["gender"]),
       state: current.state || profile.state || "",
       lga: current.lga || profile.lga || "",
     });
@@ -124,11 +171,41 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   });
 
   const goNext = async () => {
-    if (step === 0 && user?.email) {
-      form.setValue("email", user.email, { shouldValidate: true });
+    const emailValue = user?.email || accountFallback.email || profileQuery.data?.email || form.getValues("email") || "";
+    if (step === 0 && emailValue) {
+      form.setValue("email", emailValue, { shouldValidate: false });
     }
     const valid = await form.trigger(STEP_FIELDS[step], { shouldFocus: true });
+    const values = form.getValues();
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("[Caretekk onboarding]", {
+        currentStep: step + 1,
+        validationErrors: form.formState.errors,
+        emailValue: values.email,
+        fullNameValue: values.full_name,
+        phoneNumberValue: values.phone,
+        profileLoading: profileQuery.isLoading,
+        buttonDisabled: save.isPending || loading,
+      });
+    } else {
+      console.debug("[Caretekk onboarding]", {
+        currentStep: step + 1,
+        hasValidationErrors: Object.keys(form.formState.errors).length > 0,
+        emailPresent: Boolean(values.email),
+        fullNamePresent: Boolean(values.full_name),
+        phoneNumberPresent: Boolean(values.phone),
+        profileLoading: profileQuery.isLoading,
+        buttonDisabled: save.isPending || loading,
+      });
+    }
     if (!valid) return;
+    if (step === 0 && !form.getValues("email")) {
+      form.setError("email", {
+        type: "required",
+        message: "Email not found. Please log in again.",
+      });
+      return;
+    }
     if (step < TOTAL_STEPS - 1) {
       setDirection("next");
       setStep((current) => current + 1);
