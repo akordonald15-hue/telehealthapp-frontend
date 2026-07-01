@@ -48,6 +48,7 @@ type ConsultationTimingMode = "now" | "later";
 const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
 const symptomQuickReplies = ["Headache", "Fever", "Cough", "Stomach pain"];
 const hourlyConsultationSlots = Array.from({ length: 10 }, (_, index) => 8 + index);
+const hiddenDoctorNameMarkers = ["test doctor", "doctor smoke invite", "dr no phone smoke", "dr triumoh", "doctor donald ak", "donald ak"];
 const severityOptions: Array<{ value: TriageSeverity; label: string }> = [
   { value: "mild", label: "Mild" },
   { value: "moderate", label: "Moderate" },
@@ -118,6 +119,15 @@ function initials(name: string) {
 
 function oneLineBio(doctor: ProviderDoctor) {
   return doctor.bio?.trim() || "Available for secure online consultation today.";
+}
+
+function shouldHideDoctorFromPatientRecommendations(doctor: ProviderDoctor) {
+  const normalized = doctor.display_name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return hiddenDoctorNameMarkers.some((marker) => normalized.includes(marker));
 }
 
 function addDays(date: Date, days: number) {
@@ -194,6 +204,7 @@ export function AppointmentsClient() {
   const firstTimeWelcome = searchParams.get("welcome") === "first";
   const [page, setPage] = useState(1);
   const [doctorPickerOpen, setDoctorPickerOpen] = useState(false);
+  const [scheduleSheetOpen, setScheduleSheetOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<ProviderDoctor | null>(null);
   const [manualPayment, setManualPayment] = useState<PaymentInitiation | null>(null);
   const [aiSessionId, setAiSessionId] = useState<number | null>(null);
@@ -233,6 +244,7 @@ export function AppointmentsClient() {
       setCustomScheduleDate("");
       setSelectedSlotHour(null);
       setDoctorPickerOpen(false);
+      setScheduleSheetOpen(false);
       setPage(1);
       await queryClient.invalidateQueries({ queryKey: ["appointments"] });
       if (data.payment.provider === "bank_transfer") {
@@ -314,7 +326,7 @@ export function AppointmentsClient() {
   const suggestedSpecialty = isConversationResult(aiResultData) ? aiResultData.department : null;
   const triageSymptoms = isConversationResult(aiResultData) ? readableTriageList(aiResultData.extracted_symptoms) : [];
   const doctorItems = useMemo(
-    () => sortRecommendedDoctors(availableDoctors.data?.results ?? [], suggestedSpecialty),
+    () => sortRecommendedDoctors((availableDoctors.data?.results ?? []).filter((doctor) => !shouldHideDoctorFromPatientRecommendations(doctor)), suggestedSpecialty),
     [availableDoctors.data?.results, suggestedSpecialty],
   );
   const selectedDoctorLive = selectedDoctor
@@ -845,16 +857,6 @@ export function AppointmentsClient() {
         closeOnEscape={false}
         className="mt-auto h-[88dvh] max-h-[88dvh] rounded-t-[28px] border-0 sm:mt-auto sm:h-[88dvh] sm:max-h-[88dvh] sm:w-[min(760px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
         bodyClassName="px-4 pb-5 sm:px-6"
-        footer={
-          <Button
-            type="button"
-            className="w-full sm:w-fit"
-            disabled={!modalBookingReady || createAppointment.isPending}
-            onClick={handleContinueToPayment}
-          >
-            {createAppointment.isPending ? "Starting checkout..." : "Continue to Payment"}
-          </Button>
-        }
       >
         {availableDoctors.isLoading ? (
           <div className="grid gap-3" aria-busy="true" aria-label="Loading recommended doctors">
@@ -877,17 +879,6 @@ export function AppointmentsClient() {
         ) : doctorItems.length ? (
           <div className="grid gap-5">
             <div className="mx-auto h-1.5 w-16 rounded-full bg-slate-200" aria-hidden="true" />
-            <div className="rounded-[8px] border border-[#DBEAFE] bg-[#EFF6FF] p-4">
-              <p className="text-sm font-semibold text-[#2563EB]">Caretekk AI</p>
-              <p className="mt-2 text-sm leading-6 text-[#1F2937]">
-                Based on what you&apos;ve shared, I recommend speaking with one of our available general physicians today.
-              </p>
-            </div>
-            <div className="inline-flex w-fit items-center gap-2 rounded-full bg-[#EFF6FF] px-4 py-2 text-sm font-semibold text-[#1F2937]">
-              <ShieldCheck className="h-4 w-4 text-[#2563EB]" />
-              {doctorItems.length} doctor{doctorItems.length === 1 ? "" : "s"} available • Estimated response: 5-10 min
-            </div>
-
             <div className="grid gap-4">
               {doctorItems.map((doctor, index) => {
                 const selected = selectedDoctor?.id === doctor.id;
@@ -925,9 +916,8 @@ export function AppointmentsClient() {
                         <p className="mt-2 line-clamp-1 text-sm text-slate-600">{oneLineBio(doctor)}</p>
                         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
                           <span className="rounded-full bg-slate-50 px-3 py-1">★ {doctor.rating ?? "New"} ({doctor.review_count ?? 0} reviews)</span>
-                          <span className="rounded-full bg-slate-50 px-3 py-1">{doctor.years_experience ?? 0} yrs exp.</span>
                           <span className="rounded-full bg-slate-50 px-3 py-1">English</span>
-                          <span className="rounded-full bg-slate-50 px-3 py-1">Video</span>
+                          <span className="rounded-full bg-slate-50 px-3 py-1">Chat</span>
                         </div>
                       </div>
                       <div className="col-span-2 grid gap-3 sm:col-span-1 sm:min-w-36">
@@ -937,10 +927,12 @@ export function AppointmentsClient() {
                           type="button"
                           className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
                           onClick={() => {
-                        setSelectedDoctor(doctor);
-                        setTimingMode(null);
-                        setSelectedSlotHour(null);
-                        form.setValue("doctor", doctor.id, { shouldValidate: true });
+                            setSelectedDoctor(doctor);
+                            setTimingMode(null);
+                            setSelectedSlotHour(null);
+                            form.setValue("doctor", doctor.id, { shouldValidate: true });
+                            setDoctorPickerOpen(false);
+                            setScheduleSheetOpen(true);
                           }}
                         >
                           {selected ? "Selected" : "Select Doctor"}
@@ -951,115 +943,192 @@ export function AppointmentsClient() {
                 );
               })}
             </div>
-
-            {selectedDoctorLive ? (
-              <div className="ct-rise-in grid gap-4 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
-                <div>
-                  <p className="text-sm font-semibold text-[#1F2937]">Choose when you want to consult</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                    {isWithinConsultationHours()
-                      ? "You can consult now if the doctor is available, or schedule for later."
-                      : "Our doctors are currently offline. You can schedule a consultation for the next available time."}
-                  </p>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {doctorCanConsultNow ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTimingMode("now");
-                        setSelectedSlotHour(null);
-                      }}
-                      className={cn(
-                        "rounded-[8px] border p-4 text-left transition",
-                        timingMode === "now" ? "border-[#2563EB] bg-white shadow-[0_18px_42px_-34px_rgba(37,99,235,0.45)]" : "border-slate-200 bg-white/75",
-                      )}
-                    >
-                      <span className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
-                        <span className="h-2.5 w-2.5 rounded-full bg-[#2563EB]" />
-                        Consult Now
-                      </span>
-                      <span className="mt-2 block text-xs leading-5 text-slate-600">Doctor will respond within approximately 5-10 minutes.</span>
-                    </button>
-                  ) : null}
-
-                  <button
-                    type="button"
-                    onClick={() => setTimingMode("later")}
-                    className={cn(
-                      "rounded-[8px] border p-4 text-left transition",
-                      timingMode === "later" ? "border-[#2563EB] bg-white shadow-[0_18px_42px_-34px_rgba(37,99,235,0.45)]" : "border-slate-200 bg-white/75",
-                    )}
-                  >
-                    <span className="text-sm font-semibold text-[#1F2937]">Schedule for Later</span>
-                    <span className="mt-2 block text-xs leading-5 text-slate-600">Choose an available hourly consultation slot.</span>
-                  </button>
-                </div>
-
-                {timingMode === "later" ? (
-                  <div className="grid gap-4">
-                    <div className="grid grid-cols-3 gap-2">
-                      {(["today", "tomorrow", "another"] as const).map((day) => (
-                        <button
-                          key={day}
-                          type="button"
-                          onClick={() => {
-                            setScheduleDay(day);
-                            setSelectedSlotHour(null);
-                          }}
-                          className={cn(
-                            "min-h-10 rounded-[8px] border px-3 text-xs font-semibold capitalize transition",
-                            scheduleDay === day ? "border-[#2563EB] bg-[#DBEAFE] text-[#2563EB]" : "border-slate-200 bg-white text-slate-600",
-                          )}
-                        >
-                          {day === "another" ? "Another date" : day}
-                        </button>
-                      ))}
-                    </div>
-
-                    {scheduleDay === "another" ? (
-                      <Field label="Select date">
-                        <Input
-                          type="date"
-                          min={toDateInputValue(new Date())}
-                          value={customScheduleDate}
-                          onChange={(event) => {
-                            setCustomScheduleDate(event.target.value);
-                            setSelectedSlotHour(null);
-                          }}
-                        />
-                      </Field>
-                    ) : null}
-
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                      {availableSlotHours.length ? (
-                        availableSlotHours.map((hour) => (
-                          <button
-                            key={hour}
-                            type="button"
-                            onClick={() => setSelectedSlotHour(hour)}
-                            className={cn(
-                              "min-h-11 rounded-[8px] border px-3 text-sm font-semibold transition",
-                              selectedSlotHour === hour ? "border-[#2563EB] bg-[#2563EB] text-white" : "border-slate-200 bg-white text-[#1F2937]",
-                            )}
-                          >
-                            {displayHour(hour)}
-                          </button>
-                        ))
-                      ) : (
-                        <p className="col-span-full rounded-[8px] bg-white px-4 py-3 text-sm text-slate-600">
-                          No more hourly slots are available today. Please choose tomorrow or another date.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
           </div>
         ) : (
           <Notice title="No doctors available right now." tone="neutral" />
+        )}
+      </Modal>
+
+      <Modal
+        open={scheduleSheetOpen}
+        title="Confirm doctor and time"
+        description="Check your doctor, then choose when you want to consult."
+        onClose={() => undefined}
+        size="xl"
+        showCloseButton={false}
+        closeOnOverlayClick={false}
+        closeOnEscape={false}
+        className="mt-auto h-[88dvh] max-h-[88dvh] rounded-t-[28px] border-0 sm:mt-auto sm:h-[88dvh] sm:max-h-[88dvh] sm:w-[min(720px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
+        bodyClassName="px-4 pb-5 sm:px-6"
+        footer={
+          <>
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition active:scale-[0.98]"
+              onClick={() => {
+                setScheduleSheetOpen(false);
+                setDoctorPickerOpen(true);
+              }}
+            >
+              Change doctor
+            </button>
+            <Button
+              type="button"
+              className="w-full sm:w-fit"
+              disabled={!modalBookingReady || createAppointment.isPending}
+              onClick={handleContinueToPayment}
+            >
+              {createAppointment.isPending ? "Starting checkout..." : "Continue to Payment"}
+            </Button>
+          </>
+        }
+      >
+        {selectedDoctorLive ? (
+          <div className="grid gap-5">
+            <div className="mx-auto h-1.5 w-16 rounded-full bg-slate-200" aria-hidden="true" />
+            <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+              <p className="text-sm font-semibold text-[#1F2937]">Is this the doctor you want?</p>
+              <div className="mt-4 grid grid-cols-[72px_minmax(0,1fr)] gap-4">
+                <div className="relative h-[72px] w-[72px] overflow-hidden rounded-full bg-[#EFF6FF] text-[#2563EB]">
+                  {selectedDoctorLive.profile_image_url ? (
+                    <Image src={selectedDoctorLive.profile_image_url} alt="" width={88} height={88} className="h-full w-full object-cover" unoptimized />
+                  ) : (
+                    <span className="grid h-full w-full place-items-center text-lg font-bold">{initials(selectedDoctorLive.display_name)}</span>
+                  )}
+                  <span
+                    className={cn(
+                      "absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white",
+                      selectedDoctorLive.availability_status === "available" ? "bg-[#2563EB]" : "bg-slate-300",
+                    )}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-base font-semibold text-[#1F2937]">{selectedDoctorLive.display_name}</p>
+                  <p className="mt-1 text-sm text-slate-600">General Physician</p>
+                  <p className="mt-2 line-clamp-1 text-sm text-slate-600">{oneLineBio(selectedDoctorLive)}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                    <span className="rounded-full bg-white px-3 py-1">★ {selectedDoctorLive.rating ?? "New"} ({selectedDoctorLive.review_count ?? 0} reviews)</span>
+                    <span className="rounded-full bg-white px-3 py-1">English</span>
+                    <span className="rounded-full bg-white px-3 py-1">Chat</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 rounded-[8px] border border-slate-100 bg-white p-4">
+              <div>
+                <p className="text-base font-semibold text-[#1F2937]">Choose consultation time</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">You can start now if the doctor is available, or schedule an hourly slot.</p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  disabled={!doctorCanConsultNow}
+                  onClick={() => {
+                    if (!doctorCanConsultNow) return;
+                    setTimingMode("now");
+                    setSelectedSlotHour(null);
+                  }}
+                  className={cn(
+                    "rounded-[8px] border p-4 text-left transition active:scale-[0.99]",
+                    timingMode === "now" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
+                    !doctorCanConsultNow && "cursor-not-allowed opacity-55",
+                  )}
+                >
+                  <p className="font-semibold text-[#1F2937]">Consult now</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    {doctorCanConsultNow ? "Start checkout for an immediate chat consultation." : "Available between 8:00 AM and 8:00 PM."}
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTimingMode("later");
+                    setSelectedSlotHour(null);
+                  }}
+                  className={cn(
+                    "rounded-[8px] border p-4 text-left transition active:scale-[0.99]",
+                    timingMode === "later" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
+                  )}
+                >
+                  <p className="font-semibold text-[#1F2937]">Schedule for later</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Pick a time between 8:00 AM and 8:00 PM.</p>
+                </button>
+              </div>
+
+              {!doctorCanConsultNow ? (
+                <Notice title="Doctors are currently offline." tone="neutral">
+                  You can still schedule a consultation for the next available hour.
+                </Notice>
+              ) : null}
+
+              {timingMode === "later" ? (
+                <div className="grid gap-4">
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {[
+                      { value: "today", label: "Today" },
+                      { value: "tomorrow", label: "Tomorrow" },
+                      { value: "another", label: "Pick date" },
+                    ].map((item) => (
+                      <button
+                        key={item.value}
+                        type="button"
+                        onClick={() => {
+                          setScheduleDay(item.value as "today" | "tomorrow" | "another");
+                          setSelectedSlotHour(null);
+                        }}
+                        className={cn(
+                          "min-h-11 rounded-[8px] border px-4 text-sm font-semibold transition active:scale-[0.98]",
+                          scheduleDay === item.value ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]" : "border-slate-200 bg-white text-[#1F2937]",
+                        )}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {scheduleDay === "another" ? (
+                    <Field label="Preferred date">
+                      <Input
+                        type="date"
+                        min={toDateInputValue(new Date())}
+                        value={customScheduleDate}
+                        onChange={(event) => {
+                          setCustomScheduleDate(event.target.value);
+                          setSelectedSlotHour(null);
+                        }}
+                      />
+                    </Field>
+                  ) : null}
+
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {availableSlotHours.length ? (
+                      availableSlotHours.map((hour) => (
+                        <button
+                          key={hour}
+                          type="button"
+                          onClick={() => setSelectedSlotHour(hour)}
+                          className={cn(
+                            "min-h-11 rounded-[8px] border px-3 text-sm font-semibold transition active:scale-[0.98]",
+                            selectedSlotHour === hour ? "border-[#2563EB] bg-[#2563EB] text-white" : "border-slate-200 bg-white text-[#1F2937]",
+                          )}
+                        >
+                          {displayHour(hour)}
+                        </button>
+                      ))
+                    ) : (
+                      <p className="col-span-full rounded-[8px] bg-slate-50 p-3 text-sm text-slate-600">No available hourly slots for this date.</p>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : (
+          <Notice title="Select a doctor first." tone="neutral">
+            Go back and choose a doctor to continue.
+          </Notice>
         )}
       </Modal>
     </Section>
