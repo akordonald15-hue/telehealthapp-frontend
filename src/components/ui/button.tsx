@@ -24,7 +24,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   dark:
     "bg-ash-900 text-white hover:bg-[var(--primary-strong)]",
   danger:
-    "bg-danger text-white hover:opacity-95",
+    "bg-rose-600 text-white hover:opacity-95",
   ghost:
     "text-ash-700 hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]",
 };
