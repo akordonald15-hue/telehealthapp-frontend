@@ -12,6 +12,7 @@ import {
   MessageCircle,
   SendHorizonal,
   ShieldCheck,
+  Star,
   Stethoscope,
 } from "lucide-react";
 import Image from "next/image";
@@ -25,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { DataList } from "@/components/ui/data-list";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { Input, Textarea } from "@/components/ui/input";
 import { InlineLoader } from "@/components/ui/loaders";
 import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
@@ -194,6 +195,93 @@ function AssistantBubble({ speaker, children }: { speaker: "assistant" | "user";
         <span className="px-1 text-[11px] font-medium text-slate-400">Just now</span>
       </div>
     </div>
+  );
+}
+
+function PatientAppointmentCard({ appointment }: { appointment: Appointment }) {
+  const queryClient = useQueryClient();
+  const [score, setScore] = useState(5);
+  const [feedback, setFeedback] = useState("");
+  const ratingMutation = useMutation({
+    mutationFn: () =>
+      appointmentsApi.submitRating(appointment.id, {
+        score,
+        feedback: feedback.trim(),
+      }),
+    onSuccess: async () => {
+      setFeedback("");
+      await queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    },
+  });
+  const canRate = appointment.status === "completed" && !appointment.rating;
+  const doctorName = appointment.doctor_profile?.display_name || "Caretekk doctor";
+
+  return (
+    <article className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.38)]">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <p className="font-heading text-lg font-semibold text-[#1F2937]">{doctorName}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{formatDateTime(appointment.scheduled_at)}</p>
+          {appointment.reason ? <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{appointment.reason}</p> : null}
+        </div>
+        <StatusBadge value={appointment.status} />
+      </div>
+
+      {appointment.rating ? (
+        <div className="mt-4 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+          <p className="text-sm font-semibold text-[#1F2937]">Your review</p>
+          <div className="mt-2 flex items-center gap-1 text-[#2563EB]" aria-label={`${appointment.rating.score} star rating`}>
+            {[1, 2, 3, 4, 5].map((item) => (
+              <Star key={item} className={cn("h-4 w-4", item <= appointment.rating!.score && "fill-current")} />
+            ))}
+          </div>
+          {appointment.rating.feedback ? (
+            <p className="mt-3 text-sm leading-6 text-slate-600">&ldquo;{appointment.rating.feedback}&rdquo;</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {canRate ? (
+        <div className="mt-4 grid gap-3 rounded-[8px] border border-slate-200 bg-slate-50 p-4">
+          <div>
+            <p className="text-sm font-semibold text-[#1F2937]">Rate this consultation</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">Add a comment if you want to share what went well.</p>
+          </div>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Rate consultation">
+            {[1, 2, 3, 4, 5].map((item) => (
+              <button
+                key={item}
+                type="button"
+                role="radio"
+                aria-checked={score === item}
+                onClick={() => setScore(item)}
+                className={cn(
+                  "inline-flex h-11 w-11 items-center justify-center rounded-[8px] border transition active:scale-95",
+                  item <= score ? "border-[#BFDBFE] bg-[#DBEAFE] text-[#2563EB]" : "border-slate-200 bg-white text-slate-300",
+                )}
+              >
+                <Star className={cn("h-5 w-5", item <= score && "fill-current")} />
+              </button>
+            ))}
+          </div>
+          <Field label="Review comment">
+            <Textarea
+              value={feedback}
+              maxLength={500}
+              rows={3}
+              placeholder="The doctor was very patient and explained everything clearly."
+              onChange={(event) => setFeedback(event.target.value)}
+            />
+          </Field>
+          <p className="text-xs text-slate-500">{feedback.length}/500 characters</p>
+          <ErrorMessage error={ratingMutation.error} context="appointments" />
+          {ratingMutation.isSuccess ? <Notice title="Review submitted" tone="success" /> : null}
+          <Button type="button" className="w-full sm:w-fit" disabled={ratingMutation.isPending} onClick={() => ratingMutation.mutate()}>
+            {ratingMutation.isPending ? "Submitting..." : "Submit review"}
+          </Button>
+        </div>
+      ) : null}
+    </article>
   );
 }
 
@@ -892,6 +980,21 @@ export function AppointmentsClient() {
         </Notice>
       )}
 
+      {user?.role === "patient" ? (
+        <DataList<Appointment>
+          data={appointments.data}
+          error={appointments.error}
+          isLoading={appointments.isLoading}
+          errorContext="appointments"
+          loadingLabel="Loading your consultations..."
+          emptyTitle="No consultations yet."
+          empty=""
+          onNext={appointments.data?.next ? () => setPage((current) => current + 1) : undefined}
+          onPrevious={appointments.data?.previous ? () => setPage((current) => Math.max(1, current - 1)) : undefined}
+          renderItem={(item) => <PatientAppointmentCard key={item.id} appointment={item} />}
+        />
+      ) : null}
+
       {user?.role !== "patient" ? (
         <DataList<Appointment>
           data={appointments.data}
@@ -1237,16 +1340,31 @@ export function AppointmentsClient() {
                       <p className="text-sm text-slate-600">
                         <span className="font-semibold text-[#1F2937]">Selected:</span> {selectedTimeSummary}
                       </p>
-                      <Button
-                        type="button"
-                        className="mt-3 w-full"
-                        disabled={!modalBookingReady || createAppointment.isPending}
-                        onClick={handleContinueToPayment}
-                      >
-                        {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
-                      </Button>
                     </div>
                   ) : null}
+                </div>
+              ) : null}
+
+              {modalBookingReady ? (
+                <div className="grid gap-3 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+                  <div className="grid gap-2 text-sm text-slate-600">
+                    <p>
+                      <span className="font-semibold text-[#1F2937]">Selected doctor:</span>{" "}
+                      {selectedDoctorLive.display_name}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-[#1F2937]">Selected date & time:</span>{" "}
+                      {selectedTimeSummary}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    className="w-full"
+                    disabled={!modalBookingReady || createAppointment.isPending}
+                    onClick={handleContinueToPayment}
+                  >
+                    {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
+                  </Button>
                 </div>
               ) : null}
             </div>

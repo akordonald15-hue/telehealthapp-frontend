@@ -91,6 +91,7 @@ export type DoctorProfile = {
   review_count?: number;
   completed_consultations?: number;
   rating_breakdown?: RatingBreakdown;
+  recent_reviews?: ProviderReview[];
 };
 
 export type NurseProfile = {
@@ -112,6 +113,7 @@ export type NurseProfile = {
   review_count?: number;
   completed_visits?: number;
   rating_breakdown?: RatingBreakdown;
+  recent_reviews?: ProviderReview[];
 };
 
 export type ProviderAvailabilityState = {
@@ -337,6 +339,7 @@ export type ProviderDoctor = DoctorProfile & {
   review_count?: number;
   completed_consultations?: number;
   rating_breakdown?: RatingBreakdown;
+  recent_reviews?: ProviderReview[];
   active_workload: number;
   next_available_time: string | null;
   unavailable_consultation_slots?: string[];
@@ -353,6 +356,7 @@ export type ProviderNurse = {
   review_count?: number;
   completed_visits?: number;
   rating_breakdown?: RatingBreakdown;
+  recent_reviews?: ProviderReview[];
   availability_status: ProviderAvailabilityStatus;
   service_radius_km: number;
   service_zone: HomeCareZone | "";
@@ -363,6 +367,14 @@ export type ProviderNurse = {
 };
 
 export type RatingBreakdown = Record<string, { count: number; percentage: number }>;
+
+export type ProviderReview = {
+  id: number;
+  score: number;
+  comment: string;
+  patient_name: string;
+  created_at: string;
+};
 
 export type MessageAttachmentUploadInit = {
   upload_url: string;
