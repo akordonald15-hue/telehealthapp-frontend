@@ -219,6 +219,7 @@ export function AppointmentsClient() {
   const [scheduleDay, setScheduleDay] = useState<"today" | "tomorrow" | "another">("today");
   const [customScheduleDate, setCustomScheduleDate] = useState("");
   const [selectedSlotHour, setSelectedSlotHour] = useState<number | null>(null);
+  const [checkoutError, setCheckoutError] = useState("");
   const recommendationOpenedRef = useRef(false);
   const appointments = useQuery({
     queryKey: ["appointments", page],
@@ -226,35 +227,40 @@ export function AppointmentsClient() {
   });
   const createAppointment = useMutation({
     mutationFn: appointmentsApi.book,
-    onSuccess: async (data) => {
-      consultationDraft.clearDraft();
-      appointmentDraft.clearDraft();
-      paymentDraft.clearDraft();
-      form.reset();
-      setAiSessionId(null);
-      setAiConversationId(null);
-      setAiSymptomText("");
-      setAiSubmittedText("");
-      setAiSeverity(null);
-      setAiResultRequested(false);
-      setAiStartedByUser(false);
-      setSelectedDoctor(null);
-      setTimingMode(null);
-      setScheduleDay("today");
-      setCustomScheduleDate("");
-      setSelectedSlotHour(null);
-      setDoctorPickerOpen(false);
-      setScheduleSheetOpen(false);
-      setPage(1);
-      await queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    onSuccess: (data) => {
+      const payment = data.payment as PaymentInitiation & { detail?: string };
+      console.info("Caretekk checkout response", {
+        appointmentId: data.appointment?.id,
+        paymentId: payment.payment_id,
+        provider: payment.provider,
+        status: payment.status,
+        initializationStatus: payment.initialization_status,
+        hasAuthorizationUrl: Boolean(payment.authorization_url),
+        reference: payment.external_ref,
+      });
+
       if (data.payment.provider === "bank_transfer") {
+        resetBookingCheckoutState();
         setManualPayment(data.payment);
+        void queryClient.invalidateQueries({ queryKey: ["appointments"] });
         return;
       }
-      const authorizationUrl = data.payment.authorization_url;
+
+      const authorizationUrl = payment.authorization_url;
       if (authorizationUrl) {
+        resetBookingCheckoutState();
+        void queryClient.invalidateQueries({ queryKey: ["appointments"] });
         window.location.assign(authorizationUrl);
+        return;
       }
+      setCheckoutError(payment.detail || "Unable to start payment. Please try again.");
+      void queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    },
+    onError: (error) => {
+      console.error("Caretekk checkout failed", {
+        message: error instanceof Error ? error.message : "Unknown checkout error",
+      });
+      setCheckoutError(getFriendlyErrorMessage(error, "payments") || "Unable to start payment. Please try again.");
     },
   });
   const submitTransfer = useMutation({
@@ -537,23 +543,66 @@ export function AppointmentsClient() {
   }
 
   function handleContinueToPayment() {
-    if (!selectedDoctorLive || !effectiveTriageSessionId || !scheduledAtFromSelection) {
+    setCheckoutError("");
+    const missingFields = [
+      !selectedDoctorLive ? "doctor" : "",
+      !effectiveTriageSessionId ? "care check" : "",
+      !timingMode ? "consultation type" : "",
+      !scheduledAtFromSelection ? "date and time" : "",
+      !user?.id ? "signed-in patient" : "",
+    ].filter(Boolean);
+
+    const checkoutPayloadPreview = {
+      doctorId: selectedDoctorLive?.id ?? null,
+      selectedDateTime: scheduledAtFromSelection || null,
+      consultationFee: 2000,
+      patientId: user?.id ?? null,
+      consultationType: timingMode,
+      triageSessionId: effectiveTriageSessionId,
+      missingFields,
+    };
+    console.info("Caretekk checkout payload", checkoutPayloadPreview);
+
+    if (missingFields.length) {
+      setCheckoutError(`Please select ${missingFields.join(", ")} before payment.`);
       return;
     }
     const reason = aiSubmittedText || (isConversationResult(aiResultData) ? aiResultData.summary_preview : "") || "AI-assisted doctor consultation";
 
-    form.setValue("doctor", selectedDoctorLive.id, { shouldValidate: true });
+    form.setValue("doctor", selectedDoctorLive!.id, { shouldValidate: true });
     form.setValue("scheduled_at", scheduledAtFromSelection, { shouldValidate: true });
     form.setValue("reason", reason, { shouldValidate: true });
 
     createAppointment.mutate({
-      doctor: selectedDoctorLive.id,
-      triage_session: effectiveTriageSessionId,
+      doctor: selectedDoctorLive!.id,
+      triage_session: effectiveTriageSessionId!,
       scheduled_at: scheduledAtFromSelection,
       reason,
       notes: "",
       callback_url: `${window.location.origin}/appointments`,
     });
+  }
+
+  function resetBookingCheckoutState() {
+    consultationDraft.clearDraft();
+    appointmentDraft.clearDraft();
+    paymentDraft.clearDraft();
+    form.reset();
+    setAiSessionId(null);
+    setAiConversationId(null);
+    setAiSymptomText("");
+    setAiSubmittedText("");
+    setAiSeverity(null);
+    setAiResultRequested(false);
+    setAiStartedByUser(false);
+    setSelectedDoctor(null);
+    setTimingMode(null);
+    setScheduleDay("today");
+    setCustomScheduleDate("");
+    setSelectedSlotHour(null);
+    setDoctorPickerOpen(false);
+    setScheduleSheetOpen(false);
+    setPage(1);
   }
 
   return (
@@ -952,6 +1001,7 @@ export function AppointmentsClient() {
                           type="button"
                           className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
                           onClick={() => {
+                            setCheckoutError("");
                             setSelectedDoctor(doctor);
                             setTimingMode(null);
                             setSelectedSlotHour(null);
@@ -987,6 +1037,11 @@ export function AppointmentsClient() {
         bodyClassName="scroll-pb-40 px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-6"
         footer={
           <div className="grid w-full gap-3">
+            {checkoutError ? (
+              <div className="rounded-[8px] border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+                {checkoutError}
+              </div>
+            ) : null}
             <div className="rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
               <span className="font-semibold text-[#1F2937]">Selected time:</span> {selectedTimeSummary}
             </div>
@@ -1056,6 +1111,7 @@ export function AppointmentsClient() {
                   type="button"
                   disabled={!doctorCanConsultNow}
                   onClick={() => {
+                    setCheckoutError("");
                     if (!doctorCanConsultNow) return;
                     setTimingMode("now");
                     setSelectedSlotHour(null);
@@ -1074,6 +1130,7 @@ export function AppointmentsClient() {
                 <button
                   type="button"
                   onClick={() => {
+                    setCheckoutError("");
                     setTimingMode("later");
                     setSelectedSlotHour(null);
                   }}
@@ -1105,6 +1162,7 @@ export function AppointmentsClient() {
                         key={item.value}
                         type="button"
                         onClick={() => {
+                          setCheckoutError("");
                           setScheduleDay(item.value as "today" | "tomorrow" | "another");
                           setSelectedSlotHour(null);
                         }}
@@ -1125,6 +1183,7 @@ export function AppointmentsClient() {
                         min={toDateInputValue(new Date())}
                         value={customScheduleDate}
                         onChange={(event) => {
+                          setCheckoutError("");
                           setCustomScheduleDate(event.target.value);
                           setSelectedSlotHour(null);
                         }}
@@ -1141,6 +1200,7 @@ export function AppointmentsClient() {
                           disabled={unavailableSlotHours.has(hour)}
                           onClick={() => {
                             if (unavailableSlotHours.has(hour)) return;
+                            setCheckoutError("");
                             setSelectedSlotHour(hour);
                           }}
                           className={cn(
