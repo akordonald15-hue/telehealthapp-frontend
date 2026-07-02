@@ -183,7 +183,8 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   const fullNameValidation = useMemo(() => getFullNameValidation(fullNameValue), [fullNameValue]);
   const fullNameComplete = fullNameValidation.valid;
   const phoneComplete = isValidNigerianPhone(phoneNumberValue);
-  const stepOneDisabled = !fullNameComplete || !phoneComplete;
+  const canContinueStepOne = fullNameComplete && phoneComplete;
+  const stepOneDisabled = !canContinueStepOne;
 
   useEffect(() => {
     if (step !== 0) return;
@@ -206,28 +207,22 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
 
   const goNext = async () => {
     if (step === 0) {
-      const values = form.getValues();
-      const fullName = values.full_name || "";
-      const phoneNumber = values.phone || "";
-      const clickedNameValidation = getFullNameValidation(fullName);
-      const isFullNameValid = clickedNameValidation.valid;
-      const isStep1Valid = isFullNameValid && isValidNigerianPhone(phoneNumber);
-
-      console.log("Continue clicked");
+      console.log("Continue button pressed");
       console.log("currentStep before:", step + 1);
-      console.log("fullName:", fullName);
-      console.log("fullName value:", fullName);
-      console.log("trimmed fullName:", clickedNameValidation.trimmed);
-      console.log("fullName words:", clickedNameValidation.words);
-      console.log("isFullNameValid:", isFullNameValid);
-      console.log("phoneNumber:", phoneNumber);
-      console.log("validation result:", isStep1Valid);
+      console.log("canContinue:", canContinueStepOne);
+      console.log("fullName:", fullNameValue);
+      console.log("fullName value:", fullNameValue);
+      console.log("trimmed fullName:", fullNameValidation.trimmed);
+      console.log("fullName words:", fullNameValidation.words);
+      console.log("isFullNameValid:", fullNameComplete);
+      console.log("phoneNumber:", phoneNumberValue);
+      console.log("validation result:", canContinueStepOne);
 
-      if (!isStep1Valid) {
-        if (!isFullNameValid) {
+      if (!canContinueStepOne) {
+        if (!fullNameComplete) {
           form.setError("full_name", { type: "required", message: "Enter your first and last name." });
         }
-        if (!isValidNigerianPhone(phoneNumber)) {
+        if (!phoneComplete) {
           form.setError("phone", { type: "required", message: "Enter a valid 11-digit Nigerian phone number." });
         }
         return;
@@ -235,7 +230,11 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
 
       form.clearErrors(["full_name", "phone"]);
       setDirection("next");
-      setStep((current) => current + 1);
+      setStep((current) => {
+        const nextStep = current + 1;
+        console.log("moving to step:", nextStep + 1);
+        return nextStep;
+      });
       return;
     }
 
