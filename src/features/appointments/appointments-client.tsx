@@ -1158,8 +1158,8 @@ export function AppointmentsClient() {
               </div>
 
               {!doctorCanConsultNow ? (
-                <Notice title="Doctors are currently offline." tone="neutral">
-                  You can still schedule a consultation for the next available hour.
+                <Notice title="This doctor is currently offline" tone="neutral">
+                  You can schedule a consultation for an available time.
                 </Notice>
               ) : null}
 
