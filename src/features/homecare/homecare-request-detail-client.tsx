@@ -30,6 +30,8 @@ import {
   statusStepState,
 } from "@/features/homecare/homecare-utils";
 
+const HOMECARE_BOTTOM_SAFE_PADDING = "pb-[calc(9rem+env(safe-area-inset-bottom))] sm:pb-[calc(7rem+env(safe-area-inset-bottom))] lg:pb-8";
+
 export function HomeCareRequestDetailClient({ requestId }: { requestId: number }) {
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
@@ -143,7 +145,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
       {requestQuery.isLoading ? (
         <InlineLoader label="Preparing your home care request" />
       ) : request ? (
-        <>
+        <div className={`grid gap-4 ${HOMECARE_BOTTOM_SAFE_PADDING}`}>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.86fr)]">
             <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="flex flex-wrap items-center gap-2">
@@ -338,7 +340,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               )}
             </div>
           </div>
-        </>
+        </div>
       ) : null}
     </Section>
   );

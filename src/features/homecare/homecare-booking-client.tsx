@@ -26,6 +26,8 @@ const HOMECARE_ZONES: Array<{ value: HomeCareZone; label: string }> = [
   { value: "uyo", label: "Uyo" },
 ];
 
+const HOMECARE_BOTTOM_SAFE_PADDING = "pb-[calc(9rem+env(safe-area-inset-bottom))] sm:pb-[calc(7rem+env(safe-area-inset-bottom))] lg:pb-8";
+
 function toIsoOrNull(value: string) {
   if (!value) {
     return null;
@@ -203,7 +205,7 @@ export function HomeCareBookingClient() {
       }
     >
       <form
-        className="ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6"
+        className={`ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6 ${HOMECARE_BOTTOM_SAFE_PADDING}`}
         onSubmit={(event) => {
           event.preventDefault();
           const payload: HomeCareRequestCreate & { callback_url: string } = {
@@ -429,6 +431,7 @@ export function HomeCareBookingClient() {
         onClose={() => setSelectorOpen(false)}
         size="xl"
         closeLabel="Close nurse selector"
+        bodyClassName="pb-[calc(7.5rem+env(safe-area-inset-bottom))] sm:pb-6"
       >
         {nursesQuery.isLoading ? (
           <div className="grid gap-3 md:grid-cols-2">
