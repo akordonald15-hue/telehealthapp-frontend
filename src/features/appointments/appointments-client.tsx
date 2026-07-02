@@ -214,6 +214,7 @@ export function AppointmentsClient() {
   const [aiSeverity, setAiSeverity] = useState<TriageSeverity | null>(null);
   const [aiResultRequested, setAiResultRequested] = useState(false);
   const [aiStartedByUser, setAiStartedByUser] = useState(false);
+  const [completedTriageSessionId, setCompletedTriageSessionId] = useState<number | null>(null);
   const [welcomeAccepted, setWelcomeAccepted] = useState(!firstTimeWelcome);
   const [timingMode, setTimingMode] = useState<ConsultationTimingMode | null>(null);
   const [scheduleDay, setScheduleDay] = useState<"today" | "tomorrow" | "another">("today");
@@ -328,7 +329,7 @@ export function AppointmentsClient() {
   const triageSessionId = Number.isInteger(triageSessionParam) && triageSessionParam > 0 ? triageSessionParam : null;
   const aiResultData = aiResult.data;
   const aiFinished = isConversationResult(aiResultData) && aiResultData.status === "completed";
-  const effectiveTriageSessionId = triageSessionId ?? (aiFinished ? aiSessionId : null);
+  const effectiveTriageSessionId = triageSessionId ?? completedTriageSessionId ?? (aiFinished ? aiSessionId : null);
   const suggestedSpecialty = isConversationResult(aiResultData) ? aiResultData.department : null;
   const triageSymptoms = isConversationResult(aiResultData) ? readableTriageList(aiResultData.extracted_symptoms) : [];
   const doctorItems = useMemo(
@@ -385,7 +386,6 @@ export function AppointmentsClient() {
   }, [scheduleBaseDate, selectedSlotHour, timingMode]);
   const modalBookingReady = Boolean(
     selectedDoctorLive &&
-      effectiveTriageSessionId &&
       timingMode &&
       scheduledAtFromSelection &&
       (timingMode !== "later" || selectedSlotHour === null || !unavailableSlotHours.has(selectedSlotHour)) &&
@@ -429,11 +429,13 @@ export function AppointmentsClient() {
       aiSeverity,
       aiResultRequested,
       aiStartedByUser,
+      completedTriageSessionId,
     }),
-    [aiConversationId, aiResultRequested, aiSessionId, aiSeverity, aiStartedByUser, aiSubmittedText, aiSymptomText],
+    [aiConversationId, aiResultRequested, aiSessionId, aiSeverity, aiStartedByUser, aiSubmittedText, aiSymptomText, completedTriageSessionId],
   );
   const restoreConsultationDraft = useCallback((draft: typeof consultationDraftValue) => {
     setAiSessionId(draft.aiSessionId ?? null);
+    setCompletedTriageSessionId(draft.completedTriageSessionId ?? draft.aiSessionId ?? null);
     setAiConversationId(draft.aiConversationId ?? null);
     setAiSymptomText(draft.aiSymptomText || "");
     setAiSubmittedText(draft.aiSubmittedText || "");
@@ -460,6 +462,7 @@ export function AppointmentsClient() {
       aiSeverity: draft.aiSeverity,
       aiResultRequested: draft.aiResultRequested,
       aiStartedByUser: draft.aiStartedByUser,
+      completedTriageSessionId: draft.completedTriageSessionId,
     }),
   });
   const appointmentDraftKey = user?.id ? `caretekk:draft:consultation-booking:${user.id}` : null;
@@ -478,6 +481,10 @@ export function AppointmentsClient() {
     onRestore: (draft) => {
       if (draft.selectedDoctor) {
         setSelectedDoctor(draft.selectedDoctor);
+      }
+      if (draft.triageSessionId) {
+        setCompletedTriageSessionId(draft.triageSessionId);
+        setAiSessionId(draft.triageSessionId);
       }
       form.reset({
         doctor: draft.doctor || 0,
@@ -513,11 +520,17 @@ export function AppointmentsClient() {
   }, [paymentConfirmed, queryClient]);
 
   useEffect(() => {
-    if (!welcomeAccepted || user?.role !== "patient" || profileIncomplete || triageSessionId || aiSessionId || startAiSession.isPending) {
+    if (aiFinished && aiSessionId) {
+      setCompletedTriageSessionId(aiSessionId);
+    }
+  }, [aiFinished, aiSessionId]);
+
+  useEffect(() => {
+    if (!welcomeAccepted || user?.role !== "patient" || profileIncomplete || triageSessionId || aiSessionId || selectedDoctor || startAiSession.isPending) {
       return;
     }
     startAiSession.mutate();
-  }, [aiSessionId, profileIncomplete, startAiSession, triageSessionId, user?.role, welcomeAccepted]);
+  }, [aiSessionId, profileIncomplete, selectedDoctor, startAiSession, triageSessionId, user?.role, welcomeAccepted]);
 
   useEffect(() => {
     if (!aiFinished || recommendationOpenedRef.current || selectedDoctor) {
@@ -546,7 +559,6 @@ export function AppointmentsClient() {
     setCheckoutError("");
     const missingFields = [
       !selectedDoctorLive ? "doctor" : "",
-      !effectiveTriageSessionId ? "care check" : "",
       !timingMode ? "consultation type" : "",
       !scheduledAtFromSelection ? "date and time" : "",
       !user?.id ? "signed-in patient" : "",
@@ -575,7 +587,7 @@ export function AppointmentsClient() {
 
     createAppointment.mutate({
       doctor: selectedDoctorLive!.id,
-      triage_session: effectiveTriageSessionId!,
+      ...(effectiveTriageSessionId ? { triage_session: effectiveTriageSessionId } : {}),
       scheduled_at: scheduledAtFromSelection,
       reason,
       notes: "",
@@ -595,6 +607,7 @@ export function AppointmentsClient() {
     setAiSeverity(null);
     setAiResultRequested(false);
     setAiStartedByUser(false);
+    setCompletedTriageSessionId(null);
     setSelectedDoctor(null);
     setTimingMode(null);
     setScheduleDay("today");
@@ -610,7 +623,7 @@ export function AppointmentsClient() {
       title={user?.role === "patient" ? "" : isDoctor ? "Consultations" : "Appointments"}
       description={user?.role === "patient" ? "" : isDoctor ? "Open and manage assigned consultations." : undefined}
     >
-      {user?.role === "patient" && !effectiveTriageSessionId ? (
+      {user?.role === "patient" && !effectiveTriageSessionId && !selectedDoctor ? (
         <div className="-mx-4 -mt-5 grid min-h-[calc(100dvh-132px)] gap-5 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_42%,#F8FBFF_100%)] px-4 py-4 pb-6 sm:mx-0 sm:mt-0 sm:rounded-[8px] sm:p-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
               <div className="grid content-start gap-4">
                 {profileIncomplete ? (
