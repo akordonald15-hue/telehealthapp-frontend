@@ -453,9 +453,8 @@ export function HomeCareBookingClient() {
                 name={nurse.display_name}
                 subtitle={nurse.service_type || "Home care"}
                 imageUrl={nurse.profile_image_url}
-                status={nurse.availability_status}
+                status={nurse.availability_status === "available" ? "Available now" : "Offline — schedule for later"}
                 selected={selectedNurse?.id === nurse.id}
-                disabled={nurse.availability_status !== "available"}
                 primaryDetail={nurse.rating ? `Star ${nurse.rating} (${nurse.review_count ?? 0} reviews)` : "No reviews yet"}
                 secondaryDetail={`${nurse.completed_visits ?? 0} completed visits`}
                 actionLabel="Select"

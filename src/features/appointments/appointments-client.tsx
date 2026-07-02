@@ -49,7 +49,7 @@ type ConsultationTimingMode = "now" | "later";
 const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
 const symptomQuickReplies = ["Headache", "Fever", "Cough", "Stomach pain"];
 const hourlyConsultationSlots = Array.from({ length: 10 }, (_, index) => 8 + index);
-const hiddenDoctorNameMarkers = ["test doctor", "doctor smoke invite", "dr no phone smoke", "dr triumoh", "doctor donald ak", "donald ak"];
+const hiddenDoctorNameMarkers = ["test doctor", "doctor smoke invite", "dr no phone smoke", "dr triumoh", "triumoh", "doctor donald ak", "donald ak", "dr ak", "doctor ak"];
 const severityOptions: Array<{ value: TriageSeverity; label: string }> = [
   { value: "mild", label: "Mild" },
   { value: "moderate", label: "Moderate" },
@@ -1111,7 +1111,14 @@ export function AppointmentsClient() {
                         </div>
                       </div>
                       <div className="col-span-2 grid gap-3 sm:col-span-1 sm:min-w-36">
-                        <StatusBadge value={available ? "Available" : "Offline"} />
+                        <span
+                          className={cn(
+                            "inline-flex min-h-8 items-center justify-center rounded-full px-3 text-xs font-semibold",
+                            available ? "bg-[#DBEAFE] text-[#2563EB]" : "bg-slate-100 text-slate-600",
+                          )}
+                        >
+                          {available ? "Available now" : "Offline — schedule for later"}
+                        </span>
                         <span className="text-sm font-semibold text-slate-600">5-10 min</span>
                         <button
                           type="button"
@@ -1149,8 +1156,8 @@ export function AppointmentsClient() {
         showCloseButton={false}
         closeOnOverlayClick={false}
         closeOnEscape={false}
-        className="mt-auto h-[90dvh] max-h-[90dvh] rounded-t-[28px] border-0 sm:mt-auto sm:h-[88dvh] sm:max-h-[88dvh] sm:w-[min(720px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
-        bodyClassName="scroll-pb-40 px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-6"
+        className="mt-auto h-auto max-h-[88dvh] rounded-t-[28px] border-0 sm:mt-auto sm:h-auto sm:max-h-[86dvh] sm:w-[min(720px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
+        bodyClassName="scroll-pb-32 px-4 pb-4 sm:px-6"
         footer={
           <div className="grid w-full gap-3">
             {checkoutError ? (
