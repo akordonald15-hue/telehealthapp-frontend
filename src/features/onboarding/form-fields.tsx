@@ -26,6 +26,7 @@ export function TextField({
   placeholder,
   autoComplete,
   inputMode,
+  onValueChange,
 }: {
   name: Name;
   label: string;
@@ -37,15 +38,18 @@ export function TextField({
   placeholder?: string;
   autoComplete?: string;
   inputMode?: "text" | "tel" | "email" | "numeric";
+  onValueChange?: (value: string) => void;
 }) {
   const {
     register,
     formState: { errors },
   } = useFormContext<OnboardingValues>();
+  const registration = register(name);
 
   return (
     <Field label={label} hint={hint} required={required} error={errorFor(errors, name)}>
       <Input
+        {...registration}
         type={type}
         placeholder={placeholder}
         autoComplete={autoComplete}
@@ -53,7 +57,10 @@ export function TextField({
         readOnly={readOnly}
         className={cn(readOnly && "cursor-not-allowed border-ash-200 bg-white text-ash-800")}
         value={value}
-        {...register(name)}
+        onChange={(event) => {
+          void registration.onChange(event);
+          onValueChange?.(event.target.value);
+        }}
       />
     </Field>
   );

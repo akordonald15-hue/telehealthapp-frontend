@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
@@ -81,6 +81,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"next" | "back">("next");
   const [completed, setCompleted] = useState(false);
+  const [stepOneValues, setStepOneValues] = useState({ fullName: "", phoneNumber: "" });
   const [accountFallback] = useState<Partial<User>>(() => {
     if (typeof window === "undefined") {
       return {};
@@ -95,9 +96,6 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     mode: "onChange",
     reValidateMode: "onChange",
   });
-  const fullNameValue = useWatch({ control: form.control, name: "full_name" }) || "";
-  const phoneNumberValue = useWatch({ control: form.control, name: "phone" }) || "";
-
   // Prefill account fields as soon as auth is ready. The profile request can
   // arrive later, but it should never block the first Continue action.
   useEffect(() => {
@@ -107,11 +105,18 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     };
     if (!source.full_name && !source.phone) return;
     const current = form.getValues();
-    form.reset({
+    const nextValues = {
       ...current,
       full_name: current.full_name || source.full_name,
       phone: current.phone || source.phone,
-    });
+    };
+    form.reset(nextValues);
+    window.setTimeout(() => {
+      setStepOneValues({
+        fullName: nextValues.full_name || "",
+        phoneNumber: nextValues.phone || "",
+      });
+    }, 0);
   }, [accountFallback.full_name, accountFallback.phone, form, user]);
 
   useEffect(() => {
@@ -124,7 +129,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     if (prefilledProfile.current || !profileQuery.data) return;
     const profile = profileQuery.data;
     const current = form.getValues();
-    form.reset({
+    const nextValues = {
       ...current,
       full_name: current.full_name || profile.full_name || "",
       phone: current.phone || profile.phone || "",
@@ -134,7 +139,14 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
         current.gender || (profile.gender as OnboardingValues["gender"]) || ("" as OnboardingValues["gender"]),
       state: current.state || profile.state || "",
       lga: current.lga || profile.lga || "",
-    });
+    };
+    form.reset(nextValues);
+    window.setTimeout(() => {
+      setStepOneValues({
+        fullName: nextValues.full_name || "",
+        phoneNumber: nextValues.phone || "",
+      });
+    }, 0);
     prefilledProfile.current = true;
   }, [profileQuery.data, form]);
 
@@ -166,6 +178,8 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     },
   });
 
+  const fullNameValue = stepOneValues.fullName;
+  const phoneNumberValue = stepOneValues.phoneNumber;
   const fullNameValidation = useMemo(() => getFullNameValidation(fullNameValue), [fullNameValue]);
   const fullNameComplete = fullNameValidation.valid;
   const phoneComplete = isValidNigerianPhone(phoneNumberValue);
@@ -181,7 +195,14 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     console.log(`- Full Name: ${fullNameComplete ? "PASS" : "FAIL (Enter first and last name)"}`);
     console.log(`- Phone Number: ${phoneComplete ? "PASS" : "FAIL (Invalid format)"}`);
     console.log(`- Button Enabled: ${stepOneDisabled ? "FALSE" : "TRUE"}`);
-  }, [fullNameComplete, fullNameValidation, fullNameValue, phoneComplete, step, stepOneDisabled]);
+    console.log({
+      fullName: fullNameValue,
+      phoneNumber: phoneNumberValue,
+      isFullNameValid: fullNameComplete,
+      isPhoneValid: phoneComplete,
+      canContinue: !stepOneDisabled,
+    });
+  }, [fullNameComplete, fullNameValidation, fullNameValue, phoneComplete, phoneNumberValue, step, stepOneDisabled]);
 
   const goNext = async () => {
     if (step === 0) {
@@ -330,7 +351,26 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
           }}
         >
           <div key={step} className={direction === "next" ? "onboarding-step-next" : "onboarding-step-back"}>
-            {step === 0 ? <StepBasicInfo /> : step === 1 ? <StepPersonal /> : <StepLocation />}
+            {step === 0 ? (
+              <StepBasicInfo
+                onFullNameChange={(value) =>
+                  setStepOneValues((current) => ({
+                    ...current,
+                    fullName: value,
+                  }))
+                }
+                onPhoneChange={(value) =>
+                  setStepOneValues((current) => ({
+                    ...current,
+                    phoneNumber: value,
+                  }))
+                }
+              />
+            ) : step === 1 ? (
+              <StepPersonal />
+            ) : (
+              <StepLocation />
+            )}
           </div>
           {/* Allow Enter-to-submit without a visible button inside the scroll area */}
           <button type="submit" className="hidden" aria-hidden="true" tabIndex={-1} />
