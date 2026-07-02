@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import { StepBasicInfo } from "./steps/step-basic-info";
 import { StepLocation } from "./steps/step-location";
 import { StepPersonal } from "./steps/step-personal";
 import {
-  hasValidFullName,
+  getFullNameValidation,
   isValidNigerianPhone,
   onboardingSchema,
   STEP_FIELDS,
@@ -166,33 +166,44 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
     },
   });
 
-  const fullNameComplete = hasValidFullName(fullNameValue);
+  const fullNameValidation = useMemo(() => getFullNameValidation(fullNameValue), [fullNameValue]);
+  const fullNameComplete = fullNameValidation.valid;
   const phoneComplete = isValidNigerianPhone(phoneNumberValue);
   const stepOneDisabled = !fullNameComplete || !phoneComplete;
 
   useEffect(() => {
     if (step !== 0) return;
+    console.log("fullName value:", fullNameValue);
+    console.log("trimmed fullName:", fullNameValidation.trimmed);
+    console.log("fullName words:", fullNameValidation.words);
+    console.log("isFullNameValid:", fullNameValidation.valid);
     console.log("Validation Status:");
     console.log(`- Full Name: ${fullNameComplete ? "PASS" : "FAIL (Enter first and last name)"}`);
     console.log(`- Phone Number: ${phoneComplete ? "PASS" : "FAIL (Invalid format)"}`);
     console.log(`- Button Enabled: ${stepOneDisabled ? "FALSE" : "TRUE"}`);
-  }, [fullNameComplete, phoneComplete, step, stepOneDisabled]);
+  }, [fullNameComplete, fullNameValidation, fullNameValue, phoneComplete, step, stepOneDisabled]);
 
   const goNext = async () => {
     if (step === 0) {
       const values = form.getValues();
       const fullName = values.full_name || "";
       const phoneNumber = values.phone || "";
-      const isStep1Valid = hasValidFullName(fullName) && isValidNigerianPhone(phoneNumber);
+      const clickedNameValidation = getFullNameValidation(fullName);
+      const isFullNameValid = clickedNameValidation.valid;
+      const isStep1Valid = isFullNameValid && isValidNigerianPhone(phoneNumber);
 
       console.log("Continue clicked");
       console.log("currentStep before:", step + 1);
       console.log("fullName:", fullName);
+      console.log("fullName value:", fullName);
+      console.log("trimmed fullName:", clickedNameValidation.trimmed);
+      console.log("fullName words:", clickedNameValidation.words);
+      console.log("isFullNameValid:", isFullNameValid);
       console.log("phoneNumber:", phoneNumber);
       console.log("validation result:", isStep1Valid);
 
       if (!isStep1Valid) {
-        if (!hasValidFullName(fullName)) {
+        if (!isFullNameValid) {
           form.setError("full_name", { type: "required", message: "Enter your first and last name." });
         }
         if (!isValidNigerianPhone(phoneNumber)) {
@@ -346,7 +357,7 @@ function StepOneRequirements({
     <div className="rounded-[8px] border border-ash-200 bg-ash-50 px-4 py-3 text-sm">
       <p className="font-semibold text-ash-800">Complete the following to continue:</p>
       <div className="mt-2 grid gap-1.5 text-ash-600">
-        <RequirementItem complete={fullNameComplete} completeText="Full name completed" pendingText="Enter your first and last name" />
+        <RequirementItem complete={fullNameComplete} completeText="Enter your first and last name" pendingText="Enter your first and last name" />
         <RequirementItem complete={phoneComplete} completeText="Valid phone number" pendingText="Enter a valid phone number" />
       </div>
     </div>

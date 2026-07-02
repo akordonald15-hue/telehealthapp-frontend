@@ -16,8 +16,20 @@ export const GENDER_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
+export function getFullNameValidation(value: string) {
+  const trimmed = value.trim();
+  const words = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
+  const wordsAreLettersOnly = words.every((word) => /^[\p{L}]+$/u.test(word));
+
+  return {
+    trimmed,
+    words,
+    valid: words.length >= 2 && wordsAreLettersOnly,
+  };
+}
+
 export function hasValidFullName(value: string) {
-  return value.trim().split(/\s+/).filter(Boolean).length >= 2;
+  return getFullNameValidation(value).valid;
 }
 
 export function isValidNigerianPhone(value: string) {
