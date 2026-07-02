@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Home, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,6 @@ function toIsoOrNull(value: string) {
 }
 
 export function HomeCareBookingClient() {
-  const router = useRouter();
   const userQuery = useCurrentUser();
   const [zone, setZone] = useState<HomeCareZone | "">("");
   const [selectedServiceId, setSelectedServiceId] = useState<number | "">("");
@@ -51,6 +49,7 @@ export function HomeCareBookingClient() {
   const [assignmentMode, setAssignmentMode] = useState<"auto" | "choose">("auto");
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [manualPayment, setManualPayment] = useState<PaymentInitiation | null>(null);
+  const [checkoutError, setCheckoutError] = useState("");
 
   const profileQuery = useQuery({
     queryKey: ["profile", "me", "patient", "homecare-booking"],
@@ -83,6 +82,9 @@ export function HomeCareBookingClient() {
 
   const createRequest = useMutation({
     mutationFn: (body: HomeCareRequestCreate & { callback_url: string }) => homeCareApi.bookRequest(body),
+    onMutate: () => {
+      setCheckoutError("");
+    },
     onSuccess: (response) => {
       homecareDraft.clearDraft();
       paymentDraft.clearDraft();
@@ -94,7 +96,10 @@ export function HomeCareBookingClient() {
         window.location.assign(response.payment.authorization_url);
         return;
       }
-      router.replace(`/home-care/requests/${response.request.id}`);
+      setCheckoutError("Unable to start payment. Please try again.");
+    },
+    onError: (error) => {
+      setCheckoutError(getFriendlyErrorMessage(error, "payments"));
     },
   });
   const submitTransfer = useMutation({
@@ -418,6 +423,10 @@ export function HomeCareBookingClient() {
           </Notice>
         ) : null}
 
+        {checkoutError ? (
+          <Notice title={checkoutError} tone="warning" />
+        ) : null}
+
         <Button type="submit" disabled={createRequest.isPending || !canSubmit}>
           {createRequest.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           {createRequest.isPending ? "Preparing checkout..." : "Continue to Paystack"}
@@ -456,7 +465,11 @@ export function HomeCareBookingClient() {
                 status={nurse.availability_status === "available" ? "Available now" : "Offline — schedule for later"}
                 selected={selectedNurse?.id === nurse.id}
                 primaryDetail={nurse.rating ? `Star ${nurse.rating} (${nurse.review_count ?? 0} reviews)` : "No reviews yet"}
-                secondaryDetail={`${nurse.completed_visits ?? 0} completed visits`}
+                secondaryDetail={
+                  nurse.availability_status === "available"
+                    ? `${nurse.completed_visits ?? 0} completed visits`
+                    : `Offline - schedule for later | ${nurse.completed_visits ?? 0} completed visits`
+                }
                 actionLabel="Select"
                 onSelect={() => {
                   setAssignmentMode("choose");

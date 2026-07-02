@@ -316,6 +316,9 @@ export function AppointmentsClient() {
   });
   const createAppointment = useMutation({
     mutationFn: appointmentsApi.book,
+    onMutate: () => {
+      setCheckoutError("");
+    },
     onSuccess: (data) => {
       const payment = data.payment as PaymentInitiation & { detail?: string };
       console.info("Caretekk checkout response", {
@@ -1192,16 +1195,16 @@ export function AppointmentsClient() {
         }
       >
         {selectedDoctorLive ? (
-          <div className="grid gap-5">
+          <div className="grid gap-3">
             <div className="mx-auto h-1.5 w-16 rounded-full bg-slate-200" aria-hidden="true" />
-            <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+            <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-3">
               <p className="text-sm font-semibold text-[#1F2937]">Is this the doctor you want?</p>
-              <div className="mt-4 grid grid-cols-[72px_minmax(0,1fr)] gap-4">
-                <div className="relative h-[72px] w-[72px] overflow-hidden rounded-full bg-[#EFF6FF] text-[#2563EB]">
+              <div className="mt-3 grid grid-cols-[56px_minmax(0,1fr)] gap-3">
+                <div className="relative h-14 w-14 overflow-hidden rounded-full bg-[#EFF6FF] text-[#2563EB]">
                   {selectedDoctorLive.profile_image_url ? (
-                    <Image src={selectedDoctorLive.profile_image_url} alt="" width={88} height={88} className="h-full w-full object-cover" unoptimized />
+                    <Image src={selectedDoctorLive.profile_image_url} alt="" width={64} height={64} className="h-full w-full object-cover" unoptimized />
                   ) : (
-                    <span className="grid h-full w-full place-items-center text-lg font-bold">{initials(selectedDoctorLive.display_name)}</span>
+                    <span className="grid h-full w-full place-items-center text-base font-bold">{initials(selectedDoctorLive.display_name)}</span>
                   )}
                   <span
                     className={cn(
@@ -1213,23 +1216,21 @@ export function AppointmentsClient() {
                 <div className="min-w-0">
                   <p className="truncate text-base font-semibold text-[#1F2937]">{selectedDoctorLive.display_name}</p>
                   <p className="mt-1 text-sm text-slate-600">General Physician</p>
-                  <p className="mt-2 line-clamp-1 text-sm text-slate-600">{oneLineBio(selectedDoctorLive)}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
                     <span className="rounded-full bg-white px-3 py-1">★ {selectedDoctorLive.rating ?? "New"} ({selectedDoctorLive.review_count ?? 0} reviews)</span>
-                    <span className="rounded-full bg-white px-3 py-1">English</span>
                     <span className="rounded-full bg-white px-3 py-1">Chat</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="grid gap-4 rounded-[8px] border border-slate-100 bg-white p-4">
+            <div className="grid gap-3 rounded-[8px] border border-slate-100 bg-white p-3">
               <div>
                 <p className="text-base font-semibold text-[#1F2937]">Choose consultation time</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">You can start now if the doctor is available, or schedule an hourly slot.</p>
+                <p className="mt-1 text-sm leading-5 text-slate-600">Start now if available, or schedule an hourly slot.</p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
                   disabled={!doctorCanConsultNow}
@@ -1240,13 +1241,13 @@ export function AppointmentsClient() {
                     setSelectedSlotHour(null);
                   }}
                   className={cn(
-                    "rounded-[8px] border p-4 text-left transition active:scale-[0.99]",
+                    "rounded-[8px] border p-3 text-left transition active:scale-[0.99]",
                     timingMode === "now" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
                     !doctorCanConsultNow && "cursor-not-allowed opacity-55",
                   )}
                 >
                   <p className="font-semibold text-[#1F2937]">Consult now</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                  <p className="mt-1 text-sm leading-5 text-slate-600">
                     {doctorCanConsultNow ? "Start checkout for an immediate chat consultation." : "Available between 8:00 AM and 6:00 PM."}
                   </p>
                 </button>
@@ -1258,12 +1259,12 @@ export function AppointmentsClient() {
                     setSelectedSlotHour(null);
                   }}
                   className={cn(
-                    "rounded-[8px] border p-4 text-left transition active:scale-[0.99]",
+                    "rounded-[8px] border p-3 text-left transition active:scale-[0.99]",
                     timingMode === "later" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
                   )}
                 >
                   <p className="font-semibold text-[#1F2937]">Schedule for later</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Pick a time between 8:00 AM and 6:00 PM.</p>
+                  <p className="mt-1 text-sm leading-5 text-slate-600">Pick a time between 8:00 AM and 6:00 PM.</p>
                 </button>
               </div>
 
@@ -1327,7 +1328,7 @@ export function AppointmentsClient() {
                             setSelectedSlotHour(hour);
                           }}
                           className={cn(
-                            "min-h-14 rounded-[8px] border px-3 text-sm font-semibold transition active:scale-[0.98]",
+                            "min-h-12 rounded-[8px] border px-3 text-sm font-semibold transition active:scale-[0.98]",
                             selectedSlotHour === hour ? "border-[#2563EB] bg-[#2563EB] text-white" : "border-slate-200 bg-white text-[#1F2937]",
                             unavailableSlotHours.has(hour) && "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400 line-through active:scale-100",
                           )}
