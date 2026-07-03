@@ -114,15 +114,39 @@ export function HomeCareBookingClient() {
   const effectiveContactName = contactName || userQuery.data?.full_name || profileQuery.data?.full_name || "";
   const effectiveContactPhone = contactPhone || userQuery.data?.phone || profileQuery.data?.phone || "";
   const effectiveAddress = address || profileQuery.data?.address || "";
-  const canSubmit = Boolean(
-    zone &&
-      selectedService &&
-      effectiveContactName.trim() &&
-      effectiveContactPhone.trim() &&
-      effectiveAddress.trim() &&
-      preferredTime &&
-      (assignmentMode === "auto" || selectedNurse),
-  );
+  const bookingValidation = useMemo(() => {
+    const reasons: string[] = [];
+    if (!zone) {
+      reasons.push("Select a location.");
+    }
+    if (!selectedService) {
+      reasons.push("Choose a home care service.");
+    }
+    if (!effectiveContactName.trim()) {
+      reasons.push("Enter the contact name.");
+    }
+    if (!effectiveContactPhone.trim()) {
+      reasons.push("Enter the contact phone number.");
+    }
+    if (!effectiveAddress.trim()) {
+      reasons.push("Enter the service address.");
+    }
+    if (!preferredTime) {
+      reasons.push("Choose a preferred visit time.");
+    }
+    if (selectedService && Number(selectedService.price) <= 0) {
+      reasons.push("Choose a service with a valid price.");
+    }
+    if (assignmentMode === "choose" && !selectedNurse) {
+      reasons.push("Select a nurse or choose automatic assignment.");
+    }
+    return {
+      disabledReason: reasons[0] ?? "",
+      isFormValid: reasons.length === 0,
+      reasons,
+    };
+  }, [assignmentMode, effectiveAddress, effectiveContactName, effectiveContactPhone, preferredTime, selectedNurse, selectedService, zone]);
+  const canSubmit = bookingValidation.isFormValid;
   const homecareDraftValue = useMemo(
     () => ({
       zone,
@@ -228,6 +252,24 @@ export function HomeCareBookingClient() {
             care_notes: notes.trim(),
             callback_url: `${window.location.origin}/home-care/requests`,
           };
+          if (process.env.NODE_ENV !== "production") {
+            console.info("Caretekk home care checkout", {
+              selectedNurse,
+              location: zone,
+              service: selectedService,
+              address: effectiveAddress,
+              preferredTime,
+              amount: selectedService?.price ?? null,
+              isFormValid: bookingValidation.isFormValid,
+              disabledReason: bookingValidation.disabledReason,
+              paymentLoading: createRequest.isPending,
+              bookingPayload: payload,
+            });
+          }
+          if (!bookingValidation.isFormValid) {
+            setCheckoutError(bookingValidation.disabledReason || "Complete the required booking details before continuing.");
+            return;
+          }
           createRequest.mutate(payload);
         }}
       >
@@ -319,6 +361,11 @@ export function HomeCareBookingClient() {
         {servicesQuery.isError ? (
           <Notice title="We couldn't load services." tone="warning">
             {getFriendlyErrorMessage(servicesQuery.error, "homeCare")}
+          </Notice>
+        ) : null}
+        {profileQuery.isError ? (
+          <Notice title="Saved profile details are temporarily unavailable." tone="neutral">
+            You can still continue by entering the visit contact and address below.
           </Notice>
         ) : null}
 
@@ -425,6 +472,17 @@ export function HomeCareBookingClient() {
 
         {checkoutError ? (
           <Notice title={checkoutError} tone="warning" />
+        ) : null}
+
+        {!canSubmit ? (
+          <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
+            <p className="font-semibold text-[#1F2937]">Complete these details to continue:</p>
+            <ul className="mt-2 grid gap-1">
+              {bookingValidation.reasons.map((reason) => (
+                <li key={reason}>{reason}</li>
+              ))}
+            </ul>
+          </div>
         ) : null}
 
         <Button type="submit" disabled={createRequest.isPending || !canSubmit}>
