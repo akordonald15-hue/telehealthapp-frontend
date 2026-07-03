@@ -166,7 +166,7 @@ export function HomeCareBookingClient() {
   });
 
   const nurseItems = nursesQuery.data?.results ?? [];
-  const slotItems = useMemo(() => slotsQuery.data?.results ?? [], [slotsQuery.data?.results]);
+  const slotItems = useMemo(() => (slotsQuery.data?.results ?? []).filter((slot) => slot.is_available), [slotsQuery.data?.results]);
   const selectedSlot = useMemo(() => {
     const selectedTime = slotTimestamp(preferredTime);
     if (selectedTime === null) {
@@ -591,11 +591,10 @@ export function HomeCareBookingClient() {
                     <button
                       key={slot.starts_at}
                       type="button"
-                      disabled={!slot.is_available}
                       className={[
                         "min-h-11 rounded-[8px] border px-3 text-sm font-semibold transition",
                         selected ? "border-[#2563EB] bg-[#DBEAFE] text-[#1D4ED8]" : "border-slate-200 bg-white text-[#1F2937]",
-                        !slot.is_available ? "cursor-not-allowed border-slate-100 bg-slate-100 text-slate-400" : "hover:border-[#2563EB]",
+                        "hover:border-[#2563EB]",
                       ].join(" ")}
                       onClick={() => {
                         setPreferredTime(slot.starts_at);
@@ -603,7 +602,6 @@ export function HomeCareBookingClient() {
                       }}
                     >
                       {slot.label}
-                      {!slot.is_available ? <span className="mt-0.5 block text-[10px] font-semibold">Booked</span> : null}
                     </button>
                   );
                 })}
