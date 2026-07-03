@@ -99,7 +99,7 @@ export function HomeCareBookingClient() {
       setCheckoutError("Unable to start payment. Please try again.");
     },
     onError: (error) => {
-      setCheckoutError(getFriendlyErrorMessage(error, "payments"));
+      setCheckoutError(getFriendlyErrorMessage(error, "paymentCheckout"));
     },
   });
   const submitTransfer = useMutation({
