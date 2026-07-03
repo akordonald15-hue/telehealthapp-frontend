@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Home, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -97,7 +97,29 @@ export function HomeCareBookingClient() {
 
   const slotsQuery = useQuery({
     queryKey: ["home-care", "available-slots", selectedNurse?.id, preferredDate],
-    queryFn: () => homeCareApi.availableSlots({ nurse_id: selectedNurse?.id as number, date: preferredDate }),
+    queryFn: async () => {
+      const query = { nurse_id: selectedNurse?.id as number, date: preferredDate };
+      if (process.env.NODE_ENV !== "production") {
+        console.info("Caretekk home care slots request", {
+          nurseId: selectedNurse?.id ?? null,
+          serviceId: selectedServiceId || null,
+          visitDate: preferredDate,
+          location: zone || null,
+          slotsApiUrl: `/home-care/available-slots/?nurse_id=${query.nurse_id}&date=${query.date}`,
+          query,
+        });
+      }
+      const response = await homeCareApi.availableSlots(query);
+      if (process.env.NODE_ENV !== "production") {
+        console.info("Caretekk home care slots response", {
+          nurseId: query.nurse_id,
+          visitDate: query.date,
+          count: response.results.length,
+          response,
+        });
+      }
+      return response;
+    },
     enabled: userQuery.data?.role === "patient" && Boolean(selectedNurse?.id && preferredDate),
   });
 
@@ -155,6 +177,20 @@ export function HomeCareBookingClient() {
   const effectiveContactName = contactName || userQuery.data?.full_name || profileQuery.data?.full_name || "";
   const effectiveContactPhone = contactPhone || userQuery.data?.phone || profileQuery.data?.phone || "";
   const effectiveAddress = address || profileQuery.data?.address || "";
+
+  useEffect(() => {
+    if (!slotsQuery.isError || process.env.NODE_ENV === "production") {
+      return;
+    }
+    console.error("Caretekk home care slots failed", {
+      nurseId: selectedNurse?.id ?? null,
+      serviceId: selectedServiceId || null,
+      visitDate: preferredDate,
+      location: zone || null,
+      slotsApiUrl: selectedNurse?.id ? `/home-care/available-slots/?nurse_id=${selectedNurse.id}&date=${preferredDate}` : null,
+      error: slotsQuery.error,
+    });
+  }, [preferredDate, selectedNurse?.id, selectedServiceId, slotsQuery.error, slotsQuery.isError, zone]);
   const bookingValidation = useMemo(() => {
     const reasons: string[] = [];
     if (!zone) {
@@ -531,6 +567,13 @@ export function HomeCareBookingClient() {
             ) : slotsQuery.isError ? (
               <Notice title="We couldn't load available slots." tone="warning">
                 Please try again before continuing to Paystack.
+                <button
+                  type="button"
+                  className="ml-2 font-semibold text-[#2563EB] underline"
+                  onClick={() => slotsQuery.refetch()}
+                >
+                  Try again
+                </button>
               </Notice>
             ) : slotsQuery.isLoading ? (
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -538,6 +581,8 @@ export function HomeCareBookingClient() {
                   <div key={index} className="h-11 animate-pulse rounded-[8px] bg-slate-100" />
                 ))}
               </div>
+            ) : slotItems.length === 0 ? (
+              <p className="mt-3 rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">No slots available for this date.</p>
             ) : (
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {slotItems.map((slot) => {
