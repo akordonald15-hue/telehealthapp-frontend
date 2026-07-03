@@ -588,6 +588,13 @@ export type HomeCareBookingResponse = {
   payment: PaymentInitiation;
 };
 
+export type HomeCareAvailableSlot = {
+  starts_at: string;
+  hour: number;
+  label: string;
+  is_available: boolean;
+};
+
 export type Refund = {
   id: number;
   payment: number;

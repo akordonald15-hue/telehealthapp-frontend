@@ -15,6 +15,7 @@ import type {
   DetailResponse,
   DoctorProfile,
   HomeCareAssignment,
+  HomeCareAvailableSlot,
   HomeCareBookingResponse,
   HomeCareRating,
   HomeCareRequestCreate,
@@ -202,6 +203,8 @@ export const homeCareApi = {
     apiList<HomeCareService>("/home-care/services/", query),
   availableNurses: (query?: { page?: number; page_size?: number; service_type?: string; service_id?: number; zone?: string; search?: string }) =>
     apiList<ProviderNurse>("/home-care/available-nurses/", query),
+  availableSlots: (query: { nurse_id: number; date: string }) =>
+    apiRequest<{ results: HomeCareAvailableSlot[] }>(`/home-care/available-slots/?${new URLSearchParams({ nurse_id: String(query.nurse_id), date: query.date }).toString()}`),
   requests: (query?: { page?: number; page_size?: number }) => apiList<HomeCareRequestListItem>("/home-care/requests/", query),
   bookRequest: (body: HomeCareRequestCreate & { callback_url: string }) =>
     apiRequest<HomeCareBookingResponse>("/home-care/requests/book/", { method: "POST", body }),

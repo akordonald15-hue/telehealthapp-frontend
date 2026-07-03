@@ -13,6 +13,7 @@ import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
 import { ProviderPickerCard } from "@/features/providers/provider-picker-card";
+import { ApiError, extractErrorMessage } from "@/lib/api/client";
 import { homeCareApi, paymentsApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
@@ -27,12 +28,25 @@ const HOMECARE_ZONES: Array<{ value: HomeCareZone; label: string }> = [
 
 const HOMECARE_BOTTOM_SAFE_PADDING = "pb-[calc(9rem+env(safe-area-inset-bottom))] sm:pb-[calc(7rem+env(safe-area-inset-bottom))] lg:pb-8";
 
-function toIsoOrNull(value: string) {
-  if (!value) {
-    return null;
-  }
+function todayDateValue() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+function slotTimestamp(value: string) {
+  const time = new Date(value).getTime();
+  return Number.isNaN(time) ? null : time;
+}
+
+function isValidHourlyHomecareSlot(value: string) {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+  const hour = date.getHours();
+  return hour >= 8 && hour <= 19 && date.getMinutes() === 0 && date.getSeconds() === 0;
 }
 
 export function HomeCareBookingClient() {
@@ -43,6 +57,7 @@ export function HomeCareBookingClient() {
   const [contactPhone, setContactPhone] = useState("");
   const [address, setAddress] = useState("");
   const [landmark, setLandmark] = useState("");
+  const [preferredDate, setPreferredDate] = useState(todayDateValue);
   const [preferredTime, setPreferredTime] = useState("");
   const [notes, setNotes] = useState("");
   const [selectedNurse, setSelectedNurse] = useState<ProviderNurse | null>(null);
@@ -80,12 +95,26 @@ export function HomeCareBookingClient() {
     enabled: userQuery.data?.role === "patient" && Boolean(zone && selectedServiceId),
   });
 
+  const slotsQuery = useQuery({
+    queryKey: ["home-care", "available-slots", selectedNurse?.id, preferredDate],
+    queryFn: () => homeCareApi.availableSlots({ nurse_id: selectedNurse?.id as number, date: preferredDate }),
+    enabled: userQuery.data?.role === "patient" && Boolean(selectedNurse?.id && preferredDate),
+  });
+
   const createRequest = useMutation({
     mutationFn: (body: HomeCareRequestCreate & { callback_url: string }) => homeCareApi.bookRequest(body),
     onMutate: () => {
       setCheckoutError("");
     },
     onSuccess: (response) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.info("Caretekk home care checkout response", {
+          payment: response.payment,
+          request: response.request,
+          authorizationUrl: response.payment.authorization_url,
+          finalNavigationDecision: response.payment.authorization_url ? "open_paystack" : response.payment.provider === "bank_transfer" ? "show_bank_transfer" : "show_error",
+        });
+      }
       homecareDraft.clearDraft();
       paymentDraft.clearDraft();
       if (response.payment.provider === "bank_transfer") {
@@ -99,7 +128,11 @@ export function HomeCareBookingClient() {
       setCheckoutError("Unable to start payment. Please try again.");
     },
     onError: (error) => {
-      setCheckoutError(getFriendlyErrorMessage(error, "paymentCheckout"));
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Caretekk home care checkout failed", error);
+      }
+      const backendMessage = error instanceof ApiError ? extractErrorMessage(error.payload) : "";
+      setCheckoutError(backendMessage || getFriendlyErrorMessage(error, "paymentCheckout"));
     },
   });
   const submitTransfer = useMutation({
@@ -111,6 +144,14 @@ export function HomeCareBookingClient() {
   });
 
   const nurseItems = nursesQuery.data?.results ?? [];
+  const slotItems = useMemo(() => slotsQuery.data?.results ?? [], [slotsQuery.data?.results]);
+  const selectedSlot = useMemo(() => {
+    const selectedTime = slotTimestamp(preferredTime);
+    if (selectedTime === null) {
+      return null;
+    }
+    return slotItems.find((slot) => slotTimestamp(slot.starts_at) === selectedTime) ?? null;
+  }, [preferredTime, slotItems]);
   const effectiveContactName = contactName || userQuery.data?.full_name || profileQuery.data?.full_name || "";
   const effectiveContactPhone = contactPhone || userQuery.data?.phone || profileQuery.data?.phone || "";
   const effectiveAddress = address || profileQuery.data?.address || "";
@@ -131,21 +172,30 @@ export function HomeCareBookingClient() {
     if (!effectiveAddress.trim()) {
       reasons.push("Enter the service address.");
     }
-    if (!preferredTime) {
-      reasons.push("Choose a preferred visit time.");
+    if (!selectedNurse) {
+      reasons.push("Select a nurse.");
+    }
+    if (!preferredDate) {
+      reasons.push("Choose a visit date.");
+    }
+    if (!preferredTime || !isValidHourlyHomecareSlot(preferredTime)) {
+      reasons.push("Choose one of the available hourly time slots.");
+    }
+    if (selectedNurse && preferredDate && slotsQuery.isError) {
+      reasons.push("We couldn't load available time slots. Please try again.");
+    }
+    if (preferredTime && slotItems.length && (!selectedSlot || !selectedSlot.is_available)) {
+      reasons.push("This time slot is no longer available. Please choose another time.");
     }
     if (selectedService && Number(selectedService.price) <= 0) {
       reasons.push("Choose a service with a valid price.");
-    }
-    if (assignmentMode === "choose" && !selectedNurse) {
-      reasons.push("Select a nurse or choose automatic assignment.");
     }
     return {
       disabledReason: reasons[0] ?? "",
       isFormValid: reasons.length === 0,
       reasons,
     };
-  }, [assignmentMode, effectiveAddress, effectiveContactName, effectiveContactPhone, preferredTime, selectedNurse, selectedService, zone]);
+  }, [effectiveAddress, effectiveContactName, effectiveContactPhone, preferredDate, preferredTime, selectedNurse, selectedService, selectedSlot, slotItems.length, slotsQuery.isError, zone]);
   const canSubmit = bookingValidation.isFormValid;
   const homecareDraftValue = useMemo(
     () => ({
@@ -155,12 +205,13 @@ export function HomeCareBookingClient() {
       contactPhone,
       address,
       landmark,
+      preferredDate,
       preferredTime,
       notes,
       selectedNurse,
       assignmentMode,
     }),
-    [address, assignmentMode, contactName, contactPhone, landmark, notes, preferredTime, selectedNurse, selectedServiceId, zone],
+    [address, assignmentMode, contactName, contactPhone, landmark, notes, preferredDate, preferredTime, selectedNurse, selectedServiceId, zone],
   );
   const restoreHomecareDraft = useCallback((draft: typeof homecareDraftValue) => {
     setZone(draft.zone || "");
@@ -169,7 +220,17 @@ export function HomeCareBookingClient() {
     setContactPhone(draft.contactPhone || "");
     setAddress(draft.address || "");
     setLandmark(draft.landmark || "");
-    setPreferredTime(draft.preferredTime || "");
+    const restoredTime = draft.preferredTime || "";
+    if (restoredTime && isValidHourlyHomecareSlot(restoredTime)) {
+      const restoredDate = new Date(restoredTime);
+      const month = String(restoredDate.getMonth() + 1).padStart(2, "0");
+      const day = String(restoredDate.getDate()).padStart(2, "0");
+      setPreferredDate(draft.preferredDate || `${restoredDate.getFullYear()}-${month}-${day}`);
+      setPreferredTime(restoredTime);
+    } else {
+      setPreferredDate(draft.preferredDate || todayDateValue());
+      setPreferredTime("");
+    }
     setNotes(draft.notes || "");
     setSelectedNurse(draft.selectedNurse || null);
     setAssignmentMode(draft.assignmentMode || "auto");
@@ -189,6 +250,7 @@ export function HomeCareBookingClient() {
           draft.contactPhone.trim() ||
           draft.address.trim() ||
           draft.landmark.trim() ||
+          draft.preferredDate ||
           draft.preferredTime ||
           draft.notes.trim() ||
           draft.selectedNurse,
@@ -200,6 +262,7 @@ export function HomeCareBookingClient() {
       contactPhone: draft.contactPhone,
       address: draft.address,
       landmark: draft.landmark,
+      preferredDate: draft.preferredDate,
       preferredTime: draft.preferredTime,
       notes: draft.notes,
       selectedNurse: draft.selectedNurse,
@@ -242,12 +305,12 @@ export function HomeCareBookingClient() {
             referral: null,
             service: typeof selectedServiceId === "number" ? selectedServiceId : null,
             service_zone: zone,
-            preferred_nurse: assignmentMode === "choose" ? selectedNurse?.id ?? null : null,
+            preferred_nurse: selectedNurse?.id ?? null,
             contact_name_snapshot: effectiveContactName.trim(),
             contact_phone_snapshot: effectiveContactPhone.trim(),
             service_address_snapshot: effectiveAddress.trim(),
             service_location_notes: landmark.trim(),
-            requested_window_start: toIsoOrNull(preferredTime),
+            requested_window_start: selectedSlot?.starts_at ?? preferredTime ?? null,
             requested_window_end: null,
             care_notes: notes.trim(),
             callback_url: `${window.location.origin}/home-care/requests`,
@@ -258,7 +321,10 @@ export function HomeCareBookingClient() {
               location: zone,
               service: selectedService,
               address: effectiveAddress,
+              date: preferredDate,
+              timeSlot: selectedSlot,
               preferredTime,
+              availableSlots: slotsQuery.data,
               amount: selectedService?.price ?? null,
               isFormValid: bookingValidation.isFormValid,
               disabledReason: bookingValidation.disabledReason,
@@ -325,6 +391,7 @@ export function HomeCareBookingClient() {
                 setZone(event.target.value as HomeCareZone | "");
                 setSelectedServiceId("");
                 setSelectedNurse(null);
+                setPreferredTime("");
               }}
               className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
               required
@@ -343,6 +410,7 @@ export function HomeCareBookingClient() {
               onChange={(event) => {
                 setSelectedServiceId(event.target.value ? Number(event.target.value) : "");
                 setSelectedNurse(null);
+                setPreferredTime("");
               }}
               className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
               disabled={!zone || servicesQuery.isLoading}
@@ -377,39 +445,26 @@ export function HomeCareBookingClient() {
           </div>
         ) : null}
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            className={[
-              "rounded-[18px] border px-4 py-4 text-left transition",
-              assignmentMode === "auto" ? "border-[var(--primary)] bg-[var(--primary-soft)]" : "border-slate-200 bg-slate-50",
-            ].join(" ")}
-            onClick={() => {
-              setAssignmentMode("auto");
-              setSelectedNurse(null);
-            }}
-          >
-            <span className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
-              <CheckCircle2 className="h-4 w-4 text-[var(--primary)]" />
-              Assign any available nurse
-            </span>
-            <span className="mt-1 block text-sm text-slate-600">Recommended. Caretekk matches by availability, service, zone, and workload.</span>
-          </button>
-          <button
-            type="button"
-            className={[
-              "rounded-[18px] border px-4 py-4 text-left transition",
-              assignmentMode === "choose" ? "border-[var(--primary)] bg-[var(--primary-soft)]" : "border-slate-200 bg-slate-50",
-            ].join(" ")}
-            onClick={() => {
-              setAssignmentMode("choose");
-              setSelectorOpen(Boolean(zone && selectedService));
-            }}
-          >
-            <span className="text-sm font-semibold text-[#1F2937]">Choose nurse</span>
-            <span className="mt-1 block text-sm text-slate-600">{selectedNurse ? selectedNurse.display_name : "Select from available nurses."}</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          className={[
+            "rounded-[18px] border px-4 py-4 text-left transition",
+            selectedNurse ? "border-[var(--primary)] bg-[var(--primary-soft)]" : "border-slate-200 bg-slate-50",
+          ].join(" ")}
+          onClick={() => {
+            setAssignmentMode("choose");
+            setSelectorOpen(Boolean(zone && selectedService));
+            setPreferredTime("");
+          }}
+        >
+          <span className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
+            <CheckCircle2 className="h-4 w-4 text-[var(--primary)]" />
+            {selectedNurse ? selectedNurse.display_name : "Choose nurse"}
+          </span>
+          <span className="mt-1 block text-sm text-slate-600">
+            Select a nurse first so Caretekk can show only that nurse&apos;s available hourly slots.
+          </span>
+        </button>
 
         {assignmentMode === "choose" && selectedNurse ? (
           <div className="ct-soft-panel flex items-center justify-between gap-3 rounded-[20px] px-4 py-4">
@@ -420,7 +475,14 @@ export function HomeCareBookingClient() {
                 {selectedNurse.completed_visits !== undefined ? ` · ${selectedNurse.completed_visits} completed visits` : ""}
               </p>
             </div>
-            <Button type="button" variant="ghost" onClick={() => setSelectedNurse(null)}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setSelectedNurse(null);
+                setPreferredTime("");
+              }}
+            >
               Clear
             </Button>
           </div>
@@ -443,9 +505,67 @@ export function HomeCareBookingClient() {
           <Textarea value={landmark} onChange={(event) => setLandmark(event.target.value)} rows={3} placeholder="Nearby landmark or access note" />
         </Field>
 
-        <Field label="Preferred Time" required>
-          <Input type="datetime-local" value={preferredTime} onChange={(event) => setPreferredTime(event.target.value)} required />
-        </Field>
+        <div className="grid gap-3">
+          <Field label="Visit Date" required>
+            <Input
+              type="date"
+              value={preferredDate}
+              min={todayDateValue()}
+              onChange={(event) => {
+                setPreferredDate(event.target.value);
+                setPreferredTime("");
+              }}
+              required
+            />
+          </Field>
+          <div className="rounded-[18px] border border-slate-200 bg-white p-4">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-[#1F2937]">Available hourly slots</p>
+                <p className="text-xs text-slate-500">Choose one slot between 8:00 AM and 7:00 PM.</p>
+              </div>
+              {slotsQuery.isFetching ? <span className="text-xs font-semibold text-[#2563EB]">Refreshing slots...</span> : null}
+            </div>
+            {!selectedNurse ? (
+              <p className="mt-3 rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">Select a nurse to see available times.</p>
+            ) : slotsQuery.isError ? (
+              <Notice title="We couldn't load available slots." tone="warning">
+                Please try again before continuing to Paystack.
+              </Notice>
+            ) : slotsQuery.isLoading ? (
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div key={index} className="h-11 animate-pulse rounded-[8px] bg-slate-100" />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {slotItems.map((slot) => {
+                  const selected = slotTimestamp(slot.starts_at) === slotTimestamp(preferredTime);
+                  return (
+                    <button
+                      key={slot.starts_at}
+                      type="button"
+                      disabled={!slot.is_available}
+                      className={[
+                        "min-h-11 rounded-[8px] border px-3 text-sm font-semibold transition",
+                        selected ? "border-[#2563EB] bg-[#DBEAFE] text-[#1D4ED8]" : "border-slate-200 bg-white text-[#1F2937]",
+                        !slot.is_available ? "cursor-not-allowed border-slate-100 bg-slate-100 text-slate-400" : "hover:border-[#2563EB]",
+                      ].join(" ")}
+                      onClick={() => {
+                        setPreferredTime(slot.starts_at);
+                        setCheckoutError("");
+                      }}
+                    >
+                      {slot.label}
+                      {!slot.is_available ? <span className="mt-0.5 block text-[10px] font-semibold">Booked</span> : null}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
 
         <Field label="Notes for nurse">
           <Textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={3} placeholder="Optional instructions" />
@@ -456,8 +576,9 @@ export function HomeCareBookingClient() {
           <div className="mt-2 grid gap-1 text-sm text-slate-600">
             <span>{zone ? HOMECARE_ZONES.find((item) => item.value === zone)?.label : "Location not selected"}</span>
             <span>{selectedService ? selectedService.name : "Service not selected"}</span>
-            <span>{assignmentMode === "choose" && selectedNurse ? selectedNurse.display_name : "Assign any available nurse"}</span>
+            <span>{selectedNurse ? selectedNurse.display_name : "Nurse not selected"}</span>
             <span>{effectiveAddress || "Address not entered"}</span>
+            <span>{selectedSlot ? `${preferredDate} at ${selectedSlot.label}` : "Time slot not selected"}</span>
             <span className="font-semibold text-[var(--primary)]">
               {selectedService ? formatMoney(selectedService.price) : "Price appears after service selection"}
             </span>
@@ -532,6 +653,7 @@ export function HomeCareBookingClient() {
                 onSelect={() => {
                   setAssignmentMode("choose");
                   setSelectedNurse(nurse);
+                  setPreferredTime("");
                   setSelectorOpen(false);
                 }}
               />
