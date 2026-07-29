@@ -10,10 +10,12 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { ModalSheet } from "@/components/ui/modal-sheet";
 import { StepProgress } from "@/components/ui/step-progress";
+import { ApiError } from "@/lib/api/client";
 import { authApi, profilesApi } from "@/lib/api/endpoints";
 import { authKeys, useCurrentUser } from "@/lib/auth/use-auth";
 import type { PatientProfile } from "@/lib/types/backend";
 import type { User } from "@/lib/types/backend";
+import { normalizeNigerianPhoneInput } from "@/lib/validation/phone";
 
 import { StepBasicInfo } from "./steps/step-basic-info";
 import { StepLocation } from "./steps/step-location";
@@ -28,6 +30,14 @@ import {
 } from "./onboarding-schema";
 
 const TOTAL_STEPS = STEP_FIELDS.length;
+const FIELD_STEP_INDEX: Partial<Record<keyof OnboardingValues, number>> = {
+  full_name: 0,
+  phone: 0,
+  age_range: 1,
+  gender: 1,
+  state: 2,
+  lga: 2,
+};
 
 const emptyValues: OnboardingValues = {
   full_name: "",
@@ -49,6 +59,16 @@ function getStoredAuthUser(): Partial<User> {
   } catch {
     return {};
   }
+}
+
+function payloadMessage(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string").join(" ");
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  return "";
 }
 
 type OnboardingFlowProps = {
@@ -160,21 +180,56 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
 
   const save = useMutation({
     mutationFn: async (values: OnboardingValues) => {
-      await authApi.updateMe({ full_name: values.full_name, phone: values.phone });
-      await profilesApi.updateMe<PatientProfile>({
+      const phone = normalizeNigerianPhoneInput(values.phone);
+      if (phone === null) {
+        form.setError("phone", { type: "validate", message: "Enter a valid phone number in 080... or +234... format." });
+        setDirection("back");
+        setStep(0);
+        throw new Error("Enter a valid phone number in 080... or +234... format.");
+      }
+
+      const account = await authApi.updateMe({ full_name: values.full_name.trim(), phone });
+      const profile = await profilesApi.updateMe<PatientProfile>({
         gender: values.gender,
         age_range: values.age_range,
         state: values.state,
         lga: values.lga,
       });
+      return { account, profile };
     },
-    onSuccess: async () => {
+    onSuccess: async ({ account, profile }) => {
+      queryClient.setQueryData(authKeys.me, account);
+      queryClient.setQueryData(["auth", "me", "onboarding"], account);
+      queryClient.setQueryData(["profile", "me", "patient"], profile);
+      queryClient.setQueryData(["profile", "me", "patient", "gate"], profile);
       await queryClient.invalidateQueries({ queryKey: authKeys.me });
       await queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
       setCompleted(true);
       completeTimerRef.current = window.setTimeout(() => {
         onComplete?.();
       }, 1800);
+    },
+    onError: (error) => {
+      if (!(error instanceof ApiError) || !error.payload) {
+        return;
+      }
+
+      const payload = error.payload as Record<string, unknown>;
+      let firstInvalidStep: number | null = null;
+
+      (Object.keys(FIELD_STEP_INDEX) as Array<keyof OnboardingValues>).forEach((field) => {
+        const message = payloadMessage(payload[field]);
+        if (!message) {
+          return;
+        }
+        form.setError(field, { type: "server", message });
+        firstInvalidStep = firstInvalidStep ?? FIELD_STEP_INDEX[field] ?? null;
+      });
+
+      if (firstInvalidStep !== null) {
+        setDirection(firstInvalidStep < step ? "back" : "next");
+        setStep(firstInvalidStep);
+      }
     },
   });
 
@@ -186,38 +241,8 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   const canContinueStepOne = fullNameComplete && phoneComplete;
   const stepOneDisabled = !canContinueStepOne;
 
-  useEffect(() => {
-    if (step !== 0) return;
-    console.log("fullName value:", fullNameValue);
-    console.log("trimmed fullName:", fullNameValidation.trimmed);
-    console.log("fullName words:", fullNameValidation.words);
-    console.log("isFullNameValid:", fullNameValidation.valid);
-    console.log("Validation Status:");
-    console.log(`- Full Name: ${fullNameComplete ? "PASS" : "FAIL (Enter first and last name)"}`);
-    console.log(`- Phone Number: ${phoneComplete ? "PASS" : "FAIL (Invalid format)"}`);
-    console.log(`- Button Enabled: ${stepOneDisabled ? "FALSE" : "TRUE"}`);
-    console.log({
-      fullName: fullNameValue,
-      phoneNumber: phoneNumberValue,
-      isFullNameValid: fullNameComplete,
-      isPhoneValid: phoneComplete,
-      canContinue: !stepOneDisabled,
-    });
-  }, [fullNameComplete, fullNameValidation, fullNameValue, phoneComplete, phoneNumberValue, step, stepOneDisabled]);
-
   const goNext = async () => {
     if (step === 0) {
-      console.log("Continue button pressed");
-      console.log("currentStep before:", step + 1);
-      console.log("canContinue:", canContinueStepOne);
-      console.log("fullName:", fullNameValue);
-      console.log("fullName value:", fullNameValue);
-      console.log("trimmed fullName:", fullNameValidation.trimmed);
-      console.log("fullName words:", fullNameValidation.words);
-      console.log("isFullNameValid:", fullNameComplete);
-      console.log("phoneNumber:", phoneNumberValue);
-      console.log("validation result:", canContinueStepOne);
-
       if (!canContinueStepOne) {
         if (!fullNameComplete) {
           form.setError("full_name", { type: "required", message: "Enter your first and last name." });
@@ -230,24 +255,11 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
 
       form.clearErrors(["full_name", "phone"]);
       setDirection("next");
-      setStep((current) => {
-        const nextStep = current + 1;
-        console.log("moving to step:", nextStep + 1);
-        return nextStep;
-      });
+      setStep((current) => current + 1);
       return;
     }
 
     const valid = await form.trigger(STEP_FIELDS[step], { shouldFocus: true });
-    const values = form.getValues();
-    console.log("[Caretekk onboarding]", {
-      currentStep: step + 1,
-      validationErrors: form.formState.errors,
-      fullNameValue: values.full_name,
-      phoneNumberValue: values.phone,
-      profileLoading: profileQuery.isLoading,
-      buttonDisabled: save.isPending || loading,
-    });
     if (!valid) return;
     if (step < TOTAL_STEPS - 1) {
       setDirection("next");
@@ -264,7 +276,6 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   };
 
   const isLastStep = step === TOTAL_STEPS - 1;
-  const loading = false;
 
   if (completed) {
     return (
@@ -323,7 +334,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
                 event.preventDefault();
                 void goNext();
               }}
-              disabled={step === 0 ? stepOneDisabled : save.isPending || loading}
+              disabled={step === 0 ? stepOneDisabled : save.isPending}
             >
               {isLastStep ? (
                 <>

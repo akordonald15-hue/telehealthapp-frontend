@@ -33,11 +33,6 @@ async function handleAuthSuccess(
   queryClient: ReturnType<typeof useQueryClient>,
   router: ReturnType<typeof useRouter>,
 ) {
-  console.log("Auth response:", {
-    accessPresent: Boolean(tokens.access),
-    refreshPresent: Boolean(tokens.refresh),
-    user: tokens.user ?? null,
-  });
   setTokens(tokens);
   if (tokens.user) {
     queryClient.setQueryData(authKeys.me, tokens.user);
@@ -52,8 +47,6 @@ async function handleAuthSuccess(
   if (!user) {
     throw new Error("Authenticated user could not be loaded.");
   }
-  console.log("Auth user after login:", user);
-  console.log("Stored user:", tokens.user ?? user);
   await queryClient.invalidateQueries({ queryKey: authKeys.me });
   if (user.must_change_password) {
     router.replace("/change-password");
