@@ -71,6 +71,10 @@ function payloadMessage(value: unknown) {
   return "";
 }
 
+function firstMessage(messages: string[]) {
+  return messages.find(Boolean) || "Check this field and try again.";
+}
+
 type OnboardingFlowProps = {
   open?: boolean;
   /** Called after the profile is saved successfully. */
@@ -241,6 +245,24 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
   const canContinueStepOne = fullNameComplete && phoneComplete;
   const stepOneDisabled = !canContinueStepOne;
 
+  const showFieldErrors = (messages: Partial<Record<keyof OnboardingValues, string>>) => {
+    let firstInvalidStep: number | null = null;
+
+    (Object.keys(messages) as Array<keyof OnboardingValues>).forEach((field) => {
+      const message = messages[field];
+      if (!message) {
+        return;
+      }
+      form.setError(field, { type: "validate", message });
+      firstInvalidStep = firstInvalidStep ?? FIELD_STEP_INDEX[field] ?? null;
+    });
+
+    if (firstInvalidStep !== null) {
+      setDirection(firstInvalidStep < step ? "back" : "next");
+      setStep(firstInvalidStep);
+    }
+  };
+
   const goNext = async () => {
     if (step === 0) {
       if (!canContinueStepOne) {
@@ -254,6 +276,8 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
       }
 
       form.clearErrors(["full_name", "phone"]);
+      form.setValue("full_name", fullNameValidation.trimmed, { shouldValidate: true, shouldDirty: true });
+      form.setValue("phone", phoneNumberValue, { shouldValidate: true, shouldDirty: true });
       setDirection("next");
       setStep((current) => current + 1);
       return;
@@ -265,7 +289,20 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
       setDirection("next");
       setStep((current) => current + 1);
     } else {
-      form.handleSubmit((values) => save.mutate(values))();
+      const parsed = onboardingSchema.safeParse(form.getValues());
+      if (!parsed.success) {
+        const fieldMessages: Partial<Record<keyof OnboardingValues, string>> = {};
+        parsed.error.issues.forEach((issue) => {
+          const field = issue.path[0] as keyof OnboardingValues | undefined;
+          if (!field || !(field in FIELD_STEP_INDEX) || fieldMessages[field]) {
+            return;
+          }
+          fieldMessages[field] = firstMessage([issue.message]);
+        });
+        showFieldErrors(fieldMessages);
+        return;
+      }
+      save.mutate(parsed.data);
     }
   };
 
