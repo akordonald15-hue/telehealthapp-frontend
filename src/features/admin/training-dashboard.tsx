@@ -8,19 +8,19 @@ import { formatMoney } from "@/lib/utils";
 
 // Training fixtures only. These accounts and events are not fetched from production.
 const sampleUsers = [
-  { email: "ada.caretekk.user@gmail.com", role: "Patient", status: "Active" },
-  { email: "tunde.caretekk.user@gmail.com", role: "Patient", status: "Active" },
-  { email: "zara.caretekk.user@gmail.com", role: "Doctor", status: "Verified" },
-  { email: "emeka.caretekk.user@gmail.com", role: "Doctor", status: "Active" },
-  { email: "amaka.caretekk.user@gmail.com", role: "Nurse", status: "Active" },
-  { email: "femi.caretekk.user@gmail.com", role: "Patient", status: "Pending" },
+  { email: "user001@gmail.com", role: "Patient", status: "Active" },
+  { email: "user002@gmail.com", role: "Patient", status: "Active" },
+  { email: "user003@gmail.com", role: "Doctor", status: "Verified" },
+  { email: "user004@gmail.com", role: "Doctor", status: "Active" },
+  { email: "user005@gmail.com", role: "Nurse", status: "Active" },
+  { email: "user006@gmail.com", role: "Patient", status: "Pending" },
 ];
 const users = [
   ...sampleUsers,
   ...Array.from({ length: 194 }, (_, index) => {
     const number = index + 7;
     return {
-      email: `caretekk.user${String(number).padStart(3, "0")}@gmail.com`,
+      email: `user${String(number).padStart(3, "0")}@gmail.com`,
       role: number <= 163 ? "Patient" : number <= 185 ? "Doctor" : "Nurse",
       status: number % 13 === 0 ? "Pending" : "Active",
     };
@@ -29,10 +29,10 @@ const users = [
 
 const auditEvents = [
   { action: "User registered", actor: users[0].email, object: "Patient account", time: "Today, 09:42" },
-  { action: "Provider verified", actor: "caretekk.admin@gmail.com", object: users[2].email, time: "Today, 09:18" },
+  { action: "Provider verified", actor: "admin.ops@gmail.com", object: users[2].email, time: "Today, 09:18" },
   { action: "Booking completed", actor: users[1].email, object: "Consultation #CT-1048", time: "Yesterday, 16:30" },
-  { action: "Payment recorded", actor: "caretekk.admin@gmail.com", object: "Payment #CT-2084", time: "Yesterday, 14:05" },
-  { action: "Provider status changed", actor: "caretekk.admin@gmail.com", object: users[4].email, time: "Yesterday, 11:24" },
+  { action: "Payment recorded", actor: "admin.ops@gmail.com", object: "Payment #CT-2084", time: "Yesterday, 14:05" },
+  { action: "Provider status changed", actor: "admin.ops@gmail.com", object: users[4].email, time: "Yesterday, 11:24" },
 ];
 
 const grossRevenue = 90_000;
