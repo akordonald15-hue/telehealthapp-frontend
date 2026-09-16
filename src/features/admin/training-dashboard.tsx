@@ -5,27 +5,15 @@ import { Activity, Banknote, CalendarClock, ClipboardList, Home, ShieldCheck, St
 import { Badge } from "@/components/ui/badge";
 import { Section } from "@/components/ui/section";
 import { formatMoney } from "@/lib/utils";
+import { dashboardNames } from "./dashboard-names";
 
 // Training fixtures only. These accounts and events are not fetched from production.
-const sampleUsers = [
-  { email: "user001@gmail.com", role: "Patient", status: "Active" },
-  { email: "user002@gmail.com", role: "Patient", status: "Active" },
-  { email: "user003@gmail.com", role: "Doctor", status: "Verified" },
-  { email: "user004@gmail.com", role: "Doctor", status: "Active" },
-  { email: "user005@gmail.com", role: "Nurse", status: "Active" },
-  { email: "user006@gmail.com", role: "Patient", status: "Pending" },
-];
-const users = [
-  ...sampleUsers,
-  ...Array.from({ length: 194 }, (_, index) => {
-    const number = index + 7;
-    return {
-      email: `user${String(number).padStart(3, "0")}@gmail.com`,
-      role: number <= 163 ? "Patient" : number <= 185 ? "Doctor" : "Nurse",
-      status: number % 13 === 0 ? "Pending" : "Active",
-    };
-  }),
-];
+const firstRoles = ["Patient", "Patient", "Doctor", "Doctor", "Nurse", "Patient"];
+const users = dashboardNames.map((name, index) => ({
+  email: `${name.toLowerCase().replace(/\s+/g, ".")}@gmail.com`,
+  role: firstRoles[index] ?? (index < 163 ? "Patient" : index < 185 ? "Doctor" : "Nurse"),
+  status: index === 2 ? "Verified" : index === 5 || (index + 1) % 13 === 0 ? "Pending" : "Active",
+}));
 
 const auditEvents = [
   { action: "User registered", actor: users[0].email, object: "Patient account", time: "Today, 09:42" },
