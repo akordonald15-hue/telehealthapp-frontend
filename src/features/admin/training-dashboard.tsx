@@ -26,9 +26,11 @@ const auditEvents = [
 const doctorConsultationCount = 10;
 const doctorConsultationPrice = 2_000;
 const homeCareVisitPrices = [8_000, 10_000, 5_000];
+const previousRevenue = 80_000;
 const doctorRevenue = doctorConsultationCount * doctorConsultationPrice;
 const nurseRevenue = homeCareVisitPrices.reduce((total, price) => total + price, 0);
-const grossRevenue = doctorRevenue + nurseRevenue;
+const weeklyRevenue = doctorRevenue + nurseRevenue;
+const totalRevenue = previousRevenue + weeklyRevenue;
 const doctorGross = doctorRevenue * 0.7;
 const nurseGross = nurseRevenue * 0.65;
 const maintenance = (doctorGross + nurseGross) * 0.05;
@@ -68,7 +70,7 @@ export function TrainingDashboard() {
       <Metric label="Users" value={200} icon={Users} />
       <Metric label="Doctors" value={24} icon={Stethoscope} tone="cyan" />
       <Metric label="Nurses" value={16} icon={Home} tone="green" />
-      <Metric label="This week's revenue" value={formatMoney(grossRevenue)} icon={Banknote} tone="green" />
+      <Metric label="Platform revenue" value={formatMoney(totalRevenue)} icon={Banknote} tone="green" />
       <Metric label="Active consultations" value={12} icon={CalendarClock} />
       <Metric label="Active homecare" value={8} icon={ClipboardList} tone="cyan" />
       <Metric label="Provider earnings" value={formatMoney(providerEarnings)} icon={Activity} tone="amber" />
@@ -86,7 +88,11 @@ export function TrainingDashboard() {
           <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(nurseRevenue)}</p>
         </article>
       </div>
-      <div className="mt-4 flex items-center justify-between rounded-[18px] bg-[#1F2937] px-4 py-4 text-white"><span className="text-sm font-semibold">Weekly total</span><strong className="font-heading text-2xl">{formatMoney(grossRevenue)}</strong></div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-[18px] bg-slate-100 px-4 py-4"><p className="text-xs font-semibold text-slate-500">Previous revenue</p><strong className="mt-1 block font-heading text-xl text-[#1F2937]">{formatMoney(previousRevenue)}</strong></div>
+        <div className="rounded-[18px] bg-blue-50 px-4 py-4"><p className="text-xs font-semibold text-[#2563EB]">This week&apos;s addition</p><strong className="mt-1 block font-heading text-xl text-[#1F2937]">{formatMoney(weeklyRevenue)}</strong></div>
+        <div className="rounded-[18px] bg-[#1F2937] px-4 py-4 text-white"><p className="text-xs font-semibold text-slate-300">Cumulative revenue</p><strong className="mt-1 block font-heading text-xl">{formatMoney(totalRevenue)}</strong></div>
+      </div>
     </Panel>
 
     <div className="grid gap-4 xl:grid-cols-2">
@@ -96,7 +102,7 @@ export function TrainingDashboard() {
         <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500"><span>{visibleUsers.length} of 200 users · Page {page} of {pageCount}</span><div className="flex gap-2"><button type="button" disabled={page === 1} onClick={() => setPage(page - 1)} className="rounded-lg border border-slate-200 px-3 py-2 disabled:opacity-40">Previous</button><button type="button" disabled={page === pageCount} onClick={() => setPage(page + 1)} className="rounded-lg border border-slate-200 px-3 py-2 disabled:opacity-40">Next</button></div></div>
       </Panel>
       <Panel title="Financial management">
-        <div className="grid gap-3 sm:grid-cols-2"><Metric label="Provider net earnings" value={formatMoney(providerEarnings)} icon={Activity} tone="amber" /><Metric label="Platform share" value={formatMoney(platformShare)} icon={Banknote} tone="green" /></div>
+        <div className="grid gap-3 sm:grid-cols-2"><Metric label="This week's provider earnings" value={formatMoney(providerEarnings)} icon={Activity} tone="amber" /><Metric label="This week's platform share" value={formatMoney(platformShare)} icon={Banknote} tone="green" /></div>
         <div className="mt-4 space-y-3 text-sm text-slate-700">
           <p className="flex justify-between gap-3"><span>Doctor consultations</span><strong>{formatMoney(doctorRevenue)}</strong></p>
           <p className="flex justify-between gap-3"><span>Home-care visits</span><strong>{formatMoney(nurseRevenue)}</strong></p>
