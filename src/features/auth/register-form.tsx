@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,11 @@ import {
   readVerifiedRegistrationEmail,
   savePendingVerificationEmail,
 } from "@/features/auth/email-flow-storage";
+import {
+  clearPendingReferralCode,
+  normalizeReferralCode,
+  readPendingReferralCode,
+} from "@/features/referral-program/referral-code-storage";
 import { authApi } from "@/lib/api/endpoints";
 import { normalizeNigerianPhoneInput } from "@/lib/validation/phone";
 import {
@@ -32,6 +37,9 @@ export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialEmail = searchParams.get("email") ?? "";
+  // A code can arrive on the URL (?ref=) or from a /r/<code> visit earlier in this session.
+  const referralCodeFromUrl = normalizeReferralCode(searchParams.get("ref"));
+  const [referralOutcome, setReferralOutcome] = useState<{ applied: boolean; detail: string } | null>(null);
   const isCompletingAccount = searchParams.get("verified") === "1";
   const requestCode = useMutation({ mutationFn: authApi.otpRequest });
   const register = useMutation({ mutationFn: authApi.register });
@@ -45,6 +53,7 @@ export function RegisterForm() {
       email: initialEmail,
       phone: "",
       password: "",
+      referral_code: referralCodeFromUrl || readPendingReferralCode(),
     },
   });
 
@@ -79,9 +88,10 @@ export function RegisterForm() {
         email: verifiedEmail,
         phone: form.getValues("phone"),
         password: form.getValues("password"),
+        referral_code: form.getValues("referral_code") || referralCodeFromUrl || readPendingReferralCode(),
       });
     }
-  }, [emailForm, form, initialEmail, isCompletingAccount, router]);
+  }, [emailForm, form, initialEmail, isCompletingAccount, referralCodeFromUrl, router]);
 
   return (
     <div className="grid gap-5">
@@ -119,15 +129,24 @@ export function RegisterForm() {
         <form
           className="grid gap-5"
           onSubmit={form.handleSubmit((values) => {
+            const referralCode = normalizeReferralCode(values.referral_code);
             register.mutate(
               {
                 ...values,
                 phone: normalizeNigerianPhoneInput(values.phone ?? "") ?? values.phone?.trim(),
+                ...(referralCode ? { referral_code: referralCode } : {}),
               },
               {
-                onSuccess: () => {
+                onSuccess: (response) => {
                   clearPendingVerificationEmail();
                   clearVerifiedRegistrationEmail();
+                  clearPendingReferralCode();
+                  // The backend creates the account even when the code cannot be applied, so a
+                  // refusal is reported rather than treated as a signup failure.
+                  if (referralCode && response?.referral && !response.referral.applied) {
+                    setReferralOutcome(response.referral);
+                    return;
+                  }
                   router.replace("/login");
                 },
               },
@@ -144,10 +163,36 @@ export function RegisterForm() {
           <Field label="Password" error={form.formState.errors.password?.message} hint="Minimum 8 characters" required>
             <PasswordInput autoComplete="new-password" placeholder="Create a secure password" {...form.register("password")} />
           </Field>
+          <Field
+            label="Referral code (optional)"
+            error={form.formState.errors.referral_code?.message}
+            hint="Pre-filled if you arrived from an invite link. You can change or remove it."
+          >
+            <Input
+              placeholder="e.g. DONALD7K3Q"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+              {...form.register("referral_code")}
+            />
+          </Field>
           <Button type="submit" disabled={register.isPending}>
             {register.isPending ? "Creating your account..." : "Create account"}
           </Button>
         </form>
+      ) : null}
+
+      {referralOutcome && !referralOutcome.applied ? (
+        <div className="grid gap-3 rounded-[8px] border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-semibold text-amber-900">Your account was created</p>
+          <p className="text-sm text-amber-800">
+            {referralOutcome.detail || "That referral code could not be applied."} You can add a referral code from
+            Refer &amp; Earn after signing in.
+          </p>
+          <Button type="button" onClick={() => router.replace("/login")}>
+            Continue to sign in
+          </Button>
+        </div>
       ) : null}
 
       <p className="text-center text-sm text-ash-600">
