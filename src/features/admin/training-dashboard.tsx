@@ -26,16 +26,26 @@ const auditEvents = [
 const doctorConsultationCount = 10;
 const doctorConsultationPrice = 2_000;
 const homeCareVisitPrices = [8_000, 10_000, 5_000];
-const previousRevenue = 80_000;
+const previousDoctorRevenue = 60_000;
+const previousNurseRevenue = 20_000;
+const previousRevenue = previousDoctorRevenue + previousNurseRevenue;
 const doctorRevenue = doctorConsultationCount * doctorConsultationPrice;
 const nurseRevenue = homeCareVisitPrices.reduce((total, price) => total + price, 0);
 const weeklyRevenue = doctorRevenue + nurseRevenue;
 const totalRevenue = previousRevenue + weeklyRevenue;
-const doctorGross = doctorRevenue * 0.7;
-const nurseGross = nurseRevenue * 0.65;
-const maintenance = (doctorGross + nurseGross) * 0.05;
-const providerEarnings = doctorGross + nurseGross - maintenance;
-const platformShare = doctorRevenue * 0.3 + nurseRevenue * 0.35;
+const weeklyDoctorGross = doctorRevenue * 0.7;
+const weeklyNurseGross = nurseRevenue * 0.65;
+const weeklyMaintenance = (weeklyDoctorGross + weeklyNurseGross) * 0.05;
+const weeklyProviderEarnings = weeklyDoctorGross + weeklyNurseGross - weeklyMaintenance;
+const weeklyPlatformShare = doctorRevenue * 0.3 + nurseRevenue * 0.35;
+const previousDoctorGross = previousDoctorRevenue * 0.7;
+const previousNurseGross = previousNurseRevenue * 0.65;
+const previousMaintenance = (previousDoctorGross + previousNurseGross) * 0.05;
+const previousProviderEarnings = previousDoctorGross + previousNurseGross - previousMaintenance;
+const previousPlatformShare = previousDoctorRevenue * 0.3 + previousNurseRevenue * 0.35;
+const cumulativeProviderEarnings = previousProviderEarnings + weeklyProviderEarnings;
+const cumulativePlatformShare = previousPlatformShare + weeklyPlatformShare;
+const cumulativeMaintenance = previousMaintenance + weeklyMaintenance;
 
 function Metric({ label, value, icon: Icon, tone = "blue" }: {
   label: string; value: string | number; icon: React.ComponentType<{ className?: string }>;
@@ -73,7 +83,7 @@ export function TrainingDashboard() {
       <Metric label="Platform revenue" value={formatMoney(totalRevenue)} icon={Banknote} tone="green" />
       <Metric label="Active consultations" value={12} icon={CalendarClock} />
       <Metric label="Active homecare" value={8} icon={ClipboardList} tone="cyan" />
-      <Metric label="Provider earnings" value={formatMoney(providerEarnings)} icon={Activity} tone="amber" />
+      <Metric label="Provider earnings" value={formatMoney(cumulativeProviderEarnings)} icon={Activity} tone="amber" />
       <Metric label="Audit events" value={auditEvents.length} icon={ShieldCheck} tone="cyan" />
     </div>
 
@@ -102,11 +112,13 @@ export function TrainingDashboard() {
         <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500"><span>{visibleUsers.length} of 200 users · Page {page} of {pageCount}</span><div className="flex gap-2"><button type="button" disabled={page === 1} onClick={() => setPage(page - 1)} className="rounded-lg border border-slate-200 px-3 py-2 disabled:opacity-40">Previous</button><button type="button" disabled={page === pageCount} onClick={() => setPage(page + 1)} className="rounded-lg border border-slate-200 px-3 py-2 disabled:opacity-40">Next</button></div></div>
       </Panel>
       <Panel title="Financial management">
-        <div className="grid gap-3 sm:grid-cols-2"><Metric label="This week's provider earnings" value={formatMoney(providerEarnings)} icon={Activity} tone="amber" /><Metric label="This week's platform share" value={formatMoney(platformShare)} icon={Banknote} tone="green" /></div>
+        <div className="grid gap-3 sm:grid-cols-2"><Metric label="Cumulative provider earnings" value={formatMoney(cumulativeProviderEarnings)} icon={Activity} tone="amber" /><Metric label="Cumulative platform share" value={formatMoney(cumulativePlatformShare)} icon={Banknote} tone="green" /></div>
         <div className="mt-4 space-y-3 text-sm text-slate-700">
           <p className="flex justify-between gap-3"><span>Doctor consultations</span><strong>{formatMoney(doctorRevenue)}</strong></p>
           <p className="flex justify-between gap-3"><span>Home-care visits</span><strong>{formatMoney(nurseRevenue)}</strong></p>
-          <p className="flex justify-between gap-3"><span>Maintenance deduction</span><strong>{formatMoney(maintenance)}</strong></p>
+          <p className="flex justify-between gap-3"><span>Previous provider earnings</span><strong>{formatMoney(previousProviderEarnings)}</strong></p>
+          <p className="flex justify-between gap-3"><span>This week&apos;s provider earnings</span><strong>{formatMoney(weeklyProviderEarnings)}</strong></p>
+          <p className="flex justify-between gap-3 border-t border-slate-200 pt-3"><span>Cumulative maintenance deduction</span><strong>{formatMoney(cumulativeMaintenance)}</strong></p>
           <p className="border-t border-slate-200 pt-3 text-xs text-slate-500">Doctor share: 70% of bookings; nurse share: 65%. A 5% maintenance deduction applies to each provider share.</p>
         </div>
       </Panel>
