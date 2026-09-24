@@ -23,9 +23,12 @@ const auditEvents = [
   { action: "Provider status changed", actor: "admin.ops@gmail.com", object: users[4].email, time: "Yesterday, 11:24" },
 ];
 
-const grossRevenue = 90_000;
-const doctorRevenue = 60_000;
-const nurseRevenue = grossRevenue - doctorRevenue;
+const doctorConsultationCount = 10;
+const doctorConsultationPrice = 8_000;
+const homeCareVisitPrices = [8_000, 10_000, 5_000];
+const doctorRevenue = doctorConsultationCount * doctorConsultationPrice;
+const nurseRevenue = homeCareVisitPrices.reduce((total, price) => total + price, 0);
+const grossRevenue = doctorRevenue + nurseRevenue;
 const doctorGross = doctorRevenue * 0.7;
 const nurseGross = nurseRevenue * 0.65;
 const maintenance = (doctorGross + nurseGross) * 0.05;
@@ -65,12 +68,26 @@ export function TrainingDashboard() {
       <Metric label="Users" value={200} icon={Users} />
       <Metric label="Doctors" value={24} icon={Stethoscope} tone="cyan" />
       <Metric label="Nurses" value={16} icon={Home} tone="green" />
-      <Metric label="Platform revenue" value={formatMoney(grossRevenue)} icon={Banknote} tone="green" />
+      <Metric label="This week's revenue" value={formatMoney(grossRevenue)} icon={Banknote} tone="green" />
       <Metric label="Active consultations" value={12} icon={CalendarClock} />
       <Metric label="Active homecare" value={8} icon={ClipboardList} tone="cyan" />
       <Metric label="Provider earnings" value={formatMoney(providerEarnings)} icon={Activity} tone="amber" />
       <Metric label="Audit events" value={auditEvents.length} icon={ShieldCheck} tone="cyan" />
     </div>
+
+    <Panel title="This week's revenue">
+      <div className="grid gap-3 md:grid-cols-2">
+        <article className="rounded-[18px] border border-cyan-100 bg-cyan-50/50 p-4">
+          <div className="flex items-center justify-between gap-3"><div><p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">{doctorConsultationCount} consultations × {formatMoney(doctorConsultationPrice)}</p></div><Badge tone="cyan">10 completed</Badge></div>
+          <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(doctorRevenue)}</p>
+        </article>
+        <article className="rounded-[18px] border border-emerald-100 bg-emerald-50/50 p-4">
+          <div className="flex items-center justify-between gap-3"><div><p className="text-sm font-bold text-[#1F2937]">Home-care visits</p><p className="mt-1 text-xs text-slate-500">{homeCareVisitPrices.map((price) => formatMoney(price)).join(" + ")}</p></div><Badge tone="green">3 completed</Badge></div>
+          <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(nurseRevenue)}</p>
+        </article>
+      </div>
+      <div className="mt-4 flex items-center justify-between rounded-[18px] bg-[#1F2937] px-4 py-4 text-white"><span className="text-sm font-semibold">Weekly total</span><strong className="font-heading text-2xl">{formatMoney(grossRevenue)}</strong></div>
+    </Panel>
 
     <div className="grid gap-4 xl:grid-cols-2">
       <Panel title="User management">
@@ -81,8 +98,8 @@ export function TrainingDashboard() {
       <Panel title="Financial management">
         <div className="grid gap-3 sm:grid-cols-2"><Metric label="Provider net earnings" value={formatMoney(providerEarnings)} icon={Activity} tone="amber" /><Metric label="Platform share" value={formatMoney(platformShare)} icon={Banknote} tone="green" /></div>
         <div className="mt-4 space-y-3 text-sm text-slate-700">
-          <p className="flex justify-between gap-3"><span>Doctor bookings</span><strong>{formatMoney(doctorRevenue)}</strong></p>
-          <p className="flex justify-between gap-3"><span>Nurse bookings</span><strong>{formatMoney(nurseRevenue)}</strong></p>
+          <p className="flex justify-between gap-3"><span>Doctor consultations</span><strong>{formatMoney(doctorRevenue)}</strong></p>
+          <p className="flex justify-between gap-3"><span>Home-care visits</span><strong>{formatMoney(nurseRevenue)}</strong></p>
           <p className="flex justify-between gap-3"><span>Maintenance deduction</span><strong>{formatMoney(maintenance)}</strong></p>
           <p className="border-t border-slate-200 pt-3 text-xs text-slate-500">Doctor share: 70% of bookings; nurse share: 65%. A 5% maintenance deduction applies to each provider share.</p>
         </div>
