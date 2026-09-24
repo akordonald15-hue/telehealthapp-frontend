@@ -24,7 +24,7 @@ const auditEvents = [
 ];
 
 const doctorConsultationCount = 10;
-const doctorConsultationPrice = 8_000;
+const doctorConsultationPrice = 2_000;
 const homeCareVisitPrices = [8_000, 10_000, 5_000];
 const doctorRevenue = doctorConsultationCount * doctorConsultationPrice;
 const nurseRevenue = homeCareVisitPrices.reduce((total, price) => total + price, 0);
