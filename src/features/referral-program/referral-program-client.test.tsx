@@ -178,18 +178,27 @@ describe("Refer & Earn", () => {
     expect(await screen.findByText("Expired")).toBeInTheDocument();
   });
 
-  it("offers 'apply a code' to a patient who has not been referred", async () => {
+  // Product rule: a referral code can only be applied while creating an account. An existing
+  // logged-in user has no way to attach one, so the page must not offer it -- to anyone,
+  // referred or not -- and must never call the attach endpoint.
+  it("never offers an existing user a way to apply a referral code", async () => {
     render(<ReferralProgramClient />, { wrapper });
 
-    expect(await screen.findByRole("button", { name: /apply code/i })).toBeInTheDocument();
+    await screen.findByText("DONALD7K3Q");
+
+    expect(screen.queryByRole("button", { name: /apply code/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/have a referral code/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/referral code/i)).not.toBeInTheDocument();
+    expect(mocks.attach).not.toHaveBeenCalled();
   });
 
-  it("stops offering 'apply a code' once the patient already has a referral", async () => {
+  it("still offers nothing to apply once the patient already has a referral", async () => {
     mocks.referrals.mockResolvedValue(page([referral()]));
 
     render(<ReferralProgramClient />, { wrapper });
 
     await waitFor(() => expect(screen.getAllByText(/Invite sent/i)).not.toHaveLength(0));
     expect(screen.queryByRole("button", { name: /apply code/i })).not.toBeInTheDocument();
+    expect(mocks.attach).not.toHaveBeenCalled();
   });
 });

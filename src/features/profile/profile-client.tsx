@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ClipboardList, FileText, LogOut, Settings, UserRoundCheck } from "lucide-react";
+import { ClipboardList, FileText, Gift, LogOut, Settings, UserRoundCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
@@ -97,13 +97,15 @@ export function ProfileClient() {
           <div className="ct-panel rounded-[8px] p-5 sm:p-6">
             <div>
               <h2 className="ct-card-title text-[#1F2937]">Profile shortcuts</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">Records, care updates, referrals, settings, and account access.</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">Records, care updates, rewards, settings, and account access.</p>
             </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {/* Six tiles including Logout, so three across on desktop keeps the rows even. */}
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { href: "/records", label: "Medical Records", icon: FileText },
                 { href: "/care-plan", label: "Care Plans", icon: ClipboardList },
                 { href: "/referrals", label: "Referrals", icon: UserRoundCheck },
+                { href: "/refer", label: "Refer & Earn", icon: Gift },
                 { href: "#account-settings", label: "Settings", icon: Settings },
               ].map((item) => {
                 const Icon = item.icon;

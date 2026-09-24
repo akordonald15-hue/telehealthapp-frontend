@@ -6,24 +6,18 @@ import { Check, Copy, Gift, Share2, Ticket, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
-import { extractErrorMessage, ApiError } from "@/lib/api/client";
 import type { MyReferral, MyReferralReward, ReferralProgrammeTerms } from "@/lib/types/backend";
-
 
 import { formatReferralDate } from "./format";
 import {
   isProgrammeUnavailable,
-  useAttachReferralCode,
   useMyReferrals,
   useMyRewards,
   useReferralCode,
 } from "./use-referral-program";
-import { normalizeReferralCode } from "./referral-code-storage";
 
 /**
  * Programme terms are rendered from the backend response, never hard-coded: the server owns
@@ -98,7 +92,7 @@ function CopyButton({ value, label, copiedLabel }: { value: string; label: strin
           setCopied(false);
         }
       }}
-      className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:flex-none"
+      className="inline-flex min-h-11 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center gap-2 whitespace-nowrap rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:flex-none sm:basis-auto"
       aria-live="polite"
     >
       {copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
@@ -129,7 +123,7 @@ function ShareButtons({ shareUrl, shareText }: { shareUrl: string; shareText: st
                 setShareError("");
               }
             }}
-            className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[8px] bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 sm:flex-none"
+            className="inline-flex min-h-11 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center gap-2 whitespace-nowrap rounded-[8px] bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 sm:flex-none sm:basis-auto"
           >
             <Share2 className="h-4 w-4" aria-hidden />
             Share
@@ -139,7 +133,7 @@ function ShareButtons({ shareUrl, shareText }: { shareUrl: string; shareText: st
           href={whatsappHref}
           target="_blank"
           rel="noreferrer noopener"
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 sm:flex-none"
+          className="inline-flex min-h-11 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center gap-2 whitespace-nowrap rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 sm:flex-none sm:basis-auto"
         >
           Share on WhatsApp
         </a>
@@ -368,66 +362,9 @@ function MyRewardsSection() {
   );
 }
 
-/**
- * Lets an existing patient apply a code they were given. The backend decides eligibility and
- * returns one generic refusal for every reason, so this never guesses why.
- */
-function ApplyCodePanel() {
-  const attach = useAttachReferralCode();
-  const [code, setCode] = useState("");
-  const [applied, setApplied] = useState(false);
-
-  if (applied) {
-    return (
-      <Notice title="Referral code applied" tone="success">
-        Thanks — your invite is linked to your account.
-      </Notice>
-    );
-  }
-
-  const refusal =
-    attach.error instanceof ApiError ? extractErrorMessage(attach.error.payload) : "";
-
-  return (
-    <form
-      className="ct-surface grid gap-3 rounded-[8px] p-5"
-      onSubmit={(event) => {
-        event.preventDefault();
-        const normalized = normalizeReferralCode(code);
-        if (!normalized) {
-          return;
-        }
-        attach.mutate({ code: normalized }, { onSuccess: () => setApplied(true) });
-      }}
-    >
-      <h2 className="text-sm font-semibold text-slate-900">Have a referral code?</h2>
-      <Field label="Referral code">
-        <Input
-          value={code}
-          onChange={(event) => setCode(event.target.value)}
-          placeholder="e.g. DONALD7K3Q"
-          autoCapitalize="characters"
-          autoCorrect="off"
-          spellCheck={false}
-          inputMode="text"
-        />
-      </Field>
-      {refusal ? <p className="text-sm text-slate-600">{refusal}</p> : null}
-      <Button type="submit" disabled={attach.isPending || !normalizeReferralCode(code)}>
-        {attach.isPending ? "Applying..." : "Apply code"}
-      </Button>
-    </form>
-  );
-}
-
 export function ReferralProgramClient() {
   const codeQuery = useReferralCode();
-  const referrals = useMyReferrals(1);
   const programmeUnavailable = isProgrammeUnavailable(codeQuery.error);
-
-  // Only offer "apply a code" to someone who has not been referred already. The backend is
-  // authoritative; this just avoids showing an action that can only be refused.
-  const alreadyReferred = (referrals.data?.count ?? 0) > 0;
 
   const shareUrl = codeQuery.data?.share_url ?? "";
 
@@ -465,8 +402,6 @@ export function ReferralProgramClient() {
               </h2>
               <MyRewardsSection />
             </div>
-
-            {!alreadyReferred ? <ApplyCodePanel /> : null}
           </>
         ) : null}
       </div>
