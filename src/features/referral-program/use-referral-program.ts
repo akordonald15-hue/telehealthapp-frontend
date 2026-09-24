@@ -25,7 +25,20 @@ export function isProgrammeUnavailable(error: unknown) {
   if (!(error instanceof ApiError)) {
     return false;
   }
-  if (error.status !== 503) {
+  // The status alone is the reliable signal. The BFF proxy replaces the body of every upstream
+  // 502/503/504 with its own generic envelope, so the backend's REFERRAL_PROGRAM_UNAVAILABLE
+  // code does not survive the hop to the browser; checking only for the code meant this never
+  // matched in the real app.
+  //
+  // Treating a genuine referral outage the same way is deliberate rather than a compromise:
+  // these surfaces are promotional, both causes mean "invites are not available right now" to a
+  // patient, and quietly degrading them leaves the rest of the app working either way.
+  return error.status === 503;
+}
+
+/** True when the backend's own programme-unavailable code reached the client intact. */
+export function hasProgrammeUnavailableCode(error: unknown) {
+  if (!(error instanceof ApiError)) {
     return false;
   }
   const payload = error.payload as { code?: string; details?: { code?: string } } | null;

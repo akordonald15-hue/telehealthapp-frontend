@@ -174,9 +174,9 @@ function ReferralCodeCard() {
     <div className="grid gap-4">
       {programme ? (
         <div className="ct-surface rounded-[8px] p-5">
-          <h3 className="text-base font-semibold text-slate-900">
+          <h2 className="text-base font-semibold text-slate-900">
             Get {rewardHeadline(programme)} when a friend completes their first paid service
-          </h3>
+          </h2>
           <ul className="mt-3 grid gap-1.5 text-sm text-slate-600">
             {programme.max_reward_amount ? (
               <li>Maximum discount {formatNaira(programme.max_reward_amount)}.</li>
@@ -194,7 +194,7 @@ function ReferralCodeCard() {
       ) : null}
 
       <div className="ct-surface rounded-[8px] p-5">
-        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">Your referral code</h3>
+        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">Your referral code</h2>
         <p
           className="mt-2 select-all break-all font-mono text-2xl font-bold tracking-[0.18em] text-slate-900"
           // Selectable so a patient can long-press to copy on mobile.
@@ -400,7 +400,7 @@ function ApplyCodePanel() {
         attach.mutate({ code: normalized }, { onSuccess: () => setApplied(true) });
       }}
     >
-      <h3 className="text-sm font-semibold text-slate-900">Have a referral code?</h3>
+      <h2 className="text-sm font-semibold text-slate-900">Have a referral code?</h2>
       <Field label="Referral code">
         <Input
           value={code}

@@ -138,7 +138,9 @@ describe("reward selection during booking", () => {
   });
 
   it("stays out of the way entirely when the programme is unavailable", async () => {
-    mocks.rewards.mockRejectedValue(new ApiError(503, { code: "REFERRAL_PROGRAM_UNAVAILABLE" } as never));
+    mocks.rewards.mockRejectedValue(
+      new ApiError(503, { error: "service_unavailable", message: "We couldn't reach the care service right now." } as never),
+    );
 
     const { container } = render(
       <RewardSelector serviceType="appointment" selectedRewardId={null} onSelect={() => {}} />,

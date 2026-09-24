@@ -12,6 +12,7 @@ import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { Textarea } from "@/components/ui/input";
+import { useInvalidateReferralProgram } from "@/features/referral-program/use-referral-program";
 import { homeCareApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { buildWebSocketUrl } from "@/lib/realtime";
@@ -58,6 +59,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
     refetchInterval: liveTrackingConnected ? false : 8000,
   });
 
+  const invalidateReferralProgram = useInvalidateReferralProgram();
   const refreshHomeCare = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["home-care"] });
   }, [queryClient]);
@@ -67,6 +69,10 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
     onSuccess: async () => {
       setCancelReason("");
       await refreshHomeCare();
+      // Cancelling invalidates the checkout server-side, which releases any referral reward it
+      // was holding. Without this the reward list keeps showing "reserved" until the cache goes
+      // stale, right after the action that freed it.
+      invalidateReferralProgram();
     },
   });
   const confirmMutation = useMutation({

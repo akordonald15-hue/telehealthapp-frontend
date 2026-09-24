@@ -105,7 +105,10 @@ describe("Refer & Earn", () => {
   });
 
   it("hides the programme instead of breaking when it is unavailable", async () => {
-    mocks.me.mockRejectedValue(new ApiError(503, { code: "REFERRAL_PROGRAM_UNAVAILABLE" } as never));
+    // The shape the BFF proxy really returns, not the backend's original body.
+    mocks.me.mockRejectedValue(
+      new ApiError(503, { error: "service_unavailable", message: "We couldn't reach the care service right now." } as never),
+    );
 
     render(<ReferralProgramClient />, { wrapper });
 

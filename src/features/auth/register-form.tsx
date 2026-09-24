@@ -23,6 +23,7 @@ import {
   clearPendingReferralCode,
   normalizeReferralCode,
   readPendingReferralCode,
+  savePendingReferralCode,
 } from "@/features/referral-program/referral-code-storage";
 import { authApi } from "@/lib/api/endpoints";
 import { normalizeNigerianPhoneInput } from "@/lib/validation/phone";
@@ -39,6 +40,16 @@ export function RegisterForm() {
   const initialEmail = searchParams.get("email") ?? "";
   // A code can arrive on the URL (?ref=) or from a /r/<code> visit earlier in this session.
   const referralCodeFromUrl = normalizeReferralCode(searchParams.get("ref"));
+
+  // Persist a code that arrived straight on this URL. Signup leaves this route for the OTP
+  // step, so a code held only in the query string or in form state would be lost on the way
+  // back. Visitors coming via /r/<code> are already covered; this covers a marketing link
+  // that points at /register?ref=... directly.
+  useEffect(() => {
+    if (referralCodeFromUrl) {
+      savePendingReferralCode(referralCodeFromUrl);
+    }
+  }, [referralCodeFromUrl]);
   const [referralOutcome, setReferralOutcome] = useState<{ applied: boolean; detail: string } | null>(null);
   const isCompletingAccount = searchParams.get("verified") === "1";
   const requestCode = useMutation({ mutationFn: authApi.otpRequest });
@@ -129,10 +140,13 @@ export function RegisterForm() {
         <form
           className="grid gap-5"
           onSubmit={form.handleSubmit((values) => {
-            const referralCode = normalizeReferralCode(values.referral_code);
+            // Pulled out of the spread so an ordinary registration sends exactly the payload it
+            // sent before this feature existed, with no empty referral field riding along.
+            const { referral_code: rawReferralCode, ...accountValues } = values;
+            const referralCode = normalizeReferralCode(rawReferralCode);
             register.mutate(
               {
-                ...values,
+                ...accountValues,
                 phone: normalizeNigerianPhoneInput(values.phone ?? "") ?? values.phone?.trim(),
                 ...(referralCode ? { referral_code: referralCode } : {}),
               },
