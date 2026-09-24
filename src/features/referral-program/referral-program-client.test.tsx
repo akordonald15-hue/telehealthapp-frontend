@@ -97,7 +97,10 @@ describe("Refer & Earn", () => {
   it("offers copy and WhatsApp sharing", async () => {
     render(<ReferralProgramClient />, { wrapper });
 
-    expect(await screen.findByRole("button", { name: /copy link/i })).toBeInTheDocument();
+    // Wait for the card itself, then assert its controls, so a slow query cannot look like a
+    // missing button.
+    await screen.findByTestId("referral-code");
+    expect(screen.getByRole("button", { name: /copy link/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /copy code/i })).toBeInTheDocument();
     const whatsapp = screen.getByRole("link", { name: /share on whatsapp/i });
     expect(whatsapp).toHaveAttribute("href", expect.stringContaining("https://wa.me/?text="));
