@@ -14,6 +14,9 @@ import { Section } from "@/components/ui/section";
 import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
 import { ProviderPickerCard } from "@/features/providers/provider-picker-card";
 import { ApiError, extractErrorMessage } from "@/lib/api/client";
+import { RewardSelector } from "@/features/referral-program/reward-selector";
+import { RepricingConsent, requiresRepricingConsent } from "@/features/referral-program/repricing-consent";
+import { useInvalidateReferralProgram } from "@/features/referral-program/use-referral-program";
 import { homeCareApi, paymentsApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
@@ -123,8 +126,14 @@ export function HomeCareBookingClient() {
     enabled: userQuery.data?.role === "patient" && Boolean(selectedNurse?.id && preferredDate),
   });
 
+  // Public id only: the server prices the visit from the service's own price snapshot.
+  const [selectedRewardId, setSelectedRewardId] = useState<string | null>(null);
+  const [repricedPayment, setRepricedPayment] = useState<PaymentInitiation | null>(null);
+  const invalidateReferralProgram = useInvalidateReferralProgram();
+
   const createRequest = useMutation({
-    mutationFn: (body: HomeCareRequestCreate & { callback_url: string }) => homeCareApi.bookRequest(body),
+    mutationFn: (body: HomeCareRequestCreate & { callback_url: string; reward_id?: string }) =>
+      homeCareApi.bookRequest(body),
     onMutate: () => {
       setCheckoutError("");
     },
@@ -139,11 +148,18 @@ export function HomeCareBookingClient() {
       }
       homecareDraft.clearDraft();
       paymentDraft.clearDraft();
+      // The visit may have spent a reward, so referral surfaces are stale either way.
+      invalidateReferralProgram();
       if (response.payment.provider === "bank_transfer") {
         setManualPayment(response.payment);
         return;
       }
       if (response.payment.authorization_url) {
+        if (requiresRepricingConsent(response.payment)) {
+          // Costs more than the last attempt: the patient agrees before we hand off.
+          setRepricedPayment(response.payment);
+          return;
+        }
         window.location.assign(response.payment.authorization_url);
         return;
       }
@@ -350,6 +366,7 @@ export function HomeCareBookingClient() {
             requested_window_end: null,
             care_notes: notes.trim(),
             callback_url: `${window.location.origin}/home-care/requests`,
+            ...(selectedRewardId ? { reward_id: selectedRewardId } : {}),
           };
           if (process.env.NODE_ENV !== "production") {
             console.info("Caretekk home care checkout", {
@@ -649,10 +666,36 @@ export function HomeCareBookingClient() {
           </div>
         ) : null}
 
-        <Button type="submit" disabled={createRequest.isPending || !canSubmit}>
-          {createRequest.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          {createRequest.isPending ? "Preparing checkout..." : "Continue to Paystack"}
-        </Button>
+        {canSubmit ? (
+          <RewardSelector
+            serviceType="homecare"
+            serviceLabel="Home care visit"
+            serviceId={typeof selectedServiceId === "number" ? selectedServiceId : undefined}
+            selectedRewardId={selectedRewardId}
+            onSelect={setSelectedRewardId}
+            disabled={createRequest.isPending}
+          />
+        ) : null}
+
+        {repricedPayment ? (
+          <RepricingConsent
+            payment={repricedPayment}
+            serviceLabel="Home care visit"
+            onContinue={() => {
+              const url = repricedPayment.authorization_url;
+              setRepricedPayment(null);
+              if (url) {
+                window.location.assign(url);
+              }
+            }}
+            onCancel={() => setRepricedPayment(null)}
+          />
+        ) : (
+          <Button type="submit" disabled={createRequest.isPending || !canSubmit}>
+            {createRequest.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {createRequest.isPending ? "Preparing checkout..." : "Continue to Paystack"}
+          </Button>
+        )}
       </form>
 
       <Modal

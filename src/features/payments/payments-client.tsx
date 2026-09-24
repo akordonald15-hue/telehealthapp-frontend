@@ -10,11 +10,12 @@ import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { RepricingConsent, requiresRepricingConsent } from "@/features/referral-program/repricing-consent";
 import { paymentsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { paymentSummary } from "@/lib/ui/humanize";
-import type { Payment } from "@/lib/types/backend";
+import type { Payment, PaymentInitiation } from "@/lib/types/backend";
 import { formatMoney } from "@/lib/utils";
 
 const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
@@ -23,6 +24,10 @@ export function PaymentsClient() {
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
   const [retryError, setRetryError] = useState<string | null>(null);
+  // A retried checkout can cost more than the last one, because a failed discounted payment
+  // releases its reward. The patient agrees to the new amount before we hand off to the
+  // provider, so nobody is redirected to a larger charge than they last saw.
+  const [repricedPayment, setRepricedPayment] = useState<PaymentInitiation | null>(null);
   const payments = useQuery({
     queryKey: ["payments"],
     queryFn: () => paymentsApi.list(),
@@ -37,6 +42,10 @@ export function PaymentsClient() {
     onMutate: () => setRetryError(null),
     onSuccess: async (result) => {
       await queryClient.invalidateQueries({ queryKey: ["payments"] });
+      if (requiresRepricingConsent(result)) {
+        setRepricedPayment(result);
+        return;
+      }
       if (result.authorization_url && typeof window !== "undefined") {
         window.location.href = result.authorization_url;
       }
@@ -57,6 +66,20 @@ export function PaymentsClient() {
       <Notice title="Service payments only" tone="neutral">
         To pay, book a doctor consultation or home nurse request and follow the payment instructions created for that service.
       </Notice>
+      {repricedPayment ? (
+        <RepricingConsent
+          payment={repricedPayment}
+          serviceLabel={repricedPayment.appointment_id ? "Consultation" : "Home care visit"}
+          onContinue={() => {
+            const url = repricedPayment.authorization_url;
+            setRepricedPayment(null);
+            if (url && typeof window !== "undefined") {
+              window.location.href = url;
+            }
+          }}
+          onCancel={() => setRepricedPayment(null)}
+        />
+      ) : null}
       {retryError ? (
         <Notice title="Payment could not be initialized." tone="warning">
           Your booking request was saved. Please try payment again. {retryError}

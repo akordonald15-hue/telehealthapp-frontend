@@ -33,6 +33,9 @@ import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
+import { RewardSelector } from "@/features/referral-program/reward-selector";
+import { RepricingConsent, requiresRepricingConsent } from "@/features/referral-program/repricing-consent";
+import { useInvalidateReferralProgram } from "@/features/referral-program/use-referral-program";
 import { appointmentsApi, paymentsApi, profilesApi, triageApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
@@ -309,6 +312,12 @@ export function AppointmentsClient() {
   const [customScheduleDate, setCustomScheduleDate] = useState("");
   const [selectedSlotHour, setSelectedSlotHour] = useState<number | null>(null);
   const [checkoutError, setCheckoutError] = useState("");
+  // A reward is selected by public id only; the server prices the booking.
+  const [selectedRewardId, setSelectedRewardId] = useState<string | null>(null);
+  // Held back deliberately: a repriced checkout needs the patient's agreement before we send
+  // them to the payment provider.
+  const [repricedPayment, setRepricedPayment] = useState<PaymentInitiation | null>(null);
+  const invalidateReferralProgram = useInvalidateReferralProgram();
   const recommendationOpenedRef = useRef(false);
   const appointments = useQuery({
     queryKey: ["appointments", page],
@@ -338,8 +347,17 @@ export function AppointmentsClient() {
         return;
       }
 
+      // The booking may have spent a reward, so referral surfaces are now stale.
+      invalidateReferralProgram();
+
       const authorizationUrl = payment.authorization_url;
       if (authorizationUrl) {
+        if (requiresRepricingConsent(payment)) {
+          // Never redirect silently to a different amount than the patient last saw.
+          setRepricedPayment(payment);
+          void queryClient.invalidateQueries({ queryKey: ["appointments"] });
+          return;
+        }
         resetBookingCheckoutState();
         void queryClient.invalidateQueries({ queryKey: ["appointments"] });
         window.location.assign(authorizationUrl);
@@ -683,6 +701,7 @@ export function AppointmentsClient() {
       reason,
       notes: "",
       callback_url: `${window.location.origin}/appointments`,
+      ...(selectedRewardId ? { reward_id: selectedRewardId } : {}),
     });
   }
 
@@ -1365,14 +1384,37 @@ export function AppointmentsClient() {
                       {selectedTimeSummary}
                     </p>
                   </div>
-                  <Button
-                    type="button"
-                    className="w-full"
-                    disabled={!modalBookingReady || createAppointment.isPending}
-                    onClick={handleContinueToPayment}
-                  >
-                    {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
-                  </Button>
+                  <RewardSelector
+                    serviceType="appointment"
+                    serviceLabel="Consultation"
+                    selectedRewardId={selectedRewardId}
+                    onSelect={setSelectedRewardId}
+                    disabled={createAppointment.isPending}
+                  />
+                  {repricedPayment ? (
+                    <RepricingConsent
+                      payment={repricedPayment}
+                      serviceLabel="Consultation"
+                      onContinue={() => {
+                        const url = repricedPayment.authorization_url;
+                        setRepricedPayment(null);
+                        resetBookingCheckoutState();
+                        if (url) {
+                          window.location.assign(url);
+                        }
+                      }}
+                      onCancel={() => setRepricedPayment(null)}
+                    />
+                  ) : (
+                    <Button
+                      type="button"
+                      className="w-full"
+                      disabled={!modalBookingReady || createAppointment.isPending}
+                      onClick={handleContinueToPayment}
+                    >
+                      {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
+                    </Button>
+                  )}
                 </div>
               ) : null}
             </div>
