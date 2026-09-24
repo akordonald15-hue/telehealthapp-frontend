@@ -14,7 +14,10 @@ export type User = {
   updated_at: string;
 };
 
-export type RegisterResponse = Pick<User, "id" | "email" | "phone" | "role">;
+export type RegisterResponse = Pick<User, "id" | "email" | "phone" | "role"> & {
+  /** The account is created even when the code could not be applied. */
+  referral?: { applied: boolean; detail: string };
+};
 
 export type TokenPair = {
   access: string;
@@ -576,6 +579,12 @@ export type PaymentInitiation = {
   transfer_proof_size?: number;
   bank_transfer?: BankTransferDetails | null;
   can_submit_transfer_notification?: boolean;
+  /** Server-derived breakdown. Present on booking and payment-initiation responses. */
+  pricing?: CheckoutPricing;
+  /** True when this checkout costs a different amount than the previous one for the booking. */
+  repriced?: boolean;
+  previous_amount?: string;
+  detail?: string;
 };
 
 export type AppointmentBookingResponse = {
@@ -913,4 +922,79 @@ export type TriageConversationResult = {
   error: string;
   updated_at: string;
   disclaimer: string;
+};
+
+// ---------------------------------------------------------------- referral programme
+// Growth referrals (patient invites patient). Deliberately separate from `Referral`, which is
+// the clinical doctor-to-specialist domain. Every money value is a backend-formatted string:
+// the server is authoritative for pricing and the UI never recalculates it.
+
+export type ReferralProgrammeTerms = {
+  reward_type: "percent" | "fixed_amount";
+  reward_value: string;
+  max_reward_amount: string | null;
+  reward_expiry_days: number;
+  min_qualifying_paid_amount: string;
+  qualification_hold_days: number;
+  qualifying_service_types: string[];
+};
+
+export type MyReferralCode = {
+  code: string;
+  is_active: boolean;
+  share_url: string;
+  share_text: string;
+  programme: ReferralProgrammeTerms | null;
+};
+
+/** Patient-facing referral state. The backend maps its internal lifecycle onto these. */
+export type ReferralProgressStatus =
+  | "pending"
+  | "qualifying"
+  | "under_review"
+  | "successful"
+  | "not_qualified"
+  | "expired";
+
+export type MyReferral = {
+  public_id: string;
+  status: ReferralProgressStatus;
+  attached_at: string;
+  qualifies_at: string | null;
+  qualified_at: string | null;
+  reward: { public_id: string; status: ReferralRewardStatus; expires_at: string } | null;
+};
+
+export type ReferralRewardStatus = "issued" | "reserved" | "used" | "expired" | "revoked";
+
+export type MyReferralReward = {
+  public_id: string;
+  status: ReferralRewardStatus;
+  reward_type: "percent" | "fixed_amount";
+  reward_value: string;
+  max_reward_amount: string | null;
+  applicable_services: string[];
+  issued_at: string;
+  expires_at: string;
+  used_at: string | null;
+  is_redeemable: boolean;
+};
+
+/** Server-derived price breakdown. Returned by booking, preview and payment retry. */
+export type CheckoutPricing = {
+  service_value: string;
+  discount: string;
+  amount_due: string;
+  currency: string;
+  reward_applied: boolean;
+};
+
+export type RewardPreview = CheckoutPricing & {
+  service_type: string;
+  binding: false;
+};
+
+export type ReferralAttachResponse = {
+  detail: string;
+  referral: MyReferral;
 };

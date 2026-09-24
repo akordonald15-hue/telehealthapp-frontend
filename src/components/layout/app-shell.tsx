@@ -5,6 +5,7 @@ import {
   CalendarDays,
   ClipboardList,
   FileText,
+  Gift,
   Home,
   LayoutDashboard,
   MessageSquare,
@@ -46,6 +47,7 @@ const navItems: readonly NavItem[] = [
   { href: "/nurse/history", label: "History", icon: FileText, roles: ["nurse"] },
   { href: "/records", label: "Records", doctorLabel: "Patients / Care Plans", adminLabel: "Users / Records", icon: UserRoundCheck, roles: ["patient", "doctor", "admin"] },
   { href: "/referrals", label: "Referrals", patientLabel: "Referrals", icon: ClipboardList, roles: ["patient", "admin"] },
+  { href: "/refer", label: "Refer & Earn", patientLabel: "Refer & Earn", icon: Gift, roles: ["patient"] },
   { href: "/profile", label: "Profile", icon: UserRound, roles: ["patient", "doctor", "admin", "nurse"] },
   { href: "/audit", label: "Audit", icon: ShieldCheck, roles: ["admin"] },
 ] as const;
