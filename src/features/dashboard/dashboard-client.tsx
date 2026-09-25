@@ -8,6 +8,7 @@ import {
   ClipboardList,
   CreditCard,
   FileText,
+  Gift,
   Home,
   MessageSquareText,
   Sparkles,
@@ -330,6 +331,28 @@ export function DashboardClient() {
                   />
                 </div>
               </section>
+
+              {/*
+                Deliberately a plain link: it reads no programme data, so an unavailable
+                referral programme can never take Home down with it. The real terms (percentage,
+                cap, expiry) are rendered from the API inside /refer, never hard-coded here.
+              */}
+              <Link
+                href="/refer"
+                className="ct-rise-in group flex items-center gap-4 rounded-[8px] border border-[#DBEAFE] bg-[linear-gradient(120deg,#EFF6FF_0%,#F8FBFF_60%,#FFFFFF_100%)] p-4 shadow-[0_18px_48px_-42px_rgba(15,23,42,0.34)] transition duration-200 hover:-translate-y-0.5 sm:p-5"
+                style={{ animationDelay: "260ms" }}
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-white text-[#2563EB] shadow-sm">
+                  <Gift className="h-5 w-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-[#1F2937]">Refer &amp; Earn</span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-600">
+                    Invite friends and earn Caretekk rewards.
+                  </span>
+                </span>
+                <ArrowRight className="h-5 w-5 shrink-0 text-[#2563EB] transition group-hover:translate-x-0.5" />
+              </Link>
 
               <section className="ct-rise-in" style={{ animationDelay: "280ms" }}>
                 <div className="mb-3 flex items-center justify-between">

@@ -75,17 +75,6 @@ export function useRedeemableRewards() {
   return { ...query, rewards };
 }
 
-export function useAttachReferralCode() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: referralProgramApi.attach,
-    onSuccess: () => {
-      // Attaching changes the referral list and can change eligibility everywhere.
-      void queryClient.invalidateQueries({ queryKey: referralProgramKeys.root });
-    },
-  });
-}
-
 export function useRewardPreview() {
   return useMutation({ mutationFn: referralProgramApi.previewReward });
 }

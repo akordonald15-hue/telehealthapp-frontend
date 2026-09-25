@@ -115,6 +115,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       "/home-care/book",
       "/appointments",
       "/records",
+      "/refer",
       "/profile",
     ];
     return [...filtered].sort((left, right) => patientOrder.indexOf(left.href) - patientOrder.indexOf(right.href));
@@ -129,19 +130,59 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="ct-safe-area min-h-[100dvh] bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.15),_transparent_28%),linear-gradient(180deg,#F5F8FC_0%,#F7FAFE_40%,#FFFFFF_100%)]">
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1600px]">
+        {user ? (
+          <nav
+            className="sticky top-0 hidden h-[100dvh] w-64 shrink-0 flex-col gap-1 overflow-y-auto border-r border-white/70 bg-white/70 px-3 py-6 backdrop-blur-xl lg:flex"
+            aria-label="Main navigation"
+          >
+            <div className="px-2 pb-4">
+              <BrandLockup wordmark="image" wordmarkClassName="h-6 max-w-[150px]" />
+            </div>
+            {visibleNav.map((item) => {
+              const Icon = item.icon;
+              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-white hover:text-[#2563EB]",
+                    active && "bg-[#DBEAFE] text-[#2563EB]",
+                  )}
+                >
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="truncate">{navLabelForRole(item, user.role)}</span>
+                </Link>
+              );
+            })}
+            <div className="mt-auto border-t border-slate-200 px-2 pt-4">
+              <p className="truncate text-sm font-semibold text-[#1F2937]">{user.full_name || "Caretekk user"}</p>
+              <p className="truncate text-xs text-slate-500">{user.email || "Signed in securely"}</p>
+            </div>
+          </nav>
+        ) : null}
         <div className="flex min-h-[100dvh] min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 border-b border-white/65 bg-white/82 backdrop-blur-xl">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="min-w-0">
-                  <BrandLockup wordmark="image" wordmarkClassName="h-5 max-w-[132px] sm:h-6 sm:max-w-[150px]" />
-                  {user?.role !== "patient" ? (
-                    <h1 className="mt-1 truncate font-heading text-lg font-semibold tracking-[-0.025em] text-[#1F2937] sm:text-xl">{activeLabel}</h1>
-                  ) : null}
+                  {/* The sidebar carries the brand from `lg` up, so don't repeat it there. */}
+                  <div className={cn(user ? "lg:hidden" : undefined)}>
+                    <BrandLockup wordmark="image" wordmarkClassName="h-5 max-w-[132px] sm:h-6 sm:max-w-[150px]" />
+                  </div>
+                  <h1
+                    className={cn(
+                      "mt-1 truncate font-heading text-lg font-semibold tracking-[-0.025em] text-[#1F2937] sm:text-xl",
+                      user?.role === "patient" && "mt-0 hidden lg:block",
+                    )}
+                  >
+                    {activeLabel}
+                  </h1>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="hidden text-right md:block">
+                <div className="hidden text-right md:block lg:hidden">
                   <p className="text-sm font-semibold text-[#1F2937]">{user?.full_name || "Caretekk user"}</p>
                   <p className="text-xs text-slate-500">{user?.email || "Signed in securely"}</p>
                 </div>
@@ -165,7 +206,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="mx-auto w-full max-w-7xl flex-1 scroll-pb-44 px-4 py-5 pb-[calc(11rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-8 lg:px-8">
+          {/*
+            Bottom padding must stay a longhand at every breakpoint. It previously sat next to
+            `sm:py-8`, and the shorthand won from 640px up, cutting the reserve from 176px to 32px
+            while the fixed nav is 91px tall -- the last ~59px of every page was unreachable.
+            The nav only exists below `lg`, so that is the one breakpoint allowed to shrink it.
+          */}
+          <main className="mx-auto w-full max-w-7xl flex-1 scroll-pb-44 px-4 pt-5 pb-[calc(11rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8 lg:scroll-pb-12 lg:px-8 lg:pb-12">
             <ProviderHeartbeat />
             <OfflineStatusBanner />
             {children}
@@ -174,8 +221,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {user ? (
             <nav
               className={cn(
-                "fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-18px_54px_-42px_rgba(15,23,42,0.5)] backdrop-blur",
-                user.role === "patient" ? "grid grid-cols-[1fr_1fr_1.25fr_1fr_1fr] items-end" : "flex gap-2 overflow-x-auto",
+                "fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-18px_54px_-42px_rgba(15,23,42,0.5)] backdrop-blur lg:hidden",
+                // gap-x keeps "Book Doctor" and "Appointments" from touching at 375px, where
+                // each label fills its column exactly.
+                user.role === "patient"
+                  ? "grid grid-cols-[1fr_1fr_1.25fr_1fr_1fr] items-end gap-x-1"
+                  : "flex gap-2 overflow-x-auto",
               )}
               aria-label="Bottom navigation"
             >

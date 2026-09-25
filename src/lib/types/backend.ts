@@ -993,8 +993,3 @@ export type RewardPreview = CheckoutPricing & {
   service_type: string;
   binding: false;
 };
-
-export type ReferralAttachResponse = {
-  detail: string;
-  referral: MyReferral;
-};

@@ -45,7 +45,6 @@ import type {
   ProviderWalletDashboard,
   Refund,
   Referral,
-  ReferralAttachResponse,
   RegisterResponse,
   MyReferral,
   MyReferralCode,
@@ -293,8 +292,6 @@ export const referralProgramApi = {
     apiList<MyReferral>("/referral-program/me/referrals/", query),
   rewards: (query?: { page?: number; page_size?: number; redeemable?: string }) =>
     apiList<MyReferralReward>("/referral-program/me/rewards/", query),
-  attach: (body: { code: string }) =>
-    apiRequest<ReferralAttachResponse>("/referral-program/attach/", { method: "POST", body }),
   previewReward: ({
     publicId,
     serviceType,
