@@ -1,11 +1,59 @@
 import { HeartPulse, Home, ShieldCheck, Sparkles, UserRoundCheck, type LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
+
+import {
+  BanknoteSolidIcon,
+  HouseSolidIcon,
+  ShieldCheckSolidIcon,
+  StopwatchSolidIcon,
+  VideoSolidIcon,
+} from "@/components/marketing/marketing-icons";
 
 export const marketingNavItems = [
   { label: "Home", href: "#home" },
-  { label: "Doctors", href: "#doctors" },
-  { label: "Home Care", href: "#home-care" },
-  { label: "Trust", href: "#trust" },
-  { label: "Contact", href: "#contact" },
+  { label: "Services", href: "#services" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Why Caretekk", href: "#trust" },
+  // No FAQ section exists yet — placeholder anchor.
+  { label: "FAQ", href: "#faq" },
+];
+
+export const platformHighlights: Array<{
+  title: string;
+  text: string;
+  icon: ComponentType<{ className?: string }>;
+  tone: "light" | "dark";
+}> = [
+  {
+    title: "Medical advice without the wait",
+    text: "Consult a licensed doctor virtually in minutes, from anywhere in Nigeria — no travel, no queue.",
+    icon: VideoSolidIcon,
+    tone: "light",
+  },
+  {
+    title: "Hands-on care when someone needs to be there in person.",
+    text: "Book a vetted nurse or caregiver for home visits in the cities we serve.",
+    icon: HouseSolidIcon,
+    tone: "dark",
+  },
+  {
+    title: "Every professional is verified.",
+    text: "Licensed, credential-checked, and background-checked whether they're consulting you remotely or at your door.",
+    icon: ShieldCheckSolidIcon,
+    tone: "dark",
+  },
+  {
+    title: "Fast, honest confirmation",
+    text: "Virtual consultations connect you in minutes. Homecare visits are matched quickly, with same-day availability where we have providers nearby.",
+    icon: StopwatchSolidIcon,
+    tone: "light",
+  },
+  {
+    title: "Affordable from the start.",
+    text: "See a doctor from ₦2,000, or book home care from ₦5,000 — no surprise costs.",
+    icon: BanknoteSolidIcon,
+    tone: "light",
+  },
 ];
 
 export const trustItems: Array<{ title: string; text: string; icon: LucideIcon }> = [

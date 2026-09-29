@@ -235,6 +235,18 @@ textarea {
     radial-gradient(at 0% 100%, hsla(240, 100%, 96%, 1) 0px, transparent 50%);
 }
 
+/*
+ * Landing redesign scale. The Figma frames are 1000px wide and the preview scales them to the
+ * window, so from lg up these sections zoom with their container (capped at 1920px) and every
+ * size inside is authored in design px. tan(atan2(a, b)) === a / b as a unitless number.
+ * Needs an @container ancestor; browsers without support fall back to zoom 1 (design px).
+ */
+@media (min-width: 1024px) {
+  .lp-scale {
+    zoom: calc(tan(atan2(min(100cqw, 1920px), 1000px)));
+  }
+}
+
 .ct-glass {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);

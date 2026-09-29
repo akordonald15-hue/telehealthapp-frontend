@@ -2,13 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  BadgeCheck,
   Calendar,
   CheckCircle2,
   Facebook,
+  HousePlus,
   Linkedin,
   MessageCircle,
-  PlayCircle,
   Sparkles,
   Stethoscope,
 } from "lucide-react";
@@ -22,21 +21,117 @@ function TikTokIcon({ className }: { className?: string }) {
 }
 
 import { BrandLockup } from "@/components/brand/brand-lockup";
-import { HeroMockup } from "@/components/marketing/hero-mockup";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
-import { doctors, footerLinks, heroStats, howItWorksSteps, trustItems } from "@/features/marketing/data";
+import { ArrowLongRightIcon } from "@/components/marketing/marketing-icons";
+import { doctors, footerLinks, howItWorksSteps, platformHighlights, trustItems } from "@/features/marketing/data";
 import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
 
 const homeCareChips = ["Mother & baby care", "Elderly care", "Postnatal care", "General homecare"];
 const stepIcons = [Calendar, Stethoscope, Sparkles, MessageCircle];
 
 export function LandingPage() {
+  const [advice, homeVisits, verified, confirmation, pricing] = platformHighlights;
+
   return (
     <main id="home" className="min-h-screen overflow-x-hidden bg-[#f8f9ff] text-[#0b1c30]">
-      <MarketingHeader />
+      {/* Sizes in the two redesigned sections are design px on a 1000px frame; .lp-scale zooms them from lg up. */}
+      <div className="@container">
+        {/* Hero */}
+        <section className="lp-scale bg-white px-[7px] pb-[3px] pt-[7px]">
+          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#2563EB_0%,#3974EE_12%,#3877EF_25%,#4385F3_50%,#5094F5_75%,#60A5FA_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
+            <HeroGridLines />
+            <MarketingHeader />
+
+            <div className="relative">
+              <div className="inline-flex h-[47.6px] items-center gap-[8px] rounded-[22px] rounded-br-none rounded-tl-[2px] bg-[#4E8FF4] pl-[30.2px] pr-[30px] text-[15.15px] font-medium leading-none text-white max-sm:px-5">
+                <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#A6C7FA]" />
+                Trusted Digital Healthcare
+                <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#A6C7FA]" />
+              </div>
+
+              <h1 className="mt-[22.8px] text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[1.15]">
+                <span className="flex h-[60.9px] items-center justify-center max-lg:h-auto max-lg:flex-wrap max-lg:gap-y-3">
+                  {/* Hairlines run from the card edges to the first headline line */}
+                  <span aria-hidden className="h-[0.55px] flex-1 translate-y-[3.35px] bg-white max-lg:hidden" />
+                  <span>Talk to a Doctor</span>
+                  <span className="ml-[12.5px] inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tr-[18px] border-b-[3.2px] border-white bg-[#1E40AF] pl-[10.3px] pr-[16.2px] text-[31.75px] max-sm:h-[48px] max-sm:text-[24px]">
+                    Anywhere
+                  </span>
+                  <span aria-hidden className="h-[0.55px] flex-1 translate-y-[3.35px] bg-white max-lg:hidden" />
+                </span>
+                <span className="mt-[7.7px] block max-sm:mt-3">Book Home Care Nearby</span>
+              </h1>
+
+              <p className="mx-auto mt-[23.9px] max-w-[568px] text-[16.5px] font-light leading-[25.15px] text-[#F7FAFE]">
+                Connect with a licensed doctor virtually in minutes, from wherever you are or book a vetted nurse for in-home care in Akwa Ibom. See a doctor from ₦2,000, or book home care from ₦5,000.
+              </p>
+
+              <div className="mt-[35.15px] flex justify-center gap-[33.9px] max-sm:flex-col max-sm:gap-4">
+                <Link
+                  href="/register"
+                  className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[17.6px] rounded-[11.6px] bg-[#1E40AF] text-[18px] font-medium leading-none text-white shadow-[0_14px_30px_-12px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:bg-[#1E3A8A] max-sm:w-full"
+                >
+                  Talk to a Doctor
+                  <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
+                </Link>
+                <Link
+                  href="/register"
+                  className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[16.4px] rounded-[11.6px] border border-white text-[18px] font-medium leading-none text-white transition hover:-translate-y-0.5 hover:bg-white/10 max-sm:w-full"
+                >
+                  Book Homecare
+                  <HousePlus className="h-[28px] w-[28px]" strokeWidth={1.7} />
+                </Link>
+              </div>
+
+              <div className="relative mx-auto mt-[48px] h-[372px] w-[516px] translate-x-[8.2px] max-lg:translate-x-0 max-sm:h-[250px] max-sm:w-full">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -bottom-40 left-1/2 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-[#BFD8FF]/45 blur-[90px]"
+                />
+                {/* Placeholder photo. For the transparent team cutout, switch to object-contain object-bottom and drop the rounding. */}
+                <div className="relative h-full w-full overflow-hidden rounded-t-[28px]">
+                  <Image
+                    src="/img/Dr effiong Okon.jpg"
+                    alt="Caretekk doctor ready for a consultation"
+                    fill
+                    priority
+                    sizes="(min-width: 1024px) 52vw, 100vw"
+                    className="object-cover object-top"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Platform — one platform, two ways to get care */}
+        <section id="services" className="lp-scale bg-[#FCFDFF] px-4 pb-24 pt-[53.9px]">
+          <h2 className="text-center text-[40.25px] font-bold leading-[48.2px] text-[#0b1c30] max-sm:text-[30px] max-sm:leading-[1.2]">
+            One <span className="text-[#3B82F6]">Platform.</span> Two
+            <br className="max-sm:hidden" /> Ways to Get Real Care.
+          </h2>
+
+          <div className="mx-auto mt-[48.6px] w-[934px] max-w-full space-y-[20.5px]">
+            <div className="grid gap-[18.5px] md:grid-cols-[535.8fr_380.5fr]">
+              <PlatformCard highlight={advice} className="md:min-h-[290.4px]" />
+              <PlatformCard highlight={homeVisits} className="md:min-h-[290.4px]" />
+            </div>
+            <div className="grid gap-[18.5px] md:grid-cols-[380.5fr_535.8fr]">
+              <PlatformCard highlight={verified} className="md:min-h-[290.4px]" titleWidthClassName="max-w-[300px]" />
+              <PlatformCard highlight={confirmation} className="md:min-h-[290.4px]" />
+            </div>
+            {/* Same width as the wide cards above, offset as in the design (not exactly centred) */}
+            <div className="md:ml-[22.53%] md:w-[57.37%]">
+              <PlatformCard highlight={pricing} className="md:min-h-[248px]" />
+            </div>
+          </div>
+        </section>
+      </div>
 
       <div className="ct-mesh">
-        {/* Hero */}
+        {/* Legacy hero — replaced by the redesigned hero above. To restore, re-add the
+            HeroMockup import plus BadgeCheck and PlayCircle from lucide-react. */}
+        {/*
         <section className="relative mx-auto max-w-[1440px] overflow-hidden px-4 pb-24 pt-12 sm:pb-32 md:px-10 md:pt-20 lg:pb-40">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div className="z-10 animate-fade-up text-center lg:text-left">
@@ -77,8 +172,11 @@ export function LandingPage() {
             </div>
           </div>
         </section>
+        */}
 
-        {/* Service categories bar */}
+        {/* Service categories bar — replaced by the platform section above. To restore, re-add
+            the heroStats import from "@/features/marketing/data". */}
+        {/*
         <section className="border-y border-[rgba(116,118,134,0.12)] bg-white/50 py-10">
           <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-8 px-4 text-center md:grid-cols-3 md:gap-0 md:divide-x md:divide-[rgba(116,118,134,0.18)] md:px-10">
             {heroStats.map((stat) => (
@@ -91,6 +189,7 @@ export function LandingPage() {
             ))}
           </div>
         </section>
+        */}
 
         {/* Bento — Trust */}
         <section id="trust" className="mx-auto max-w-[1440px] px-4 py-24 sm:py-28 md:px-10 lg:py-32">
@@ -544,5 +643,85 @@ export function LandingPage() {
         </div>
       </footer>
     </main>
+  );
+}
+
+/**
+ * Perspective floor grid behind the hero, traced from the design (986×956 card, design px):
+ * horizontal rules spaced wider towards the bottom, and six lines fanning out from a vanishing
+ * point above the card (x=428, 801.6 above the top edge).
+ */
+function HeroGridLines() {
+  const horizontals = [54.5, 141, 248.5, 380, 540, 733];
+  const vanishX = 428;
+  const bottomScale = 1 + 956 / 801.6;
+  const fanOffsets = [-385.8, -228.3, -75.4, 75.4, 228.3, 385.8];
+
+  return (
+    <svg
+      viewBox="0 0 986 956"
+      preserveAspectRatio="xMidYMin slice"
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 h-full w-full"
+    >
+      <g stroke="white" strokeOpacity={0.2} strokeWidth={1}>
+        {horizontals.map((y) => (
+          <line key={`h${y}`} x1={0} y1={y} x2={986} y2={y} />
+        ))}
+        {fanOffsets.map((offset) => (
+          <line key={`f${offset}`} x1={vanishX + offset} y1={0} x2={vanishX + offset * bottomScale} y2={956} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+function PlatformCard({
+  highlight,
+  className = "",
+  titleWidthClassName,
+}: {
+  highlight: (typeof platformHighlights)[number];
+  className?: string;
+  /** Replaces the default title text-box width. */
+  titleWidthClassName?: string;
+}) {
+  const { title, text, icon: Icon, tone } = highlight;
+  const dark = tone === "dark";
+  const titleWidth = titleWidthClassName ?? (dark ? "max-w-[330px]" : "max-w-[444px]");
+
+  // Text boxes are narrower than the cards so lines break where the design breaks them.
+  return (
+    <article
+      className={`rounded-[31.8px] pb-10 ${
+        dark
+          ? "bg-[#1E3A8A] pl-[27.5px] pr-5 pt-[30.2px] shadow-[0_20px_48px_-6px_rgba(15,23,42,0.1)]"
+          : "bg-[#EFF6FF] px-[33.9px] pt-[30.7px]"
+      } ${className}`}
+    >
+      <span
+        className={`flex items-center justify-center rounded-full text-white ${
+          dark
+            ? "ml-[11.8px] h-[54px] w-[54px] bg-white/[0.23] shadow-[0_8px_18px_rgba(255,255,255,0.08)]"
+            : "h-[53.5px] w-[53.5px] bg-[#3B82F6] shadow-[0_6px_14px_-2px_rgba(15,23,42,0.18)]"
+        }`}
+      >
+        <Icon className="h-8 w-8" />
+      </span>
+      <h3
+        className={`text-[20.45px] font-bold leading-[23.6px] ${titleWidth} ${
+          dark ? "mt-[33.5px] text-white" : "mt-[34.5px] text-[#223245]"
+        }`}
+      >
+        {title}
+      </h3>
+      <p
+        className={`${
+          dark ? "mt-[14px] max-w-[330px] text-[16.5px] leading-[25px] text-white" : "mt-[13px] max-w-[444px] text-base leading-[25.4px] text-[#434655]"
+        }`}
+      >
+        {text}
+      </p>
+    </article>
   );
 }
