@@ -30,8 +30,8 @@ const lastWeekDoctorRevenue = 20_000;
 const lastWeekHomeCarePrices = [8_000, 10_000, 5_000];
 const lastWeekNurseRevenue = lastWeekHomeCarePrices.reduce((total, price) => total + price, 0);
 const lastWeekRevenue = lastWeekDoctorRevenue + lastWeekNurseRevenue;
-const thisWeekDoctorCount = 2;
-const thisWeekDoctorRevenue = 4_000;
+const thisWeekDoctorCount = 4;
+const thisWeekDoctorRevenue = 8_000;
 const thisWeekNurseRevenue = 10_000;
 const thisWeekRevenue = thisWeekDoctorRevenue + thisWeekNurseRevenue;
 
@@ -53,6 +53,11 @@ const totalRevenue = previousRevenue + lastWeekRevenue + thisWeekRevenue;
 const cumulativeProviderEarnings = previousSplit.providerEarnings + lastWeekSplit.providerEarnings + thisWeekSplit.providerEarnings;
 const cumulativePlatformShare = previousSplit.platformShare + lastWeekSplit.platformShare + thisWeekSplit.platformShare;
 const cumulativeMaintenance = previousSplit.maintenance + lastWeekSplit.maintenance + thisWeekSplit.maintenance;
+const financialHistory = [
+  { period: "Opening balance", activity: "Existing doctor and home-care revenue", revenue: previousRevenue, split: previousSplit, runningRevenue: previousRevenue },
+  { period: "Last week", activity: "10 doctor consultations · 3 home-care visits", revenue: lastWeekRevenue, split: lastWeekSplit, runningRevenue: previousRevenue + lastWeekRevenue },
+  { period: "This week", activity: "4 doctor consultations · 1 home-care visit", revenue: thisWeekRevenue, split: thisWeekSplit, runningRevenue: totalRevenue },
+];
 
 function Metric({ label, value, icon: Icon, tone = "blue" }: {
   label: string; value: string | number; icon: React.ComponentType<{ className?: string }>;
@@ -127,6 +132,25 @@ export function TrainingDashboard() {
         <div className="rounded-[18px] bg-slate-100 px-4 py-4"><p className="text-xs font-semibold text-slate-500">Revenue before last week</p><strong className="mt-1 block font-heading text-xl text-[#1F2937]">{formatMoney(previousRevenue)}</strong></div>
         <div className="rounded-[18px] bg-blue-50 px-4 py-4"><p className="text-xs font-semibold text-[#2563EB]">Last two weeks added</p><strong className="mt-1 block font-heading text-xl text-[#1F2937]">{formatMoney(lastWeekRevenue + thisWeekRevenue)}</strong></div>
         <div className="rounded-[18px] bg-[#1F2937] px-4 py-4 text-white"><p className="text-xs font-semibold text-slate-300">Cumulative revenue</p><strong className="mt-1 block font-heading text-xl">{formatMoney(totalRevenue)}</strong></div>
+      </div>
+    </Panel>
+
+    <Panel title="Financial history">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[820px] border-separate border-spacing-y-2 text-left text-sm">
+          <thead className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <tr><th className="px-3 py-2">Period</th><th className="px-3 py-2">Activity</th><th className="px-3 py-2">Revenue</th><th className="px-3 py-2">Provider net</th><th className="px-3 py-2">Platform share</th><th className="px-3 py-2">Maintenance</th><th className="px-3 py-2">Running revenue</th></tr>
+          </thead>
+          <tbody>{financialHistory.map((entry) => <tr key={entry.period} className="bg-slate-50 text-slate-700">
+            <td className="rounded-l-[14px] px-3 py-3 font-bold text-[#1F2937]">{entry.period}</td>
+            <td className="px-3 py-3 text-xs text-slate-500">{entry.activity}</td>
+            <td className="px-3 py-3 font-semibold">{formatMoney(entry.revenue)}</td>
+            <td className="px-3 py-3">{formatMoney(entry.split.providerEarnings)}</td>
+            <td className="px-3 py-3">{formatMoney(entry.split.platformShare)}</td>
+            <td className="px-3 py-3">{formatMoney(entry.split.maintenance)}</td>
+            <td className="rounded-r-[14px] px-3 py-3 font-bold text-[#1F2937]">{formatMoney(entry.runningRevenue)}</td>
+          </tr>)}</tbody>
+        </table>
       </div>
     </Panel>
 
