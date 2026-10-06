@@ -5,7 +5,6 @@ import {
   Calendar,
   CheckCircle2,
   Facebook,
-  HousePlus,
   Linkedin,
   MessageCircle,
   Sparkles,
@@ -21,8 +20,8 @@ function TikTokIcon({ className }: { className?: string }) {
 }
 
 import { BrandLockup } from "@/components/brand/brand-lockup";
+import { HeroSlideshow } from "@/components/marketing/hero-slideshow";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
-import { ArrowLongRightIcon } from "@/components/marketing/marketing-icons";
 import { doctors, footerLinks, howItWorksSteps, platformHighlights, trustItems } from "@/features/marketing/data";
 import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
 
@@ -38,69 +37,14 @@ export function LandingPage() {
       <div className="@container">
         {/* Hero */}
         <section className="lp-scale bg-white px-[7px] pb-[3px] pt-[7px]">
-          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#2563EB_0%,#3974EE_12%,#3877EF_25%,#4385F3_50%,#5094F5_75%,#60A5FA_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
-            <HeroGridLines />
+          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#4E52E5_0%,#6070EA_35%,#86A2F5_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
+            {/* Dot grid. The concentric arcs are baked into the team cutouts. */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgb(255_255_255/0.22)_1px,transparent_1.4px)] bg-[size:16px_16px]"
+            />
             <MarketingHeader />
-
-            <div className="relative">
-              <div className="inline-flex h-[47.6px] items-center gap-[8px] rounded-[22px] rounded-br-none rounded-tl-[2px] bg-[#4E8FF4] pl-[30.2px] pr-[30px] text-[15.15px] font-medium leading-none text-white max-sm:px-5">
-                <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#A6C7FA]" />
-                Trusted Digital Healthcare
-                <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#A6C7FA]" />
-              </div>
-
-              <h1 className="mt-[22.8px] text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[1.15]">
-                <span className="flex h-[60.9px] items-center justify-center max-lg:h-auto max-lg:flex-wrap max-lg:gap-y-3">
-                  {/* Hairlines run from the card edges to the first headline line */}
-                  <span aria-hidden className="h-[0.55px] flex-1 translate-y-[3.35px] bg-white max-lg:hidden" />
-                  <span>Talk to a Doctor</span>
-                  <span className="ml-[12.5px] inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tr-[18px] border-b-[3.2px] border-white bg-[#1E40AF] pl-[10.3px] pr-[16.2px] text-[31.75px] max-sm:h-[48px] max-sm:text-[24px]">
-                    Anywhere
-                  </span>
-                  <span aria-hidden className="h-[0.55px] flex-1 translate-y-[3.35px] bg-white max-lg:hidden" />
-                </span>
-                <span className="mt-[7.7px] block max-sm:mt-3">Book Home Care Nearby</span>
-              </h1>
-
-              <p className="mx-auto mt-[23.9px] max-w-[568px] text-[16.5px] font-light leading-[25.15px] text-[#F7FAFE]">
-                Connect with a licensed doctor virtually in minutes, from wherever you are or book a vetted nurse for in-home care in Akwa Ibom. See a doctor from ₦2,000, or book home care from ₦5,000.
-              </p>
-
-              <div className="mt-[35.15px] flex justify-center gap-[33.9px] max-sm:flex-col max-sm:gap-4">
-                <Link
-                  href="/register"
-                  className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[17.6px] rounded-[11.6px] bg-[#1E40AF] text-[18px] font-medium leading-none text-white shadow-[0_14px_30px_-12px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:bg-[#1E3A8A] max-sm:w-full"
-                >
-                  Talk to a Doctor
-                  <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
-                </Link>
-                <Link
-                  href="/register"
-                  className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[16.4px] rounded-[11.6px] border border-white text-[18px] font-medium leading-none text-white transition hover:-translate-y-0.5 hover:bg-white/10 max-sm:w-full"
-                >
-                  Book Homecare
-                  <HousePlus className="h-[28px] w-[28px]" strokeWidth={1.7} />
-                </Link>
-              </div>
-
-              <div className="relative mx-auto mt-[48px] h-[372px] w-[516px] translate-x-[8.2px] max-lg:translate-x-0 max-sm:h-[250px] max-sm:w-full">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -bottom-40 left-1/2 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-[#BFD8FF]/45 blur-[90px]"
-                />
-                {/* Placeholder photo. For the transparent team cutout, switch to object-contain object-bottom and drop the rounding. */}
-                <div className="relative h-full w-full overflow-hidden rounded-t-[28px]">
-                  <Image
-                    src="/img/Dr effiong Okon.jpg"
-                    alt="Caretekk doctor ready for a consultation"
-                    fill
-                    priority
-                    sizes="(min-width: 1024px) 52vw, 100vw"
-                    className="object-cover object-top"
-                  />
-                </div>
-              </div>
-            </div>
+            <HeroSlideshow />
           </div>
         </section>
 
@@ -643,36 +587,6 @@ export function LandingPage() {
         </div>
       </footer>
     </main>
-  );
-}
-
-/**
- * Perspective floor grid behind the hero, traced from the design (986×956 card, design px):
- * horizontal rules spaced wider towards the bottom, and six lines fanning out from a vanishing
- * point above the card (x=428, 801.6 above the top edge).
- */
-function HeroGridLines() {
-  const horizontals = [54.5, 141, 248.5, 380, 540, 733];
-  const vanishX = 428;
-  const bottomScale = 1 + 956 / 801.6;
-  const fanOffsets = [-385.8, -228.3, -75.4, 75.4, 228.3, 385.8];
-
-  return (
-    <svg
-      viewBox="0 0 986 956"
-      preserveAspectRatio="xMidYMin slice"
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full"
-    >
-      <g stroke="white" strokeOpacity={0.2} strokeWidth={1}>
-        {horizontals.map((y) => (
-          <line key={`h${y}`} x1={0} y1={y} x2={986} y2={y} />
-        ))}
-        {fanOffsets.map((offset) => (
-          <line key={`f${offset}`} x1={vanishX + offset} y1={0} x2={vanishX + offset * bottomScale} y2={956} />
-        ))}
-      </g>
-    </svg>
   );
 }
 

@@ -91,6 +91,35 @@ export const doctors = [
   { name: "Dr. Moronu Ekene", image: "/img/Dr Ekene.jpg" },
 ];
 
+export const heroSlides: Array<{
+  lead: string;
+  highlight: string;
+  tail: string;
+  highlightClassName: string;
+  text: string;
+  image: string;
+  alt: string;
+}> = [
+  {
+    lead: "A Doctor’s",
+    highlight: "Opinion,",
+    tail: "Minutes Away",
+    highlightClassName: "bg-[#362FAA]",
+    text: "Connect with a licensed doctor virtually, wherever you are in Nigeria confirmed in minutes, from ₦2,000.",
+    image: "/img/team-consult.webp",
+    alt: "Caretekk doctors ready for a virtual consultation",
+  },
+  {
+    lead: "Real Care",
+    highlight: "Right",
+    tail: "at Your Door",
+    highlightClassName: "bg-[#1A2241]",
+    text: "Book a vetted nurse or caregiver for in-home care in Akwa Ibom from ₦5,000.",
+    image: "/img/team-homecare.webp",
+    alt: "Caretekk care team available for home visits",
+  },
+];
+
 export const heroStats = [
   { value: "General medicine", label: "doctor consultations without leaving home" },
   { value: "Mother & baby care", label: "guided care for growing families and recovery" },
