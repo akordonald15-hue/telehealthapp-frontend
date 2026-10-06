@@ -657,7 +657,7 @@ function SolutionCard({
       )}
     >
       <PingBadge dark={dark} delay={pingDelay}>
-        <Icon className="h-[26px] w-[26px]" />
+        <Icon className="relative h-full w-full" />
       </PingBadge>
       <h3 className={cn("mt-[28px] text-[21px] font-bold leading-[1.25]", dark ? "text-white" : "text-[#131A2F]")}>{title}</h3>
       <p className={cn("mt-[12px] max-w-[372px] text-[15px] leading-[24px]", dark ? "text-white/85" : "text-[#80828F]")}>{text}</p>
