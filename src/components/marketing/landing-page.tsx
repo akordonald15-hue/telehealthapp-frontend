@@ -22,8 +22,20 @@ function TikTokIcon({ className }: { className?: string }) {
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { HeroSlideshow } from "@/components/marketing/hero-slideshow";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
-import { doctors, footerLinks, howItWorksSteps, platformHighlights, trustItems } from "@/features/marketing/data";
+import { PingBadge } from "@/components/marketing/ping-badge";
+import { PlatformStats } from "@/components/marketing/platform-stats";
+import {
+  doctors,
+  footerLinks,
+  howItWorksSteps,
+  platformHighlights,
+  trustItems,
+} from "@/features/marketing/data";
 import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
+import { cn } from "@/lib/utils";
+
+/** The hero's dot grid (16px pitch) as faint indigo dots, for the light sections that follow it. */
+const LIGHT_DOTS = "bg-[radial-gradient(rgb(78_82_229/0.1)_1px,transparent_1.4px)] bg-[size:16px_16px]";
 
 const homeCareChips = ["Mother & baby care", "Elderly care", "Postnatal care", "General homecare"];
 const stepIcons = [Calendar, Stethoscope, Sparkles, MessageCircle];
@@ -38,7 +50,7 @@ export function LandingPage() {
         {/* Hero */}
         <section className="lp-scale bg-white px-[7px] pb-[3px] pt-[7px]">
           <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#4E52E5_0%,#6070EA_35%,#86A2F5_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
-            {/* Dot grid. The concentric arcs are baked into the team cutouts. */}
+            {/* Dot grid. The circles behind the team are drawn by HeroSlideshow. */}
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgb(255_255_255/0.22)_1px,transparent_1.4px)] bg-[size:16px_16px]"
@@ -48,25 +60,26 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* Platform — one platform, two ways to get care */}
-        <section id="services" className="lp-scale bg-[#FCFDFF] px-4 pb-24 pt-[53.9px]">
-          <h2 className="text-center text-[40.25px] font-bold leading-[48.2px] text-[#0b1c30] max-sm:text-[30px] max-sm:leading-[1.2]">
-            One <span className="text-[#3B82F6]">Platform.</span> Two
+        <section aria-label={`${BRAND_NAME} in numbers`} className={`lp-scale bg-[#FAFBFF] px-4 py-[46px] ${LIGHT_DOTS}`}>
+          <PlatformStats />
+        </section>
+
+        <section id="services" className={`lp-scale bg-[#F2F5FE] px-4 pb-[104px] pt-[72px] ${LIGHT_DOTS}`}>
+          <p className="text-center text-[14px] font-medium uppercase tracking-[0.2em] text-[#4846B3]">Solution</p>
+          <h2 className="mt-[16px] text-center text-[40.25px] font-bold leading-[48.2px] text-[#131A2F] max-sm:text-[30px] max-sm:leading-[1.2]">
+            One <span className="text-[#5F72F0]">Platform.</span> Two
             <br className="max-sm:hidden" /> Ways to Get Real Care.
           </h2>
 
-          <div className="mx-auto mt-[48.6px] w-[934px] max-w-full space-y-[20.5px]">
-            <div className="grid gap-[18.5px] md:grid-cols-[535.8fr_380.5fr]">
-              <PlatformCard highlight={advice} className="md:min-h-[290.4px]" />
-              <PlatformCard highlight={homeVisits} className="md:min-h-[290.4px]" />
+          <div className="mx-auto mt-[64px] grid w-[946px] max-w-full gap-[24px] md:grid-cols-2 md:items-center">
+            <div className="flex flex-col gap-[40px] max-md:contents">
+              <SolutionCard highlight={advice} tall pingDelay={0} className="max-md:order-1" />
+              <SolutionCard highlight={confirmation} tall pingDelay={1.2} className="max-md:order-4" />
             </div>
-            <div className="grid gap-[18.5px] md:grid-cols-[380.5fr_535.8fr]">
-              <PlatformCard highlight={verified} className="md:min-h-[290.4px]" titleWidthClassName="max-w-[300px]" />
-              <PlatformCard highlight={confirmation} className="md:min-h-[290.4px]" />
-            </div>
-            {/* Same width as the wide cards above, offset as in the design (not exactly centred) */}
-            <div className="md:ml-[22.53%] md:w-[57.37%]">
-              <PlatformCard highlight={pricing} className="md:min-h-[248px]" />
+            <div className="flex flex-col gap-[36px] max-md:contents">
+              <SolutionCard highlight={homeVisits} pingDelay={0.4} className="max-md:order-2" />
+              <SolutionCard highlight={verified} pingDelay={0.8} className="max-md:order-3" />
+              <SolutionCard highlight={pricing} pingDelay={1.6} className="max-md:order-5" />
             </div>
           </div>
         </section>
@@ -590,52 +603,41 @@ export function LandingPage() {
   );
 }
 
-function PlatformCard({
+/**
+ * A Solution card. Light cards are white; the dark one carries the hero's dot grid in light dots.
+ * Tall cards (the left column) sit their content at the bottom, as in the design. `pingDelay`
+ * offsets the icon's ping (seconds) so the cards ping one after another.
+ */
+function SolutionCard({
   highlight,
-  className = "",
-  titleWidthClassName,
+  tall = false,
+  pingDelay = 0,
+  className,
 }: {
   highlight: (typeof platformHighlights)[number];
+  tall?: boolean;
+  pingDelay?: number;
   className?: string;
-  /** Replaces the default title text-box width. */
-  titleWidthClassName?: string;
 }) {
   const { title, text, icon: Icon, tone } = highlight;
   const dark = tone === "dark";
-  const titleWidth = titleWidthClassName ?? (dark ? "max-w-[330px]" : "max-w-[444px]");
 
-  // Text boxes are narrower than the cards so lines break where the design breaks them.
   return (
     <article
-      className={`rounded-[31.8px] pb-10 ${
+      className={cn(
+        "flex flex-col rounded-[28px] px-[40px] max-sm:px-[28px]",
+        tall ? "justify-end pb-[56px] pt-[48px] md:min-h-[426px]" : "pb-[44px] pt-[42px]",
         dark
-          ? "bg-[#1E3A8A] pl-[27.5px] pr-5 pt-[30.2px] shadow-[0_20px_48px_-6px_rgba(15,23,42,0.1)]"
-          : "bg-[#EFF6FF] px-[33.9px] pt-[30.7px]"
-      } ${className}`}
+          ? "bg-[#303086] bg-[radial-gradient(rgb(255_255_255/0.09)_1px,transparent_1.4px)] bg-[size:16px_16px] shadow-[0_28px_60px_-30px_rgba(48,48,134,0.6)]"
+          : "bg-white shadow-[0_22px_48px_-28px_rgba(48,48,134,0.2)]",
+        className,
+      )}
     >
-      <span
-        className={`flex items-center justify-center rounded-full text-white ${
-          dark
-            ? "ml-[11.8px] h-[54px] w-[54px] bg-white/[0.23] shadow-[0_8px_18px_rgba(255,255,255,0.08)]"
-            : "h-[53.5px] w-[53.5px] bg-[#3B82F6] shadow-[0_6px_14px_-2px_rgba(15,23,42,0.18)]"
-        }`}
-      >
-        <Icon className="h-8 w-8" />
-      </span>
-      <h3
-        className={`text-[20.45px] font-bold leading-[23.6px] ${titleWidth} ${
-          dark ? "mt-[33.5px] text-white" : "mt-[34.5px] text-[#223245]"
-        }`}
-      >
-        {title}
-      </h3>
-      <p
-        className={`${
-          dark ? "mt-[14px] max-w-[330px] text-[16.5px] leading-[25px] text-white" : "mt-[13px] max-w-[444px] text-base leading-[25.4px] text-[#434655]"
-        }`}
-      >
-        {text}
-      </p>
+      <PingBadge dark={dark} delay={pingDelay}>
+        <Icon className="h-[26px] w-[26px]" />
+      </PingBadge>
+      <h3 className={cn("mt-[28px] text-[21px] font-bold leading-[1.25]", dark ? "text-white" : "text-[#131A2F]")}>{title}</h3>
+      <p className={cn("mt-[12px] max-w-[372px] text-[15px] leading-[24px]", dark ? "text-white/85" : "text-[#80828F]")}>{text}</p>
     </article>
   );
 }

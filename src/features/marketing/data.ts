@@ -3,9 +3,9 @@ import type { ComponentType } from "react";
 
 import {
   BanknoteSolidIcon,
+  FastForwardSolidIcon,
   HouseSolidIcon,
-  ShieldCheckSolidIcon,
-  StopwatchSolidIcon,
+  IdCardsSolidIcon,
   VideoSolidIcon,
 } from "@/components/marketing/marketing-icons";
 
@@ -14,8 +14,14 @@ export const marketingNavItems = [
   { label: "Services", href: "#services" },
   { label: "How It Works", href: "#how-it-works" },
   { label: "Why Caretekk", href: "#trust" },
-  // No FAQ section exists yet — placeholder anchor.
   { label: "FAQ", href: "#faq" },
+];
+
+export const platformStats: Array<{ value: number; suffix: string; label: string }> = [
+  { value: 1200, suffix: "+", label: "Consultations & visits" },
+  { value: 8, suffix: "min", label: "Avg. connect time" },
+  { value: 50, suffix: "+", label: "Vetted doctors & nurses" },
+  { value: 3, suffix: "", label: "Lagos, Abuja, PH" },
 ];
 
 export const platformHighlights: Array<{
@@ -28,24 +34,24 @@ export const platformHighlights: Array<{
     title: "Medical advice without the wait",
     text: "Consult a licensed doctor virtually in minutes, from anywhere in Nigeria — no travel, no queue.",
     icon: VideoSolidIcon,
-    tone: "light",
+    tone: "dark",
   },
   {
-    title: "Hands-on care when someone needs to be there in person.",
+    title: "Someone there, when it matters.",
     text: "Book a vetted nurse or caregiver for home visits in the cities we serve.",
     icon: HouseSolidIcon,
-    tone: "dark",
+    tone: "light",
   },
   {
     title: "Every professional is verified.",
     text: "Licensed, credential-checked, and background-checked whether they're consulting you remotely or at your door.",
-    icon: ShieldCheckSolidIcon,
-    tone: "dark",
+    icon: IdCardsSolidIcon,
+    tone: "light",
   },
   {
     title: "Fast, honest confirmation",
     text: "Virtual consultations connect you in minutes. Homecare visits are matched quickly, with same-day availability where we have providers nearby.",
-    icon: StopwatchSolidIcon,
+    icon: FastForwardSolidIcon,
     tone: "light",
   },
   {

@@ -44,6 +44,23 @@ export function StopwatchSolidIcon({ className }: IconProps) {
   );
 }
 
+export function IdCardsSolidIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd" className={className} aria-hidden="true">
+      <path d="M8 3h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-.5V5.5H6V5a2 2 0 0 1 2-2Z" />
+      <path d="M4 7h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm3.5 3.6a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8Zm-2.9 7.9c.3-1.5 1.5-2.5 2.9-2.5s2.6 1 2.9 2.5ZM12 11.2h3.6v1.6H12Zm0 3.3h2.6v1.6H12Z" />
+    </svg>
+  );
+}
+
+export function FastForwardSolidIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M2.5 6.3c0-.9 1-1.4 1.7-.9l7.3 5.4V6.3c0-.9 1-1.4 1.7-.9l8 5.8c.6.4.6 1.3 0 1.7l-8 5.8c-.7.5-1.7 0-1.7-.9v-4.6l-7.3 5.4c-.7.5-1.7 0-1.7-.9Z" />
+    </svg>
+  );
+}
+
 export function BanknoteSolidIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd" className={className} aria-hidden="true">
