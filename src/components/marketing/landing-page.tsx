@@ -22,26 +22,30 @@ function TikTokIcon({ className }: { className?: string }) {
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { HeroSlideshow } from "@/components/marketing/hero-slideshow";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
+import { ArrowLongRightIcon } from "@/components/marketing/marketing-icons";
 import { PingBadge } from "@/components/marketing/ping-badge";
 import { PlatformStats } from "@/components/marketing/platform-stats";
+import { RevealLines } from "@/components/marketing/reveal-lines";
 import {
   doctors,
   footerLinks,
   howItWorksSteps,
   platformHighlights,
+  serviceOffers,
   trustItems,
 } from "@/features/marketing/data";
 import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
-/** The hero's dot grid (16px pitch) as faint indigo dots, for the light sections that follow it. */
 const LIGHT_DOTS = "bg-[radial-gradient(rgb(78_82_229/0.1)_1px,transparent_1.4px)] bg-[size:16px_16px]";
+const PANEL_DOTS = "bg-[radial-gradient(rgb(255_255_255/0.12)_1px,transparent_1.4px)] bg-[size:16px_16px]";
 
 const homeCareChips = ["Mother & baby care", "Elderly care", "Postnatal care", "General homecare"];
 const stepIcons = [Calendar, Stethoscope, Sparkles, MessageCircle];
 
 export function LandingPage() {
   const [advice, homeVisits, verified, confirmation, pricing] = platformHighlights;
+  const [doctorVisits, homeNursing, elderlyCare, maternalCare] = serviceOffers;
 
   return (
     <main id="home" className="min-h-screen overflow-x-hidden bg-[#f8f9ff] text-[#0b1c30]">
@@ -64,12 +68,14 @@ export function LandingPage() {
           <PlatformStats />
         </section>
 
-        <section id="services" className={`lp-scale bg-[#F2F5FE] px-4 pb-[104px] pt-[72px] ${LIGHT_DOTS}`}>
-          <p className="text-center text-[14px] font-medium uppercase tracking-[0.2em] text-[#4846B3]">Solution</p>
-          <h2 className="mt-[16px] text-center text-[40.25px] font-bold leading-[48.2px] text-[#131A2F] max-sm:text-[30px] max-sm:leading-[1.2]">
-            One <span className="text-[#5F72F0]">Platform.</span> Two
-            <br className="max-sm:hidden" /> Ways to Get Real Care.
-          </h2>
+        <section id="solution" className={`lp-scale bg-[#F2F5FE] px-4 pb-[104px] pt-[72px] ${LIGHT_DOTS}`}>
+          <RevealLines className="text-center">
+            <p className="text-[14px] font-medium uppercase tracking-[0.2em] text-[#4846B3]">Solution</p>
+            <h2 className="mt-[16px] text-[40.25px] font-bold leading-[48.2px] text-[#131A2F] max-sm:text-[30px] max-sm:leading-[1.2]">
+              One <span className="text-[#5F72F0]">Platform.</span> Two
+              <br /> Ways to Get Real Care.
+            </h2>
+          </RevealLines>
 
           <div className="mx-auto mt-[64px] grid w-[946px] max-w-full gap-[24px] md:grid-cols-2 md:items-center">
             <div className="flex flex-col gap-[40px] max-md:contents">
@@ -80,6 +86,29 @@ export function LandingPage() {
               <SolutionCard highlight={homeVisits} pingDelay={0.4} className="max-md:order-2" />
               <SolutionCard highlight={verified} pingDelay={0.8} className="max-md:order-3" />
               <SolutionCard highlight={pricing} pingDelay={1.6} className="max-md:order-5" />
+            </div>
+          </div>
+        </section>
+
+        <section id="services" className="lp-scale bg-[#F2F5FE] px-[7px] pb-[7px]">
+          <div className={`rounded-[18.5px] bg-[#1E40AF] px-[24px] pb-[104px] pt-[80px] max-sm:px-4 max-sm:pb-16 max-sm:pt-14 ${PANEL_DOTS}`}>
+            <RevealLines className="pl-[12px] text-white max-sm:pl-1">
+              <p className="text-[15px] font-light uppercase tracking-[0.04em] text-white/85">Our Services</p>
+              <h2 className="mt-[18px] text-[40.25px] font-bold leading-[48.2px] max-sm:text-[30px] max-sm:leading-[1.2]">
+                What Our
+                <br /> Platform Offers.
+              </h2>
+            </RevealLines>
+
+            <div className="mx-auto mt-[33px] grid w-[938px] max-w-full gap-[22px] md:grid-cols-2">
+              <div className="flex flex-col gap-[38px] md:mt-[60px] max-md:contents">
+                <ServiceCard offer={doctorVisits} className="max-md:order-1" />
+                <ServiceCard offer={elderlyCare} className="max-md:order-3" />
+              </div>
+              <div className="flex flex-col gap-[38px] max-md:contents">
+                <ServiceCard offer={homeNursing} className="max-md:order-2" />
+                <ServiceCard offer={maternalCare} className="max-md:order-4" />
+              </div>
             </div>
           </div>
         </section>
@@ -602,12 +631,6 @@ export function LandingPage() {
     </main>
   );
 }
-
-/**
- * A Solution card. Light cards are white; the dark one carries the hero's dot grid in light dots.
- * Tall cards (the left column) sit their content at the bottom, as in the design. `pingDelay`
- * offsets the icon's ping (seconds) so the cards ping one after another.
- */
 function SolutionCard({
   highlight,
   tall = false,
@@ -638,6 +661,48 @@ function SolutionCard({
       </PingBadge>
       <h3 className={cn("mt-[28px] text-[21px] font-bold leading-[1.25]", dark ? "text-white" : "text-[#131A2F]")}>{title}</h3>
       <p className={cn("mt-[12px] max-w-[372px] text-[15px] leading-[24px]", dark ? "text-white/85" : "text-[#80828F]")}>{text}</p>
+    </article>
+  );
+}
+
+function ServiceCard({ offer, className }: { offer: (typeof serviceOffers)[number]; className?: string }) {
+  const { title, text, cta, href, image, alt, icon: Icon } = offer;
+
+  return (
+    <article
+      className={cn(
+        "flex flex-col overflow-hidden rounded-[22px] bg-white pb-[64px] shadow-[0_24px_48px_-24px_rgba(8,20,80,0.45)] md:min-h-[575px] max-sm:pb-10",
+        className,
+      )}
+    >
+      <div className="relative h-[247px] shrink-0">
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 174 247"
+          preserveAspectRatio="none"
+          fill="none"
+          stroke="#C3CEF3"
+          className="absolute left-0 top-0 h-full w-[38%]"
+        >
+          <path d="M0 34H174M0 155H174M82 0 8 155" vectorEffect="non-scaling-stroke" />
+        </svg>
+        <div className="absolute inset-y-0 right-0 w-[62%]">
+          <Image src={image} alt={alt} fill sizes="(min-width: 768px) 29vw, 60vw" className="object-cover" />
+        </div>
+        <Icon className="absolute bottom-0 left-[47px] h-[90px] w-[90px] translate-y-1/2 max-sm:left-[28px]" />
+      </div>
+
+      <div className="px-[47px] pt-[83px] max-sm:px-[28px]">
+        <h3 className="max-w-[250px] text-[25px] font-semibold leading-[32px] text-[#0B1C30]">{title}</h3>
+        <p className="mt-[16px] max-w-[360px] text-[15.5px] leading-[25.5px] text-[#6A6C79]">{text}</p>
+        <Link
+          href={href}
+          className="group mt-[21px] inline-flex items-center gap-[14px] rounded-md text-[16px] font-medium text-[#1E40AF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/20"
+        >
+          {cta}
+          <ArrowLongRightIcon className="h-[14px] w-[20px] transition-transform duration-300 group-hover:translate-x-1" />
+        </Link>
+      </div>
     </article>
   );
 }

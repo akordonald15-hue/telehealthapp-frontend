@@ -17,7 +17,7 @@ export function MarketingHeader() {
   const [open, setOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
-  useGSAP(
+  const { contextSafe } = useGSAP(
     () => {
       const header = headerRef.current;
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -36,6 +36,23 @@ export function MarketingHeader() {
     },
     { scope: headerRef },
   );
+
+  const underlineDuration = (seconds: number) =>
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : seconds;
+
+  const drawUnderline = contextSafe((link: HTMLElement) => {
+    const line = link.querySelector("[data-underline]");
+    if (Number(gsap.getProperty(line, "scaleX")) < 0.01) {
+      gsap.set(line, { xPercent: 0 });
+    }
+    gsap.to(line, { xPercent: 0, scaleX: 1, duration: underlineDuration(0.45), ease: "power3.out", overwrite: true });
+  });
+
+  const clearUnderline = contextSafe((link: HTMLElement) => {
+    const line = link.querySelector("[data-underline]");
+    const rightEdge = Number(gsap.getProperty(line, "xPercent")) + Number(gsap.getProperty(line, "scaleX")) * 100;
+    gsap.to(line, { xPercent: rightEdge, scaleX: 0, duration: underlineDuration(0.4), ease: "power3.out", overwrite: true });
+  });
 
   return (
     <header
@@ -61,10 +78,20 @@ export function MarketingHeader() {
                 href={item.href}
                 data-intro="link"
                 aria-current={item.href === ACTIVE_HREF ? "page" : undefined}
-                className={`ct-underline-link rounded-md text-[15.25px] leading-none transition-colors [--underline:#1E40AF] hover:text-[#1E40AF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${item.href === ACTIVE_HREF ? "font-medium text-[#1E40AF]" : "text-[#243345]"
+                onPointerEnter={(event) => drawUnderline(event.currentTarget)}
+                onPointerLeave={(event) => !event.currentTarget.matches(":focus-visible") && clearUnderline(event.currentTarget)}
+                onFocus={(event) => event.currentTarget.matches(":focus-visible") && drawUnderline(event.currentTarget)}
+                onBlur={(event) => !event.currentTarget.matches(":hover") && clearUnderline(event.currentTarget)}
+                className={`relative rounded-md text-[15.25px] leading-none transition-colors hover:text-[#1E40AF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${item.href === ACTIVE_HREF ? "font-medium text-[#1E40AF]" : "text-[#243345]"
                   }`}
               >
                 {item.label}
+                <span
+                  data-underline
+                  aria-hidden="true"
+                  style={{ transform: "scaleX(0)" }}
+                  className="pointer-events-none absolute inset-x-0 -bottom-[7px] h-[1.25px] origin-left rounded-full bg-[#1E40AF]"
+                />
               </a>
             ))}
           </div>

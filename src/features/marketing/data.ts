@@ -8,6 +8,12 @@ import {
   IdCardsSolidIcon,
   VideoSolidIcon,
 } from "@/components/marketing/marketing-icons";
+import {
+  DoctorVisitIcon,
+  ElderlyCareIcon,
+  HomeNursingIcon,
+  MaternalCareIcon,
+} from "@/components/marketing/service-icons";
 
 export const marketingNavItems = [
   { label: "Home", href: "#home" },
@@ -59,6 +65,53 @@ export const platformHighlights: Array<{
     text: "See a doctor from ₦2,000, or book home care from ₦5,000 — no surprise costs.",
     icon: BanknoteSolidIcon,
     tone: "light",
+  },
+];
+
+export const serviceOffers: Array<{
+  title: string;
+  text: string;
+  cta: string;
+  href: string;
+  image: string;
+  alt: string;
+  icon: ComponentType<{ className?: string }>;
+}> = [
+  {
+    title: "On-Demand Doctor Visits",
+    text: "Talk to a licensed doctor virtually, anywhere in Nigeria confirmed in minutes, from ₦2,000.",
+    cta: "Talk to a Doctor",
+    href: "/register",
+    image: "/img/services/doctor-visit.webp",
+    alt: "Doctor reviewing notes with a patient",
+    icon: DoctorVisitIcon,
+  },
+  {
+    title: "Home Healthcare & Nursing",
+    text: "Home nursing, mother & baby care from registered midwives. Same-day, from ₦5,000.",
+    cta: "Book a Nursing Visit",
+    href: "/register",
+    image: "/img/services/home-nursing.webp",
+    alt: "Doctor in a white coat speaking with a patient",
+    icon: HomeNursingIcon,
+  },
+  {
+    title: "Elderly Care Support",
+    text: "Daily support for aging parents — check-ins, medication, mobility help — matched to your family.",
+    cta: "Book Elderly Care",
+    href: "/register",
+    image: "/img/services/elderly-care.webp",
+    alt: "Health worker checking an older woman's blood pressure",
+    icon: ElderlyCareIcon,
+  },
+  {
+    title: "Maternal & Postpartum Care",
+    text: "Virtual doctor support, plus in-person mother and baby care from our registered midwives.",
+    cta: "Get Maternal Care Support",
+    href: "/register",
+    image: "/img/services/maternal-care.webp",
+    alt: "Mother resting in bed with her newborn",
+    icon: MaternalCareIcon,
   },
 ];
 
