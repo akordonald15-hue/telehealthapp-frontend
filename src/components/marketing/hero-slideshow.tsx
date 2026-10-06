@@ -2,6 +2,7 @@
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { HousePlus } from "lucide-react";
 import { useRef, useState } from "react";
@@ -11,7 +12,7 @@ import { WaveButton } from "@/components/ui/wave-button";
 import { heroSlides } from "@/features/marketing/data";
 import { cn } from "@/lib/utils";
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const SLIDE_INTERVAL_MS = 8000;
 const STAGGER = 0.07;
@@ -20,18 +21,28 @@ const ENTER_AT = 0.38;
 export function HeroSlideshow() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [onScreen, setOnScreen] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
   const previous = useRef(active);
   const transition = useRef<gsap.core.Timeline | null>(null);
 
+  useGSAP(() => {
+    ScrollTrigger.create({
+      trigger: rootRef.current,
+      start: "top bottom",
+      end: "bottom top",
+      onToggle: (self) => setOnScreen(self.isActive),
+    });
+  });
+
   useGSAP(
     () => {
-      if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (paused || !onScreen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         return;
       }
       gsap.delayedCall(SLIDE_INTERVAL_MS / 1000, () => setActive((index) => (index + 1) % heroSlides.length));
     },
-    { dependencies: [active, paused], revertOnUpdate: true },
+    { dependencies: [active, paused, onScreen], revertOnUpdate: true },
   );
 
   const { contextSafe } = useGSAP(

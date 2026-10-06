@@ -102,12 +102,12 @@ export function LandingPage() {
 
             <div className="mx-auto mt-[33px] grid w-[938px] max-w-full gap-[22px] md:grid-cols-2">
               <div className="flex flex-col gap-[38px] md:mt-[60px] max-md:contents">
-                <ServiceCard offer={doctorVisits} className="max-md:order-1" />
-                <ServiceCard offer={elderlyCare} className="max-md:order-3" />
+                <ServiceCard offer={doctorVisits} pingDelay={0} className="max-md:order-1" />
+                <ServiceCard offer={elderlyCare} pingDelay={0.8} className="max-md:order-3" />
               </div>
               <div className="flex flex-col gap-[38px] max-md:contents">
-                <ServiceCard offer={homeNursing} className="max-md:order-2" />
-                <ServiceCard offer={maternalCare} className="max-md:order-4" />
+                <ServiceCard offer={homeNursing} pingDelay={0.4} className="max-md:order-2" />
+                <ServiceCard offer={maternalCare} pingDelay={1.2} className="max-md:order-4" />
               </div>
             </div>
           </div>
@@ -656,7 +656,7 @@ function SolutionCard({
         className,
       )}
     >
-      <PingBadge dark={dark} delay={pingDelay}>
+      <PingBadge dark={dark} delay={pingDelay} className="relative h-[92px] w-[92px]">
         <Icon className="relative h-full w-full" />
       </PingBadge>
       <h3 className={cn("mt-[28px] text-[21px] font-bold leading-[1.25]", dark ? "text-white" : "text-[#131A2F]")}>{title}</h3>
@@ -665,7 +665,15 @@ function SolutionCard({
   );
 }
 
-function ServiceCard({ offer, className }: { offer: (typeof serviceOffers)[number]; className?: string }) {
+function ServiceCard({
+  offer,
+  pingDelay = 0,
+  className,
+}: {
+  offer: (typeof serviceOffers)[number];
+  pingDelay?: number;
+  className?: string;
+}) {
   const { title, text, cta, href, image, alt, icon: Icon } = offer;
 
   return (
@@ -689,7 +697,12 @@ function ServiceCard({ offer, className }: { offer: (typeof serviceOffers)[numbe
         <div className="absolute inset-y-0 right-0 w-[62%]">
           <Image src={image} alt={alt} fill sizes="(min-width: 768px) 29vw, 60vw" className="object-cover" />
         </div>
-        <Icon className="absolute bottom-0 left-[47px] h-[90px] w-[90px] translate-y-1/2 max-sm:left-[28px]" />
+        <PingBadge
+          delay={pingDelay}
+          className="absolute bottom-0 left-[47px] h-[90px] w-[90px] translate-y-1/2 max-sm:left-[28px]"
+        >
+          <Icon className="relative h-full w-full" />
+        </PingBadge>
       </div>
 
       <div className="px-[47px] pt-[83px] max-sm:px-[28px]">

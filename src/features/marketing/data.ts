@@ -38,7 +38,7 @@ export const platformHighlights: Array<{
 }> = [
   {
     title: "Medical advice without the wait",
-    text: "Consult a licensed doctor virtually in minutes, from anywhere in Nigeria — no travel, no queue.",
+    text: "Consult a licensed doctor virtually in minutes, from anywhere in Nigeria no travel, no queue.",
     icon: VideoBadgeIcon,
     tone: "dark",
   },
@@ -62,7 +62,7 @@ export const platformHighlights: Array<{
   },
   {
     title: "Affordable from the start.",
-    text: "See a doctor from ₦2,000, or book home care from ₦5,000 — no surprise costs.",
+    text: "See a doctor from ₦2,000, or book home care from ₦5,000 no surprise costs.",
     icon: MoneyBadgeIcon,
     tone: "light",
   },
@@ -97,7 +97,7 @@ export const serviceOffers: Array<{
   },
   {
     title: "Elderly Care Support",
-    text: "Daily support for aging parents — check-ins, medication, mobility help — matched to your family.",
+    text: "Daily support for aging parents check-ins, medication, mobility help matched to your family.",
     cta: "Book Elderly Care",
     href: "/register",
     image: "/img/services/elderly-care.webp",

@@ -8,7 +8,17 @@ import { useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
-export function PingBadge({ dark = false, delay = 0, children }: { dark?: boolean; delay?: number; children: ReactNode }) {
+export function PingBadge({
+  dark = false,
+  delay = 0,
+  className,
+  children,
+}: {
+  dark?: boolean;
+  delay?: number;
+  className?: string;
+  children: ReactNode;
+}) {
   const rootRef = useRef<HTMLSpanElement>(null);
 
   useGSAP(
@@ -37,7 +47,7 @@ export function PingBadge({ dark = false, delay = 0, children }: { dark?: boolea
   );
 
   return (
-    <span ref={rootRef} className="relative flex h-[92px] w-[92px] shrink-0">
+    <span ref={rootRef} className={cn("flex shrink-0", className)}>
       <span data-ping aria-hidden className={cn("absolute inset-0 rounded-full opacity-0", dark ? "bg-[#BFDBFE]/25" : "bg-[#BFDBFE]")} />
       {children}
     </span>
