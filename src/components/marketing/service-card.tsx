@@ -1,9 +1,9 @@
 import { serviceOffers } from "@/features/marketing/data";
 import { cn } from "@/lib/utils";
 import { PingBadge } from "./ping-badge";
-import { Link } from "lucide-react";
 import { ArrowLongRightIcon } from "./marketing-icons";
 import Image from "next/image";
+import Link from "next/link";
 
 
 export function ServiceCard({

@@ -22,8 +22,6 @@ function TikTokIcon({ className }: { className?: string }) {
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { HeroSlideshow } from "@/components/marketing/hero-slideshow";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
-import { ArrowLongRightIcon } from "@/components/marketing/marketing-icons";
-import { PingBadge } from "@/components/marketing/ping-badge";
 import { PlatformStats } from "@/components/marketing/platform-stats";
 import { RevealLines } from "@/components/marketing/reveal-lines";
 import {
