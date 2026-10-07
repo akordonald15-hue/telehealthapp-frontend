@@ -25,14 +25,16 @@ const auditEvents = [
 const previousDoctorRevenue = 60_000;
 const previousNurseRevenue = 20_000;
 const previousRevenue = previousDoctorRevenue + previousNurseRevenue;
-const lastWeekDoctorCount = 10;
-const lastWeekDoctorRevenue = 20_000;
-const lastWeekHomeCarePrices = [8_000, 10_000, 5_000];
-const lastWeekNurseRevenue = lastWeekHomeCarePrices.reduce((total, price) => total + price, 0);
+const olderWeekDoctorRevenue = 20_000;
+const olderWeekNurseRevenue = 23_000;
+const olderWeekRevenue = olderWeekDoctorRevenue + olderWeekNurseRevenue;
+const lastWeekDoctorCount = 4;
+const lastWeekDoctorRevenue = 8_000;
+const lastWeekNurseRevenue = 10_000;
 const lastWeekRevenue = lastWeekDoctorRevenue + lastWeekNurseRevenue;
-const thisWeekDoctorCount = 4;
-const thisWeekDoctorRevenue = 8_000;
-const thisWeekNurseRevenue = 10_000;
+const thisWeekDoctorCount = 5;
+const thisWeekDoctorRevenue = 10_000;
+const thisWeekNurseRevenue = 20_000;
 const thisWeekRevenue = thisWeekDoctorRevenue + thisWeekNurseRevenue;
 
 function calculateRevenueSplit(doctorRevenue: number, nurseRevenue: number) {
@@ -47,16 +49,19 @@ function calculateRevenueSplit(doctorRevenue: number, nurseRevenue: number) {
 }
 
 const previousSplit = calculateRevenueSplit(previousDoctorRevenue, previousNurseRevenue);
+const olderWeekSplit = calculateRevenueSplit(olderWeekDoctorRevenue, olderWeekNurseRevenue);
 const lastWeekSplit = calculateRevenueSplit(lastWeekDoctorRevenue, lastWeekNurseRevenue);
 const thisWeekSplit = calculateRevenueSplit(thisWeekDoctorRevenue, thisWeekNurseRevenue);
-const totalRevenue = previousRevenue + lastWeekRevenue + thisWeekRevenue;
-const cumulativeProviderEarnings = previousSplit.providerEarnings + lastWeekSplit.providerEarnings + thisWeekSplit.providerEarnings;
-const cumulativePlatformShare = previousSplit.platformShare + lastWeekSplit.platformShare + thisWeekSplit.platformShare;
-const cumulativeMaintenance = previousSplit.maintenance + lastWeekSplit.maintenance + thisWeekSplit.maintenance;
+const revenueBeforeLastWeek = previousRevenue + olderWeekRevenue;
+const totalRevenue = revenueBeforeLastWeek + lastWeekRevenue + thisWeekRevenue;
+const cumulativeProviderEarnings = previousSplit.providerEarnings + olderWeekSplit.providerEarnings + lastWeekSplit.providerEarnings + thisWeekSplit.providerEarnings;
+const cumulativePlatformShare = previousSplit.platformShare + olderWeekSplit.platformShare + lastWeekSplit.platformShare + thisWeekSplit.platformShare;
+const cumulativeMaintenance = previousSplit.maintenance + olderWeekSplit.maintenance + lastWeekSplit.maintenance + thisWeekSplit.maintenance;
 const financialHistory = [
   { period: "Opening balance", activity: "Existing doctor and home-care revenue", revenue: previousRevenue, split: previousSplit, runningRevenue: previousRevenue },
-  { period: "Last week", activity: "10 doctor consultations · 3 home-care visits", revenue: lastWeekRevenue, split: lastWeekSplit, runningRevenue: previousRevenue + lastWeekRevenue },
-  { period: "This week", activity: "4 doctor consultations · 1 home-care visit", revenue: thisWeekRevenue, split: thisWeekSplit, runningRevenue: totalRevenue },
+  { period: "Earlier week", activity: "10 doctor consultations · 3 home-care visits", revenue: olderWeekRevenue, split: olderWeekSplit, runningRevenue: revenueBeforeLastWeek },
+  { period: "Last week", activity: "4 doctor consultations · 1 home-care visit", revenue: lastWeekRevenue, split: lastWeekSplit, runningRevenue: revenueBeforeLastWeek + lastWeekRevenue },
+  { period: "This week", activity: "5 doctor consultations · 1 home-care visit", revenue: thisWeekRevenue, split: thisWeekSplit, runningRevenue: totalRevenue },
 ];
 
 function Metric({ label, value, icon: Icon, tone = "blue" }: {
@@ -105,11 +110,11 @@ export function TrainingDashboard() {
           <div className="mb-3 flex items-center justify-between gap-3"><h3 className="font-heading text-lg font-semibold text-[#1F2937]">Last week</h3><Badge tone="blue">{formatMoney(lastWeekRevenue)}</Badge></div>
           <div className="grid gap-3 sm:grid-cols-2">
             <article className="rounded-[18px] border border-cyan-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">{lastWeekDoctorCount} consultations × {formatMoney(lastWeekDoctorRevenue / lastWeekDoctorCount)}</p>
+              <p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">{lastWeekDoctorCount} consultations · {formatMoney(lastWeekDoctorRevenue)} total</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(lastWeekDoctorRevenue)}</p>
             </article>
             <article className="rounded-[18px] border border-emerald-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Home-care visits</p><p className="mt-1 text-xs text-slate-500">{lastWeekHomeCarePrices.map((price) => formatMoney(price)).join(" + ")}</p>
+              <p className="text-sm font-bold text-[#1F2937]">Home-care visit</p><p className="mt-1 text-xs text-slate-500">1 completed visit</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(lastWeekNurseRevenue)}</p>
             </article>
           </div>
@@ -129,7 +134,7 @@ export function TrainingDashboard() {
         </section>
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-[18px] bg-slate-100 px-4 py-4"><p className="text-xs font-semibold text-slate-500">Revenue before last week</p><strong className="mt-1 block font-heading text-xl text-[#1F2937]">{formatMoney(previousRevenue)}</strong></div>
+        <div className="rounded-[18px] bg-slate-100 px-4 py-4"><p className="text-xs font-semibold text-slate-500">Revenue before last week</p><strong className="mt-1 block font-heading text-xl text-[#1F2937]">{formatMoney(revenueBeforeLastWeek)}</strong></div>
         <div className="rounded-[18px] bg-blue-50 px-4 py-4"><p className="text-xs font-semibold text-[#2563EB]">Last two weeks added</p><strong className="mt-1 block font-heading text-xl text-[#1F2937]">{formatMoney(lastWeekRevenue + thisWeekRevenue)}</strong></div>
         <div className="rounded-[18px] bg-[#1F2937] px-4 py-4 text-white"><p className="text-xs font-semibold text-slate-300">Cumulative revenue</p><strong className="mt-1 block font-heading text-xl">{formatMoney(totalRevenue)}</strong></div>
       </div>
