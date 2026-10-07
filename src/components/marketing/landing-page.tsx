@@ -36,6 +36,8 @@ import {
 } from "@/features/marketing/data";
 import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
 import { cn } from "@/lib/utils";
+import { SolutionCard } from "./solution-card";
+import { ServiceCard } from "./service-card";
 
 const LIGHT_DOTS = "bg-[radial-gradient(rgb(78_82_229/0.1)_1px,transparent_1.4px)] bg-[size:16px_16px]";
 const PANEL_DOTS = "bg-[radial-gradient(rgb(255_255_255/0.12)_1px,transparent_1.4px)] bg-[size:16px_16px]";
@@ -435,9 +437,8 @@ export function LandingPage() {
             return (
               <div
                 key={step.id}
-                className={`group relative flex flex-col items-center gap-8 md:flex-row md:gap-12 ${
-                  reversed ? "md:flex-row-reverse" : ""
-                }`}
+                className={`group relative flex flex-col items-center gap-8 md:flex-row md:gap-12 ${reversed ? "md:flex-row-reverse" : ""
+                  }`}
               >
                 <div className={`flex-1 text-center md:text-left ${reversed ? "" : "md:text-right"}`}>
                   <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#2563EB] font-bold text-white md:hidden">
@@ -453,9 +454,8 @@ export function LandingPage() {
 
                 <div className="w-full flex-1">
                   <div
-                    className={`rounded-[1.5rem] border border-[rgba(116,118,134,0.15)] bg-[#e5eeff] p-5 shadow-sm transition duration-500 group-hover:rotate-0 sm:p-6 ${
-                      reversed ? "md:-rotate-1" : "md:rotate-1"
-                    }`}
+                    className={`rounded-[1.5rem] border border-[rgba(116,118,134,0.15)] bg-[#e5eeff] p-5 shadow-sm transition duration-500 group-hover:rotate-0 sm:p-6 ${reversed ? "md:-rotate-1" : "md:rotate-1"
+                      }`}
                   >
                     <div className="mb-4 flex items-center gap-3">
                       <Icon className="h-5 w-5 text-[#2563EB]" />
@@ -630,91 +630,6 @@ export function LandingPage() {
     </main>
   );
 }
-function SolutionCard({
-  highlight,
-  tall = false,
-  pingDelay = 0,
-  className,
-}: {
-  highlight: (typeof platformHighlights)[number];
-  tall?: boolean;
-  pingDelay?: number;
-  className?: string;
-}) {
-  const { title, text, icon: Icon, tone } = highlight;
-  const dark = tone === "dark";
 
-  return (
-    <article
-      className={cn(
-        "flex flex-col rounded-[28px] px-[40px] max-lg:justify-end max-lg:pb-[56px] max-lg:pt-[48px] max-sm:px-[28px]",
-        tall ? "justify-end pb-[56px] pt-[48px] md:min-h-[426px]" : "pb-[44px] pt-[42px]",
-        dark
-          ? "bg-[#1E3A8A] bg-[radial-gradient(rgb(255_255_255/0.09)_1px,transparent_1.4px)] bg-[size:16px_16px] shadow-[0_28px_60px_-30px_rgba(30,58,138,0.6)]"
-          : "bg-white shadow-[0_22px_48px_-28px_rgba(48,48,134,0.2)]",
-        className,
-      )}
-    >
-      <PingBadge dark={dark} delay={pingDelay} className="relative h-[92px] w-[92px]">
-        <Icon className="relative h-full w-full" />
-      </PingBadge>
-      <h3 className={cn("mt-[28px] text-[21px] font-bold leading-[1.25]", dark ? "text-white" : "text-[#0B1C30]")}>{title}</h3>
-      <p className={cn("mt-[12px] max-w-[372px] text-[15px] leading-[24px]", dark ? "text-white/85" : "text-[#434655]")}>{text}</p>
-    </article>
-  );
-}
 
-function ServiceCard({
-  offer,
-  pingDelay = 0,
-  className,
-}: {
-  offer: (typeof serviceOffers)[number];
-  pingDelay?: number;
-  className?: string;
-}) {
-  const { title, text, cta, href, image, alt, icon: Icon } = offer;
 
-  return (
-    <article
-      className={cn(
-        "flex flex-col overflow-hidden rounded-[22px] bg-white pb-[64px] shadow-[0_24px_48px_-24px_rgba(8,20,80,0.45)] lg:min-h-[575px] max-sm:pb-10",
-        className,
-      )}
-    >
-      <div className="relative h-[247px] shrink-0">
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 174 247"
-          preserveAspectRatio="none"
-          fill="none"
-          stroke="#C3CEF3"
-          className="absolute left-0 top-0 h-full w-[38%]"
-        >
-          <path d="M0 34H174M0 155H174M82 0 8 155" vectorEffect="non-scaling-stroke" />
-        </svg>
-        <div className="absolute inset-y-0 right-0 w-[62%]">
-          <Image src={image} alt={alt} fill sizes="(min-width: 1024px) 29vw, 60vw" className="object-cover" />
-        </div>
-        <PingBadge
-          delay={pingDelay}
-          className="absolute bottom-0 left-[47px] h-[90px] w-[90px] translate-y-1/2 max-sm:left-[28px]"
-        >
-          <Icon className="relative h-full w-full" />
-        </PingBadge>
-      </div>
-
-      <div className="px-[47px] pt-[83px] max-sm:px-[28px]">
-        <h3 className="max-w-[250px] text-[25px] font-semibold leading-[32px] text-[#0B1C30]">{title}</h3>
-        <p className="mt-[16px] max-w-[360px] text-[15.5px] leading-[25.5px] text-[#434655]">{text}</p>
-        <Link
-          href={href}
-          className="group mt-[21px] inline-flex items-center gap-[14px] rounded-md text-[16px] font-medium text-[#1E40AF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/20"
-        >
-          {cta}
-          <ArrowLongRightIcon className="h-[14px] w-[20px] transition-transform duration-300 group-hover:translate-x-1" />
-        </Link>
-      </div>
-    </article>
-  );
-}

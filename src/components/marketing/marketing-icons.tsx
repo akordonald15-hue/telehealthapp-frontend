@@ -1,8 +1,6 @@
-// Placeholder glyphs matching the landing design's solid icon style. Swap for final assets later.
 
 type IconProps = { className?: string };
 
-/** Long-shaft arrow used on the landing CTAs (wider than lucide's ArrowRight). */
 export function ArrowLongRightIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 22 16" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
