@@ -46,7 +46,7 @@ export function PlatformStats() {
           className="flex flex-col-reverse items-center justify-end py-[20px] text-center md:border-l md:border-[#C8CBE6] md:first:border-l-0"
         >
           <dt className="mt-[12px] text-[15.5px] leading-tight text-[#4B4B5C] max-sm:text-[14px]">{stat.label}</dt>
-          <dd className="text-[46px] font-bold leading-none tabular-nums text-[#5560E8] max-sm:text-[36px]">
+          <dd className="text-[46px] font-bold leading-none tabular-nums text-[#3472EF] max-sm:text-[36px]">
             <span className="sr-only">
               {formatNumber(stat.value)}
               {stat.suffix}

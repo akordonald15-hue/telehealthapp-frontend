@@ -3,10 +3,10 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { Menu, X } from "lucide-react";
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { ArrowLongRightIcon } from "@/components/marketing/marketing-icons";
-import { WaveButton } from "@/components/ui/wave-button";
 import { marketingNavItems } from "@/features/marketing/data";
 
 gsap.registerPlugin(useGSAP);
@@ -96,14 +96,14 @@ export function MarketingHeader() {
             ))}
           </div>
 
-          <WaveButton
+          <Link
             href="#contact"
             data-intro="cta"
-            className="ml-auto h-[49.7px] w-[184.1px] gap-[18.3px] rounded-[13.8px] text-[15.75px] font-medium leading-none max-lg:hidden"
+            className="ml-auto inline-flex h-[49.7px] w-[184.1px] items-center justify-center gap-[18.3px] rounded-[13.8px] bg-[#1E40AF] text-[15.75px] font-medium leading-none text-white hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 max-lg:hidden"
           >
             Contact Us
             <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
-          </WaveButton>
+          </Link>
 
           <button
             type="button"
@@ -131,14 +131,14 @@ export function MarketingHeader() {
                 {item.label}
               </a>
             ))}
-            <WaveButton
+            <Link
               href="#contact"
               onClick={() => setOpen(false)}
-              className="mt-2 h-[50px] gap-3 rounded-[12px] text-base font-medium"
+              className="mt-2 inline-flex h-[50px] items-center justify-center gap-3 rounded-[12px] bg-[#1E40AF] text-base font-medium text-white hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25"
             >
               Contact Us
               <ArrowLongRightIcon className="h-[15px] w-[21px]" />
-            </WaveButton>
+            </Link>
           </div>
         ) : null}
       </nav>

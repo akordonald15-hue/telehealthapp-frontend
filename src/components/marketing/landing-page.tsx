@@ -53,8 +53,7 @@ export function LandingPage() {
       <div className="@container">
         {/* Hero */}
         <section className="lp-scale bg-white px-[7px] pb-[3px] pt-[7px]">
-          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#4E52E5_0%,#6070EA_35%,#86A2F5_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
-            {/* Dot grid. The circles behind the team are drawn by HeroSlideshow. */}
+          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#2563EB_0%,#60A5FA_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgb(255_255_255/0.22)_1px,transparent_1.4px)] bg-[size:16px_16px]"
@@ -70,9 +69,9 @@ export function LandingPage() {
 
         <section id="solution" className={`lp-scale bg-[#F2F5FE] px-4 pb-[104px] pt-[72px] ${LIGHT_DOTS}`}>
           <RevealLines className="text-center">
-            <p className="text-[14px] font-medium uppercase tracking-[0.2em] text-[#4846B3]">Solution</p>
+            <p className="text-[14px] font-medium uppercase tracking-[0.2em] text-[#1E40AF]">Solution</p>
             <h2 className="mt-[16px] text-[40.25px] font-bold leading-[48.2px] text-[#131A2F] max-sm:text-[30px] max-sm:leading-[1.2]">
-              One <span className="text-[#5F72F0]">Platform.</span> Two
+              One <span className="text-[#3B82F6]">Platform.</span> Two
               <br /> Ways to Get Real Care.
             </h2>
           </RevealLines>
@@ -651,7 +650,7 @@ function SolutionCard({
         "flex flex-col rounded-[28px] px-[40px] max-sm:px-[28px]",
         tall ? "justify-end pb-[56px] pt-[48px] md:min-h-[426px]" : "pb-[44px] pt-[42px]",
         dark
-          ? "bg-[#303086] bg-[radial-gradient(rgb(255_255_255/0.09)_1px,transparent_1.4px)] bg-[size:16px_16px] shadow-[0_28px_60px_-30px_rgba(48,48,134,0.6)]"
+          ? "bg-[#1E3A8A] bg-[radial-gradient(rgb(255_255_255/0.09)_1px,transparent_1.4px)] bg-[size:16px_16px] shadow-[0_28px_60px_-30px_rgba(30,58,138,0.6)]"
           : "bg-white shadow-[0_22px_48px_-28px_rgba(48,48,134,0.2)]",
         className,
       )}

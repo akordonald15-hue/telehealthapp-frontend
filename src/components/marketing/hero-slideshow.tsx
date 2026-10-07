@@ -4,11 +4,11 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
+import Link from "next/link";
 import { HousePlus } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { ArrowLongRightIcon } from "@/components/marketing/marketing-icons";
-import { WaveButton } from "@/components/ui/wave-button";
 import { heroSlides } from "@/features/marketing/data";
 import { cn } from "@/lib/utils";
 
@@ -112,7 +112,7 @@ export function HeroSlideshow() {
         }
       }}
     >
-      <div className="inline-flex h-[47.6px] items-center gap-[8px] rounded-[22px] rounded-br-none rounded-tl-[2px] bg-[#6E83EF] pl-[30.2px] pr-[30px] text-[15.15px] font-medium leading-none text-white max-sm:px-5">
+      <div className="inline-flex h-[47.6px] items-center gap-[8px] rounded-[22px] rounded-br-none rounded-tl-[2px] bg-[#60A5FA80] pl-[30.2px] pr-[30px] text-[15.15px] font-medium leading-none text-white max-sm:px-5">
         <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#B3C2F7]" />
         Trusted Digital Healthcare
         <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#B3C2F7]" />
@@ -165,23 +165,20 @@ export function HeroSlideshow() {
       </div>
 
       <div className="mt-[35.15px] flex justify-center gap-[33.9px] max-sm:flex-col max-sm:gap-4">
-        <WaveButton
+        <Link
           href="/register"
-          variant="indigo"
-          className="h-[58.8px] w-[249.5px] gap-[17.6px] rounded-full text-[18px] font-medium leading-none shadow-[0_16px_32px_-14px_rgba(30,27,107,0.55)] max-sm:w-full"
+          className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[17.6px] rounded-full bg-[#1E40AF] text-[18px] font-medium leading-none text-white shadow-[0_16px_32px_-14px_rgba(30,64,175,0.6)] hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
         >
           Talk to a Doctor
           <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
-        </WaveButton>
-        <WaveButton
+        </Link>
+        <Link
           href="/register"
-          variant="outline"
-          waveTextColor="#362FAA"
-          className="h-[58.8px] w-[249.5px] gap-[16.4px] rounded-full text-[18px] font-medium leading-none max-sm:w-full"
+          className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[16.4px] rounded-full border border-white text-[18px] font-medium leading-none text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
         >
           Book Homecare
           <HousePlus className="h-[28px] w-[28px]" strokeWidth={1.7} />
-        </WaveButton>
+        </Link>
       </div>
 
       <div className="relative mx-auto mt-[48px] grid h-[447px] w-[850px] max-w-full max-sm:left-1/2 max-sm:h-[316px] max-sm:w-[600px] max-sm:max-w-none max-sm:-translate-x-1/2">
