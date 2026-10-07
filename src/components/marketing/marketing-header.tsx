@@ -99,7 +99,7 @@ export function MarketingHeader() {
           <Link
             href="#contact"
             data-intro="cta"
-            className="ml-auto inline-flex h-[49.7px] w-[184.1px] items-center justify-center gap-[18.3px] rounded-[13.8px] bg-[#1E40AF] text-[15.75px] font-medium leading-none text-white hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 max-lg:hidden"
+            className="ml-auto inline-flex h-[49.7px] w-[184.1px] items-center justify-center gap-[18.3px] rounded-[13.8px] bg-[#1E40AF] text-[15.75px] font-medium leading-none text-white hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 max-lg:h-11 max-lg:w-auto max-lg:gap-4 max-lg:rounded-full max-lg:px-6 max-sm:hidden"
           >
             Contact Us
             <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
@@ -111,10 +111,10 @@ export function MarketingHeader() {
             aria-expanded={open}
             aria-controls="mobile-nav"
             onClick={() => setOpen((value) => !value)}
-            className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white text-[#1F2937] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 lg:hidden"
+            className="ml-3 inline-flex h-11 w-11 items-center justify-center rounded-[12px] text-[#1F2937] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 max-sm:ml-auto lg:hidden"
           >
             <span className="sr-only">Toggle navigation</span>
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {open ? <X className="h-6 w-6" strokeWidth={1.75} /> : <Menu className="h-7 w-7" strokeWidth={1.75} />}
           </button>
         </div>
 

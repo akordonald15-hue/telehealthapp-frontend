@@ -181,7 +181,7 @@ export function HeroSlideshow() {
         </Link>
       </div>
 
-      <div className="relative mx-auto mt-[48px] grid h-[447px] w-[850px] max-w-full max-sm:left-1/2 max-sm:h-[316px] max-sm:w-[600px] max-sm:max-w-none max-sm:-translate-x-1/2">
+      <div className="relative mx-auto mt-[48px] grid h-[447px] w-[850px] max-w-full max-lg:left-1/2 max-lg:max-w-none max-lg:-translate-x-1/2 max-sm:h-[316px] max-sm:w-[600px] sm:max-lg:aspect-[850/447] sm:max-lg:h-auto sm:max-lg:w-[min(148%,1100px)]">
         <HeroCircles />
         {heroSlides.map((slide, index) => (
           <div key={slide.image} {...slideLayer(index, "relative")}>           <div
@@ -195,7 +195,7 @@ export function HeroSlideshow() {
                 preload={index === 0}
                 loading={index === 0 ? undefined : "eager"}
                 fetchPriority={index === 0 ? "high" : "low"}
-                sizes="(min-width: 1920px) 1632px, (min-width: 1024px) 85vw, (min-width: 640px) 850px, 600px"
+                sizes="(min-width: 1920px) 1632px, (min-width: 1024px) 85vw, (min-width: 640px) 1100px, 600px"
                 onLoad={(event) => revealImage(event.currentTarget)}
                 className="object-contain object-bottom opacity-0"
               />

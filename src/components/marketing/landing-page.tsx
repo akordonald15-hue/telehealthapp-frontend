@@ -76,15 +76,15 @@ export function LandingPage() {
             </h2>
           </RevealLines>
 
-          <div className="mx-auto mt-[64px] grid w-[946px] max-w-full gap-[24px] md:grid-cols-2 md:items-center">
-            <div className="flex flex-col gap-[40px] max-md:contents">
-              <SolutionCard highlight={advice} tall pingDelay={0} className="max-md:order-1" />
-              <SolutionCard highlight={confirmation} tall pingDelay={1.2} className="max-md:order-4" />
+          <div className="mx-auto mt-[64px] grid w-[946px] max-w-full gap-[24px] max-lg:auto-rows-fr lg:grid-cols-2 lg:items-center">
+            <div className="flex flex-col gap-[40px] max-lg:contents">
+              <SolutionCard highlight={advice} tall pingDelay={0} />
+              <SolutionCard highlight={confirmation} tall pingDelay={1.2} />
             </div>
-            <div className="flex flex-col gap-[36px] max-md:contents">
-              <SolutionCard highlight={homeVisits} pingDelay={0.4} className="max-md:order-2" />
-              <SolutionCard highlight={verified} pingDelay={0.8} className="max-md:order-3" />
-              <SolutionCard highlight={pricing} pingDelay={1.6} className="max-md:order-5" />
+            <div className="flex flex-col gap-[36px] max-lg:contents">
+              <SolutionCard highlight={homeVisits} pingDelay={0.4} />
+              <SolutionCard highlight={verified} pingDelay={0.8} />
+              <SolutionCard highlight={pricing} pingDelay={1.6} />
             </div>
           </div>
         </section>
@@ -99,14 +99,14 @@ export function LandingPage() {
               </h2>
             </RevealLines>
 
-            <div className="mx-auto mt-[33px] grid w-[938px] max-w-full gap-[22px] md:grid-cols-2">
-              <div className="flex flex-col gap-[38px] md:mt-[60px] max-md:contents">
-                <ServiceCard offer={doctorVisits} pingDelay={0} className="max-md:order-1" />
-                <ServiceCard offer={elderlyCare} pingDelay={0.8} className="max-md:order-3" />
+            <div className="mx-auto mt-[33px] grid w-[938px] max-w-full gap-[22px] max-lg:auto-rows-fr lg:grid-cols-2">
+              <div className="flex flex-col gap-[38px] lg:mt-[60px] max-lg:contents">
+                <ServiceCard offer={doctorVisits} pingDelay={0} className="max-lg:order-1" />
+                <ServiceCard offer={elderlyCare} pingDelay={0.8} className="max-lg:order-3" />
               </div>
-              <div className="flex flex-col gap-[38px] max-md:contents">
-                <ServiceCard offer={homeNursing} pingDelay={0.4} className="max-md:order-2" />
-                <ServiceCard offer={maternalCare} pingDelay={1.2} className="max-md:order-4" />
+              <div className="flex flex-col gap-[38px] max-lg:contents">
+                <ServiceCard offer={homeNursing} pingDelay={0.4} className="max-lg:order-2" />
+                <ServiceCard offer={maternalCare} pingDelay={1.2} className="max-lg:order-4" />
               </div>
             </div>
           </div>
@@ -647,7 +647,7 @@ function SolutionCard({
   return (
     <article
       className={cn(
-        "flex flex-col rounded-[28px] px-[40px] max-sm:px-[28px]",
+        "flex flex-col rounded-[28px] px-[40px] max-lg:justify-end max-lg:pb-[56px] max-lg:pt-[48px] max-sm:px-[28px]",
         tall ? "justify-end pb-[56px] pt-[48px] md:min-h-[426px]" : "pb-[44px] pt-[42px]",
         dark
           ? "bg-[#1E3A8A] bg-[radial-gradient(rgb(255_255_255/0.09)_1px,transparent_1.4px)] bg-[size:16px_16px] shadow-[0_28px_60px_-30px_rgba(30,58,138,0.6)]"
@@ -658,8 +658,8 @@ function SolutionCard({
       <PingBadge dark={dark} delay={pingDelay} className="relative h-[92px] w-[92px]">
         <Icon className="relative h-full w-full" />
       </PingBadge>
-      <h3 className={cn("mt-[28px] text-[21px] font-bold leading-[1.25]", dark ? "text-white" : "text-[#131A2F]")}>{title}</h3>
-      <p className={cn("mt-[12px] max-w-[372px] text-[15px] leading-[24px]", dark ? "text-white/85" : "text-[#80828F]")}>{text}</p>
+      <h3 className={cn("mt-[28px] text-[21px] font-bold leading-[1.25]", dark ? "text-white" : "text-[#0B1C30]")}>{title}</h3>
+      <p className={cn("mt-[12px] max-w-[372px] text-[15px] leading-[24px]", dark ? "text-white/85" : "text-[#434655]")}>{text}</p>
     </article>
   );
 }
@@ -678,7 +678,7 @@ function ServiceCard({
   return (
     <article
       className={cn(
-        "flex flex-col overflow-hidden rounded-[22px] bg-white pb-[64px] shadow-[0_24px_48px_-24px_rgba(8,20,80,0.45)] md:min-h-[575px] max-sm:pb-10",
+        "flex flex-col overflow-hidden rounded-[22px] bg-white pb-[64px] shadow-[0_24px_48px_-24px_rgba(8,20,80,0.45)] lg:min-h-[575px] max-sm:pb-10",
         className,
       )}
     >
@@ -694,7 +694,7 @@ function ServiceCard({
           <path d="M0 34H174M0 155H174M82 0 8 155" vectorEffect="non-scaling-stroke" />
         </svg>
         <div className="absolute inset-y-0 right-0 w-[62%]">
-          <Image src={image} alt={alt} fill sizes="(min-width: 768px) 29vw, 60vw" className="object-cover" />
+          <Image src={image} alt={alt} fill sizes="(min-width: 1024px) 29vw, 60vw" className="object-cover" />
         </div>
         <PingBadge
           delay={pingDelay}
@@ -706,7 +706,7 @@ function ServiceCard({
 
       <div className="px-[47px] pt-[83px] max-sm:px-[28px]">
         <h3 className="max-w-[250px] text-[25px] font-semibold leading-[32px] text-[#0B1C30]">{title}</h3>
-        <p className="mt-[16px] max-w-[360px] text-[15.5px] leading-[25.5px] text-[#6A6C79]">{text}</p>
+        <p className="mt-[16px] max-w-[360px] text-[15.5px] leading-[25.5px] text-[#434655]">{text}</p>
         <Link
           href={href}
           className="group mt-[21px] inline-flex items-center gap-[14px] rounded-md text-[16px] font-medium text-[#1E40AF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/20"

@@ -39,11 +39,11 @@ export function PlatformStats() {
   );
 
   return (
-    <dl ref={rootRef} className="mx-auto grid w-[900px] max-w-full grid-cols-2 gap-y-6 md:grid-cols-4">
+    <dl ref={rootRef} className="mx-auto grid w-[900px] max-w-full grid-cols-2 lg:grid-cols-4">
       {platformStats.map((stat) => (
         <div
           key={stat.label}
-          className="flex flex-col-reverse items-center justify-end py-[20px] text-center md:border-l md:border-[#C8CBE6] md:first:border-l-0"
+          className="flex flex-col-reverse items-center justify-end border-[#1E40AFE5] py-[20px] text-center max-lg:even:border-l lg:border-l lg:first:border-l-0"
         >
           <dt className="mt-[12px] text-[15.5px] leading-tight text-[#4B4B5C] max-sm:text-[14px]">{stat.label}</dt>
           <dd className="text-[46px] font-bold leading-none tabular-nums text-[#3472EF] max-sm:text-[36px]">
