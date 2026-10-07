@@ -12,6 +12,7 @@ import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { Textarea } from "@/components/ui/input";
+import { useInvalidateReferralProgram } from "@/features/referral-program/use-referral-program";
 import { homeCareApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { buildWebSocketUrl } from "@/lib/realtime";
@@ -29,6 +30,8 @@ import {
   referralNotes,
   statusStepState,
 } from "@/features/homecare/homecare-utils";
+
+const HOMECARE_BOTTOM_SAFE_PADDING = "pb-[calc(9rem+env(safe-area-inset-bottom))] sm:pb-[calc(7rem+env(safe-area-inset-bottom))] lg:pb-8";
 
 export function HomeCareRequestDetailClient({ requestId }: { requestId: number }) {
   const queryClient = useQueryClient();
@@ -56,6 +59,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
     refetchInterval: liveTrackingConnected ? false : 8000,
   });
 
+  const invalidateReferralProgram = useInvalidateReferralProgram();
   const refreshHomeCare = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["home-care"] });
   }, [queryClient]);
@@ -65,6 +69,10 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
     onSuccess: async () => {
       setCancelReason("");
       await refreshHomeCare();
+      // Cancelling invalidates the checkout server-side, which releases any referral reward it
+      // was holding. Without this the reward list keeps showing "reserved" until the cache goes
+      // stale, right after the action that freed it.
+      invalidateReferralProgram();
     },
   });
   const confirmMutation = useMutation({
@@ -143,7 +151,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
       {requestQuery.isLoading ? (
         <InlineLoader label="Preparing your home care request" />
       ) : request ? (
-        <>
+        <div className={`grid gap-4 ${HOMECARE_BOTTOM_SAFE_PADDING}`}>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.86fr)]">
             <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="flex flex-wrap items-center gap-2">
@@ -338,7 +346,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               )}
             </div>
           </div>
-        </>
+        </div>
       ) : null}
     </Section>
   );

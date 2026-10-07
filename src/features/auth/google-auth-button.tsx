@@ -72,6 +72,9 @@ export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
       google.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: (response) => {
+          console.log("Google OAuth response:", {
+            credentialPresent: Boolean(response.credential),
+          });
           if (!response.credential) {
             setLocalError("Google sign-in did not return a valid account token.");
             return;

@@ -2,7 +2,13 @@
 
 import { TextField } from "../form-fields";
 
-export function StepBasicInfo() {
+export function StepBasicInfo({
+  onFullNameChange,
+  onPhoneChange,
+}: {
+  onFullNameChange?: (value: string) => void;
+  onPhoneChange?: (value: string) => void;
+}) {
   return (
     <div className="grid gap-4">
       <TextField
@@ -10,14 +16,8 @@ export function StepBasicInfo() {
         label="Full Name"
         placeholder="e.g. Ada Okafor"
         autoComplete="name"
+        onValueChange={onFullNameChange}
         required
-      />
-      <TextField
-        name="email"
-        label="Email"
-        type="email"
-        readOnly
-        hint="This is the email linked to your account."
       />
       <TextField
         name="phone"
@@ -26,6 +26,7 @@ export function StepBasicInfo() {
         inputMode="tel"
         placeholder="08012345678"
         autoComplete="tel"
+        onValueChange={onPhoneChange}
         required
       />
     </div>

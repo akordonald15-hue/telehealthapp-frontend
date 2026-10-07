@@ -10,6 +10,8 @@ import type { PaymentInitiation } from "@/lib/types/backend";
 import { beginFilePickerGrace } from "@/lib/pwa/file-picker-guard";
 import { formatMoney } from "@/lib/utils";
 
+const PAYMENT_PANEL_BOTTOM_SAFE_PADDING = "pb-[calc(8rem+env(safe-area-inset-bottom))] sm:pb-5";
+
 function CopyButton({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false);
   return (
@@ -75,7 +77,7 @@ export function BankTransferPaymentPanel({
   }
 
   return (
-    <div className="grid gap-4 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+    <div className={`grid gap-4 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4 ${PAYMENT_PANEL_BOTTOM_SAFE_PADDING}`}>
       <Notice title="Bank transfer payment" tone="warning">
         Complete payment by bank transfer. Caretekk will open the service after your transfer is verified.
       </Notice>

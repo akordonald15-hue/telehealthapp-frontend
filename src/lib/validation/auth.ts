@@ -14,6 +14,9 @@ export const registerSchema = z.object({
     .optional()
     .refine((value) => !value || normalizeNigerianPhoneInput(value) !== null, NIGERIAN_PHONE_ERROR),
   password: z.string().min(8),
+  // Optional referral code. Shape only: whether it can actually be applied is a backend
+  // decision, and an unusable code must never block account creation.
+  referral_code: z.string().max(32).optional(),
 });
 
 export const emailSchema = z.object({

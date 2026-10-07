@@ -1,14 +1,16 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
+import { profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { clearTokens, hasStoredSession } from "@/lib/auth/tokens";
 import { FullPageLoader } from "@/components/ui/loaders";
 import { FILE_PICKER_GRACE_EVENT, FILE_PICKER_GRACE_MS } from "@/lib/pwa/file-picker-guard";
+import type { PatientProfile } from "@/lib/types/backend";
 
 function subscribeToClientMount() {
   return () => undefined;
@@ -27,6 +29,7 @@ const BACKGROUND_GRACE_MS = 3 * 60 * 1000;
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
   const mounted = useSyncExternalStore(subscribeToClientMount, getClientMountSnapshot, getServerMountSnapshot);
@@ -35,6 +38,15 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const offlineSinceRef = useRef<number | null>(null);
   const filePickerGraceUntilRef = useRef(0);
   const graceTimerRef = useRef<number | null>(null);
+  const patientProfileQuery = useQuery({
+    queryKey: ["profile", "me", "patient", "gate"],
+    queryFn: () => profilesApi.me<PatientProfile>(),
+    enabled:
+      mounted &&
+      secureState === "online" &&
+      userQuery.data?.role === "patient" &&
+      !userQuery.data?.must_change_password,
+  });
 
   const clearSensitiveState = useCallback(() => {
     queryClient.cancelQueries({
@@ -252,6 +264,32 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     router.replace("/change-password");
   }, [mounted, router, secureState, userQuery.data?.must_change_password]);
 
+  useEffect(() => {
+    if (
+      !mounted ||
+      secureState !== "online" ||
+      userQuery.data?.role !== "patient" ||
+      userQuery.data?.must_change_password ||
+      patientProfileQuery.isLoading ||
+      patientProfileQuery.isError ||
+      patientProfileQuery.data?.profile_complete ||
+      pathname === "/onboarding"
+    ) {
+      return;
+    }
+    router.replace("/onboarding");
+  }, [
+    mounted,
+    patientProfileQuery.data?.profile_complete,
+    patientProfileQuery.isError,
+    patientProfileQuery.isLoading,
+    pathname,
+    router,
+    secureState,
+    userQuery.data?.must_change_password,
+    userQuery.data?.role,
+  ]);
+
   if (mounted && secureState === "offline") {
     return (
       <main className="flex min-h-[100dvh] items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.18),_transparent_28%),linear-gradient(180deg,#F8FBFF_0%,#F4F7FB_42%,#FFFFFF_100%)] px-4 py-10">
@@ -295,6 +333,33 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   if (userQuery.data?.must_change_password) {
     return <FullPageLoader title="Securing your session" subtitle="Preparing your password update." />;
+  }
+
+  if (
+    userQuery.data?.role === "patient" &&
+    patientProfileQuery.isLoading &&
+    secureState === "online"
+  ) {
+    return (
+      <FullPageLoader
+        title="Preparing your Caretekk profile"
+        subtitle="We are checking the details needed for safe care."
+      />
+    );
+  }
+
+  if (
+    userQuery.data?.role === "patient" &&
+    patientProfileQuery.data &&
+    !patientProfileQuery.data.profile_complete &&
+    pathname !== "/onboarding"
+  ) {
+    return (
+      <FullPageLoader
+        title="Preparing your profile setup"
+        subtitle="Taking you to the required onboarding steps."
+      />
+    );
   }
 
   return children;

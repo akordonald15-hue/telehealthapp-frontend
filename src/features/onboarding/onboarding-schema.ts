@@ -16,17 +16,40 @@ export const GENDER_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-// Accepts Nigerian formats: 080..., +23480..., 23480... (10-13 digits, optional +)
-const phoneRegex = /^\+?\d{10,14}$/;
+export function getFullNameValidation(value: string) {
+  const trimmed = value.trim();
+  const words = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
+  const wordsAreLettersOnly = words.every((word) => /^[\p{L}]+$/u.test(word));
+
+  return {
+    trimmed,
+    words,
+    valid: words.length >= 2 && wordsAreLettersOnly,
+  };
+}
+
+export function hasValidFullName(value: string) {
+  return getFullNameValidation(value).valid;
+}
+
+export function isValidNigerianPhone(value: string) {
+  const normalized = value.replace(/[\s-]/g, "");
+  return /^(0[789][01]\d{8}|\+?234[789][01]\d{8})$/.test(normalized);
+}
 
 export const onboardingSchema = z.object({
   // Step 1 - Basic information
-  full_name: z.string().trim().min(2, "Enter your full name.").max(120),
-  email: z.string().email(),
+  full_name: z
+    .string()
+    .trim()
+    .min(1, "Enter your full name.")
+    .max(120)
+    .refine(hasValidFullName, "Enter your first and last name."),
   phone: z
     .string()
     .trim()
-    .regex(phoneRegex, "Enter a valid phone number (e.g. 08012345678)."),
+    .min(1, "Enter your phone number.")
+    .refine(isValidNigerianPhone, "Enter a valid 11-digit Nigerian phone number."),
 
   // Step 2 - Personal information
   age_range: z.enum(AGE_RANGES, { message: "Select your age range." }),
@@ -41,7 +64,7 @@ export type OnboardingValues = z.infer<typeof onboardingSchema>;
 
 /** Field groups per step, used to trigger step-scoped validation before advancing. */
 export const STEP_FIELDS: (keyof OnboardingValues)[][] = [
-  ["full_name", "email", "phone"],
+  ["full_name", "phone"],
   ["age_range", "gender"],
   ["state", "lga"],
 ];

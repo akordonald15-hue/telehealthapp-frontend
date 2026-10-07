@@ -12,6 +12,7 @@ import {
   MessageCircle,
   SendHorizonal,
   ShieldCheck,
+  Star,
   Stethoscope,
 } from "lucide-react";
 import Image from "next/image";
@@ -25,13 +26,16 @@ import { Button } from "@/components/ui/button";
 import { DataList } from "@/components/ui/data-list";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { Input, Textarea } from "@/components/ui/input";
 import { InlineLoader } from "@/components/ui/loaders";
 import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
+import { RewardSelector } from "@/features/referral-program/reward-selector";
+import { RepricingConsent, requiresRepricingConsent } from "@/features/referral-program/repricing-consent";
+import { useInvalidateReferralProgram } from "@/features/referral-program/use-referral-program";
 import { appointmentsApi, paymentsApi, profilesApi, triageApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
@@ -48,7 +52,7 @@ type ConsultationTimingMode = "now" | "later";
 const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
 const symptomQuickReplies = ["Headache", "Fever", "Cough", "Stomach pain"];
 const hourlyConsultationSlots = Array.from({ length: 10 }, (_, index) => 8 + index);
-const hiddenDoctorNameMarkers = ["test doctor", "doctor smoke invite", "dr no phone smoke", "dr triumoh", "doctor donald ak", "donald ak"];
+const hiddenDoctorNameMarkers = ["test doctor", "doctor smoke invite", "dr no phone smoke", "dr triumoh", "triumoh", "doctor donald ak", "donald ak", "dr ak", "doctor ak"];
 const severityOptions: Array<{ value: TriageSeverity; label: string }> = [
   { value: "mild", label: "Mild" },
   { value: "moderate", label: "Moderate" },
@@ -197,6 +201,93 @@ function AssistantBubble({ speaker, children }: { speaker: "assistant" | "user";
   );
 }
 
+function PatientAppointmentCard({ appointment }: { appointment: Appointment }) {
+  const queryClient = useQueryClient();
+  const [score, setScore] = useState(5);
+  const [feedback, setFeedback] = useState("");
+  const ratingMutation = useMutation({
+    mutationFn: () =>
+      appointmentsApi.submitRating(appointment.id, {
+        score,
+        feedback: feedback.trim(),
+      }),
+    onSuccess: async () => {
+      setFeedback("");
+      await queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    },
+  });
+  const canRate = appointment.status === "completed" && !appointment.rating;
+  const doctorName = appointment.doctor_profile?.display_name || "Caretekk doctor";
+
+  return (
+    <article className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.38)]">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <p className="font-heading text-lg font-semibold text-[#1F2937]">{doctorName}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{formatDateTime(appointment.scheduled_at)}</p>
+          {appointment.reason ? <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{appointment.reason}</p> : null}
+        </div>
+        <StatusBadge value={appointment.status} />
+      </div>
+
+      {appointment.rating ? (
+        <div className="mt-4 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+          <p className="text-sm font-semibold text-[#1F2937]">Your review</p>
+          <div className="mt-2 flex items-center gap-1 text-[#2563EB]" aria-label={`${appointment.rating.score} star rating`}>
+            {[1, 2, 3, 4, 5].map((item) => (
+              <Star key={item} className={cn("h-4 w-4", item <= appointment.rating!.score && "fill-current")} />
+            ))}
+          </div>
+          {appointment.rating.feedback ? (
+            <p className="mt-3 text-sm leading-6 text-slate-600">&ldquo;{appointment.rating.feedback}&rdquo;</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {canRate ? (
+        <div className="mt-4 grid gap-3 rounded-[8px] border border-slate-200 bg-slate-50 p-4">
+          <div>
+            <p className="text-sm font-semibold text-[#1F2937]">Rate this consultation</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">Add a comment if you want to share what went well.</p>
+          </div>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Rate consultation">
+            {[1, 2, 3, 4, 5].map((item) => (
+              <button
+                key={item}
+                type="button"
+                role="radio"
+                aria-checked={score === item}
+                onClick={() => setScore(item)}
+                className={cn(
+                  "inline-flex h-11 w-11 items-center justify-center rounded-[8px] border transition active:scale-95",
+                  item <= score ? "border-[#BFDBFE] bg-[#DBEAFE] text-[#2563EB]" : "border-slate-200 bg-white text-slate-300",
+                )}
+              >
+                <Star className={cn("h-5 w-5", item <= score && "fill-current")} />
+              </button>
+            ))}
+          </div>
+          <Field label="Review comment">
+            <Textarea
+              value={feedback}
+              maxLength={500}
+              rows={3}
+              placeholder="The doctor was very patient and explained everything clearly."
+              onChange={(event) => setFeedback(event.target.value)}
+            />
+          </Field>
+          <p className="text-xs text-slate-500">{feedback.length}/500 characters</p>
+          <ErrorMessage error={ratingMutation.error} context="appointments" />
+          {ratingMutation.isSuccess ? <Notice title="Review submitted" tone="success" /> : null}
+          <Button type="button" className="w-full sm:w-fit" disabled={ratingMutation.isPending} onClick={() => ratingMutation.mutate()}>
+            {ratingMutation.isPending ? "Submitting..." : "Submit review"}
+          </Button>
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
 export function AppointmentsClient() {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -214,11 +305,19 @@ export function AppointmentsClient() {
   const [aiSeverity, setAiSeverity] = useState<TriageSeverity | null>(null);
   const [aiResultRequested, setAiResultRequested] = useState(false);
   const [aiStartedByUser, setAiStartedByUser] = useState(false);
+  const [completedTriageSessionId, setCompletedTriageSessionId] = useState<number | null>(null);
   const [welcomeAccepted, setWelcomeAccepted] = useState(!firstTimeWelcome);
   const [timingMode, setTimingMode] = useState<ConsultationTimingMode | null>(null);
   const [scheduleDay, setScheduleDay] = useState<"today" | "tomorrow" | "another">("today");
   const [customScheduleDate, setCustomScheduleDate] = useState("");
   const [selectedSlotHour, setSelectedSlotHour] = useState<number | null>(null);
+  const [checkoutError, setCheckoutError] = useState("");
+  // A reward is selected by public id only; the server prices the booking.
+  const [selectedRewardId, setSelectedRewardId] = useState<string | null>(null);
+  // Held back deliberately: a repriced checkout needs the patient's agreement before we send
+  // them to the payment provider.
+  const [repricedPayment, setRepricedPayment] = useState<PaymentInitiation | null>(null);
+  const invalidateReferralProgram = useInvalidateReferralProgram();
   const recommendationOpenedRef = useRef(false);
   const appointments = useQuery({
     queryKey: ["appointments", page],
@@ -226,35 +325,52 @@ export function AppointmentsClient() {
   });
   const createAppointment = useMutation({
     mutationFn: appointmentsApi.book,
-    onSuccess: async (data) => {
-      consultationDraft.clearDraft();
-      appointmentDraft.clearDraft();
-      paymentDraft.clearDraft();
-      form.reset();
-      setAiSessionId(null);
-      setAiConversationId(null);
-      setAiSymptomText("");
-      setAiSubmittedText("");
-      setAiSeverity(null);
-      setAiResultRequested(false);
-      setAiStartedByUser(false);
-      setSelectedDoctor(null);
-      setTimingMode(null);
-      setScheduleDay("today");
-      setCustomScheduleDate("");
-      setSelectedSlotHour(null);
-      setDoctorPickerOpen(false);
-      setScheduleSheetOpen(false);
-      setPage(1);
-      await queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    onMutate: () => {
+      setCheckoutError("");
+    },
+    onSuccess: (data) => {
+      const payment = data.payment as PaymentInitiation & { detail?: string };
+      console.info("Caretekk checkout response", {
+        appointmentId: data.appointment?.id,
+        paymentId: payment.payment_id,
+        provider: payment.provider,
+        status: payment.status,
+        initializationStatus: payment.initialization_status,
+        hasAuthorizationUrl: Boolean(payment.authorization_url),
+        reference: payment.external_ref,
+      });
+
       if (data.payment.provider === "bank_transfer") {
+        resetBookingCheckoutState();
         setManualPayment(data.payment);
+        void queryClient.invalidateQueries({ queryKey: ["appointments"] });
         return;
       }
-      const authorizationUrl = data.payment.authorization_url;
+
+      // The booking may have spent a reward, so referral surfaces are now stale.
+      invalidateReferralProgram();
+
+      const authorizationUrl = payment.authorization_url;
       if (authorizationUrl) {
+        if (requiresRepricingConsent(payment)) {
+          // Never redirect silently to a different amount than the patient last saw.
+          setRepricedPayment(payment);
+          void queryClient.invalidateQueries({ queryKey: ["appointments"] });
+          return;
+        }
+        resetBookingCheckoutState();
+        void queryClient.invalidateQueries({ queryKey: ["appointments"] });
         window.location.assign(authorizationUrl);
+        return;
       }
+      setCheckoutError(payment.detail || "Unable to start payment. Please try again.");
+      void queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    },
+    onError: (error) => {
+      console.error("Caretekk checkout failed", {
+        message: error instanceof Error ? error.message : "Unknown checkout error",
+      });
+      setCheckoutError(getFriendlyErrorMessage(error, "payments") || "Unable to start payment. Please try again.");
     },
   });
   const submitTransfer = useMutation({
@@ -322,7 +438,7 @@ export function AppointmentsClient() {
   const triageSessionId = Number.isInteger(triageSessionParam) && triageSessionParam > 0 ? triageSessionParam : null;
   const aiResultData = aiResult.data;
   const aiFinished = isConversationResult(aiResultData) && aiResultData.status === "completed";
-  const effectiveTriageSessionId = triageSessionId ?? (aiFinished ? aiSessionId : null);
+  const effectiveTriageSessionId = triageSessionId ?? completedTriageSessionId ?? (aiFinished ? aiSessionId : null);
   const suggestedSpecialty = isConversationResult(aiResultData) ? aiResultData.department : null;
   const triageSymptoms = isConversationResult(aiResultData) ? readableTriageList(aiResultData.extracted_symptoms) : [];
   const doctorItems = useMemo(
@@ -379,7 +495,6 @@ export function AppointmentsClient() {
   }, [scheduleBaseDate, selectedSlotHour, timingMode]);
   const modalBookingReady = Boolean(
     selectedDoctorLive &&
-      effectiveTriageSessionId &&
       timingMode &&
       scheduledAtFromSelection &&
       (timingMode !== "later" || selectedSlotHour === null || !unavailableSlotHours.has(selectedSlotHour)) &&
@@ -423,11 +538,13 @@ export function AppointmentsClient() {
       aiSeverity,
       aiResultRequested,
       aiStartedByUser,
+      completedTriageSessionId,
     }),
-    [aiConversationId, aiResultRequested, aiSessionId, aiSeverity, aiStartedByUser, aiSubmittedText, aiSymptomText],
+    [aiConversationId, aiResultRequested, aiSessionId, aiSeverity, aiStartedByUser, aiSubmittedText, aiSymptomText, completedTriageSessionId],
   );
   const restoreConsultationDraft = useCallback((draft: typeof consultationDraftValue) => {
     setAiSessionId(draft.aiSessionId ?? null);
+    setCompletedTriageSessionId(draft.completedTriageSessionId ?? draft.aiSessionId ?? null);
     setAiConversationId(draft.aiConversationId ?? null);
     setAiSymptomText(draft.aiSymptomText || "");
     setAiSubmittedText(draft.aiSubmittedText || "");
@@ -454,6 +571,7 @@ export function AppointmentsClient() {
       aiSeverity: draft.aiSeverity,
       aiResultRequested: draft.aiResultRequested,
       aiStartedByUser: draft.aiStartedByUser,
+      completedTriageSessionId: draft.completedTriageSessionId,
     }),
   });
   const appointmentDraftKey = user?.id ? `caretekk:draft:consultation-booking:${user.id}` : null;
@@ -472,6 +590,10 @@ export function AppointmentsClient() {
     onRestore: (draft) => {
       if (draft.selectedDoctor) {
         setSelectedDoctor(draft.selectedDoctor);
+      }
+      if (draft.triageSessionId) {
+        setCompletedTriageSessionId(draft.triageSessionId);
+        setAiSessionId(draft.triageSessionId);
       }
       form.reset({
         doctor: draft.doctor || 0,
@@ -507,11 +629,17 @@ export function AppointmentsClient() {
   }, [paymentConfirmed, queryClient]);
 
   useEffect(() => {
-    if (!welcomeAccepted || user?.role !== "patient" || profileIncomplete || triageSessionId || aiSessionId || startAiSession.isPending) {
+    if (aiFinished && aiSessionId) {
+      setCompletedTriageSessionId(aiSessionId);
+    }
+  }, [aiFinished, aiSessionId]);
+
+  useEffect(() => {
+    if (!welcomeAccepted || user?.role !== "patient" || profileIncomplete || triageSessionId || aiSessionId || selectedDoctor || startAiSession.isPending) {
       return;
     }
     startAiSession.mutate();
-  }, [aiSessionId, profileIncomplete, startAiSession, triageSessionId, user?.role, welcomeAccepted]);
+  }, [aiSessionId, profileIncomplete, selectedDoctor, startAiSession, triageSessionId, user?.role, welcomeAccepted]);
 
   useEffect(() => {
     if (!aiFinished || recommendationOpenedRef.current || selectedDoctor) {
@@ -537,23 +665,67 @@ export function AppointmentsClient() {
   }
 
   function handleContinueToPayment() {
-    if (!selectedDoctorLive || !effectiveTriageSessionId || !scheduledAtFromSelection) {
+    setCheckoutError("");
+    const missingFields = [
+      !selectedDoctorLive ? "doctor" : "",
+      !timingMode ? "consultation type" : "",
+      !scheduledAtFromSelection ? "date and time" : "",
+      !user?.id ? "signed-in patient" : "",
+    ].filter(Boolean);
+
+    const checkoutPayloadPreview = {
+      doctorId: selectedDoctorLive?.id ?? null,
+      selectedDateTime: scheduledAtFromSelection || null,
+      consultationFee: 2000,
+      patientId: user?.id ?? null,
+      consultationType: timingMode,
+      triageSessionId: effectiveTriageSessionId,
+      missingFields,
+    };
+    console.info("Caretekk checkout payload", checkoutPayloadPreview);
+
+    if (missingFields.length) {
+      setCheckoutError(`Please select ${missingFields.join(", ")} before payment.`);
       return;
     }
     const reason = aiSubmittedText || (isConversationResult(aiResultData) ? aiResultData.summary_preview : "") || "AI-assisted doctor consultation";
 
-    form.setValue("doctor", selectedDoctorLive.id, { shouldValidate: true });
+    form.setValue("doctor", selectedDoctorLive!.id, { shouldValidate: true });
     form.setValue("scheduled_at", scheduledAtFromSelection, { shouldValidate: true });
     form.setValue("reason", reason, { shouldValidate: true });
 
     createAppointment.mutate({
-      doctor: selectedDoctorLive.id,
-      triage_session: effectiveTriageSessionId,
+      doctor: selectedDoctorLive!.id,
+      ...(effectiveTriageSessionId ? { triage_session: effectiveTriageSessionId } : {}),
       scheduled_at: scheduledAtFromSelection,
       reason,
       notes: "",
       callback_url: `${window.location.origin}/appointments`,
+      ...(selectedRewardId ? { reward_id: selectedRewardId } : {}),
     });
+  }
+
+  function resetBookingCheckoutState() {
+    consultationDraft.clearDraft();
+    appointmentDraft.clearDraft();
+    paymentDraft.clearDraft();
+    form.reset();
+    setAiSessionId(null);
+    setAiConversationId(null);
+    setAiSymptomText("");
+    setAiSubmittedText("");
+    setAiSeverity(null);
+    setAiResultRequested(false);
+    setAiStartedByUser(false);
+    setCompletedTriageSessionId(null);
+    setSelectedDoctor(null);
+    setTimingMode(null);
+    setScheduleDay("today");
+    setCustomScheduleDate("");
+    setSelectedSlotHour(null);
+    setDoctorPickerOpen(false);
+    setScheduleSheetOpen(false);
+    setPage(1);
   }
 
   return (
@@ -561,7 +733,7 @@ export function AppointmentsClient() {
       title={user?.role === "patient" ? "" : isDoctor ? "Consultations" : "Appointments"}
       description={user?.role === "patient" ? "" : isDoctor ? "Open and manage assigned consultations." : undefined}
     >
-      {user?.role === "patient" && !effectiveTriageSessionId ? (
+      {user?.role === "patient" && !effectiveTriageSessionId && !selectedDoctor ? (
         <div className="-mx-4 -mt-5 grid min-h-[calc(100dvh-132px)] gap-5 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_42%,#F8FBFF_100%)] px-4 py-4 pb-6 sm:mx-0 sm:mt-0 sm:rounded-[8px] sm:p-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
               <div className="grid content-start gap-4">
                 {profileIncomplete ? (
@@ -830,6 +1002,21 @@ export function AppointmentsClient() {
         </Notice>
       )}
 
+      {user?.role === "patient" ? (
+        <DataList<Appointment>
+          data={appointments.data}
+          error={appointments.error}
+          isLoading={appointments.isLoading}
+          errorContext="appointments"
+          loadingLabel="Loading your consultations..."
+          emptyTitle="No consultations yet."
+          empty=""
+          onNext={appointments.data?.next ? () => setPage((current) => current + 1) : undefined}
+          onPrevious={appointments.data?.previous ? () => setPage((current) => Math.max(1, current - 1)) : undefined}
+          renderItem={(item) => <PatientAppointmentCard key={item.id} appointment={item} />}
+        />
+      ) : null}
+
       {user?.role !== "patient" ? (
         <DataList<Appointment>
           data={appointments.data}
@@ -946,12 +1133,20 @@ export function AppointmentsClient() {
                         </div>
                       </div>
                       <div className="col-span-2 grid gap-3 sm:col-span-1 sm:min-w-36">
-                        <StatusBadge value={available ? "Available" : "Offline"} />
+                        <span
+                          className={cn(
+                            "inline-flex min-h-8 items-center justify-center rounded-full px-3 text-xs font-semibold",
+                            available ? "bg-[#DBEAFE] text-[#2563EB]" : "bg-slate-100 text-slate-600",
+                          )}
+                        >
+                          {available ? "Available now" : "Offline — schedule for later"}
+                        </span>
                         <span className="text-sm font-semibold text-slate-600">5-10 min</span>
                         <button
                           type="button"
                           className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
                           onClick={() => {
+                            setCheckoutError("");
                             setSelectedDoctor(doctor);
                             setTimingMode(null);
                             setSelectedSlotHour(null);
@@ -983,10 +1178,15 @@ export function AppointmentsClient() {
         showCloseButton={false}
         closeOnOverlayClick={false}
         closeOnEscape={false}
-        className="mt-auto h-[90dvh] max-h-[90dvh] rounded-t-[28px] border-0 sm:mt-auto sm:h-[88dvh] sm:max-h-[88dvh] sm:w-[min(720px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
-        bodyClassName="scroll-pb-40 px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-6"
+        className="mt-auto h-auto max-h-[88dvh] rounded-t-[28px] border-0 sm:mt-auto sm:h-auto sm:max-h-[86dvh] sm:w-[min(720px,94vw)] sm:rounded-t-[28px] sm:rounded-b-none sm:border-0"
+        bodyClassName="scroll-pb-32 px-4 pb-4 sm:px-6"
         footer={
           <div className="grid w-full gap-3">
+            {checkoutError ? (
+              <div className="rounded-[8px] border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+                {checkoutError}
+              </div>
+            ) : null}
             <div className="rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
               <span className="font-semibold text-[#1F2937]">Selected time:</span> {selectedTimeSummary}
             </div>
@@ -1014,16 +1214,16 @@ export function AppointmentsClient() {
         }
       >
         {selectedDoctorLive ? (
-          <div className="grid gap-5">
+          <div className="grid gap-3">
             <div className="mx-auto h-1.5 w-16 rounded-full bg-slate-200" aria-hidden="true" />
-            <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+            <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-3">
               <p className="text-sm font-semibold text-[#1F2937]">Is this the doctor you want?</p>
-              <div className="mt-4 grid grid-cols-[72px_minmax(0,1fr)] gap-4">
-                <div className="relative h-[72px] w-[72px] overflow-hidden rounded-full bg-[#EFF6FF] text-[#2563EB]">
+              <div className="mt-3 grid grid-cols-[56px_minmax(0,1fr)] gap-3">
+                <div className="relative h-14 w-14 overflow-hidden rounded-full bg-[#EFF6FF] text-[#2563EB]">
                   {selectedDoctorLive.profile_image_url ? (
-                    <Image src={selectedDoctorLive.profile_image_url} alt="" width={88} height={88} className="h-full w-full object-cover" unoptimized />
+                    <Image src={selectedDoctorLive.profile_image_url} alt="" width={64} height={64} className="h-full w-full object-cover" unoptimized />
                   ) : (
-                    <span className="grid h-full w-full place-items-center text-lg font-bold">{initials(selectedDoctorLive.display_name)}</span>
+                    <span className="grid h-full w-full place-items-center text-base font-bold">{initials(selectedDoctorLive.display_name)}</span>
                   )}
                   <span
                     className={cn(
@@ -1035,61 +1235,61 @@ export function AppointmentsClient() {
                 <div className="min-w-0">
                   <p className="truncate text-base font-semibold text-[#1F2937]">{selectedDoctorLive.display_name}</p>
                   <p className="mt-1 text-sm text-slate-600">General Physician</p>
-                  <p className="mt-2 line-clamp-1 text-sm text-slate-600">{oneLineBio(selectedDoctorLive)}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
                     <span className="rounded-full bg-white px-3 py-1">★ {selectedDoctorLive.rating ?? "New"} ({selectedDoctorLive.review_count ?? 0} reviews)</span>
-                    <span className="rounded-full bg-white px-3 py-1">English</span>
                     <span className="rounded-full bg-white px-3 py-1">Chat</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="grid gap-4 rounded-[8px] border border-slate-100 bg-white p-4">
+            <div className="grid gap-3 rounded-[8px] border border-slate-100 bg-white p-3">
               <div>
                 <p className="text-base font-semibold text-[#1F2937]">Choose consultation time</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">You can start now if the doctor is available, or schedule an hourly slot.</p>
+                <p className="mt-1 text-sm leading-5 text-slate-600">Start now if available, or schedule an hourly slot.</p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
                   disabled={!doctorCanConsultNow}
                   onClick={() => {
+                    setCheckoutError("");
                     if (!doctorCanConsultNow) return;
                     setTimingMode("now");
                     setSelectedSlotHour(null);
                   }}
                   className={cn(
-                    "rounded-[8px] border p-4 text-left transition active:scale-[0.99]",
+                    "rounded-[8px] border p-3 text-left transition active:scale-[0.99]",
                     timingMode === "now" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
                     !doctorCanConsultNow && "cursor-not-allowed opacity-55",
                   )}
                 >
                   <p className="font-semibold text-[#1F2937]">Consult now</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                  <p className="mt-1 text-sm leading-5 text-slate-600">
                     {doctorCanConsultNow ? "Start checkout for an immediate chat consultation." : "Available between 8:00 AM and 6:00 PM."}
                   </p>
                 </button>
                 <button
                   type="button"
                   onClick={() => {
+                    setCheckoutError("");
                     setTimingMode("later");
                     setSelectedSlotHour(null);
                   }}
                   className={cn(
-                    "rounded-[8px] border p-4 text-left transition active:scale-[0.99]",
+                    "rounded-[8px] border p-3 text-left transition active:scale-[0.99]",
                     timingMode === "later" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
                   )}
                 >
                   <p className="font-semibold text-[#1F2937]">Schedule for later</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Pick a time between 8:00 AM and 6:00 PM.</p>
+                  <p className="mt-1 text-sm leading-5 text-slate-600">Pick a time between 8:00 AM and 6:00 PM.</p>
                 </button>
               </div>
 
               {!doctorCanConsultNow ? (
-                <Notice title="Doctors are currently offline." tone="neutral">
-                  You can still schedule a consultation for the next available hour.
+                <Notice title="This doctor is currently offline" tone="neutral">
+                  You can schedule a consultation for an available time.
                 </Notice>
               ) : null}
 
@@ -1105,6 +1305,7 @@ export function AppointmentsClient() {
                         key={item.value}
                         type="button"
                         onClick={() => {
+                          setCheckoutError("");
                           setScheduleDay(item.value as "today" | "tomorrow" | "another");
                           setSelectedSlotHour(null);
                         }}
@@ -1125,6 +1326,7 @@ export function AppointmentsClient() {
                         min={toDateInputValue(new Date())}
                         value={customScheduleDate}
                         onChange={(event) => {
+                          setCheckoutError("");
                           setCustomScheduleDate(event.target.value);
                           setSelectedSlotHour(null);
                         }}
@@ -1141,10 +1343,11 @@ export function AppointmentsClient() {
                           disabled={unavailableSlotHours.has(hour)}
                           onClick={() => {
                             if (unavailableSlotHours.has(hour)) return;
+                            setCheckoutError("");
                             setSelectedSlotHour(hour);
                           }}
                           className={cn(
-                            "min-h-14 rounded-[8px] border px-3 text-sm font-semibold transition active:scale-[0.98]",
+                            "min-h-12 rounded-[8px] border px-3 text-sm font-semibold transition active:scale-[0.98]",
                             selectedSlotHour === hour ? "border-[#2563EB] bg-[#2563EB] text-white" : "border-slate-200 bg-white text-[#1F2937]",
                             unavailableSlotHours.has(hour) && "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400 line-through active:scale-100",
                           )}
@@ -1164,16 +1367,54 @@ export function AppointmentsClient() {
                       <p className="text-sm text-slate-600">
                         <span className="font-semibold text-[#1F2937]">Selected:</span> {selectedTimeSummary}
                       </p>
-                      <Button
-                        type="button"
-                        className="mt-3 w-full"
-                        disabled={!modalBookingReady || createAppointment.isPending}
-                        onClick={handleContinueToPayment}
-                      >
-                        {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
-                      </Button>
                     </div>
                   ) : null}
+                </div>
+              ) : null}
+
+              {modalBookingReady ? (
+                <div className="grid gap-3 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+                  <div className="grid gap-2 text-sm text-slate-600">
+                    <p>
+                      <span className="font-semibold text-[#1F2937]">Selected doctor:</span>{" "}
+                      {selectedDoctorLive.display_name}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-[#1F2937]">Selected date & time:</span>{" "}
+                      {selectedTimeSummary}
+                    </p>
+                  </div>
+                  <RewardSelector
+                    serviceType="appointment"
+                    serviceLabel="Consultation"
+                    selectedRewardId={selectedRewardId}
+                    onSelect={setSelectedRewardId}
+                    disabled={createAppointment.isPending}
+                  />
+                  {repricedPayment ? (
+                    <RepricingConsent
+                      payment={repricedPayment}
+                      serviceLabel="Consultation"
+                      onContinue={() => {
+                        const url = repricedPayment.authorization_url;
+                        setRepricedPayment(null);
+                        resetBookingCheckoutState();
+                        if (url) {
+                          window.location.assign(url);
+                        }
+                      }}
+                      onCancel={() => setRepricedPayment(null)}
+                    />
+                  ) : (
+                    <Button
+                      type="button"
+                      className="w-full"
+                      disabled={!modalBookingReady || createAppointment.isPending}
+                      onClick={handleContinueToPayment}
+                    >
+                      {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
+                    </Button>
+                  )}
                 </div>
               ) : null}
             </div>

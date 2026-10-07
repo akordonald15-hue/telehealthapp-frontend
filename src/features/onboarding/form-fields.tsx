@@ -21,36 +21,46 @@ export function TextField({
   hint,
   required,
   readOnly,
+  value,
   type = "text",
   placeholder,
   autoComplete,
   inputMode,
+  onValueChange,
 }: {
   name: Name;
   label: string;
   hint?: string;
   required?: boolean;
   readOnly?: boolean;
+  value?: string;
   type?: string;
   placeholder?: string;
   autoComplete?: string;
   inputMode?: "text" | "tel" | "email" | "numeric";
+  onValueChange?: (value: string) => void;
 }) {
   const {
     register,
     formState: { errors },
   } = useFormContext<OnboardingValues>();
+  const registration = register(name);
 
   return (
     <Field label={label} hint={hint} required={required} error={errorFor(errors, name)}>
       <Input
+        {...registration}
         type={type}
         placeholder={placeholder}
         autoComplete={autoComplete}
         inputMode={inputMode}
         readOnly={readOnly}
-        className={cn(readOnly && "cursor-not-allowed bg-ash-50 text-ash-500")}
-        {...register(name)}
+        className={cn(readOnly && "cursor-not-allowed border-ash-200 bg-white text-ash-800")}
+        value={value}
+        onChange={(event) => {
+          void registration.onChange(event);
+          onValueChange?.(event.target.value);
+        }}
       />
     </Field>
   );

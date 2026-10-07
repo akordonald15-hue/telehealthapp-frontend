@@ -14,6 +14,8 @@ import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { formatDateTime, formatMoney } from "@/lib/utils";
 import { bookingSourceLabel, homeCareStatusLabel, preferredTimeLabel } from "@/features/homecare/homecare-utils";
 
+const HOMECARE_BOTTOM_SAFE_PADDING = "pb-[calc(9rem+env(safe-area-inset-bottom))] sm:pb-[calc(7rem+env(safe-area-inset-bottom))] lg:pb-8";
+
 export function HomeCareRequestsClient() {
   const userQuery = useCurrentUser();
   const requestsQuery = useQuery({
@@ -48,7 +50,7 @@ export function HomeCareRequestsClient() {
       ) : null}
 
       {requestsQuery.isLoading ? (
-        <div className="grid gap-4" aria-busy="true" aria-label="Loading homecare requests">
+        <div className={`grid gap-4 ${HOMECARE_BOTTOM_SAFE_PADDING}`} aria-busy="true" aria-label="Loading homecare requests">
           {[0, 1, 2].map((item) => (
             <div key={item} className="rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6">
               <div className="h-5 w-48 animate-pulse rounded-full bg-slate-100" />
@@ -62,7 +64,7 @@ export function HomeCareRequestsClient() {
           ))}
         </div>
       ) : requests.length ? (
-        <div className="grid gap-4">
+        <div className={`grid gap-4 ${HOMECARE_BOTTOM_SAFE_PADDING}`}>
           {requests.map((request) => {
             const nurse = request.current_assignment?.nurse;
             return (
@@ -111,16 +113,18 @@ export function HomeCareRequestsClient() {
           })}
         </div>
       ) : (
-        <EmptyState
-          icon={Home}
-          title="No home care yet."
-          description=""
-          action={
-            <Link href="/home-care/book" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[var(--primary)] px-4 text-sm font-extrabold text-white">
-              Request Home Care
-            </Link>
-          }
-        />
+        <div className={HOMECARE_BOTTOM_SAFE_PADDING}>
+          <EmptyState
+            icon={Home}
+            title="No home care yet."
+            description=""
+            action={
+              <Link href="/home-care/book" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[var(--primary)] px-4 text-sm font-extrabold text-white">
+                Request Home Care
+              </Link>
+            }
+          />
+        </div>
       )}
     </Section>
   );

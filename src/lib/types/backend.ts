@@ -3,7 +3,10 @@ export type UserRole = "patient" | "doctor" | "nurse" | "admin";
 export type User = {
   id: number;
   email: string;
+  first_name?: string;
+  last_name?: string;
   full_name: string;
+  avatar_url?: string;
   phone: string;
   role: UserRole;
   must_change_password: boolean;
@@ -11,11 +14,15 @@ export type User = {
   updated_at: string;
 };
 
-export type RegisterResponse = Pick<User, "id" | "email" | "phone" | "role">;
+export type RegisterResponse = Pick<User, "id" | "email" | "phone" | "role"> & {
+  /** The account is created even when the code could not be applied. */
+  referral?: { applied: boolean; detail: string };
+};
 
 export type TokenPair = {
   access: string;
   refresh?: string;
+  user?: User;
 };
 
 export type DetailResponse = {
@@ -69,7 +76,6 @@ export type PatientProfile = {
   emergency_contact_name: string;
   emergency_contact_phone: string;
   medical_history: Record<string, unknown>;
-  // Onboarding age range (backend to add column; optional until then).
   age_range?: string;
   profile_complete?: boolean;
 };
@@ -88,6 +94,7 @@ export type DoctorProfile = {
   review_count?: number;
   completed_consultations?: number;
   rating_breakdown?: RatingBreakdown;
+  recent_reviews?: ProviderReview[];
 };
 
 export type NurseProfile = {
@@ -109,6 +116,7 @@ export type NurseProfile = {
   review_count?: number;
   completed_visits?: number;
   rating_breakdown?: RatingBreakdown;
+  recent_reviews?: ProviderReview[];
 };
 
 export type ProviderAvailabilityState = {
@@ -334,6 +342,7 @@ export type ProviderDoctor = DoctorProfile & {
   review_count?: number;
   completed_consultations?: number;
   rating_breakdown?: RatingBreakdown;
+  recent_reviews?: ProviderReview[];
   active_workload: number;
   next_available_time: string | null;
   unavailable_consultation_slots?: string[];
@@ -350,6 +359,7 @@ export type ProviderNurse = {
   review_count?: number;
   completed_visits?: number;
   rating_breakdown?: RatingBreakdown;
+  recent_reviews?: ProviderReview[];
   availability_status: ProviderAvailabilityStatus;
   service_radius_km: number;
   service_zone: HomeCareZone | "";
@@ -360,6 +370,14 @@ export type ProviderNurse = {
 };
 
 export type RatingBreakdown = Record<string, { count: number; percentage: number }>;
+
+export type ProviderReview = {
+  id: number;
+  score: number;
+  comment: string;
+  patient_name: string;
+  created_at: string;
+};
 
 export type MessageAttachmentUploadInit = {
   upload_url: string;
@@ -561,6 +579,12 @@ export type PaymentInitiation = {
   transfer_proof_size?: number;
   bank_transfer?: BankTransferDetails | null;
   can_submit_transfer_notification?: boolean;
+  /** Server-derived breakdown. Present on booking and payment-initiation responses. */
+  pricing?: CheckoutPricing;
+  /** True when this checkout costs a different amount than the previous one for the booking. */
+  repriced?: boolean;
+  previous_amount?: string;
+  detail?: string;
 };
 
 export type AppointmentBookingResponse = {
@@ -571,6 +595,13 @@ export type AppointmentBookingResponse = {
 export type HomeCareBookingResponse = {
   request: HomeCareRequestDetail;
   payment: PaymentInitiation;
+};
+
+export type HomeCareAvailableSlot = {
+  starts_at: string;
+  hour: number;
+  label: string;
+  is_available: boolean;
 };
 
 export type Refund = {
@@ -891,4 +922,74 @@ export type TriageConversationResult = {
   error: string;
   updated_at: string;
   disclaimer: string;
+};
+
+// ---------------------------------------------------------------- referral programme
+// Growth referrals (patient invites patient). Deliberately separate from `Referral`, which is
+// the clinical doctor-to-specialist domain. Every money value is a backend-formatted string:
+// the server is authoritative for pricing and the UI never recalculates it.
+
+export type ReferralProgrammeTerms = {
+  reward_type: "percent" | "fixed_amount";
+  reward_value: string;
+  max_reward_amount: string | null;
+  reward_expiry_days: number;
+  min_qualifying_paid_amount: string;
+  qualification_hold_days: number;
+  qualifying_service_types: string[];
+};
+
+export type MyReferralCode = {
+  code: string;
+  is_active: boolean;
+  share_url: string;
+  share_text: string;
+  programme: ReferralProgrammeTerms | null;
+};
+
+/** Patient-facing referral state. The backend maps its internal lifecycle onto these. */
+export type ReferralProgressStatus =
+  | "pending"
+  | "qualifying"
+  | "under_review"
+  | "successful"
+  | "not_qualified"
+  | "expired";
+
+export type MyReferral = {
+  public_id: string;
+  status: ReferralProgressStatus;
+  attached_at: string;
+  qualifies_at: string | null;
+  qualified_at: string | null;
+  reward: { public_id: string; status: ReferralRewardStatus; expires_at: string } | null;
+};
+
+export type ReferralRewardStatus = "issued" | "reserved" | "used" | "expired" | "revoked";
+
+export type MyReferralReward = {
+  public_id: string;
+  status: ReferralRewardStatus;
+  reward_type: "percent" | "fixed_amount";
+  reward_value: string;
+  max_reward_amount: string | null;
+  applicable_services: string[];
+  issued_at: string;
+  expires_at: string;
+  used_at: string | null;
+  is_redeemable: boolean;
+};
+
+/** Server-derived price breakdown. Returned by booking, preview and payment retry. */
+export type CheckoutPricing = {
+  service_value: string;
+  discount: string;
+  amount_due: string;
+  currency: string;
+  reward_applied: boolean;
+};
+
+export type RewardPreview = CheckoutPricing & {
+  service_type: string;
+  binding: false;
 };

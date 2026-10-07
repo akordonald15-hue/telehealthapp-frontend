@@ -15,6 +15,7 @@ import type {
   DetailResponse,
   DoctorProfile,
   HomeCareAssignment,
+  HomeCareAvailableSlot,
   HomeCareBookingResponse,
   HomeCareRating,
   HomeCareRequestCreate,
@@ -45,6 +46,10 @@ import type {
   Refund,
   Referral,
   RegisterResponse,
+  MyReferral,
+  MyReferralCode,
+  MyReferralReward,
+  RewardPreview,
   Thread,
   TokenPair,
   TriageAnswerResponse,
@@ -65,7 +70,7 @@ function authPath(path: string) {
 }
 
 export const authApi = {
-  register: (body: { email: string; phone?: string; password: string }) =>
+  register: (body: { email: string; phone?: string; password: string; referral_code?: string }) =>
     apiRequest<RegisterResponse>(authPath("/auth/register/"), {
       method: "POST",
       body: { ...body, role: "patient" },
@@ -151,7 +156,16 @@ export const appointmentsApi = {
   list: (query?: { page?: number; page_size?: number }) => apiList<Appointment>("/appointments/", query),
   availableDoctors: (query?: { page?: number; page_size?: number; specialty?: string; search?: string }) =>
     apiList<ProviderDoctor>("/appointments/available-doctors/", query),
-  book: (body: { doctor: number; triage_session?: number; scheduled_at: string; reason?: string; notes?: string; callback_url: string }) =>
+  book: (body: {
+    doctor: number;
+    triage_session?: number;
+    scheduled_at: string;
+    reason?: string;
+    notes?: string;
+    callback_url: string;
+    /** A reward's public UUID. Never an amount: the server prices the booking. */
+    reward_id?: string;
+  }) =>
     apiRequest<AppointmentBookingResponse>("/appointments/book/", { method: "POST", body }),
   create: (body: { doctor: number; scheduled_at: string; status?: string; reason?: string; notes?: string }) =>
     apiRequest<Appointment>("/appointments/", { method: "POST", body }),
@@ -202,8 +216,10 @@ export const homeCareApi = {
     apiList<HomeCareService>("/home-care/services/", query),
   availableNurses: (query?: { page?: number; page_size?: number; service_type?: string; service_id?: number; zone?: string; search?: string }) =>
     apiList<ProviderNurse>("/home-care/available-nurses/", query),
+  availableSlots: (query: { nurse_id: number; date: string }) =>
+    apiRequest<{ results: HomeCareAvailableSlot[] }>(`/home-care/available-slots/?${new URLSearchParams({ nurse_id: String(query.nurse_id), date: query.date }).toString()}`),
   requests: (query?: { page?: number; page_size?: number }) => apiList<HomeCareRequestListItem>("/home-care/requests/", query),
-  bookRequest: (body: HomeCareRequestCreate & { callback_url: string }) =>
+  bookRequest: (body: HomeCareRequestCreate & { callback_url: string; reward_id?: string }) =>
     apiRequest<HomeCareBookingResponse>("/home-care/requests/book/", { method: "POST", body }),
   createRequest: (body: HomeCareRequestCreate) =>
     apiRequest<HomeCareRequestDetail>("/home-care/requests/", { method: "POST", body }),
@@ -263,6 +279,32 @@ export const paymentsApi = {
   },
   refund: (body: { payment: number; amount: string | number }) =>
     apiRequest<Refund>("/payments/refunds/", { method: "POST", body }),
+};
+
+/**
+ * Growth referral programme. One namespace, mirroring the backend, so no component reaches
+ * for a raw fetch. Nothing here sends or computes a money value: the server decides every
+ * amount, and the UI only ever renders what it returns.
+ */
+export const referralProgramApi = {
+  me: () => apiRequest<MyReferralCode>("/referral-program/me/"),
+  referrals: (query?: { page?: number; page_size?: number }) =>
+    apiList<MyReferral>("/referral-program/me/referrals/", query),
+  rewards: (query?: { page?: number; page_size?: number; redeemable?: string }) =>
+    apiList<MyReferralReward>("/referral-program/me/rewards/", query),
+  previewReward: ({
+    publicId,
+    serviceType,
+    service,
+  }: {
+    publicId: string;
+    serviceType: "appointment" | "homecare";
+    service?: number;
+  }) =>
+    apiRequest<RewardPreview>(`/referral-program/rewards/${publicId}/preview/`, {
+      method: "POST",
+      body: { service_type: serviceType, ...(service ? { service } : {}) },
+    }),
 };
 
 export const providerLedgerApi = {

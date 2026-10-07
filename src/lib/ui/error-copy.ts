@@ -66,7 +66,7 @@ const MESSAGE_OVERRIDES: Array<{ pattern: RegExp; replacement: string }> = [
   { pattern: /throttled|too many requests/i, replacement: "You've made a few requests in a short time. Please wait a moment and try again." },
   {
     pattern: /doctor.*not available for booking|not available for an immediate consultation/i,
-    replacement: "That doctor is not available right now. Please choose another available doctor.",
+    replacement: "This doctor is currently offline, but you can schedule a consultation for an available time.",
   },
   {
     pattern: /care check.*already.*used|care check-in.*already linked|triage_session.*already linked/i,

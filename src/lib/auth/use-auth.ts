@@ -11,6 +11,15 @@ export const authKeys = {
   me: ["auth", "me"] as const,
 };
 
+const STORED_AUTH_USER_KEY = "caretekk:auth-user";
+
+function storeAuthUser(user: User) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.sessionStorage.setItem(STORED_AUTH_USER_KEY, JSON.stringify(user));
+}
+
 export function useCurrentUser() {
   return useQuery({
     queryKey: authKeys.me,
@@ -20,15 +29,24 @@ export function useCurrentUser() {
 }
 
 async function handleAuthSuccess(
-  tokens: { access: string; refresh?: string },
+  tokens: { access: string; refresh?: string; user?: User },
   queryClient: ReturnType<typeof useQueryClient>,
   router: ReturnType<typeof useRouter>,
 ) {
   setTokens(tokens);
-  const user = await queryClient.fetchQuery({
-    queryKey: authKeys.me,
-    queryFn: authApi.me,
-  });
+  if (tokens.user) {
+    queryClient.setQueryData(authKeys.me, tokens.user);
+    storeAuthUser(tokens.user);
+  }
+  const user =
+    tokens.user ||
+    (await queryClient.fetchQuery({
+      queryKey: authKeys.me,
+      queryFn: authApi.me,
+    }));
+  if (!user) {
+    throw new Error("Authenticated user could not be loaded.");
+  }
   await queryClient.invalidateQueries({ queryKey: authKeys.me });
   if (user.must_change_password) {
     router.replace("/change-password");
@@ -84,6 +102,9 @@ export function useLogout() {
     },
     onSettled: async () => {
       clearTokens();
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem(STORED_AUTH_USER_KEY);
+      }
       queryClient.setQueryData<User | null>(authKeys.me, null);
       await queryClient.invalidateQueries();
       router.replace("/login");
