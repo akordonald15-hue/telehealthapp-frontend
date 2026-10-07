@@ -2,7 +2,6 @@
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { BrandLockup } from "@/components/brand/brand-lockup";
@@ -16,6 +15,7 @@ const ACTIVE_HREF = "#home";
 export function MarketingHeader() {
   const [open, setOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const menu = useRef<gsap.core.Timeline | null>(null);
 
   const { contextSafe } = useGSAP(
     () => {
@@ -35,6 +35,43 @@ export function MarketingHeader() {
         .from('[data-intro="cta"]', { x: 16, autoAlpha: 0, duration: 0.8 }, 0.42);
     },
     { scope: headerRef },
+  );
+
+  useGSAP(
+    () => {
+      menu.current = gsap
+        .timeline({ paused: true, defaults: { ease: "power3.inOut" } })
+        .to('[data-burger="middle"]', { scaleX: 0, autoAlpha: 0, duration: 0.2 }, 0)
+        .to('[data-burger="top"]', { y: 7, duration: 0.2 }, 0)
+        .to('[data-burger="bottom"]', { y: -7, duration: 0.2 }, 0)
+        .to('[data-burger="top"]', { rotation: 45, duration: 0.3 }, 0.18)
+        .to('[data-burger="bottom"]', { rotation: -45, duration: 0.3 }, 0.18)
+        .fromTo("[data-menu-panel]", { height: 0, autoAlpha: 0 }, { height: "auto", autoAlpha: 1, duration: 0.45 }, 0)
+        .fromTo(
+          "[data-menu-item]",
+          { y: -10, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.3, ease: "power2.out", stagger: 0.035 },
+          0.12,
+        );
+    },
+    { scope: headerRef },
+  );
+
+  useGSAP(
+    () => {
+      const timeline = menu.current;
+      if (!timeline) {
+        return;
+      }
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        timeline.progress(open ? 1 : 0);
+      } else if (open) {
+        timeline.timeScale(1).play();
+      } else {
+        timeline.timeScale(1.5).reverse();
+      }
+    },
+    { dependencies: [open], scope: headerRef },
   );
 
   const underlineDuration = (seconds: number) =>
@@ -114,18 +151,23 @@ export function MarketingHeader() {
             className="ml-3 inline-flex h-11 w-11 items-center justify-center rounded-[12px] text-[#1F2937] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 max-sm:ml-auto lg:hidden"
           >
             <span className="sr-only">Toggle navigation</span>
-            {open ? <X className="h-6 w-6" strokeWidth={1.75} /> : <Menu className="h-7 w-7" strokeWidth={1.75} />}
+            <span aria-hidden="true" className="relative h-[16px] w-[20px]">
+              <span data-burger="top" className="absolute inset-x-0 top-0 h-[2px] rounded-full bg-current" />
+              <span data-burger="middle" className="absolute inset-x-0 top-[7px] h-[2px] rounded-full bg-current" />
+              <span data-burger="bottom" className="absolute inset-x-0 top-[14px] h-[2px] rounded-full bg-current" />
+            </span>
           </button>
         </div>
 
-        {open ? (
-          <div className="grid gap-1 border-t border-[#E5E7EB] px-3 pb-4 pt-3 lg:hidden" id="mobile-nav">
+        <div id="mobile-nav" data-menu-panel className="invisible h-0 overflow-hidden lg:hidden">
+          <div className="grid gap-1 border-t border-[#E5E7EB] px-3 pb-4 pt-3">
             {marketingNavItems.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
+                data-menu-item
                 onClick={() => setOpen(false)}
-                className={`rounded-[10px] px-3 py-3 text-base transition hover:bg-[#EFF4FF] hover:text-[#1E40AF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${item.href === ACTIVE_HREF ? "font-medium text-[#1E40AF]" : "text-[#243345]"
+                className={`rounded-[10px] px-3 py-3 text-base transition-colors hover:bg-[#EFF4FF] hover:text-[#1E40AF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${item.href === ACTIVE_HREF ? "font-medium text-[#1E40AF]" : "text-[#243345]"
                   }`}
               >
                 {item.label}
@@ -133,14 +175,15 @@ export function MarketingHeader() {
             ))}
             <Link
               href="#contact"
+              data-menu-item
               onClick={() => setOpen(false)}
-              className="mt-2 inline-flex h-[50px] items-center justify-center gap-3 rounded-[12px] bg-[#1E40AF] text-base font-medium text-white hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25"
+              className="mt-2 inline-flex h-[50px] items-center justify-center gap-3 rounded-[12px] bg-[#1E40AF] text-base font-medium text-white hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 sm:hidden"
             >
               Contact Us
               <ArrowLongRightIcon className="h-[15px] w-[21px]" />
             </Link>
           </div>
-        ) : null}
+        </div>
       </nav>
     </header>
   );
