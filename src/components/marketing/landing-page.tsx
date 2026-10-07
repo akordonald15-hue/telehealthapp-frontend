@@ -5,27 +5,19 @@ import {
   BadgeCheck,
   Calendar,
   CheckCircle2,
-  Facebook,
-  Linkedin,
   MessageCircle,
   PlayCircle,
   Sparkles,
   Stethoscope,
 } from "lucide-react";
 
-function TikTokIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.13a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.84-.56Z" />
-    </svg>
-  );
-}
-
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { HeroMockup } from "@/components/marketing/hero-mockup";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
-import { doctors, footerLinks, heroStats, howItWorksSteps, trustItems } from "@/features/marketing/data";
-import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
+import { SiteFooter } from "@/components/marketing/site-footer";
+import { doctors, heroStats, howItWorksSteps, trustItems } from "@/features/marketing/data";
+import { BRAND_SUPPORT_EMAIL } from "@/lib/brand";
 
 const homeCareChips = ["Mother & baby care", "Elderly care", "Postnatal care", "General homecare"];
 const stepIcons = [Calendar, Stethoscope, Sparkles, MessageCircle];
@@ -426,123 +418,9 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer id="contact" className="border-t border-[rgba(116,118,134,0.15)] bg-[#eff4ff] py-16 sm:py-20">
-        <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-12 px-4 md:grid-cols-4 md:px-10">
-          <div className="md:col-span-1">
-            <BrandLockup href="/" />
-            <p className="mt-6 max-w-xs text-sm leading-7 text-[#434655]">
-              Trusted digital healthcare for doctor consultations, homecare support, records, and follow-up care.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <a
-                href="https://www.linkedin.com/company/caretekk-health-technologies-ltd/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Caretekk on LinkedIn"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(116,118,134,0.2)] bg-white text-[#0b1c30] transition hover:border-[#2563EB] hover:text-[#2563EB]"
-              >
-                <Linkedin className="h-4 w-4" />
-              </a>
-              <a
-                href="https://www.facebook.com/share/1BSrQHdC8m/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Caretekk on Facebook"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(116,118,134,0.2)] bg-white text-[#0b1c30] transition hover:border-[#2563EB] hover:text-[#2563EB]"
-              >
-                <Facebook className="h-4 w-4" />
-              </a>
-              <a
-                href="https://www.tiktok.com/@caretekk.health"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Caretekk on TikTok"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(116,118,134,0.2)] bg-white text-[#0b1c30] transition hover:border-[#2563EB] hover:text-[#2563EB]"
-              >
-                <TikTokIcon className="h-4 w-4" />
-              </a>
-              <a
-                href={`mailto:${BRAND_SUPPORT_EMAIL}`}
-                aria-label="Email support"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(116,118,134,0.2)] bg-white text-[#0b1c30] transition hover:border-[#2563EB] hover:text-[#2563EB]"
-              >
-                <MessageCircle className="h-4 w-4" />
-              </a>
-            </div>
-          </div>
+      <FaqSection />
 
-          <div>
-            <h4 className="ct-caption mb-5 text-[#0b1c30]">Product</h4>
-            <ul className="space-y-3">
-              {footerLinks.map((link) => (
-                <li key={link.label}>
-                  <a href={link.href} className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="ct-caption mb-5 text-[#0b1c30]">Company</h4>
-            <ul className="space-y-3">
-              <li>
-                <a href="#trust" className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                  Why Caretekk
-                </a>
-              </li>
-              <li>
-                <a href="#doctors" className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                  Our doctors
-                </a>
-              </li>
-              <li>
-                <a href="#how-it-works" className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                  How it works
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="ct-caption mb-5 text-[#0b1c30]">Support</h4>
-            <ul className="space-y-3">
-              <li>
-                <a
-                  href={`mailto:${BRAND_SUPPORT_EMAIL}`}
-                  className="text-sm text-[#434655] transition hover:text-[#2563EB]"
-                >
-                  {BRAND_SUPPORT_EMAIL}
-                </a>
-              </li>
-              <li>
-                <Link href="/login" className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                  Sign in
-                </Link>
-              </li>
-              <li>
-                <Link href="/register" className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                  Create account
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mx-auto mt-16 flex max-w-[1440px] flex-col items-center justify-between gap-4 border-t border-[rgba(116,118,134,0.15)] px-4 pt-8 text-center md:flex-row md:px-10 md:text-left">
-          <p className="text-xs text-[#747686]">
-            © {new Date().getFullYear()} {BRAND_NAME} Healthcare. Built for trusted, modern care.
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#434655]">
-              System Status: Operational
-            </span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

@@ -72,8 +72,52 @@ export const howItWorksSteps = [
   },
 ];
 
-export const footerLinks = [
-  { label: "Doctors", href: "#doctors" },
-  { label: "Home Care", href: "#home-care" },
-  { label: "Trust", href: "#trust" },
+export const faqItems: Array<{ question: string; answer: string[] }> = [
+  {
+    question: "Is Caretekk more expensive than a regular hospital visit?",
+    answer: [
+      "Caretekk is priced to be transparent you'll know the cost before you book. Doctor consultations start from ₦2,000, and home care visits start from ₦5,000.",
+      "When you factor in transport, parking, and time lost to hospital queues, many families find Caretekk saves them money as well as stress.",
+    ],
+  },
+  {
+    question: "How do I know the doctor or nurse is actually qualified?",
+    answer: [
+      "Every professional on Caretekk whether they consult virtually or visit your home is licensed, credential-verified, and background-checked before they're approved on the platform.",
+      "You can see their qualifications before you book and rate every consultation or visit.",
+    ],
+  },
+  {
+    question: "What if I need care urgently, not next week?",
+    answer: [
+      "Virtual doctor consultations are typically confirmed within minutes, anywhere in Nigeria. For in-home nursing or caregiver visits, we offer same-day availability in the cities we currently serve you'll see real-time availability when you book.",
+    ],
+  },
+  {
+    question: "Do you only serve Akwa Ibom?",
+    answer: [
+      "Virtual doctor consultations are available anywhere in Nigeria. In-person homecare and nursing visits are currently available in Akwa Ibom, with more locations coming soon.",
+      "Enter your location when you book and we'll confirm what's available near you.",
+    ],
+  },
+  {
+    question: "Is my family's information safe with Caretekk?",
+    answer: [
+      "Yes. Your medical information is kept confidential and secure within the Caretekk platform, and only shared with the doctor or provider handling your consultation or visit.",
+    ],
+  },
+];
+
+export const footerCompanyLinks = [
+  { label: "Home", href: "#home" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Why Caretekk", href: "#trust" },
+  { label: "Contact Us", href: "#contact" },
+];
+
+export const footerServiceLinks = [
+  { label: "Talk to a Doctor", href: "/register" },
+  { label: "Home Nursing", href: "#home-care" },
+  { label: "Elderly Care", href: "#home-care" },
+  { label: "Mother & Baby Care", href: "#home-care" },
 ];
