@@ -2,13 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  BadgeCheck,
   Calendar,
   CheckCircle2,
   Facebook,
   Linkedin,
   MessageCircle,
-  PlayCircle,
   Sparkles,
   Stethoscope,
 } from "lucide-react";
@@ -22,21 +20,103 @@ function TikTokIcon({ className }: { className?: string }) {
 }
 
 import { BrandLockup } from "@/components/brand/brand-lockup";
-import { HeroMockup } from "@/components/marketing/hero-mockup";
+import { HeroSlideshow } from "@/components/marketing/hero-slideshow";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
-import { doctors, footerLinks, heroStats, howItWorksSteps, trustItems } from "@/features/marketing/data";
+import { PlatformStats } from "@/components/marketing/platform-stats";
+import { RevealLines } from "@/components/marketing/reveal-lines";
+import {
+  doctors,
+  footerLinks,
+  howItWorksSteps,
+  platformHighlights,
+  serviceOffers,
+  trustItems,
+} from "@/features/marketing/data";
 import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
+import { cn } from "@/lib/utils";
+import { SolutionCard } from "./solution-card";
+import { ServiceCard } from "./service-card";
+
+const LIGHT_DOTS = "bg-[radial-gradient(rgb(78_82_229/0.1)_1px,transparent_1.4px)] bg-[size:16px_16px]";
+const PANEL_DOTS = "bg-[radial-gradient(rgb(255_255_255/0.12)_1px,transparent_1.4px)] bg-[size:16px_16px]";
 
 const homeCareChips = ["Mother & baby care", "Elderly care", "Postnatal care", "General homecare"];
 const stepIcons = [Calendar, Stethoscope, Sparkles, MessageCircle];
 
 export function LandingPage() {
+  const [advice, homeVisits, verified, confirmation, pricing] = platformHighlights;
+  const [doctorVisits, homeNursing, elderlyCare, maternalCare] = serviceOffers;
+
   return (
     <main id="home" className="min-h-screen overflow-x-hidden bg-[#f8f9ff] text-[#0b1c30]">
-      <MarketingHeader />
+      {/* Sizes in the two redesigned sections are design px on a 1000px frame; .lp-scale zooms them from lg up. */}
+      <div className="@container">
+        {/* Hero */}
+        <section className="lp-scale bg-white px-[7px] pb-[3px] pt-[7px]">
+          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#2563EB_0%,#60A5FA_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgb(255_255_255/0.22)_1px,transparent_1.4px)] bg-[size:16px_16px]"
+            />
+            <MarketingHeader />
+            <HeroSlideshow />
+          </div>
+        </section>
+
+        <section aria-label={`${BRAND_NAME} in numbers`} className={`lp-scale bg-[#FAFBFF] px-4 py-[46px] ${LIGHT_DOTS}`}>
+          <PlatformStats />
+        </section>
+
+        <section id="solution" className={`lp-scale bg-[#F2F5FE] px-4 pb-[104px] pt-[72px] ${LIGHT_DOTS}`}>
+          <RevealLines className="text-center">
+            <p className="text-[14px] font-medium uppercase tracking-[0.2em] text-[#1E40AF]">Solution</p>
+            <h2 className="mt-[16px] text-[40.25px] font-bold leading-[48.2px] text-[#131A2F] max-sm:text-[30px] max-sm:leading-[1.2]">
+              One <span className="text-[#3B82F6]">Platform.</span> Two
+              <br /> Ways to Get Real Care.
+            </h2>
+          </RevealLines>
+
+          <div className="mx-auto mt-[64px] grid w-[946px] max-w-full gap-[24px] max-lg:auto-rows-fr lg:grid-cols-2 lg:items-center">
+            <div className="flex flex-col gap-[40px] max-lg:contents">
+              <SolutionCard highlight={advice} tall pingDelay={0} />
+              <SolutionCard highlight={confirmation} tall pingDelay={1.2} />
+            </div>
+            <div className="flex flex-col gap-[36px] max-lg:contents">
+              <SolutionCard highlight={homeVisits} pingDelay={0.4} />
+              <SolutionCard highlight={verified} pingDelay={0.8} />
+              <SolutionCard highlight={pricing} pingDelay={1.6} />
+            </div>
+          </div>
+        </section>
+
+        <section id="services" className="lp-scale bg-[#F2F5FE] px-[7px] pb-[7px]">
+          <div className={`rounded-[18.5px] bg-[#1E40AF] px-[24px] pb-[104px] pt-[80px] max-sm:px-4 max-sm:pb-16 max-sm:pt-14 ${PANEL_DOTS}`}>
+            <RevealLines className="pl-[12px] text-white max-sm:pl-1">
+              <p className="text-[15px] font-light uppercase tracking-[0.04em] text-white/85">Our Services</p>
+              <h2 className="mt-[18px] text-[40.25px] font-bold leading-[48.2px] max-sm:text-[30px] max-sm:leading-[1.2]">
+                What Our
+                <br /> Platform Offers.
+              </h2>
+            </RevealLines>
+
+            <div className="mx-auto mt-[33px] grid w-[938px] max-w-full gap-[22px] max-lg:auto-rows-fr lg:grid-cols-2">
+              <div className="flex flex-col gap-[38px] lg:mt-[60px] max-lg:contents">
+                <ServiceCard offer={doctorVisits} pingDelay={0} className="max-lg:order-1" />
+                <ServiceCard offer={elderlyCare} pingDelay={0.8} className="max-lg:order-3" />
+              </div>
+              <div className="flex flex-col gap-[38px] max-lg:contents">
+                <ServiceCard offer={homeNursing} pingDelay={0.4} className="max-lg:order-2" />
+                <ServiceCard offer={maternalCare} pingDelay={1.2} className="max-lg:order-4" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
 
       <div className="ct-mesh">
-        {/* Hero */}
+        {/* Legacy hero — replaced by the redesigned hero above. To restore, re-add the
+            HeroMockup import plus BadgeCheck and PlayCircle from lucide-react. */}
+        {/*
         <section className="relative mx-auto max-w-[1440px] overflow-hidden px-4 pb-24 pt-12 sm:pb-32 md:px-10 md:pt-20 lg:pb-40">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div className="z-10 animate-fade-up text-center lg:text-left">
@@ -77,8 +157,11 @@ export function LandingPage() {
             </div>
           </div>
         </section>
+        */}
 
-        {/* Service categories bar */}
+        {/* Service categories bar — replaced by the platform section above. To restore, re-add
+            the heroStats import from "@/features/marketing/data". */}
+        {/*
         <section className="border-y border-[rgba(116,118,134,0.12)] bg-white/50 py-10">
           <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-8 px-4 text-center md:grid-cols-3 md:gap-0 md:divide-x md:divide-[rgba(116,118,134,0.18)] md:px-10">
             {heroStats.map((stat) => (
@@ -91,6 +174,7 @@ export function LandingPage() {
             ))}
           </div>
         </section>
+        */}
 
         {/* Bento — Trust */}
         <section id="trust" className="mx-auto max-w-[1440px] px-4 py-24 sm:py-28 md:px-10 lg:py-32">
@@ -351,9 +435,8 @@ export function LandingPage() {
             return (
               <div
                 key={step.id}
-                className={`group relative flex flex-col items-center gap-8 md:flex-row md:gap-12 ${
-                  reversed ? "md:flex-row-reverse" : ""
-                }`}
+                className={`group relative flex flex-col items-center gap-8 md:flex-row md:gap-12 ${reversed ? "md:flex-row-reverse" : ""
+                  }`}
               >
                 <div className={`flex-1 text-center md:text-left ${reversed ? "" : "md:text-right"}`}>
                   <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#2563EB] font-bold text-white md:hidden">
@@ -369,9 +452,8 @@ export function LandingPage() {
 
                 <div className="w-full flex-1">
                   <div
-                    className={`rounded-[1.5rem] border border-[rgba(116,118,134,0.15)] bg-[#e5eeff] p-5 shadow-sm transition duration-500 group-hover:rotate-0 sm:p-6 ${
-                      reversed ? "md:-rotate-1" : "md:rotate-1"
-                    }`}
+                    className={`rounded-[1.5rem] border border-[rgba(116,118,134,0.15)] bg-[#e5eeff] p-5 shadow-sm transition duration-500 group-hover:rotate-0 sm:p-6 ${reversed ? "md:-rotate-1" : "md:rotate-1"
+                      }`}
                   >
                     <div className="mb-4 flex items-center gap-3">
                       <Icon className="h-5 w-5 text-[#2563EB]" />
@@ -546,3 +628,6 @@ export function LandingPage() {
     </main>
   );
 }
+
+
+
