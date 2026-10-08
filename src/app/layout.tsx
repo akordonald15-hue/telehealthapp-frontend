@@ -7,7 +7,7 @@ import { BRAND_NAME } from "@/lib/brand";
 
 const lexend = Lexend({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
   variable: "--font-lexend",
 });
 
@@ -47,7 +47,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-full ${lexend.variable}`}>
+    // Browser extensions (e.g. QuillBot) add attributes to <html> before hydration; this only silences that element.
+    <html lang="en" className={`h-full ${lexend.variable}`} suppressHydrationWarning>
       <body className="min-h-full bg-[#F9FAFB] text-[#1F2937] antialiased">
         <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
         <Providers>{children}</Providers>
