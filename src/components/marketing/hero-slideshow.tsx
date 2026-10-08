@@ -114,7 +114,7 @@ export function HeroSlideshow() {
         }
       }}
     >
-      <div className="inline-flex h-[47.6px] items-center gap-[8px] rounded-[22px] rounded-br-none rounded-tl-[2px] bg-[#60A5FA80] pl-[30.2px] pr-[30px] text-[15.15px] font-medium leading-none text-white max-sm:px-5">
+      <div className="inline-flex h-[47.6px] items-center gap-[8px] rounded-[22px] rounded-br-none rounded-tl-[2px] bg-[#1E40AF] pl-[30.2px] pr-[30px] text-[15.15px] font-medium leading-none text-white max-sm:px-5">
         <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#B3C2F7]" />
         Trusted Digital Healthcare
         <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#B3C2F7]" />
@@ -183,7 +183,7 @@ export function HeroSlideshow() {
         </Link>
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-3" aria-label="Highlight controls">
+      <div role="group" className="mt-6 flex items-center justify-center gap-3" aria-label="Highlight controls">
         {heroSlides.map((slide, index) => (
           <button
             key={slide.highlight}

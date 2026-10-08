@@ -43,10 +43,10 @@ export function LandingPage() {
       <div className="@container">
         {/* Hero */}
         <section className="lp-scale bg-white px-[7px] pb-[3px] pt-[7px]">
-          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#2563EB_0%,#60A5FA_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
+          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#2563EB_0%,#2563EB_80%,#60A5FA_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgb(255_255_255/0.22)_1px,transparent_1.4px)] bg-[size:16px_16px]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgb(255_255_255/0.05)_1px,transparent_1.4px)] bg-[size:16px_16px]"
             />
             <MarketingHeader />
             <HeroSlideshow />

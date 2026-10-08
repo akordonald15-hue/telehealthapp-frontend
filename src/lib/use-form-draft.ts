@@ -68,6 +68,9 @@ export function useFormDraft<T>({
     onRestoreRef.current = onRestore;
   }, [onRestore]);
 
+  // This effect synchronizes with an external browser-storage key. Restoring here
+  // avoids reading storage during server rendering and preserves existing drafts.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setRestored(false);
     setReady(false);
@@ -96,6 +99,7 @@ export function useFormDraft<T>({
     setRestored(true);
     setReady(true);
   }, [enabled, key, storageRef]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (!ready || !enabled || !key || !storageRef || submittedRef.current) {

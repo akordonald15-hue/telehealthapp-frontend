@@ -94,6 +94,12 @@ export function MarketingHeader() {
   return (
     <header
       ref={headerRef}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && open) {
+          setOpen(false);
+          headerRef.current?.querySelector<HTMLButtonElement>('[aria-controls="mobile-nav"]')?.focus();
+        }
+      }}
       className="invisible absolute left-[16.4px] right-[24.9px] top-[22.2px] z-20 text-left max-lg:inset-x-3 max-lg:top-3"
     >
       <nav data-intro="bar" className="rounded-[12.7px] bg-white" aria-label="Main navigation">
@@ -159,7 +165,7 @@ export function MarketingHeader() {
           </button>
         </div>
 
-        <div id="mobile-nav" data-menu-panel className="invisible h-0 overflow-hidden lg:hidden">
+        <div id="mobile-nav" data-menu-panel aria-hidden={!open} inert={!open} className="invisible h-0 overflow-hidden lg:hidden">
           <div className="grid gap-1 border-t border-[#E5E7EB] px-3 pb-4 pt-3">
             {marketingNavItems.map((item) => (
               <a

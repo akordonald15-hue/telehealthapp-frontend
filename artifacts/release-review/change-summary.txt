@@ -1,0 +1,151 @@
+ artifacts/hero-review/after-1024-consult.png       |  Bin 0 -> 435430 bytes
+ artifacts/hero-review/after-1024-homecare.png      |  Bin 0 -> 381380 bytes
+ artifacts/hero-review/after-1280-consult.png       |  Bin 0 -> 654632 bytes
+ artifacts/hero-review/after-1280-homecare.png      |  Bin 0 -> 566455 bytes
+ artifacts/hero-review/after-1440-consult.png       |  Bin 0 -> 694217 bytes
+ artifacts/hero-review/after-1440-homecare.png      |  Bin 0 -> 694608 bytes
+ artifacts/hero-review/after-360-consult.png        |  Bin 0 -> 121153 bytes
+ artifacts/hero-review/after-360-homecare.png       |  Bin 0 -> 106469 bytes
+ artifacts/hero-review/after-390-consult.png        |  Bin 0 -> 130600 bytes
+ artifacts/hero-review/after-390-homecare.png       |  Bin 0 -> 113591 bytes
+ artifacts/hero-review/after-768-consult.png        |  Bin 0 -> 294496 bytes
+ artifacts/hero-review/after-768-homecare.png       |  Bin 0 -> 246287 bytes
+ artifacts/hero-review/after-qa.json                |  146 +
+ artifacts/hero-review/before-1024-consult.png      |  Bin 0 -> 365670 bytes
+ artifacts/hero-review/before-1024-homecare.png     |  Bin 0 -> 334141 bytes
+ artifacts/hero-review/before-1280-consult.png      |  Bin 0 -> 543868 bytes
+ artifacts/hero-review/before-1280-homecare.png     |  Bin 0 -> 500095 bytes
+ artifacts/hero-review/before-1440-consult.png      |  Bin 0 -> 678693 bytes
+ artifacts/hero-review/before-1440-homecare.png     |  Bin 0 -> 622427 bytes
+ artifacts/hero-review/before-360-consult.png       |  Bin 0 -> 166197 bytes
+ artifacts/hero-review/before-360-homecare.png      |  Bin 0 -> 147501 bytes
+ artifacts/hero-review/before-390-consult.png       |  Bin 0 -> 169898 bytes
+ artifacts/hero-review/before-390-homecare.png      |  Bin 0 -> 150638 bytes
+ artifacts/hero-review/before-768-consult.png       |  Bin 0 -> 362007 bytes
+ artifacts/hero-review/before-768-homecare.png      |  Bin 0 -> 319634 bytes
+ artifacts/hero-review/before-qa.json               |   68 +
+ artifacts/hero-review/build-configured.txt         |  112 +
+ artifacts/hero-review/build.txt                    |   28 +
+ artifacts/hero-review/lint.txt                     |   24 +
+ artifacts/hero-review/npm-audit.json               | 1386 ++++++++++
+ artifacts/hero-review/report.md                    |   77 +
+ artifacts/hero-review/rotation-qa.json             |    1 +
+ artifacts/hero-review/targeted-lint.txt            |    0
+ artifacts/hero-review/test-rerun.txt               |   14 +
+ artifacts/hero-review/tests.txt                    |   91 +
+ artifacts/hero-review/typecheck.txt                |    4 +
+ artifacts/release-review/accessibility-1440.json   |  175 ++
+ artifacts/release-review/accessibility-390.json    |  181 ++
+ artifacts/release-review/after-doctors-1440.png    |  Bin 0 -> 556803 bytes
+ artifacts/release-review/after-doctors-390.png     |  Bin 0 -> 648944 bytes
+ artifacts/release-review/after-doctors-768.png     |  Bin 0 -> 585542 bytes
+ artifacts/release-review/after-faq-1024.png        |  Bin 0 -> 93840 bytes
+ artifacts/release-review/after-faq-1280.png        |  Bin 0 -> 106098 bytes
+ artifacts/release-review/after-faq-1440.png        |  Bin 0 -> 115703 bytes
+ artifacts/release-review/after-faq-360.png         |  Bin 0 -> 44573 bytes
+ artifacts/release-review/after-faq-390.png         |  Bin 0 -> 45469 bytes
+ artifacts/release-review/after-faq-768.png         |  Bin 0 -> 79102 bytes
+ .../release-review/after-hero-consult-1024.png     |  Bin 0 -> 379086 bytes
+ .../release-review/after-hero-consult-1280.png     |  Bin 0 -> 552012 bytes
+ .../release-review/after-hero-consult-1440.png     |  Bin 0 -> 656863 bytes
+ .../release-review/after-hero-consult-360.png      |  Bin 0 -> 104480 bytes
+ .../release-review/after-hero-consult-390.png      |  Bin 0 -> 113174 bytes
+ .../release-review/after-hero-consult-768.png      |  Bin 0 -> 272211 bytes
+ .../release-review/after-hero-homecare-1024.png    |  Bin 0 -> 322843 bytes
+ .../release-review/after-hero-homecare-1280.png    |  Bin 0 -> 459625 bytes
+ .../release-review/after-hero-homecare-1440.png    |  Bin 0 -> 547977 bytes
+ .../release-review/after-hero-homecare-360.png     |  Bin 0 -> 91443 bytes
+ .../release-review/after-hero-homecare-390.png     |  Bin 0 -> 97949 bytes
+ .../release-review/after-hero-homecare-768.png     |  Bin 0 -> 224438 bytes
+ artifacts/release-review/after-home-care-1440.png  |  Bin 0 -> 715176 bytes
+ artifacts/release-review/after-home-care-390.png   |  Bin 0 -> 306369 bytes
+ artifacts/release-review/after-home-care-768.png   |  Bin 0 -> 784753 bytes
+ .../release-review/after-how-it-works-1440.png     |  Bin 0 -> 115860 bytes
+ .../release-review/after-how-it-works-390.png      |  Bin 0 -> 84727 bytes
+ .../release-review/after-how-it-works-768.png      |  Bin 0 -> 115754 bytes
+ artifacts/release-review/after-landing-1024.png    |  Bin 0 -> 2502971 bytes
+ artifacts/release-review/after-landing-1280.png    |  Bin 0 -> 3125402 bytes
+ artifacts/release-review/after-landing-1440.png    |  Bin 0 -> 4271774 bytes
+ artifacts/release-review/after-landing-360.png     |  Bin 0 -> 1397438 bytes
+ artifacts/release-review/after-landing-390.png     |  Bin 0 -> 2274323 bytes
+ artifacts/release-review/after-landing-768.png     |  Bin 0 -> 3333005 bytes
+ artifacts/release-review/after-newsletter-1024.png |  Bin 0 -> 136977 bytes
+ artifacts/release-review/after-newsletter-1280.png |  Bin 0 -> 136690 bytes
+ artifacts/release-review/after-newsletter-1440.png |  Bin 0 -> 140799 bytes
+ artifacts/release-review/after-newsletter-360.png  |  Bin 0 -> 91905 bytes
+ artifacts/release-review/after-newsletter-390.png  |  Bin 0 -> 92585 bytes
+ artifacts/release-review/after-newsletter-768.png  |  Bin 0 -> 151229 bytes
+ artifacts/release-review/after-services-1440.png   |  Bin 0 -> 922416 bytes
+ artifacts/release-review/after-services-390.png    |  Bin 0 -> 187603 bytes
+ artifacts/release-review/after-services-768.png    |  Bin 0 -> 144238 bytes
+ artifacts/release-review/after-trust-1440.png      |  Bin 0 -> 321667 bytes
+ artifacts/release-review/after-trust-390.png       |  Bin 0 -> 289757 bytes
+ artifacts/release-review/after-trust-768.png       |  Bin 0 -> 270616 bytes
+ artifacts/release-review/audit-after.json          |  136 +
+ artifacts/release-review/audit-fix.txt             |   31 +
+ artifacts/release-review/audit-production.json     |   22 +
+ artifacts/release-review/before-landing-1440.png   |  Bin 0 -> 2680991 bytes
+ artifacts/release-review/before-landing-390.png    |  Bin 0 -> 1288826 bytes
+ .../release-review/before-newsletter-1440.png      |  Bin 0 -> 210769 bytes
+ artifacts/release-review/before-newsletter-390.png |  Bin 0 -> 121309 bytes
+ artifacts/release-review/browser-output.txt        |    6 +
+ artifacts/release-review/browser-qa.json           |  654 +++++
+ artifacts/release-review/browser-tool-install.txt  |    9 +
+ artifacts/release-review/build.txt                 |  113 +
+ artifacts/release-review/change-summary.txt        |    9 +
+ artifacts/release-review/dependency-assessment.md  |   36 +
+ artifacts/release-review/files-changed.txt         |   72 +
+ artifacts/release-review/install.txt               |    9 +
+ artifacts/release-review/lint.txt                  |   21 +
+ artifacts/release-review/lock-update.txt           |    5 +
+ artifacts/release-review/marketing-claims.md       |   26 +
+ artifacts/release-review/motion-output.txt         |    8 +
+ artifacts/release-review/motion-qa.json            |   30 +
+ artifacts/release-review/report.md                 |  118 +
+ artifacts/release-review/tests-before-update.txt   |   29 +
+ artifacts/release-review/tests-final.txt           |   13 +
+ artifacts/release-review/timed-test-repeat-1.txt   |   16 +
+ artifacts/release-review/timed-test-repeat-2.txt   |   16 +
+ artifacts/release-review/timed-test-repeat-3.txt   |   16 +
+ artifacts/release-review/typecheck.txt             |    4 +
+ package-lock.json                                  | 2875 ++++++--------------
+ package.json                                       |   13 +-
+ public/img/faq-illustration.png                    |  Bin 0 -> 47887 bytes
+ public/img/footer/email.svg                        |    3 +
+ public/img/footer/facebook.svg                     |    3 +
+ public/img/footer/grid.svg                         |   41 +
+ public/img/footer/linkedin.svg                     |    3 +
+ public/img/footer/logo-mark.png                    |  Bin 0 -> 6407 bytes
+ public/img/footer/logo-name.png                    |  Bin 0 -> 24126 bytes
+ public/img/footer/wordmark.svg                     |   10 +
+ public/img/services/doctor-visit.webp              |  Bin 0 -> 54584 bytes
+ public/img/services/elderly-care.webp              |  Bin 0 -> 61254 bytes
+ public/img/services/home-nursing.webp              |  Bin 0 -> 66844 bytes
+ public/img/services/maternal-care.webp             |  Bin 0 -> 41730 bytes
+ public/img/team-consult.webp                       |  Bin 0 -> 132564 bytes
+ public/img/team-homecare.webp                      |  Bin 0 -> 129414 bytes
+ scripts/hero-visual-qa.mjs                         |   68 +
+ scripts/release-browser-qa.mjs                     |  168 ++
+ scripts/release-dependency-assessment.py           |   56 +
+ scripts/release-motion-qa.mjs                      |   79 +
+ src/app/globals.css                                |    6 +
+ src/app/layout.tsx                                 |    5 +-
+ src/components/brand/brand-lockup.tsx              |   14 +-
+ src/components/marketing/faq-section.tsx           |  118 +
+ src/components/marketing/hero-slideshow.tsx        |  256 ++
+ src/components/marketing/landing-page.tsx          |  263 +-
+ src/components/marketing/marketing-header.tsx      |  211 +-
+ src/components/marketing/marketing-icons.tsx       |   26 +
+ src/components/marketing/ping-badge.tsx            |   55 +
+ src/components/marketing/platform-stats.tsx        |   63 +
+ src/components/marketing/reveal-lines.tsx          |   45 +
+ src/components/marketing/service-card.tsx          |   62 +
+ src/components/marketing/service-icons.tsx         |   69 +
+ src/components/marketing/site-footer.test.tsx      |   23 +
+ src/components/marketing/site-footer.tsx           |  190 ++
+ src/components/marketing/solution-card.tsx         |   38 +
+ src/components/marketing/solution-icons.tsx        |   84 +
+ src/features/marketing/data.ts                     |  206 +-
+ src/lib/use-form-draft.ts                          |    4 +
+ vitest.config.ts => vitest.config.mts              |    7 +-
+ 150 files changed, 6539 insertions(+), 2231 deletions(-)
