@@ -21,6 +21,7 @@ const ENTER_AT = 0.38;
 export function HeroSlideshow() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [rotationStopped, setRotationStopped] = useState(false);
   const [onScreen, setOnScreen] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
   const previous = useRef(active);
@@ -37,15 +38,15 @@ export function HeroSlideshow() {
 
   useGSAP(
     () => {
-      if (paused || !onScreen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (paused || rotationStopped || !onScreen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         return;
       }
       gsap.delayedCall(SLIDE_INTERVAL_MS / 1000, () => setActive((index) => (index + 1) % heroSlides.length));
     },
-    { dependencies: [active, paused, onScreen], revertOnUpdate: true },
+    { dependencies: [active, paused, rotationStopped, onScreen], revertOnUpdate: true },
   );
 
-  const { contextSafe } = useGSAP(
+  useGSAP(
     () => {
       const from = previous.current;
       previous.current = active;
@@ -53,6 +54,11 @@ export function HeroSlideshow() {
         return;
       }
       transition.current?.progress(1).kill();
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        gsap.set(`[data-slide="${from}"] [data-motion="text"], [data-slide="${from}"] [data-motion="image"]`, { opacity: 0 });
+        gsap.set(`[data-slide="${active}"] [data-motion="text"], [data-slide="${active}"] [data-motion="image"]`, { opacity: 1, x: 0 });
+        return;
+      }
 
       const details = (slide: number, motion: "text" | "pill" | "image") => `[data-slide="${slide}"] [data-motion="${motion}"]`;
 
@@ -81,10 +87,6 @@ export function HeroSlideshow() {
     },
     { scope: rootRef, dependencies: [active] },
   );
-
-  const revealImage = contextSafe((image: HTMLImageElement) => {
-    gsap.to(image, { opacity: 1, duration: 0.6, ease: "power2.out" });
-  });
 
   const slideLayer = (index: number, className?: string) => {
     const isActive = index === active;
@@ -118,7 +120,7 @@ export function HeroSlideshow() {
         <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#B3C2F7]" />
       </div>
 
-      <div aria-live={paused ? "polite" : "off"}>
+      <div aria-live={paused || rotationStopped ? "polite" : "off"}>
         <h1 className="mt-[22.8px] grid text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[1.15]">
           {heroSlides.map((slide, index) => (
             <span key={slide.highlight} {...slideLayer(index)}>
@@ -181,24 +183,56 @@ export function HeroSlideshow() {
         </Link>
       </div>
 
-      <div className="relative mx-auto mt-[48px] grid h-[447px] w-[850px] max-w-full max-lg:left-1/2 max-lg:max-w-none max-lg:-translate-x-1/2 max-sm:h-[316px] max-sm:w-[600px] sm:max-lg:aspect-[850/447] sm:max-lg:h-auto sm:max-lg:w-[min(148%,1100px)]">
+      <div className="mt-6 flex items-center justify-center gap-3" aria-label="Highlight controls">
+        {heroSlides.map((slide, index) => (
+          <button
+            key={slide.highlight}
+            type="button"
+            aria-label={index === 0 ? "Show consultation highlight" : "Show homecare highlight"}
+            aria-pressed={index === active}
+            onClick={() => { setRotationStopped(true); setActive(index); }}
+            className={cn("h-11 rounded-full border border-white/60 px-4 text-sm text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white", index === active && "bg-[#1E40AF]")}
+          >
+            {index === 0 ? "Consultations" : "Homecare"}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => setRotationStopped((value) => !value)}
+          className="h-11 rounded-full px-3 text-sm text-white underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+        >
+          {rotationStopped ? "Resume" : "Pause"}
+        </button>
+      </div>
+
+      <div className="relative mx-auto mt-[32px] grid aspect-[850/447] w-[850px] max-w-full">
         <HeroCircles />
         {heroSlides.map((slide, index) => (
-          <div key={slide.image} {...slideLayer(index, "relative")}>           <div
+          <div key={slide.image} {...slideLayer(index, "relative")}>
+            <div
               data-motion="image"
-              className={cn("absolute inset-0 will-change-[transform,opacity]", hiddenUntilShown(index))}
+              className={cn("absolute inset-0 flex items-end justify-center gap-[2%] px-[3%] will-change-[transform,opacity]", hiddenUntilShown(index))}
             >
-              <Image
-                src={slide.image}
-                alt={slide.alt}
-                fill
-                preload={index === 0}
-                loading={index === 0 ? undefined : "eager"}
-                fetchPriority={index === 0 ? "high" : "low"}
-                sizes="(min-width: 1920px) 1632px, (min-width: 1024px) 85vw, (min-width: 640px) 1100px, 600px"
-                onLoad={(event) => revealImage(event.currentTarget)}
-                className="object-contain object-bottom opacity-0"
-              />
+              {slide.portraits.map((portrait) => (
+                <div
+                  key={portrait.name}
+                  data-portrait={portrait.name}
+                  className={cn(
+                    "relative aspect-[4/5] w-[27%] shrink-0 overflow-hidden rounded-t-[80px] border border-white/50 bg-white/10 shadow-lg",
+                    portrait.featured ? "order-2 w-[38%]" : "first:order-1 last:order-3",
+                  )}
+                >
+                  <Image
+                    src={portrait.image}
+                    alt={portrait.name}
+                    fill
+                    preload={index === 0 && portrait.featured}
+                    sizes={portrait.featured ? "(min-width: 1024px) 33vw, 38vw" : "(min-width: 1024px) 23vw, 27vw"}
+                    className="object-contain object-bottom"
+                  />
+                </div>
+              ))}
+              {slide.portraits.length === 2 && <div aria-hidden="true" className="order-3 w-[27%] shrink-0" />}
             </div>
           </div>
         ))}

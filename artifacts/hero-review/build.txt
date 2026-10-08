@@ -1,0 +1,28 @@
+
+> frontend@0.1.0 build
+> next build
+
+▲ Next.js 16.2.3 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.3min
+  Running TypeScript ...
+  Finished TypeScript in 75s ...
+  Collecting page data using 11 workers ...
+Error: A backend API base URL is required via BACKEND_API_BASE_URL or NEXT_PUBLIC_API_BASE_URL.
+    at module evaluation (C:\Projects\Caretekk\hero-review\.next\server\chunks\[root-of-the-server]__06ren3~._.js:1:1001)
+    at instantiateModule (C:\Projects\Caretekk\hero-review\.next\server\chunks\[turbopack]_runtime.js:853:9)
+    at getOrInstantiateModuleFromParent (C:\Projects\Caretekk\hero-review\.next\server\chunks\[turbopack]_runtime.js:877:12)
+    at Context.esmImport [as i] (C:\Projects\Caretekk\hero-review\.next\server\chunks\[turbopack]_runtime.js:281:20)
+    at module evaluation (C:\Projects\Caretekk\hero-review\.next\server\chunks\[root-of-the-server]__06ren3~._.js:1:3460)
+    at instantiateModule (C:\Projects\Caretekk\hero-review\.next\server\chunks\[turbopack]_runtime.js:853:9)
+    at instantiateRuntimeModule (C:\Projects\Caretekk\hero-review\.next\server\chunks\[turbopack]_runtime.js:882:12)
+    at getOrInstantiateRuntimeModule (C:\Projects\Caretekk\hero-review\.next\server\chunks\[turbopack]_runtime.js:895:12)
+    at Object.m (C:\Projects\Caretekk\hero-review\.next\server\chunks\[turbopack]_runtime.js:898:18)
+    at Object.<anonymous> (C:\Projects\Caretekk\hero-review\.next\server\app\api\appointments\available-doctors\route.js:5:3)
+
+> Build error occurred
+Error: Failed to collect page data for /api/appointments/available-doctors
+    at ignore-listed frames {
+  type: 'Error'
+}

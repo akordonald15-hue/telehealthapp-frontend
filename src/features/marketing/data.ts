@@ -158,6 +158,7 @@ export const heroSlides: Array<{
   text: string;
   image: string;
   alt: string;
+  portraits: Array<{ image: string; name: string; featured?: boolean }>;
 }> = [
   {
     lead: "A Doctor’s",
@@ -167,6 +168,11 @@ export const heroSlides: Array<{
     text: "Connect with a licensed doctor virtually, wherever you are in Nigeria confirmed in minutes, from ₦2,000.",
     image: "/img/team-consult.webp",
     alt: "Caretekk doctors ready for a virtual consultation",
+    portraits: [
+      { image: "/img/Dr Paul Chinonso.jpg", name: "Dr. Paul Chinonso" },
+      { image: "/img/Dr michael Idam.jpg", name: "Dr. Michael Idam", featured: true },
+      { image: "/img/Dr effiong Okon.jpg", name: "Dr. Effiong Okon" },
+    ],
   },
   {
     lead: "Real Care",
@@ -176,6 +182,10 @@ export const heroSlides: Array<{
     text: "Book a vetted nurse or caregiver for in-home care in Akwa Ibom from ₦5,000.",
     image: "/img/team-homecare.webp",
     alt: "Caretekk care team available for home visits",
+    portraits: [
+      { image: "/img/Dr Paul Chinonso.jpg", name: "Dr. Paul Chinonso" },
+      { image: "/img/Dr effiong Okon.jpg", name: "Dr. Effiong Okon", featured: true },
+    ],
   },
 ];
 

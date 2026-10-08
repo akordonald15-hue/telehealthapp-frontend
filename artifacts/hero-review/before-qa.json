@@ -1,0 +1,68 @@
+[
+  {
+    "width": 360,
+    "errors": [],
+    "viewport": 360,
+    "documentWidth": 360,
+    "missingAnchors": [
+      "#faq",
+      "#faq"
+    ],
+    "portraits": []
+  },
+  {
+    "width": 390,
+    "errors": [],
+    "viewport": 390,
+    "documentWidth": 390,
+    "missingAnchors": [
+      "#faq",
+      "#faq"
+    ],
+    "portraits": []
+  },
+  {
+    "width": 768,
+    "errors": [],
+    "viewport": 768,
+    "documentWidth": 768,
+    "missingAnchors": [
+      "#faq",
+      "#faq"
+    ],
+    "portraits": []
+  },
+  {
+    "width": 1024,
+    "errors": [],
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "missingAnchors": [
+      "#faq",
+      "#faq"
+    ],
+    "portraits": []
+  },
+  {
+    "width": 1280,
+    "errors": [],
+    "viewport": 1280,
+    "documentWidth": 1280,
+    "missingAnchors": [
+      "#faq",
+      "#faq"
+    ],
+    "portraits": []
+  },
+  {
+    "width": 1440,
+    "errors": [],
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "missingAnchors": [
+      "#faq",
+      "#faq"
+    ],
+    "portraits": []
+  }
+]
