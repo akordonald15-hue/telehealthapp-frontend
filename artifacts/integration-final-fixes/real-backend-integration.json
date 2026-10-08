@@ -1,0 +1,266 @@
+{
+  "scope": "Actual frontend BFF and isolated Django/Postgres/Redis/MinIO, no API mocks; no real cash or live payment credentials",
+  "workflows": [
+    "Real OTP delivery to local mailbox, email verification, registration, login and patient onboarding",
+    "Doctor/nurse profiles and normal patient doctor discovery",
+    "Missing and overseas declarations refused at all four clinical entry points",
+    "Real completed triage, Nigeria booking, bank-transfer initialization, MinIO proof upload, admin test confirmation and fixed payment polling",
+    "Clinical referral creation and fixed PATCH proxy, with real admin-only status authorization",
+    "Real doctor/patient REST messaging and cookie-authenticated local Channels/Redis WebSocket handshake",
+    "Real Eket homecare checkout, proof/storage, status confirmation, request listing and nurse assignment",
+    "Actual backend-authenticated patient, doctor and nurse dashboard browser smoke checks",
+    "Actual logout and revoked session access"
+  ],
+  "calls": [
+    {
+      "method": "POST",
+      "path": "/auth/email/verify/request/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/email/verify/confirm/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/register/",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me/",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/auth/me/",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/profiles/me/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/profiles/me/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/profiles/me/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/appointments/available-doctors/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/triage/start",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/triage/start",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/triage/conversation/start",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/triage/conversation/start",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/appointments/book/",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/appointments/book/",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/home-care/requests/book/",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/home-care/requests/book/",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/triage/start",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/triage/conversation/start",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/triage/conversation/6c3b5621-3374-4e43-be70-25a14f668bb2/message",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/triage/conversation/6c3b5621-3374-4e43-be70-25a14f668bb2/complete",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/triage/conversation/6c3b5621-3374-4e43-be70-25a14f668bb2/result",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/appointments/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/appointments/book/",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/payments/2/submit-transfer/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/admin/payments/2/confirm/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/payments/2/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/appointments/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/referrals/",
+      "status": 201
+    },
+    {
+      "method": "PATCH",
+      "path": "/referrals/2/",
+      "status": 403
+    },
+    {
+      "method": "PATCH",
+      "path": "/referrals/2/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/messages/threads/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/messages/threads/2/messages/",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/messages/threads/2/messages/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/home-care/requests/book/",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/payments/3/submit-transfer/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/admin/payments/3/confirm/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/payments/3/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/home-care/requests/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/home-care/assignments/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/logout/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me/",
+      "status": 401
+    }
+  ],
+  "excluded": [
+    "External Paystack initialization/webhook",
+    "Provider credential verification",
+    "Policy/clinical-consent UI not located in supplied repository"
+  ]
+}

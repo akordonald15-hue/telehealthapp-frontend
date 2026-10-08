@@ -1,0 +1,87 @@
+services:
+  gateway:
+    image: python:3.12-slim
+    entrypoint: [python, /qa/qa_gateway.py]
+    volumes:
+      - C:/Projects/Caretekk/frontend-release/artifacts/integration-final-fixes:/qa:ro
+    ports: ["127.0.0.1:8108:8080"]
+    networks: [isolated, gateway]
+    depends_on: [backend]
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: caretekk_release_qa
+      POSTGRES_USER: caretekk_release_qa
+      POSTGRES_PASSWORD: local-disposable-qa-only
+    networks: [isolated]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U caretekk_release_qa"]
+      interval: 2s
+      retries: 30
+  redis:
+    image: redis:7-alpine
+    networks: [isolated]
+  minio:
+    image: minio/minio:latest
+    command: [server, /data]
+    environment:
+      MINIO_ROOT_USER: local-qa-only
+      MINIO_ROOT_PASSWORD: local-qa-storage-password
+    networks: [isolated]
+  backend:
+    image: telehealthapp-web:latest
+    entrypoint: [python]
+    command: [-m, uvicorn, qa_asgi:application, --host, 0.0.0.0, --port, "8000"]
+    working_dir: /app
+    volumes:
+      - C:/Projects/Caretekk/backend-release:/app
+      - C:/Projects/Caretekk/frontend-release/artifacts/integration-final-fixes:/qa
+    networks: [isolated]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    environment:
+      PYTHONPATH: /qa:/app
+      DJANGO_SETTINGS_MODULE: qa_settings
+      ENVIRONMENT: staging
+      DJANGO_DEBUG: "true"
+      SILK_ENABLED: "false"
+      DJANGO_SECRET_KEY: release-qa-isolated-not-a-production-secret-20261008
+      JWT_SECRET_KEY: release-qa-isolated-jwt-not-production-20261008
+      REFERRAL_FINGERPRINT_SECRET: release-qa-isolated-fingerprint-not-production-20261008
+      DATABASE_URL: postgres://caretekk_release_qa:local-disposable-qa-only@db:5432/caretekk_release_qa
+      DATABASE_SSL_REQUIRE: "false"
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: memory://
+      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+      EMAIL_PROVIDER: smtp
+      CARETEKK_SMS_ENABLED: "false"
+      USE_S3: "false"
+      AWS_ACCESS_KEY_ID: local-qa-only
+      AWS_SECRET_ACCESS_KEY: local-qa-storage-password
+      AWS_REGION: us-east-1
+      AWS_S3_BUCKET: caretekk-release-qa
+      AWS_S3_ENDPOINT: http://minio:9000
+      AWS_S3_PUBLIC_ENDPOINT: http://minio:9000
+      AWS_EC2_METADATA_DISABLED: "true"
+      PAYSTACK_SECRET_KEY: ""
+      PAYSTACK_WEBHOOK_SECRET: ""
+      PAYMENT_PROVIDER: bank_transfer
+      CARETEKK_BANK_NAME: Local QA Bank - No Real Transfers
+      CARETEKK_BANK_ACCOUNT_NAME: Disposable Test Fixture
+      CARETEKK_BANK_ACCOUNT_NUMBER: "0000000000"
+      HOMECARE_ENABLED: "true"
+      PROVIDER_LEDGER_ENABLED: "true"
+      CLINICAL_ALLOWED_COUNTRIES: NG
+      ALLOWED_HOSTS: localhost,127.0.0.1,testserver,backend
+      CORS_ALLOWED_ORIGINS: http://127.0.0.1:3108
+      CSRF_TRUSTED_ORIGINS: http://127.0.0.1:3108,http://127.0.0.1:8108
+      CARETEKK_APP_URL: http://127.0.0.1:3108
+networks:
+  gateway:
+  isolated:
+    internal: true

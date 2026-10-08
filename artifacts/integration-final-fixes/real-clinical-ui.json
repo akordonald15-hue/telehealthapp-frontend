@@ -1,0 +1,20 @@
+[
+  {
+    "width": 390,
+    "login": "real backend",
+    "checkbox": "not preselected",
+    "declaration": "NG sent by real UI",
+    "triage": "existing redirect to gated appointments",
+    "homecare": "Akwa Ibom visible",
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "login": "real backend",
+    "checkbox": "not preselected",
+    "declaration": "NG sent by real UI",
+    "triage": "existing redirect to gated appointments",
+    "homecare": "Akwa Ibom visible",
+    "overflow": false
+  }
+]

@@ -1,0 +1,10 @@
+
+> frontend@0.1.0 test:browser
+> node scripts/release-browser-qa.mjs
+
+Checking 360px
+Checking 390px
+Checking 768px
+Checking 1024px
+Checking 1280px
+Checking 1440px
