@@ -1,5 +1,6 @@
 "use client";
 
+import { ClinicalLocation } from "@/components/ui/clinical-location";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -252,6 +253,7 @@ function AssistantBubble({
 }
 
 export function TriageClient() {
+  const [locationConfirmed, setLocationConfirmed] = useState(false);
   const searchParams = useSearchParams();
   const userQuery = useCurrentUser();
   const user = userQuery.data;
@@ -264,12 +266,12 @@ export function TriageClient() {
   const [resultRequested, setResultRequested] = useState(false);
 
   const startConversation = useMutation({
-    mutationFn: (id: number) => triageApi.startConversation({ session_id: id }),
+    mutationFn: (id: number) => triageApi.startConversation({ session_id: id, consultation_country: locationConfirmed ? "NG" : "" }),
     onSuccess: (data) => setConversationId(data.conversation.id),
   });
 
   const startSession = useMutation({
-    mutationFn: triageApi.start,
+    mutationFn: () => triageApi.start({ consultation_country: locationConfirmed ? "NG" : "" }),
     onSuccess: (data) => {
       setSessionId(data.id);
       startConversation.mutate(data.id);
@@ -370,6 +372,7 @@ export function TriageClient() {
 
   return (
     <Section title="Care check-in" description={pageDescription}>
+      <ClinicalLocation confirmed={locationConfirmed} onChange={setLocationConfirmed} />
       {userQuery.isLoading ? (
         <div className="ct-panel grid gap-4 rounded-[28px] p-6">
           <InlineLoader label="Preparing your care check-in" />
@@ -555,7 +558,7 @@ export function TriageClient() {
             <Button
               type="button"
               onClick={() => startSession.mutate()}
-              disabled={startSession.isPending}
+              disabled={startSession.isPending || !locationConfirmed}
               className="w-full sm:w-fit"
             >
               {startSession.isPending ? "Preparing..." : "Start care check-in"}

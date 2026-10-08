@@ -38,7 +38,7 @@ export const platformHighlights: Array<{
 }> = [
   {
     title: "Online doctor consultations",
-    text: "Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability.",
+    text: "Access online healthcare consultations from wherever you are in Nigeria. Online consultations are currently available to patients located in Nigeria, subject to practitioner eligibility and appointment availability.",
     icon: VideoBadgeIcon,
     tone: "dark",
   },
@@ -79,7 +79,7 @@ export const serviceOffers: Array<{
 }> = [
   {
     title: "On-Demand Doctor Visits",
-    text: "Access online healthcare consultations from wherever you are. Doctor consultations from ₦2,000 where applicable. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability.",
+    text: "Access online healthcare consultations from wherever you are in Nigeria. Doctor consultations from ₦2,000 where applicable. Online consultations are currently available to patients located in Nigeria, subject to practitioner eligibility and appointment availability.",
     cta: "Talk to a Doctor",
     href: "/register",
     image: "/img/services/doctor-visit.webp",
@@ -165,7 +165,7 @@ export const heroSlides: Array<{
     highlight: "Opinion,",
     tail: "Book Today",
     highlightClassName: "bg-[#1E40AF]",
-    text: "Online doctor consultations from ₦2,000 where applicable. Book immediately, subject to available appointment slots.",
+    text: "Online doctor consultations in Nigeria from ₦2,000 where applicable. Book immediately, subject to available appointment slots.",
     image: "/img/team-consult.webp",
     alt: "Caretekk doctors ready for a virtual consultation",
     portraits: [
@@ -242,7 +242,7 @@ export const faqItems: Array<{ question: string; answer: string[] }> = [
   {
     question: "Do you only serve Akwa Ibom?",
     answer: [
-      "Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability. Home visits are currently available in Akwa Ibom State, Nigeria.",
+      "Access online healthcare consultations from wherever you are in Nigeria. Online consultations are currently available to patients located in Nigeria, subject to practitioner eligibility and appointment availability. Home visits are currently available in Akwa Ibom State, Nigeria.",
       "Home visits depend on provider and appointment availability within Akwa Ibom State.",
     ],
   },

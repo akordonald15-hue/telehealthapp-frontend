@@ -97,7 +97,7 @@ export function ReferralLandingClient({ code }: { code: string }) {
           You&apos;ve been invited to Caretekk
         </h1>
         <p className="text-[15px] leading-relaxed text-slate-600">
-          Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability.
+          Access online healthcare consultations from wherever you are in Nigeria. Online consultations are currently available to patients located in Nigeria, subject to practitioner eligibility and appointment availability.
         </p>
       </header>
 

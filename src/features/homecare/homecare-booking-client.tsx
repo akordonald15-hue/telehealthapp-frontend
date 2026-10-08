@@ -1,5 +1,6 @@
 "use client";
 
+import { ClinicalLocation } from "@/components/ui/clinical-location";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Home, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -53,6 +54,7 @@ function isValidHourlyHomecareSlot(value: string) {
 }
 
 export function HomeCareBookingClient() {
+  const [locationConfirmed, setLocationConfirmed] = useState(false);
   const userQuery = useCurrentUser();
   const [zone, setZone] = useState<HomeCareZone | "">("");
   const [selectedServiceId, setSelectedServiceId] = useState<number | "">("");
@@ -133,7 +135,7 @@ export function HomeCareBookingClient() {
 
   const createRequest = useMutation({
     mutationFn: (body: HomeCareRequestCreate & { callback_url: string; reward_id?: string }) =>
-      homeCareApi.bookRequest(body),
+      homeCareApi.bookRequest({ ...body, consultation_country: locationConfirmed ? "NG" : "" }),
     onMutate: () => {
       setCheckoutError("");
     },
@@ -349,6 +351,7 @@ export function HomeCareBookingClient() {
         </Link>
       }
     >
+      <ClinicalLocation confirmed={locationConfirmed} onChange={setLocationConfirmed} />
       <form
         className={`ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6 ${HOMECARE_BOTTOM_SAFE_PADDING}`}
         onSubmit={(event) => {
@@ -434,7 +437,7 @@ export function HomeCareBookingClient() {
         </div>
 
         <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
-          <span className="font-semibold text-[#1F2937]">Payment method:</span> Secure online payment with Paystack.
+          <span className="font-semibold text-[#1F2937]">Payment:</span> Secure payment instructions are shown when you continue.
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -584,7 +587,7 @@ export function HomeCareBookingClient() {
               <p className="mt-3 rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">Select a nurse to see available times.</p>
             ) : slotsQuery.isError ? (
               <Notice title="We couldn't load available slots." tone="warning">
-                Please try again before continuing to Paystack.
+                Please try again before continuing to payment.
                 <button
                   type="button"
                   className="ml-2 font-semibold text-[#2563EB] underline"
@@ -694,7 +697,7 @@ export function HomeCareBookingClient() {
         ) : (
           <Button type="submit" disabled={createRequest.isPending || !canSubmit}>
             {createRequest.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {createRequest.isPending ? "Preparing checkout..." : "Continue to Paystack"}
+            {createRequest.isPending ? "Preparing checkout..." : "Continue to payment"}
           </Button>
         )}
       </form>

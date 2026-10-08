@@ -158,6 +158,7 @@ export const appointmentsApi = {
     apiList<ProviderDoctor>("/appointments/available-doctors/", query),
   book: (body: {
     doctor: number;
+    consultation_country: string;
     triage_session?: number;
     scheduled_at: string;
     reason?: string;
@@ -219,7 +220,7 @@ export const homeCareApi = {
   availableSlots: (query: { nurse_id: number; date: string }) =>
     apiRequest<{ results: HomeCareAvailableSlot[] }>(`/home-care/available-slots/?${new URLSearchParams({ nurse_id: String(query.nurse_id), date: query.date }).toString()}`),
   requests: (query?: { page?: number; page_size?: number }) => apiList<HomeCareRequestListItem>("/home-care/requests/", query),
-  bookRequest: (body: HomeCareRequestCreate & { callback_url: string; reward_id?: string }) =>
+  bookRequest: (body: HomeCareRequestCreate & { callback_url: string; reward_id?: string; consultation_country?: string }) =>
     apiRequest<HomeCareBookingResponse>("/home-care/requests/book/", { method: "POST", body }),
   createRequest: (body: HomeCareRequestCreate) =>
     apiRequest<HomeCareRequestDetail>("/home-care/requests/", { method: "POST", body }),
@@ -386,7 +387,7 @@ export const adminApi = {
 };
 
 export const triageApi = {
-  start: () => apiRequest<TriageSession>("/triage/start", { method: "POST" }),
+  start: (body: { consultation_country: string }) => apiRequest<TriageSession>("/triage/start", { method: "POST", body }),
   submitSymptoms: (
     sessionId: number,
     body: {
@@ -405,7 +406,7 @@ export const triageApi = {
     apiRequest<TriageProcessingResponse>(`/triage/${sessionId}/analyze`, { method: "POST" }),
   doctors: (sessionId: number) => apiRequest<TriageProcessingResponse>(`/triage/${sessionId}/doctors`),
   report: (sessionId: number) => apiRequest<TriageReport | TriageProcessingResponse>(`/triage/${sessionId}/report`),
-  startConversation: (body?: { session_id?: number }) =>
+  startConversation: (body?: { session_id?: number; consultation_country?: string }) =>
     apiRequest<TriageConversationStart>("/triage/conversation/start", { method: "POST", body: body || {} }),
   sendConversationMessage: (
     conversationId: string,
