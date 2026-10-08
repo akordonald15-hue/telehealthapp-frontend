@@ -69,7 +69,7 @@ export function SiteFooter() {
               <Image src="/img/footer/logo-name.png" alt={BRAND_NAME} width={173} height={44} className="h-[35px] w-auto md:h-[44px]" />
             </Link>
             <p className="mt-6 text-lg font-light leading-[1.5] md:mt-[30px] md:text-[27px] lg:text-xl">
-              Trusted digital healthcare for doctor consultations, homecare support, records, and follow-up care.
+              Trusted digital healthcare for online doctor consultations, records, and follow-up care. Home visits are currently available in Akwa Ibom State, Nigeria.
             </p>
             <div className="mt-8 flex gap-3 md:mt-[47px] md:gap-[14px]">
               {socialLinks.map(({ label, href, icon, w, h }) => {

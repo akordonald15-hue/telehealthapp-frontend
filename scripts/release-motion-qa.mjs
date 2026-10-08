@@ -73,7 +73,7 @@ try {
     results.push({ width, manualTransition: 'passed', automaticRotation: 'passed', pause: 'passed', menuAnimation: width === 390 ? 'passed' : 'desktop navigation', stableHeroHeight: initialHeight, observedLayoutShift: layoutShift, contrastRegions, errors });
     await page.close();
   }
-  fs.writeFileSync('artifacts/release-review/motion-qa.json', JSON.stringify(results, null, 2));
+  fs.writeFileSync(`${process.env.QA_OUTPUT_DIR || 'artifacts/release-review'}/motion-qa.json`, JSON.stringify(results, null, 2));
 } finally {
   await browser.close();
 }

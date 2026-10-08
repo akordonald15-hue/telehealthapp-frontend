@@ -23,11 +23,11 @@ export const marketingNavItems = [
   { label: "FAQ", href: "#faq" },
 ];
 
-export const platformStats: Array<{ value: number; suffix: string; label: string }> = [
-  { value: 1200, suffix: "+", label: "Consultations & visits" },
-  { value: 8, suffix: "min", label: "Avg. connect time" },
-  { value: 50, suffix: "+", label: "Vetted doctors & nurses" },
-  { value: 3, suffix: "", label: "Lagos, Abuja, PH" },
+export const platformStats: Array<{ value: string; label: string }> = [
+  { value: "Online care", label: "Doctor consultations" },
+  { value: "Book now", label: "Subject to available appointment slots" },
+  { value: "Care team", label: "Connect with healthcare professionals." },
+  { value: "Akwa Ibom", label: "Home visits in Akwa Ibom State, Nigeria" },
 ];
 
 export const platformHighlights: Array<{
@@ -37,14 +37,14 @@ export const platformHighlights: Array<{
   tone: "light" | "dark";
 }> = [
   {
-    title: "Medical advice without the wait",
-    text: "Consult a licensed doctor virtually in minutes, from anywhere in Nigeria no travel, no queue.",
+    title: "Online doctor consultations",
+    text: "Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability.",
     icon: VideoBadgeIcon,
     tone: "dark",
   },
   {
     title: "Someone there, when it matters.",
-    text: "Book a vetted nurse or caregiver for home visits in the cities we serve.",
+    text: "Book a vetted nurse or caregiver for home visits. Home visits are currently available in Akwa Ibom State, Nigeria.",
     icon: HomeBadgeIcon,
     tone: "light",
   },
@@ -56,13 +56,13 @@ export const platformHighlights: Array<{
   },
   {
     title: "Fast, honest confirmation",
-    text: "Virtual consultations connect you in minutes. Homecare visits are matched quickly, with same-day availability where we have providers nearby.",
+    text: "Book a doctor appointment immediately, subject to available appointment slots. Available times are shown when you book. Home visits are currently available in Akwa Ibom State, Nigeria.",
     icon: FastForwardBadgeIcon,
     tone: "light",
   },
   {
     title: "Affordable from the start.",
-    text: "See a doctor from ₦2,000, or book home care from ₦5,000 no surprise costs.",
+    text: "Doctor consultations from ₦2,000 where applicable. Home care from ₦5,000 in Akwa Ibom State, Nigeria. Review the price before booking.",
     icon: MoneyBadgeIcon,
     tone: "light",
   },
@@ -79,7 +79,7 @@ export const serviceOffers: Array<{
 }> = [
   {
     title: "On-Demand Doctor Visits",
-    text: "Talk to a licensed doctor virtually, anywhere in Nigeria confirmed in minutes, from ₦2,000.",
+    text: "Access online healthcare consultations from wherever you are. Doctor consultations from ₦2,000 where applicable. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability.",
     cta: "Talk to a Doctor",
     href: "/register",
     image: "/img/services/doctor-visit.webp",
@@ -88,7 +88,7 @@ export const serviceOffers: Array<{
   },
   {
     title: "Home Healthcare & Nursing",
-    text: "Home nursing, mother & baby care from registered midwives. Same-day, from ₦5,000.",
+    text: "Home nursing, mother & baby care from registered midwives, from ₦5,000. Home visits are currently available in Akwa Ibom State, Nigeria.",
     cta: "Book a Nursing Visit",
     href: "/register",
     image: "/img/services/home-nursing.webp",
@@ -97,7 +97,7 @@ export const serviceOffers: Array<{
   },
   {
     title: "Elderly Care Support",
-    text: "Daily support for aging parents check-ins, medication, mobility help matched to your family.",
+    text: "Daily support for aging parents: check-ins, medication, mobility help matched to your family. Home visits are currently available in Akwa Ibom State, Nigeria.",
     cta: "Book Elderly Care",
     href: "/register",
     image: "/img/services/elderly-care.webp",
@@ -106,7 +106,7 @@ export const serviceOffers: Array<{
   },
   {
     title: "Maternal & Postpartum Care",
-    text: "Virtual doctor support, plus in-person mother and baby care from our registered midwives.",
+    text: "Virtual doctor support, plus in-person mother and baby care from our registered midwives. Home visits are currently available in Akwa Ibom State, Nigeria.",
     cta: "Get Maternal Care Support",
     href: "/register",
     image: "/img/services/maternal-care.webp",
@@ -123,7 +123,7 @@ export const trustItems: Array<{ title: string; text: string; icon: LucideIcon }
   },
   {
     title: "Licensed nurses",
-    text: "Book home-care support for recovery, routine care, and family needs.",
+    text: "Book home-care support for recovery, routine care, and family needs in Akwa Ibom State, Nigeria.",
     icon: Home,
   },
   {
@@ -133,7 +133,7 @@ export const trustItems: Array<{ title: string; text: string; icon: LucideIcon }
   },
   {
     title: "24/7 access",
-    text: "Start care, check updates, and keep next steps in one place.",
+    text: "Access your care workspace around the clock. Doctor responses depend on appointment availability.",
     icon: Sparkles,
   },
   {
@@ -163,9 +163,9 @@ export const heroSlides: Array<{
   {
     lead: "A Doctor’s",
     highlight: "Opinion,",
-    tail: "Minutes Away",
+    tail: "Book Today",
     highlightClassName: "bg-[#1E40AF]",
-    text: "Connect with a licensed doctor virtually, wherever you are in Nigeria confirmed in minutes, from ₦2,000.",
+    text: "Online doctor consultations from ₦2,000 where applicable. Book immediately, subject to available appointment slots.",
     image: "/img/team-consult.webp",
     alt: "Caretekk doctors ready for a virtual consultation",
     portraits: [
@@ -179,7 +179,7 @@ export const heroSlides: Array<{
     highlight: "Right",
     tail: "at Your Door",
     highlightClassName: "bg-[#1E40AF]",
-    text: "Book a vetted nurse or caregiver for in-home care in Akwa Ibom from ₦5,000.",
+    text: "Book in-home care from ₦5,000. Home visits are currently available in Akwa Ibom State, Nigeria.",
     image: "/img/team-homecare.webp",
     alt: "Caretekk care team available for home visits",
     portraits: [
@@ -236,20 +236,20 @@ export const faqItems: Array<{ question: string; answer: string[] }> = [
   {
     question: "What if I need care urgently, not next week?",
     answer: [
-      "Virtual doctor consultations are typically confirmed within minutes, anywhere in Nigeria. For in-home nursing or caregiver visits, we offer same-day availability in the cities we currently serve you'll see real-time availability when you book.",
+      "Book a doctor appointment immediately, subject to available appointment slots. Available appointment times are shown when you book; an immediate doctor response is not guaranteed. Home visits are currently available in Akwa Ibom State, Nigeria.",
     ],
   },
   {
     question: "Do you only serve Akwa Ibom?",
     answer: [
-      "Virtual doctor consultations are available anywhere in Nigeria. In-person homecare and nursing visits are currently available in Akwa Ibom, with more locations coming soon.",
-      "Enter your location when you book and we'll confirm what's available near you.",
+      "Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability. Home visits are currently available in Akwa Ibom State, Nigeria.",
+      "Home visits depend on provider and appointment availability within Akwa Ibom State.",
     ],
   },
   {
     question: "Is my family's information safe with Caretekk?",
     answer: [
-      "Yes. Your medical information is kept confidential and secure within the Caretekk platform, and only shared with the doctor or provider handling your consultation or visit.",
+      "Caretekk supports confidential care through access controls that restrict access to medical information. Authorized care, support, and administrative access may be needed to provide the service.",
     ],
   },
 ];

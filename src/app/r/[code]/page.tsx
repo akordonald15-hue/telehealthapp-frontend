@@ -4,7 +4,7 @@ import { ReferralLandingClient } from "@/features/referral-program/referral-land
 
 export const metadata: Metadata = {
   title: "You've been invited to Caretekk",
-  description: "Speak with doctors and access home-care services from Caretekk.",
+  description: "Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability. Home visits are currently available in Akwa Ibom State, Nigeria.",
 };
 
 /**

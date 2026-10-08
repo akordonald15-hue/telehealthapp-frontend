@@ -53,7 +53,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section aria-label={`${BRAND_NAME} in numbers`} className={`lp-scale bg-[#FAFBFF] px-4 py-[46px] ${LIGHT_DOTS}`}>
+        <section aria-label={`${BRAND_NAME} service overview`} className={`lp-scale bg-[#FAFBFF] px-4 py-[46px] ${LIGHT_DOTS}`}>
           <PlatformStats />
         </section>
 
@@ -270,7 +270,7 @@ export function LandingPage() {
             <div className="relative z-10">
               <p className="ct-caption text-white/75">Doctor consultations</p>
               <h2 className="mt-4 max-w-[16ch] font-heading text-3xl font-semibold leading-tight text-white sm:text-4xl">
-                See a doctor for ₦2,000.
+                Doctor consultations from ₦2,000.
               </h2>
               <p className="mt-5 max-w-xl text-base leading-8 text-white/85 sm:text-lg">
                 Book a session with a trusted doctor from the comfort of your home.
@@ -313,7 +313,7 @@ export function LandingPage() {
               Care at home for recovery, routine support, and family needs.
             </h2>
             <p className="mt-5 text-base leading-8 text-[#434655] sm:text-lg">
-              Caretekk connects you with trusted home-care nurses for mother and baby care, elderly care, postnatal support, and general homecare follow-up.
+              Caretekk connects you with trusted home-care nurses for mother and baby care, elderly care, postnatal support, and general homecare follow-up. Home visits are currently available in Akwa Ibom State, Nigeria.
             </p>
             <div className="mt-6 flex flex-wrap gap-3 text-sm font-medium">
               {homeCareChips.map((chip) => (
