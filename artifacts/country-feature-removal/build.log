@@ -1,0 +1,115 @@
+
+> frontend@0.1.0 build
+> next build
+
+▲ Next.js 16.4.0 (Turbopack)
+✓ Running next.config.ts took 299ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 18.6s
+  Running TypeScript ...
+  Finished TypeScript in 45s ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/34) ...
+  Generating static pages using 11 workers (8/34)
+  Generating static pages using 11 workers (16/34)
+  Generating static pages using 11 workers (25/34)
+✓ Generating static pages using 11 workers (34/34) in 2.9s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/admin/[[...path]]
+├ ƒ /api/appointments
+├ ƒ /api/appointments/[id]
+├ ƒ /api/appointments/[id]/cancel
+├ ƒ /api/appointments/[id]/rating
+├ ƒ /api/appointments/available-doctors
+├ ƒ /api/appointments/book
+├ ƒ /api/audit/[[...path]]
+├ ƒ /api/auth/change-password
+├ ƒ /api/auth/email/verify/confirm
+├ ƒ /api/auth/email/verify/request
+├ ƒ /api/auth/google
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/me
+├ ƒ /api/auth/otp/request
+├ ƒ /api/auth/otp/verify
+├ ƒ /api/auth/password-reset/confirm
+├ ƒ /api/auth/password-reset/request
+├ ƒ /api/auth/password-reset/verify
+├ ƒ /api/auth/provider-setup/complete
+├ ƒ /api/auth/provider-setup/verify
+├ ƒ /api/auth/refresh
+├ ƒ /api/auth/register
+├ ƒ /api/home-care/assignments/[[...path]]
+├ ƒ /api/home-care/available-nurses
+├ ƒ /api/home-care/available-slots
+├ ƒ /api/home-care/requests/[[...path]]
+├ ƒ /api/home-care/services
+├ ƒ /api/messages/attachments/[attachmentId]/file
+├ ƒ /api/messages/attachments/[attachmentId]/upload
+├ ƒ /api/messages/threads
+├ ƒ /api/messages/threads/[threadId]/attachments/init
+├ ƒ /api/messages/threads/[threadId]/dispute
+├ ƒ /api/messages/threads/[threadId]/end
+├ ƒ /api/messages/threads/[threadId]/messages
+├ ƒ /api/payments
+├ ƒ /api/payments/[id]
+├ ƒ /api/payments/[id]/retry
+├ ƒ /api/payments/[id]/submit-transfer
+├ ƒ /api/payments/initiate
+├ ƒ /api/profiles/care-plans
+├ ƒ /api/profiles/care-plans/[carePlanId]
+├ ƒ /api/profiles/doctors
+├ ƒ /api/profiles/me
+├ ƒ /api/profiles/medical-files/[fileId]/download
+├ ƒ /api/profiles/medical-records
+├ ƒ /api/profiles/medical-records/[recordId]
+├ ƒ /api/profiles/medical-records/[recordId]/files/init
+├ ƒ /api/provider-ledger/[[...path]]
+├ ƒ /api/providers/[[...path]]
+├ ƒ /api/referral-program/[[...path]]
+├ ƒ /api/referrals
+├ ƒ /api/referrals/[id]
+├ ƒ /api/triage/[[...path]]
+├ ○ /appointments
+├ ƒ /appointments/[id]
+├ ○ /audit
+├ ○ /care-plan
+├ ○ /change-password
+├ ƒ /dasbooard
+├ ƒ /dasbooard/login
+├ ƒ /dasbooard/login/submit
+├ ƒ /dasbooard/logout
+├ ○ /dashboard
+├ ○ /home-care/book
+├ ○ /home-care/requests
+├ ƒ /home-care/requests/[id]
+├ ○ /icon.png
+├ ○ /login
+├ ○ /manifest.webmanifest
+├ ○ /messages
+├ ○ /nurse/history
+├ ƒ /nurse/request/[id]
+├ ○ /nurse/requests
+├ ○ /offline
+├ ○ /onboarding
+├ ○ /password-reset
+├ ○ /payments
+├ ○ /profile
+├ ○ /provider-setup
+├ ƒ /r/[code]
+├ ○ /records
+├ ○ /refer
+├ ○ /referrals
+├ ○ /register
+├ ○ /triage
+└ ○ /verify-email
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

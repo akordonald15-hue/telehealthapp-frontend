@@ -1,0 +1,8 @@
+{
+  "frontend_removal": "d55dfffe0dd5090a50fe101a633dce0aa7b40799",
+  "backend_removal": "785d7c25d3f081d5891fbb440a84a1c5e7bca13d",
+  "backend_tree_matches_original": true,
+  "backend_tree_matches_fetched_main": true,
+  "real_bff_calls": 42,
+  "source_scopes": "Historical reports and Git history retained; runtime feature removed"
+}
