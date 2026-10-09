@@ -4,9 +4,10 @@ import assert from 'node:assert/strict';
 
 // Actual BFF -> isolated Django/Postgres/Redis/MinIO. No API routing mocks.
 const base = 'http://127.0.0.1:3108';
-const output = 'artifacts/integration-final-fixes';
+const output = process.env.QA_OUTPUT_DIR || 'artifacts/country-feature-removal';
+const qaRoot = 'artifacts/integration-final-fixes';
 const password = 'Local-QA-Only-2026!';
-const fixtures = JSON.parse(fs.readFileSync(`${output}/fixtures.log`, 'utf8').split('QA_FIXTURES=')[1].trim());
+const fixtures = JSON.parse(fs.readFileSync(`${qaRoot}/fixtures.log`, 'utf8').split('QA_FIXTURES=')[1].trim());
 const calls = [];
 const workflows = [];
 const contexts = [];
@@ -43,8 +44,8 @@ try {
   const patient = await context();
   const email = `qa-patient-${Date.now()}@caretekk.invalid`;
   await call(patient, 'POST', '/auth/email/verify/request/', { email });
-  const mailFiles = fs.readdirSync(`${output}/mailbox`).sort((a, b) => fs.statSync(`${output}/mailbox/${b}`).mtimeMs - fs.statSync(`${output}/mailbox/${a}`).mtimeMs);
-  const mail = mailFiles.map(f => fs.readFileSync(`${output}/mailbox/${f}`, 'utf8')).find(text => text.includes(email));
+  const mailFiles = fs.readdirSync(`${qaRoot}/mailbox`).sort((a, b) => fs.statSync(`${qaRoot}/mailbox/${b}`).mtimeMs - fs.statSync(`${qaRoot}/mailbox/${a}`).mtimeMs);
+  const mail = mailFiles.map(f => fs.readFileSync(`${qaRoot}/mailbox/${f}`, 'utf8')).find(text => text.includes(email));
   assert(mail, 'Verification message must be delivered to the isolated file mailbox');
   const code = mail.match(/\b\d{6}\b/)?.[0];
   assert(code, 'Verification message must contain its real generated test OTP');
@@ -52,6 +53,7 @@ try {
   await call(patient, 'POST', '/auth/register/', { email, password, phone: '+2348012345678', role: 'patient' }, [201]);
   await call(patient, 'POST', '/auth/login/', { email, password });
   const user = await call(patient, 'GET', '/auth/me/');
+  assert.equal(user.role, 'patient');
   await call(patient, 'PATCH', '/auth/me/', { full_name: 'Local QA Patient' });
   const profile = await call(patient, 'PATCH', '/profiles/me/', { age_range: '25-34', gender: 'female', state: 'Akwa Ibom', lga: 'Eket', address: 'Local QA fictional address' });
   assert.equal(profile.profile_complete, true);
@@ -64,13 +66,8 @@ try {
   const doctors = await call(patient, 'GET', '/appointments/available-doctors/');
   assert(doctors.results.some(row => row.id === fixtures.doctor_profile));
   workflows.push('Doctor/nurse profiles and normal patient doctor discovery');
-  for (const path of ['/triage/start', '/triage/conversation/start', '/appointments/book/', '/home-care/requests/book/']) {
-    await call(patient, 'POST', path, { consultation_country: 'US' }, [403]);
-    await call(patient, 'POST', path, {}, [403]);
-  }
-  workflows.push('Missing and overseas declarations refused at all four clinical entry points');
-  const triage = await call(patient, 'POST', '/triage/start', { consultation_country: 'NG' }, [201]);
-  const conversation = await call(patient, 'POST', '/triage/conversation/start', { session_id: triage.id, consultation_country: 'NG' }, [200, 201, 202]);
+  const triage = await call(patient, 'POST', '/triage/start', undefined, [201]);
+  const conversation = await call(patient, 'POST', '/triage/conversation/start', { session_id: triage.id }, [200, 201, 202]);
   const conversationId = conversation.conversation.id;
   await call(patient, 'POST', `/triage/conversation/${conversationId}/message`, { message: 'I have a mild headache', severity: 'mild', age: 30, gender: 'female', location: 'Eket, Nigeria' }, [200, 201, 202]);
   await call(patient, 'POST', `/triage/conversation/${conversationId}/complete`, {}, [200, 202]);
@@ -86,7 +83,7 @@ try {
   while (doctorAppointments.results.some(row => Math.abs(new Date(row.scheduled_at) - schedule) < 3600000)) schedule.setUTCDate(schedule.getUTCDate() + 1);
   const booking = await call(patient, 'POST', '/appointments/book/', {
     doctor: fixtures.doctor_profile, triage_session: triage.id, scheduled_at: schedule.toISOString(),
-    reason: 'Local QA fictional headache', consultation_country: 'NG', callback_url: `${base}/payments`,
+    reason: 'Local QA fictional headache', callback_url: `${base}/payments`,
   }, [201]);
   assert.equal(booking.payment.provider, 'bank_transfer');
   assert.equal(booking.payment.amount, '2000.00');
@@ -94,7 +91,7 @@ try {
   const appointments = await call(patient, 'GET', '/appointments/');
   const appointment = appointments.results.find(row => row.id === booking.appointment.id);
   assert(['confirmed', 'scheduled'].includes(appointment.status));
-  workflows.push('Real completed triage, Nigeria booking, bank-transfer initialization, MinIO proof upload, admin test confirmation and fixed payment polling');
+  workflows.push('Real completed triage and booking with original payloads, bank-transfer initialization, MinIO proof upload, admin test confirmation and fixed payment polling');
   const referral = await call(doctor, 'POST', '/referrals/', { patient: profile.id, appointment: appointment.id, referred_to: 'Local QA fictional clinic', notes: 'Local QA only' }, [201]);
   await call(patient, 'PATCH', `/referrals/${referral.id}/`, { status: 'contacted' }, [403]);
   const updated = await call(admin, 'PATCH', `/referrals/${referral.id}/`, { status: 'contacted' });
@@ -118,16 +115,20 @@ try {
   assert.equal(wsResult, 'connected');
   await wsPage.close();
   workflows.push('Real doctor/patient REST messaging and cookie-authenticated local Channels/Redis WebSocket handshake');
+  await call(patient, 'POST', '/home-care/requests/book/', {
+    booking_source: 'direct', service: fixtures.homecare_service, service_zone: 'lagos', callback_url: `${base}/payments`,
+  }, [400]);
+  workflows.push('Existing homecare zone validation rejects unsupported Lagos selection');
   const homecare = await call(patient, 'POST', '/home-care/requests/book/', {
     booking_source: 'direct', service: fixtures.homecare_service, service_zone: 'eket',
-    consultation_country: 'NG', contact_name_snapshot: 'Local QA Patient', contact_phone_snapshot: '+2348012345678',
+    contact_name_snapshot: 'Local QA Patient', contact_phone_snapshot: '+2348012345678',
     service_address_snapshot: 'Local QA fictional address, Eket, Akwa Ibom', care_notes: 'Local QA only', callback_url: `${base}/payments`,
   }, [201]);
   await confirmPayment(patient, admin, homecare.payment.payment_id);
   await call(patient, 'GET', '/home-care/requests/');
   const assignments = await call(nurse, 'GET', '/home-care/assignments/');
   assert(assignments.results.length > 0);
-  workflows.push('Real Eket homecare checkout, proof/storage, status confirmation, request listing and nurse assignment');
+  workflows.push('Real Eket homecare checkout without a country declaration, proof/storage, status confirmation, request listing and nurse assignment');
   for (const [role, client] of [['patient', patient], ['doctor', doctor], ['nurse', nurse]]) {
     const page = await browser.newPage({ viewport: { width: 390, height: 1100 } });
     await page.context().addCookies((await client.storageState()).cookies);

@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { ClinicalLocation } from "@/components/ui/clinical-location";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -290,7 +289,6 @@ function PatientAppointmentCard({ appointment }: { appointment: Appointment }) {
 }
 
 export function AppointmentsClient() {
-  const [locationConfirmed, setLocationConfirmed] = useState(false);
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const userQuery = useCurrentUser();
@@ -326,7 +324,7 @@ export function AppointmentsClient() {
     queryFn: () => appointmentsApi.list({ page, page_size: 10 }),
   });
   const createAppointment = useMutation({
-    mutationFn: (body: Omit<Parameters<typeof appointmentsApi.book>[0], "consultation_country">) => appointmentsApi.book({ ...body, consultation_country: locationConfirmed ? "NG" : "" }),
+    mutationFn: appointmentsApi.book,
     onMutate: () => {
       setCheckoutError("");
     },
@@ -383,13 +381,13 @@ export function AppointmentsClient() {
     },
   });
   const startConversation = useMutation({
-    mutationFn: (id: number) => triageApi.startConversation({ session_id: id, consultation_country: locationConfirmed ? "NG" : "" }),
+    mutationFn: (id: number) => triageApi.startConversation({ session_id: id }),
     onSuccess: (data) => {
       setAiConversationId(data.conversation.id);
     },
   });
   const startAiSession = useMutation({
-    mutationFn: () => triageApi.start({ consultation_country: locationConfirmed ? "NG" : "" }),
+    mutationFn: triageApi.start,
     onSuccess: (data) => {
       setAiSessionId(data.id);
       setAiStartedByUser(true);
@@ -637,11 +635,11 @@ export function AppointmentsClient() {
   }, [aiFinished, aiSessionId]);
 
   useEffect(() => {
-    if (!locationConfirmed || !welcomeAccepted || user?.role !== "patient" || profileIncomplete || triageSessionId || aiSessionId || selectedDoctor || startAiSession.isPending) {
+    if (!welcomeAccepted || user?.role !== "patient" || profileIncomplete || triageSessionId || aiSessionId || selectedDoctor || startAiSession.isPending) {
       return;
     }
     startAiSession.mutate();
-  }, [aiSessionId, locationConfirmed, profileIncomplete, selectedDoctor, startAiSession, triageSessionId, user?.role, welcomeAccepted]);
+  }, [aiSessionId, profileIncomplete, selectedDoctor, startAiSession, triageSessionId, user?.role, welcomeAccepted]);
 
   useEffect(() => {
     if (!aiFinished || recommendationOpenedRef.current || selectedDoctor) {
@@ -735,7 +733,6 @@ export function AppointmentsClient() {
       title={user?.role === "patient" ? "" : isDoctor ? "Consultations" : "Appointments"}
       description={user?.role === "patient" ? "" : isDoctor ? "Open and manage assigned consultations." : undefined}
     >
-      {user?.role === "patient" ? <div className="pb-6"><ClinicalLocation confirmed={locationConfirmed} onChange={setLocationConfirmed} /></div> : null}
       {user?.role === "patient" && !effectiveTriageSessionId && !selectedDoctor ? (
         <div className="-mx-4 -mt-5 grid min-h-[calc(100dvh-132px)] gap-5 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_42%,#F8FBFF_100%)] px-4 py-4 pb-6 sm:mx-0 sm:mt-0 sm:rounded-[8px] sm:p-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
               <div className="grid content-start gap-4">

@@ -1,6 +1,5 @@
 "use client";
 
-import { ClinicalLocation } from "@/components/ui/clinical-location";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Home, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -54,7 +53,6 @@ function isValidHourlyHomecareSlot(value: string) {
 }
 
 export function HomeCareBookingClient() {
-  const [locationConfirmed, setLocationConfirmed] = useState(false);
   const userQuery = useCurrentUser();
   const [zone, setZone] = useState<HomeCareZone | "">("");
   const [selectedServiceId, setSelectedServiceId] = useState<number | "">("");
@@ -135,7 +133,7 @@ export function HomeCareBookingClient() {
 
   const createRequest = useMutation({
     mutationFn: (body: HomeCareRequestCreate & { callback_url: string; reward_id?: string }) =>
-      homeCareApi.bookRequest({ ...body, consultation_country: locationConfirmed ? "NG" : "" }),
+      homeCareApi.bookRequest(body),
     onMutate: () => {
       setCheckoutError("");
     },
@@ -351,7 +349,6 @@ export function HomeCareBookingClient() {
         </Link>
       }
     >
-      <ClinicalLocation confirmed={locationConfirmed} onChange={setLocationConfirmed} />
       <form
         className={`ct-panel grid gap-4 rounded-[28px] p-5 sm:p-6 ${HOMECARE_BOTTOM_SAFE_PADDING}`}
         onSubmit={(event) => {
