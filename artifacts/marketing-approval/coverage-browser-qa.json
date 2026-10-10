@@ -1,0 +1,41 @@
+{
+  "results": [
+    {
+      "width": 390,
+      "path": "/home-care/book",
+      "coverage": "visible",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "path": "/home-care/requests",
+      "coverage": "visible",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "path": "/home-care/requests/901",
+      "coverage": "visible",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "path": "/home-care/book",
+      "coverage": "visible",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "path": "/home-care/requests",
+      "coverage": "visible",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "path": "/home-care/requests/901",
+      "coverage": "visible",
+      "overflow": false
+    }
+  ],
+  "backend": "Synthetic responses only; no real API records or booking."
+}

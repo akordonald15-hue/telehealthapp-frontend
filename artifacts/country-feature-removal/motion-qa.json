@@ -1,0 +1,30 @@
+[
+  {
+    "width": 390,
+    "manualTransition": "passed",
+    "automaticRotation": "passed",
+    "pause": "passed",
+    "menuAnimation": "passed",
+    "stableHeroHeight": 827.875,
+    "observedLayoutShift": 0,
+    "contrastRegions": {
+      "heroMaxTextBottom": 0.7392231617091952,
+      "footerMaxTextBottom": 0.8495727692954195
+    },
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "manualTransition": "passed",
+    "automaticRotation": "passed",
+    "pause": "passed",
+    "menuAnimation": "desktop navigation",
+    "stableHeroHeight": 1537.6875,
+    "observedLayoutShift": 0,
+    "contrastRegions": {
+      "heroMaxTextBottom": 0.548632280616185,
+      "footerMaxTextBottom": 0.6128283760312636
+    },
+    "errors": []
+  }
+]

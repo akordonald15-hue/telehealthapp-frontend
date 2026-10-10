@@ -1,0 +1,16 @@
+
+> frontend@0.1.0 test
+> vitest run refer-discoverability.test.tsx
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.mts:22:32). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 C:/Projects/Caretekk/frontend-release
+
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  16:01:20
+   Duration  8.18s (transform 590ms, setup 342ms, import 1.17s, tests 2.55s, environment 2.13s)
+

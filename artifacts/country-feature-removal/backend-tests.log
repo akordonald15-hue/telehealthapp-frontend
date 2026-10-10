@@ -1,0 +1,135 @@
+ Container caretekk-release-qa-20261008-db-1 Running
+ Container caretekk-release-qa-20261008-redis-1 Running
+ Container caretekk-release-qa-20261008-minio-1 Running
+ Container caretekk-release-qa-20261008-db-1 Waiting
+ Container caretekk-release-qa-20261008-db-1 Healthy
+ Container caretekk-release-qa-20261008-backend-run-ebe9b7943dde Creating
+ Container caretekk-release-qa-20261008-backend-run-ebe9b7943dde Created
+........................................................................ [ 10%]
+........................................................................ [ 20%]
+........................................................................ [ 30%]
+........................................................................ [ 40%]
+........................................................................ [ 50%]
+........................................................................ [ 60%]
+........................................................................ [ 70%]
+........................................................................ [ 80%]
+........................................................................ [ 90%]
+..................................................................       [100%]
+=============================== warnings summary ===============================
+tests/test_access_control.py: 16 warnings
+tests/test_admin_dashboard.py: 9 warnings
+tests/test_appointments_flow.py: 3 warnings
+tests/test_auth_flows.py: 2 warnings
+tests/test_authentication.py: 39 warnings
+tests/test_authorization_contract.py: 7 warnings
+tests/test_backend_hardening_coverage.py: 6 warnings
+tests/test_consultation_start_notifications.py: 2 warnings
+tests/test_consultation_triage_linkage.py: 5 warnings
+tests/test_homecare_api.py: 14 warnings
+tests/test_jwt_lifecycle.py: 7 warnings
+tests/test_messaging_views_extra.py: 27 warnings
+tests/test_nurse_role_regressions.py: 3 warnings
+tests/test_payment_booking_foundation.py: 52 warnings
+tests/test_payment_first_booking.py: 15 warnings
+tests/test_profiles_views_extra.py: 8 warnings
+tests/test_provider_availability.py: 20 warnings
+tests/test_provider_ledger.py: 9 warnings
+tests/test_referral_api.py: 43 warnings
+tests/test_referral_checkout.py: 33 warnings
+tests/test_referral_integration.py: 24 warnings
+tests/test_referral_review_fixes.py: 10 warnings
+tests/test_security_hardening.py: 8 warnings
+tests/test_throttling.py: 2 warnings
+tests/test_triage_api.py: 8 warnings
+tests/test_webhooks.py: 11 warnings
+tests/test_websocket_messaging.py: 1 warning
+tests/test_exception_handler.py: 1 warning
+tests/test_health.py: 4 warnings
+  /usr/local/lib/python3.11/site-packages/django/core/handlers/base.py:61: UserWarning: No directory at: /app/staticfiles/
+    mw_instance = middleware(adapted_handler)
+
+tests/test_access_control.py::test_patient_can_view_own_referral_and_unrelated_patient_cannot
+  /usr/local/lib/python3.11/site-packages/rest_framework/pagination.py:207: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'apps.referrals.models.Referral'> QuerySet.
+    paginator = self.django_paginator_class(queryset, page_size)
+
+tests/test_admin_dashboard.py: 13 warnings
+tests/test_appointments_flow.py: 3 warnings
+tests/test_auth_flows.py: 2 warnings
+tests/test_authorization_contract.py: 12 warnings
+tests/test_backend_hardening_coverage.py: 20 warnings
+tests/test_consultation_start_notifications.py: 2 warnings
+tests/test_consultation_triage_linkage.py: 6 warnings
+tests/test_discount_application.py: 60 warnings
+tests/test_homecare_api.py: 38 warnings
+tests/test_jwt_lifecycle.py: 6 warnings
+tests/test_ledger_discount_compatibility.py: 45 warnings
+tests/test_manual_payment_notifications.py: 2 warnings
+tests/test_messaging_views_extra.py: 35 warnings
+tests/test_nurse_role_regressions.py: 6 warnings
+tests/test_payment_booking_foundation.py: 95 warnings
+tests/test_payment_first_booking.py: 19 warnings
+tests/test_payments_flows.py: 6 warnings
+tests/test_payments_services.py: 2 warnings
+tests/test_profiles_views_extra.py: 9 warnings
+tests/test_provider_availability.py: 33 warnings
+tests/test_provider_ledger.py: 14 warnings
+tests/test_referral_api.py: 113 warnings
+tests/test_referral_checkout.py: 65 warnings
+tests/test_referral_integration.py: 91 warnings
+tests/test_referral_program_models.py: 60 warnings
+tests/test_referral_review_fixes.py: 56 warnings
+tests/test_referral_services.py: 134 warnings
+tests/test_security_hardening.py: 10 warnings
+tests/test_throttling.py: 1 warning
+tests/test_triage_api.py: 9 warnings
+tests/test_triage_services.py: 2 warnings
+tests/test_triage_tasks.py: 9 warnings
+tests/test_websocket_messaging.py: 2 warnings
+  /usr/local/lib/python3.11/site-packages/factory/django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+tests/test_admin_dashboard.py: 5 warnings
+tests/test_appointments_flow.py: 3 warnings
+tests/test_authorization_contract.py: 5 warnings
+tests/test_backend_hardening_coverage.py: 4 warnings
+tests/test_consultation_start_notifications.py: 2 warnings
+tests/test_consultation_triage_linkage.py: 5 warnings
+tests/test_homecare_api.py: 1 warning
+tests/test_ledger_discount_compatibility.py: 17 warnings
+tests/test_manual_payment_notifications.py: 1 warning
+tests/test_messaging_views_extra.py: 28 warnings
+tests/test_nurse_role_regressions.py: 3 warnings
+tests/test_payment_booking_foundation.py: 64 warnings
+tests/test_payment_first_booking.py: 11 warnings
+tests/test_profiles_views_extra.py: 5 warnings
+tests/test_provider_availability.py: 18 warnings
+tests/test_provider_ledger.py: 7 warnings
+tests/test_referral_api.py: 23 warnings
+tests/test_referral_checkout.py: 64 warnings
+tests/test_referral_integration.py: 62 warnings
+tests/test_referral_review_fixes.py: 30 warnings
+tests/test_referral_services.py: 66 warnings
+tests/test_security_hardening.py: 4 warnings
+tests/test_triage_tasks.py: 1 warning
+tests/test_websocket_messaging.py: 2 warnings
+  /usr/local/lib/python3.11/site-packages/factory/django.py:182: DeprecationWarning: DoctorUserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the DoctorUserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+tests/test_referral_integration.py::test_patient_confirmed_homecare_enters_the_qualification_hold
+tests/test_referral_integration.py::test_duplicate_homecare_confirmation_is_idempotent
+tests/test_referral_review_fixes.py::test_calling_the_service_directly_records_referral_completion
+tests/test_referral_review_fixes.py::test_the_endpoint_records_completion_exactly_once
+tests/test_referral_review_fixes.py::test_repeated_confirmation_stays_idempotent
+tests/test_security_hardening.py::test_provider_listing_redacts_sensitive_doctor_and_nurse_fields
+tests/test_security_hardening.py::test_homecare_request_detail_redacts_nurse_private_fields
+  /usr/local/lib/python3.11/site-packages/factory/django.py:182: DeprecationWarning: HomeCareAssignmentFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the HomeCareAssignmentFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+714 passed, 1808 warnings in 249.65s (0:04:09)

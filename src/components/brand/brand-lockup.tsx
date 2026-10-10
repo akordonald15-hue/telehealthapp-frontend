@@ -10,6 +10,10 @@ type BrandLockupProps = {
   textClassName?: string;
   logoClassName?: string;
   wordmarkClassName?: string;
+  /** The *SizeClassName / gapClassName props replace their defaults (cn() does not merge conflicting utilities). */
+  gapClassName?: string;
+  iconSizeClassName?: string;
+  wordmarkSizeClassName?: string;
   wordmark?: "text" | "image" | "none";
   inverse?: boolean;
 };
@@ -20,11 +24,14 @@ export function BrandLockup({
   textClassName,
   logoClassName,
   wordmarkClassName,
+  gapClassName = "gap-2.5 sm:gap-3",
+  iconSizeClassName = "h-10 w-10 sm:h-11 sm:w-11",
+  wordmarkSizeClassName = "h-6 max-w-[148px] sm:h-7 sm:max-w-[176px]",
   wordmark = "image",
   inverse = false,
 }: BrandLockupProps) {
   const content = (
-    <span className={cn("inline-flex items-center gap-2.5 sm:gap-3", className)}>
+    <span className={cn("inline-flex items-center", gapClassName, className)}>
       <span className={cn("flex shrink-0 items-center justify-center", logoClassName)}>
         <Image
           src="/Logo/newlogo.png"
@@ -32,7 +39,7 @@ export function BrandLockup({
           width={48}
           height={48}
           priority
-          className={cn("h-10 w-10 object-contain sm:h-11 sm:w-11", inverse && "brightness-110 saturate-110")}
+          className={cn("object-contain", iconSizeClassName, inverse && "brightness-110 saturate-110")}
         />
       </span>
 
@@ -44,7 +51,8 @@ export function BrandLockup({
           height={48}
           priority
           className={cn(
-            "h-6 w-auto max-w-[148px] object-contain object-left sm:h-7 sm:max-w-[176px]",
+            "w-auto object-contain object-left",
+            wordmarkSizeClassName,
             inverse && "brightness-0 invert",
             wordmarkClassName,
           )}

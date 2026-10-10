@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Caretekk",
     short_name: "Caretekk",
-    description: "Caretekk healthcare platform for doctor consultations and home-care nursing",
+    description: "Caretekk healthcare platform for online doctor consultations. Home visits are currently available in Akwa Ibom State, Nigeria.",
     start_url: "/",
     scope: "/",
     display: "standalone",

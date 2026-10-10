@@ -7,13 +7,13 @@ import { BRAND_NAME } from "@/lib/brand";
 
 const lexend = Lexend({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
   variable: "--font-lexend",
 });
 
 export const metadata: Metadata = {
   title: `${BRAND_NAME} | Trusted Telehealth And Home Care`,
-  description: `Book appointments, message your care team, manage records, and coordinate home visits with ${BRAND_NAME}.`,
+  description: `Book online appointments, message your care team, and manage records with ${BRAND_NAME}. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability. Home visits are currently available in Akwa Ibom State, Nigeria.`,
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -47,7 +47,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-full ${lexend.variable}`}>
+    // Browser extensions (e.g. QuillBot) add attributes to <html> before hydration; this only silences that element.
+    <html lang="en" className={`h-full ${lexend.variable}`} suppressHydrationWarning>
       <body className="min-h-full bg-[#F9FAFB] text-[#1F2937] antialiased">
         <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
         <Providers>{children}</Providers>

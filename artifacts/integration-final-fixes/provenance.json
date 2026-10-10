@@ -1,0 +1,7 @@
+{
+  "frontend_implementation": "c111470cbf3143bd1a6b611b662e4c4143c3d9d5",
+  "backend": "aa5f70335b2e3aa2fb9bc0a25e0ba3ade5a381ee",
+  "backend_image_id": "sha256:2d7aca13468f66c0240a7197d6ee24c84c67787a4684f073a247aed365ea2792",
+  "network": "Application/Postgres/Redis/MinIO internal-only; local gateway only; no production resources",
+  "provider": "Actual bank_transfer in HTTP QA; PAYMENT_PROVIDER=paystack with existing mocks in backend unit tests"
+}

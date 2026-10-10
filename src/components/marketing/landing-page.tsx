@@ -2,96 +2,108 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  BadgeCheck,
   Calendar,
   CheckCircle2,
-  Facebook,
-  Linkedin,
   MessageCircle,
-  PlayCircle,
   Sparkles,
   Stethoscope,
 } from "lucide-react";
 
-function TikTokIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.13a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.84-.56Z" />
-    </svg>
-  );
-}
-
 import { BrandLockup } from "@/components/brand/brand-lockup";
-import { HeroMockup } from "@/components/marketing/hero-mockup";
+import { HeroSlideshow } from "@/components/marketing/hero-slideshow";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
-import { doctors, footerLinks, heroStats, howItWorksSteps, trustItems } from "@/features/marketing/data";
+import { PlatformStats } from "@/components/marketing/platform-stats";
+import { RevealLines } from "@/components/marketing/reveal-lines";
+import {
+  doctors,
+  howItWorksSteps,
+  platformHighlights,
+  serviceOffers,
+  trustItems,
+} from "@/features/marketing/data";
 import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
+import { SolutionCard } from "./solution-card";
+import { ServiceCard } from "./service-card";
+
+const LIGHT_DOTS = "bg-[radial-gradient(rgb(78_82_229/0.1)_1px,transparent_1.4px)] bg-[size:16px_16px]";
+const PANEL_DOTS = "bg-[radial-gradient(rgb(255_255_255/0.12)_1px,transparent_1.4px)] bg-[size:16px_16px]";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { SiteFooter } from "@/components/marketing/site-footer";
 
 const homeCareChips = ["Mother & baby care", "Elderly care", "Postnatal care", "General homecare"];
 const stepIcons = [Calendar, Stethoscope, Sparkles, MessageCircle];
 
 export function LandingPage() {
+  const [advice, homeVisits, verified, confirmation, pricing] = platformHighlights;
+  const [doctorVisits, homeNursing, elderlyCare, maternalCare] = serviceOffers;
+
   return (
     <main id="home" className="min-h-screen overflow-x-hidden bg-[#f8f9ff] text-[#0b1c30]">
-      <MarketingHeader />
+      {/* Sizes in the two redesigned sections are design px on a 1000px frame; .lp-scale zooms them from lg up. */}
+      <div className="@container">
+        {/* Hero */}
+        <section className="lp-scale bg-white px-[7px] pb-[3px] pt-[7px]">
+          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#2563EB_0%,#2563EB_80%,#60A5FA_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgb(255_255_255/0.05)_1px,transparent_1.4px)] bg-[size:16px_16px]"
+            />
+            <MarketingHeader />
+            <HeroSlideshow />
+          </div>
+        </section>
+
+        <section aria-label={`${BRAND_NAME} service overview`} className={`lp-scale bg-[#FAFBFF] px-4 py-[46px] ${LIGHT_DOTS}`}>
+          <PlatformStats />
+        </section>
+
+        <section id="solution" className={`lp-scale bg-[#F2F5FE] px-4 pb-[104px] pt-[72px] ${LIGHT_DOTS}`}>
+          <RevealLines className="text-center">
+            <p className="text-[14px] font-medium uppercase tracking-[0.2em] text-[#1E40AF]">Solution</p>
+            <h2 className="mt-[16px] text-[40.25px] font-bold leading-[48.2px] text-[#131A2F] max-sm:text-[30px] max-sm:leading-[1.2]">
+              One <span className="text-[#3B82F6]">Platform.</span> Two
+              <br /> Ways to Get Real Care.
+            </h2>
+          </RevealLines>
+
+          <div className="mx-auto mt-[64px] grid w-[946px] max-w-full gap-[24px] max-lg:auto-rows-fr lg:grid-cols-2 lg:items-center">
+            <div className="flex flex-col gap-[40px] max-lg:contents">
+              <SolutionCard highlight={advice} tall pingDelay={0} />
+              <SolutionCard highlight={confirmation} tall pingDelay={1.2} />
+            </div>
+            <div className="flex flex-col gap-[36px] max-lg:contents">
+              <SolutionCard highlight={homeVisits} pingDelay={0.4} />
+              <SolutionCard highlight={verified} pingDelay={0.8} />
+              <SolutionCard highlight={pricing} pingDelay={1.6} />
+            </div>
+          </div>
+        </section>
+
+        <section id="services" className="lp-scale bg-[#F2F5FE] px-[7px] pb-[7px]">
+          <div className={`rounded-[18.5px] bg-[#1E40AF] px-[24px] pb-[104px] pt-[80px] max-sm:px-4 max-sm:pb-16 max-sm:pt-14 ${PANEL_DOTS}`}>
+            <RevealLines className="pl-[12px] text-white max-sm:pl-1">
+              <p className="text-[15px] font-light uppercase tracking-[0.04em] text-white/85">Our Services</p>
+              <h2 className="mt-[18px] text-[40.25px] font-bold leading-[48.2px] max-sm:text-[30px] max-sm:leading-[1.2]">
+                What Our
+                <br /> Platform Offers.
+              </h2>
+            </RevealLines>
+
+            <div className="mx-auto mt-[33px] grid w-[938px] max-w-full gap-[22px] max-lg:auto-rows-fr lg:grid-cols-2">
+              <div className="flex flex-col gap-[38px] lg:mt-[60px] max-lg:contents">
+                <ServiceCard offer={doctorVisits} pingDelay={0} className="max-lg:order-1" />
+                <ServiceCard offer={elderlyCare} pingDelay={0.8} className="max-lg:order-3" />
+              </div>
+              <div className="flex flex-col gap-[38px] max-lg:contents">
+                <ServiceCard offer={homeNursing} pingDelay={0.4} className="max-lg:order-2" />
+                <ServiceCard offer={maternalCare} pingDelay={1.2} className="max-lg:order-4" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
 
       <div className="ct-mesh">
-        {/* Hero */}
-        <section className="relative mx-auto max-w-[1440px] overflow-hidden px-4 pb-24 pt-12 sm:pb-32 md:px-10 md:pt-20 lg:pb-40">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-            <div className="z-10 animate-fade-up text-center lg:text-left">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[rgba(116,118,134,0.18)] bg-[#dce9ff] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1e40af]">
-                <BadgeCheck className="h-4 w-4" />
-                <span>Trusted digital healthcare</span>
-              </div>
-
-              <h1 className="font-heading text-[2.5rem] font-semibold leading-[1.04] tracking-[-0.03em] text-[#0b1c30] sm:text-[3rem] lg:text-[3.5rem]">
-                Care that feels close, clear, and{" "}
-                <span className="italic text-[#2563EB]">trusted</span>.
-              </h1>
-
-              <p className="mx-auto mt-7 max-w-xl text-base leading-8 text-[#434655] sm:text-lg lg:mx-0">
-                Caretekk brings together general medicine, mother and baby care, elderly care, and homecare support in one premium healthcare workspace.
-              </p>
-
-              <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap lg:justify-start">
-                <Link
-                  href="/register"
-                  className="inline-flex w-full items-center justify-center rounded-3xl bg-[#2563EB] px-8 py-4 font-bold text-white shadow-[0_18px_38px_-18px_rgba(29,78,216,0.55)] transition hover:-translate-y-0.5 hover:bg-[#1e40af] hover:shadow-[0_22px_44px_-18px_rgba(29,78,216,0.65)] sm:w-auto"
-                >
-                  Book consultation
-                </Link>
-                <a
-                  href="#demo"
-                  className="ct-glass inline-flex w-full items-center justify-center gap-2 rounded-3xl px-8 py-4 font-semibold text-[#0b1c30] transition hover:bg-[#eff4ff] sm:w-auto"
-                >
-                  <PlayCircle className="h-5 w-5 text-[#2563EB]" />
-                  See Caretekk in action
-                </a>
-              </div>
-            </div>
-
-            <div className="relative flex min-h-[640px] animate-fade-up-delayed items-center justify-center lg:justify-end">
-              <div className="absolute -z-10 h-[110%] w-[110%] rounded-full bg-[#2563EB]/8 blur-[120px]" />
-              <HeroMockup />
-            </div>
-          </div>
-        </section>
-
-        {/* Service categories bar */}
-        <section className="border-y border-[rgba(116,118,134,0.12)] bg-white/50 py-10">
-          <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-8 px-4 text-center md:grid-cols-3 md:gap-0 md:divide-x md:divide-[rgba(116,118,134,0.18)] md:px-10">
-            {heroStats.map((stat) => (
-              <div key={stat.value} className="px-4">
-                <p className="font-heading text-xl font-bold text-[#2563EB] sm:text-2xl">{stat.value}</p>
-                <p className="mx-auto mt-3 max-w-[26ch] text-[11px] font-semibold uppercase tracking-[0.16em] text-[#434655]">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Bento — Trust */}
         <section id="trust" className="mx-auto max-w-[1440px] px-4 py-24 sm:py-28 md:px-10 lg:py-32">
           <div className="mb-16 text-center">
@@ -258,7 +270,7 @@ export function LandingPage() {
             <div className="relative z-10">
               <p className="ct-caption text-white/75">Doctor consultations</p>
               <h2 className="mt-4 max-w-[16ch] font-heading text-3xl font-semibold leading-tight text-white sm:text-4xl">
-                See a doctor for ₦2,000.
+                Doctor consultations from ₦2,000.
               </h2>
               <p className="mt-5 max-w-xl text-base leading-8 text-white/85 sm:text-lg">
                 Book a session with a trusted doctor from the comfort of your home.
@@ -301,7 +313,7 @@ export function LandingPage() {
               Care at home for recovery, routine support, and family needs.
             </h2>
             <p className="mt-5 text-base leading-8 text-[#434655] sm:text-lg">
-              Caretekk connects you with trusted home-care nurses for mother and baby care, elderly care, postnatal support, and general homecare follow-up.
+              Caretekk connects you with trusted home-care nurses for mother and baby care, elderly care, postnatal support, and general homecare follow-up. Home visits are currently available in Akwa Ibom State, Nigeria.
             </p>
             <div className="mt-6 flex flex-wrap gap-3 text-sm font-medium">
               {homeCareChips.map((chip) => (
@@ -351,9 +363,8 @@ export function LandingPage() {
             return (
               <div
                 key={step.id}
-                className={`group relative flex flex-col items-center gap-8 md:flex-row md:gap-12 ${
-                  reversed ? "md:flex-row-reverse" : ""
-                }`}
+                className={`group relative flex flex-col items-center gap-8 md:flex-row md:gap-12 ${reversed ? "md:flex-row-reverse" : ""
+                  }`}
               >
                 <div className={`flex-1 text-center md:text-left ${reversed ? "" : "md:text-right"}`}>
                   <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#2563EB] font-bold text-white md:hidden">
@@ -369,9 +380,8 @@ export function LandingPage() {
 
                 <div className="w-full flex-1">
                   <div
-                    className={`rounded-[1.5rem] border border-[rgba(116,118,134,0.15)] bg-[#e5eeff] p-5 shadow-sm transition duration-500 group-hover:rotate-0 sm:p-6 ${
-                      reversed ? "md:-rotate-1" : "md:rotate-1"
-                    }`}
+                    className={`rounded-[1.5rem] border border-[rgba(116,118,134,0.15)] bg-[#e5eeff] p-5 shadow-sm transition duration-500 group-hover:rotate-0 sm:p-6 ${reversed ? "md:-rotate-1" : "md:rotate-1"
+                      }`}
                   >
                     <div className="mb-4 flex items-center gap-3">
                       <Icon className="h-5 w-5 text-[#2563EB]" />
@@ -426,123 +436,12 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer id="contact" className="border-t border-[rgba(116,118,134,0.15)] bg-[#eff4ff] py-16 sm:py-20">
-        <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-12 px-4 md:grid-cols-4 md:px-10">
-          <div className="md:col-span-1">
-            <BrandLockup href="/" />
-            <p className="mt-6 max-w-xs text-sm leading-7 text-[#434655]">
-              Trusted digital healthcare for doctor consultations, homecare support, records, and follow-up care.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <a
-                href="https://www.linkedin.com/company/caretekk-health-technologies-ltd/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Caretekk on LinkedIn"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(116,118,134,0.2)] bg-white text-[#0b1c30] transition hover:border-[#2563EB] hover:text-[#2563EB]"
-              >
-                <Linkedin className="h-4 w-4" />
-              </a>
-              <a
-                href="https://www.facebook.com/share/1BSrQHdC8m/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Caretekk on Facebook"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(116,118,134,0.2)] bg-white text-[#0b1c30] transition hover:border-[#2563EB] hover:text-[#2563EB]"
-              >
-                <Facebook className="h-4 w-4" />
-              </a>
-              <a
-                href="https://www.tiktok.com/@caretekk.health"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Caretekk on TikTok"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(116,118,134,0.2)] bg-white text-[#0b1c30] transition hover:border-[#2563EB] hover:text-[#2563EB]"
-              >
-                <TikTokIcon className="h-4 w-4" />
-              </a>
-              <a
-                href={`mailto:${BRAND_SUPPORT_EMAIL}`}
-                aria-label="Email support"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(116,118,134,0.2)] bg-white text-[#0b1c30] transition hover:border-[#2563EB] hover:text-[#2563EB]"
-              >
-                <MessageCircle className="h-4 w-4" />
-              </a>
-            </div>
-          </div>
+      <FaqSection />
 
-          <div>
-            <h4 className="ct-caption mb-5 text-[#0b1c30]">Product</h4>
-            <ul className="space-y-3">
-              {footerLinks.map((link) => (
-                <li key={link.label}>
-                  <a href={link.href} className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="ct-caption mb-5 text-[#0b1c30]">Company</h4>
-            <ul className="space-y-3">
-              <li>
-                <a href="#trust" className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                  Why Caretekk
-                </a>
-              </li>
-              <li>
-                <a href="#doctors" className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                  Our doctors
-                </a>
-              </li>
-              <li>
-                <a href="#how-it-works" className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                  How it works
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="ct-caption mb-5 text-[#0b1c30]">Support</h4>
-            <ul className="space-y-3">
-              <li>
-                <a
-                  href={`mailto:${BRAND_SUPPORT_EMAIL}`}
-                  className="text-sm text-[#434655] transition hover:text-[#2563EB]"
-                >
-                  {BRAND_SUPPORT_EMAIL}
-                </a>
-              </li>
-              <li>
-                <Link href="/login" className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                  Sign in
-                </Link>
-              </li>
-              <li>
-                <Link href="/register" className="text-sm text-[#434655] transition hover:text-[#2563EB]">
-                  Create account
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mx-auto mt-16 flex max-w-[1440px] flex-col items-center justify-between gap-4 border-t border-[rgba(116,118,134,0.15)] px-4 pt-8 text-center md:flex-row md:px-10 md:text-left">
-          <p className="text-xs text-[#747686]">
-            © {new Date().getFullYear()} {BRAND_NAME} Healthcare. Built for trusted, modern care.
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#434655]">
-              System Status: Operational
-            </span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
+
+
+
