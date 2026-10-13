@@ -142,7 +142,7 @@ export function MarketingHeader() {
           <Link
             href="#contact"
             data-intro="cta"
-            className="ml-auto inline-flex h-[49.7px] w-[184.1px] items-center justify-center gap-[18.3px] rounded-[13.8px] bg-[#1E40AF] text-[15.75px] font-medium leading-none text-white hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 max-lg:h-11 max-lg:w-auto max-lg:gap-4 max-lg:rounded-full max-lg:px-6 max-sm:hidden"
+            className="ml-auto inline-flex h-[49.7px] w-[184.1px] items-center justify-center gap-[18.3px] rounded-full bg-[#1E40AF] text-[15.75px] font-medium leading-none text-white hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 max-lg:h-11 max-lg:w-auto max-lg:gap-4 max-lg:rounded-full max-lg:px-6 max-sm:hidden"
           >
             Contact Us
             <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />

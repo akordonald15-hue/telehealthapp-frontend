@@ -69,33 +69,27 @@ try {
     assert(await overview.evaluate(el => el.scrollWidth <= el.clientWidth), 'Service overview overflows');
     const hero = page.locator('main section').first();
     await hero.scrollIntoViewIfNeeded();
-    await page.waitForFunction(() => [...document.querySelectorAll('[data-slide][aria-hidden="false"] [data-portrait] img')].every(img => img.complete && img.naturalWidth > 0), { timeout: 30000 });
+    await page.waitForFunction(() => [...document.querySelectorAll('[data-slide][aria-hidden="false"] [data-hero-image] img')].every(img => img.complete && img.naturalWidth > 0), { timeout: 30000 });
     const height = (await hero.boundingBox()).height;
     await hero.screenshot({ caret: 'initial', path: `${output}/after-hero-consult-${width}.png` });
-    const activePortraits = () => page.locator('[data-slide][aria-hidden="false"] [data-portrait]');
-    const consult = await activePortraits().evaluateAll(elements => elements.map(el => {
+    const activeHeroImage = () => page.locator('[data-slide][aria-hidden="false"] [data-hero-image]').evaluateAll(elements => elements.map(el => {
       const rect = el.getBoundingClientRect();
       const img = el.querySelector('img');
-      return { name: el.dataset.portrait, left: rect.left, right: rect.right, objectFit: getComputedStyle(img).objectFit, src: img.getAttribute('src'), loaded: img.complete && img.naturalWidth > 0 };
+      return { center: (rect.left + rect.right) / 2, objectFit: getComputedStyle(img).objectFit, src: decodeURIComponent(img.getAttribute('src')), loaded: img.complete && img.naturalWidth > 0 };
     }));
-    assert.equal(consult.length, 3);
-    assert.ok(consult.every(p => p.loaded && p.objectFit === 'contain'));
-    const sorted = [...consult].sort((a, b) => a.left - b.left);
-    for (let i = 1; i < sorted.length; i++) assert.ok(sorted[i].left > sorted[i - 1].right, 'Portraits must not overlap');
-    const michael = consult.find(p => p.name === 'Dr. Michael Idam');
-    assert.ok(decodeURIComponent(michael.src).includes('/img/Dr michael Idam.jpg'));
-    await page.getByRole('button', { name: 'Show homecare highlight' }).click();
+    const consult = await activeHeroImage();
+    assert.equal(consult.length, 1);
+    assert.ok(consult[0].loaded && consult[0].objectFit === 'contain');
+    assert.ok(Math.abs(consult[0].center - width / 2) < 2);
+    assert.ok(consult[0].src.includes('/img/hero/doctors-consult.webp'));
+    await page.getByRole('button', { name: 'Show homecare highlight' }).press('Enter');
     await expect(page.getByRole('button', { name: 'Show homecare highlight' })).toHaveAttribute('aria-pressed', 'true');
     assert.equal((await hero.boundingBox()).height, height);
     await hero.screenshot({ caret: 'initial', path: `${output}/after-hero-homecare-${width}.png` });
-    const homecare = await activePortraits().evaluateAll(elements => elements.map(el => {
-      const rect = el.getBoundingClientRect();
-      return { name: el.dataset.portrait, center: (rect.left + rect.right) / 2, src: el.querySelector('img').getAttribute('src') };
-    }));
-    assert.equal(homecare.length, 2);
-    const okon = homecare.find(p => p.name === 'Dr. Effiong Okon');
-    assert.ok(Math.abs(okon.center - width / 2) < 2);
-    assert.ok(decodeURIComponent(okon.src).includes('/img/Dr effiong Okon.jpg'));
+    const homecare = await activeHeroImage();
+    assert.equal(homecare.length, 1);
+    assert.ok(Math.abs(homecare[0].center - width / 2) < 2);
+    assert.ok(homecare[0].src.includes('/img/hero/doctors-homecare.webp'));
     const anchors = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].map(a => a.getAttribute('href')).filter(h => h.length > 1 && !document.getElementById(h.slice(1))));
     assert.deepEqual(anchors, [], 'Navigation targets must exist');
     assert.equal(await page.locator('h1').count(), 1);
@@ -133,7 +127,7 @@ try {
     for (const id of ['services', 'trust', 'doctors', 'home-care', 'how-it-works']) {
       if ([390, 768, 1440].includes(width)) await captureLoadedSection(page, page.locator(`#${id}`), `${output}/after-${id}-${width}.png`);
     }
-    await page.getByRole('button', { name: 'Show consultation highlight' }).click();
+    await page.getByRole('button', { name: 'Show consultation highlight' }).press('Enter');
     await captureLoadedSection(page, page.locator('main'), `${output}/after-landing-${width}.png`);
     let accessibility = null;
     if ([390, 1440].includes(width)) {

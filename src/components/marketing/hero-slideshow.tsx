@@ -3,9 +3,10 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Praise } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
-import { HousePlus } from "lucide-react";
+import { HousePlus, Pause, Play } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { ArrowLongRightIcon } from "@/components/marketing/marketing-icons";
@@ -14,9 +15,12 @@ import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const SLIDE_INTERVAL_MS = 8000;
-const STAGGER = 0.07;
-const ENTER_AT = 0.38;
+const praise = Praise({ weight: "400", subsets: ["latin"] });
+
+const SLIDE_INTERVAL_MS = 6000;
+const STAGGER = 0.05;
+const ENTER_AT = 0.3;
+const BACKGROUND_OPACITY = 0.2;
 
 export function HeroSlideshow() {
   const [active, setActive] = useState(0);
@@ -54,36 +58,34 @@ export function HeroSlideshow() {
         return;
       }
       transition.current?.progress(1).kill();
+
+      const details = (slide: number, motion: "text" | "image" | "background") => `[data-slide="${slide}"] [data-motion="${motion}"]`;
+
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        gsap.set(`[data-slide="${from}"] [data-motion="text"], [data-slide="${from}"] [data-motion="image"]`, { opacity: 0 });
-        gsap.set(`[data-slide="${active}"] [data-motion="text"], [data-slide="${active}"] [data-motion="image"]`, { opacity: 1, x: 0 });
+        gsap.set([details(from, "text"), details(from, "image"), details(from, "background")], { opacity: 0 });
+        gsap.set([details(active, "text"), details(active, "image")], { opacity: 1, y: 0 });
+        gsap.set(details(active, "background"), { opacity: BACKGROUND_OPACITY });
         return;
       }
 
-      const details = (slide: number, motion: "text" | "pill" | "image") => `[data-slide="${slide}"] [data-motion="${motion}"]`;
-
       transition.current = gsap
-        .timeline()
-        .to(details(from, "text"), { x: -56, opacity: 0, duration: 0.4, ease: "power2.inOut", stagger: STAGGER }, 0)
-        .to(details(from, "image"), { x: -160, opacity: 0, duration: 0.5, ease: "power2.inOut" }, STAGGER)
+        .timeline({ defaults: { duration: 0.3, ease: "power1.in" } })
+        .to(details(from, "text"), { y: -10, opacity: 0, stagger: STAGGER }, 0)
+        .to(details(from, "image"), { y: 24, opacity: 0 }, 0)
+        .to(details(from, "background"), { opacity: 0, duration: 0.6, ease: "power1.inOut" }, 0)
+        .fromTo(
+          details(active, "background"),
+          { opacity: 0 },
+          { opacity: BACKGROUND_OPACITY, duration: 0.6, ease: "power1.inOut" },
+          0,
+        )
         .fromTo(
           details(active, "text"),
-          { x: 56, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.8, ease: "expo.out", stagger: STAGGER },
+          { y: 10, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", stagger: STAGGER },
           ENTER_AT,
         )
-        .fromTo(
-          details(active, "pill"),
-          { scale: 0.7, transformOrigin: "0% 100%" },
-          { scale: 1, duration: 0.7, ease: "back.out(1.8)" },
-          ENTER_AT + STAGGER,
-        )
-        .fromTo(
-          details(active, "image"),
-          { x: 160, opacity: 0 },
-          { x: 0, opacity: 1, duration: 1, ease: "expo.out" },
-          ENTER_AT + STAGGER,
-        );
+        .fromTo(details(active, "image"), { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, ENTER_AT);
     },
     { scope: rootRef, dependencies: [active] },
   );
@@ -106,7 +108,6 @@ export function HeroSlideshow() {
       aria-roledescription="carousel"
       aria-label="Highlights"
       ref={rootRef}
-      className="relative"
       onFocus={() => setPaused(true)}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -114,128 +115,158 @@ export function HeroSlideshow() {
         }
       }}
     >
-      <div className="inline-flex h-[47.6px] items-center gap-[8px] rounded-[22px] rounded-br-none rounded-tl-[2px] bg-[#1E40AF] pl-[30.2px] pr-[30px] text-[15.15px] font-medium leading-none text-white max-sm:px-5">
-        <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#B3C2F7]" />
-        Trusted Digital Healthcare
-        <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#B3C2F7]" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        {heroSlides.map((slide, index) => (
+          <div key={slide.background} data-slide={index}>
+            <Image
+              src={slide.background}
+              alt=""
+              width={2000}
+              height={1400}
+              preload={index === 0}
+              sizes="150vw"
+              data-motion="background"
+              style={{ opacity: index === 0 ? BACKGROUND_OPACITY : 0 }}
+              className={cn("absolute h-auto max-w-none mix-blend-screen", slide.backgroundClassName)}
+            />
+          </div>
+        ))}
+        <div className="absolute inset-0 bg-[radial-gradient(rgb(255_255_255/0.22)_1.2px,transparent_1.6px)] bg-[size:16px_16px]" />
       </div>
 
-      <div aria-live={paused || rotationStopped ? "polite" : "off"}>
-        <h1 className="mt-[22.8px] grid text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[1.15]">
-          {heroSlides.map((slide, index) => (
-            <span key={slide.highlight} {...slideLayer(index)}>
-              <span
-                data-motion="text"
-                className={cn(
-                  "flex h-[60.9px] items-center justify-center max-lg:h-auto max-lg:flex-wrap max-lg:gap-y-3",
-                  hiddenUntilShown(index),
-                )}
-              >
-                <span>{slide.lead}</span>
+      <div className="relative">
+        <div className="inline-flex h-[45.5px] items-center gap-[8px] rounded-b-[3px] rounded-t-[13px] bg-white/15 px-[30px] text-[15.15px] font-medium leading-none text-white max-sm:px-5">
+          <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#C7D2FE]" />
+          Trusted Digital Healthcare
+          <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#C7D2FE]" />
+        </div>
+
+        <div aria-live={paused || rotationStopped ? "polite" : "off"}>
+          <h1 className="mt-[22.8px] grid text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[1.15]">
+            {heroSlides.map((slide, index) => (
+              <span key={slide.highlight} {...slideLayer(index)}>
                 <span
-                  data-motion="pill"
+                  data-motion="text"
                   className={cn(
-                    "ml-[12.5px] inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tr-[18px] border-b-[3.2px] border-white pl-[10.3px] pr-[16.2px] text-[31.75px] max-sm:h-[48px] max-sm:text-[24px]",
-                    slide.highlightClassName,
+                    "flex h-[60.9px] items-center justify-center max-lg:h-auto max-lg:flex-wrap max-lg:gap-y-3",
+                    hiddenUntilShown(index),
                   )}
                 >
-                  {slide.highlight}
+                  <span>{slide.lead}</span>
+                  <span
+                    className={cn(
+                      praise.className,
+                      "ml-[12.5px] inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tl-[4px] rounded-tr-[18px] border-b-[3.2px] border-white bg-[#1E40AF] px-[33px] text-[44px] font-normal max-sm:h-[50px] max-sm:px-5 max-sm:text-[34px]",
+                    )}
+                  >
+                    {slide.highlight}
+                  </span>
+                </span>
+                <span data-motion="text" className={cn("mt-[7.7px] block max-sm:mt-3", hiddenUntilShown(index))}>
+                  {slide.tail}
                 </span>
               </span>
-              <span data-motion="text" className={cn("mt-[7.7px] block max-sm:mt-3", hiddenUntilShown(index))}>
-                {slide.tail}
-              </span>
-            </span>
-          ))}
-        </h1>
+            ))}
+          </h1>
 
-        <div className="mt-[23.9px] grid">
+          <div className="mt-[23.9px] grid">
+            {heroSlides.map((slide, index) => (
+              <div key={slide.highlight} {...slideLayer(index)}>
+                <p
+                  data-motion="text"
+                  className={cn(
+                    "mx-auto text-[16.5px] font-normal leading-[25.15px] text-white",
+                    slide.textClassName,
+                    hiddenUntilShown(index),
+                  )}
+                >
+                  {slide.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-[50.5px] flex justify-center gap-[33.9px] max-sm:mt-[35px] max-sm:flex-col max-sm:gap-4">
+          <Link
+            href="/register"
+            className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[17.6px] rounded-full bg-[#1E40AF] text-[18px] font-medium leading-none text-white shadow-[0_16px_32px_-14px_rgba(11,28,48,0.55)] hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
+          >
+            Talk to a Doctor
+            <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
+          </Link>
+          <Link
+            href="/register"
+            className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[16.4px] rounded-full border border-white text-[18px] font-medium leading-none text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
+          >
+            Book Homecare
+            <HousePlus className="h-[28px] w-[28px]" strokeWidth={1.7} />
+          </Link>
+        </div>
+
+        <div
+          role="group"
+          aria-label="Highlight controls"
+          className="pointer-events-none absolute inset-x-0 z-10 mt-[22px] flex items-center justify-center gap-1 opacity-0 focus-within:pointer-events-auto focus-within:opacity-100"
+        >
           {heroSlides.map((slide, index) => (
-            <div key={slide.highlight} {...slideLayer(index)}>
-              <p
-                data-motion="text"
+            <button
+              key={slide.highlight}
+              type="button"
+              aria-label={index === 0 ? "Show consultation highlight" : "Show homecare highlight"}
+              aria-pressed={index === active}
+              onClick={() => {
+                setRotationStopped(true);
+                setActive(index);
+              }}
+              className="group inline-flex h-6 items-center justify-center px-1 focus-visible:outline-none"
+            >
+              <span
                 className={cn(
-                  "mx-auto max-w-[480px] text-[16.5px] font-light leading-[25.15px] text-[#F7FAFE]",
+                  "block h-[7px] rounded-full transition-all duration-300 group-focus-visible:ring-2 group-focus-visible:ring-white group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#2563EB]",
+                  index === active ? "w-[26px] bg-white" : "w-[7px] bg-white/45 group-hover:bg-white/70",
+                )}
+              />
+            </button>
+          ))}
+          <button
+            type="button"
+            aria-label={rotationStopped ? "Resume" : "Pause"}
+            onClick={() => setRotationStopped((value) => !value)}
+            className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-white/70 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            {rotationStopped ? (
+              <Play className="h-[13px] w-[13px] fill-current" strokeWidth={0} />
+            ) : (
+              <Pause className="h-[13px] w-[13px] fill-current" strokeWidth={0} />
+            )}
+          </button>
+        </div>
+
+        <div className="relative mx-auto mt-[75px] grid aspect-[850/447] w-[850px] max-w-full max-sm:aspect-[4/3]">
+          <HeroCircles />
+          {heroSlides.map((slide, index) => (
+            <div key={slide.image} {...slideLayer(index, "relative")}>
+              <div
+                data-motion="image"
+                data-hero-image
+                className={cn(
+                  "absolute inset-x-0 bottom-0 mx-auto aspect-[3632/2448] w-[69%] will-change-[transform,opacity] max-sm:w-full",
                   hiddenUntilShown(index),
                 )}
               >
-                {slide.text}
-              </p>
+                <Image
+                  src={slide.image}
+                  alt={slide.alt}
+                  fill
+                  preload={index === 0}
+                  sizes="(min-width: 1024px) 45vw, (min-width: 640px) 69vw, 100vw"
+                  className="object-contain object-bottom"
+                />
+              </div>
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="mt-[35.15px] flex justify-center gap-[33.9px] max-sm:flex-col max-sm:gap-4">
-        <Link
-          href="/register"
-          className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[17.6px] rounded-full bg-[#1E40AF] text-[18px] font-medium leading-none text-white shadow-[0_16px_32px_-14px_rgba(30,64,175,0.6)] hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
-        >
-          Talk to a Doctor
-          <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
-        </Link>
-        <Link
-          href="/register"
-          className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[16.4px] rounded-full border border-white text-[18px] font-medium leading-none text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
-        >
-          Book Homecare
-          <HousePlus className="h-[28px] w-[28px]" strokeWidth={1.7} />
-        </Link>
-      </div>
-
-      <div role="group" className="mt-6 flex items-center justify-center gap-3" aria-label="Highlight controls">
-        {heroSlides.map((slide, index) => (
-          <button
-            key={slide.highlight}
-            type="button"
-            aria-label={index === 0 ? "Show consultation highlight" : "Show homecare highlight"}
-            aria-pressed={index === active}
-            onClick={() => { setRotationStopped(true); setActive(index); }}
-            className={cn("h-11 rounded-full border border-white/60 px-4 text-sm text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white", index === active && "bg-[#1E40AF]")}
-          >
-            {index === 0 ? "Consultations" : "Homecare"}
-          </button>
-        ))}
-        <button
-          type="button"
-          onClick={() => setRotationStopped((value) => !value)}
-          className="h-11 rounded-full px-3 text-sm text-white underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-        >
-          {rotationStopped ? "Resume" : "Pause"}
-        </button>
-      </div>
-
-      <div className="relative mx-auto mt-[32px] grid aspect-[850/447] w-[850px] max-w-full">
-        <HeroCircles />
-        {heroSlides.map((slide, index) => (
-          <div key={slide.image} {...slideLayer(index, "relative")}>
-            <div
-              data-motion="image"
-              className={cn("absolute inset-0 flex items-end justify-center gap-[2%] px-[3%] will-change-[transform,opacity]", hiddenUntilShown(index))}
-            >
-              {slide.portraits.map((portrait) => (
-                <div
-                  key={portrait.name}
-                  data-portrait={portrait.name}
-                  className={cn(
-                    "relative aspect-[4/5] w-[27%] shrink-0 overflow-hidden rounded-t-[80px] border border-white/50 bg-white/10 shadow-lg",
-                    portrait.featured ? "order-2 w-[38%]" : "first:order-1 last:order-3",
-                  )}
-                >
-                  <Image
-                    src={portrait.image}
-                    alt={portrait.name}
-                    fill
-                    preload={index === 0 && portrait.featured}
-                    sizes={portrait.featured ? "(min-width: 1024px) 33vw, 38vw" : "(min-width: 1024px) 23vw, 27vw"}
-                    className="object-contain object-bottom"
-                  />
-                </div>
-              ))}
-              {slide.portraits.length === 2 && <div aria-hidden="true" className="order-3 w-[27%] shrink-0" />}
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -249,8 +280,8 @@ function HeroCircles() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 h-full w-full"
     >
-      <circle cx={424.9} cy={423.9} r={423.1} fill="white" fillOpacity={0.06} stroke="white" strokeOpacity={0.26} strokeWidth={1.6} />
-      <circle cx={430.6} cy={432.9} r={369.5} fill="white" fillOpacity={0.02} stroke="white" strokeOpacity={0.2} strokeWidth={1.6} />
+      <circle cx={425} cy={361} r={311} fill="white" fillOpacity={0.04} stroke="white" strokeOpacity={0.3} strokeWidth={1.2} />
+      <circle cx={425} cy={347} r={258} fill="white" fillOpacity={0.02} stroke="white" strokeOpacity={0.22} strokeWidth={1.2} />
     </svg>
   );
 }
