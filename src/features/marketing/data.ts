@@ -170,7 +170,7 @@ export const heroSlides: Array<{
     image: "/img/hero/doctors-consult.webp",
     alt: "Caretekk doctors ready for a virtual consultation",
     background: "/img/hero/bg-consult.webp",
-    backgroundClassName: "left-1/2 top-[49px] w-[166%] -translate-x-1/2 max-lg:top-[12%] max-sm:top-[34%] max-sm:w-[300%]",
+    backgroundClassName: "left-1/2 top-[49px] w-[166%] -translate-x-1/2 max-lg:top-[12%] max-sm:top-[27%] max-sm:w-[300%]",
   },
   {
     lead: "Real Care",

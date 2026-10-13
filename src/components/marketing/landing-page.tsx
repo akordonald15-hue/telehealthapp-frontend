@@ -39,7 +39,6 @@ export function LandingPage() {
 
   return (
     <main id="home" className="min-h-screen overflow-x-hidden bg-[#f8f9ff] text-[#0b1c30]">
-      {/* Sizes in the two redesigned sections are design px on a 1000px frame; .lp-scale zooms them from lg up. */}
       <div className="@container">
         {/* Hero */}
         <section className="lp-scale bg-white px-[7px] pb-[3px] pt-[7px]">

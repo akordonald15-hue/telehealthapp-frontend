@@ -18,8 +18,8 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 const praise = Praise({ weight: "400", subsets: ["latin"] });
 
 const SLIDE_INTERVAL_MS = 6000;
-const STAGGER = 0.05;
-const ENTER_AT = 0.3;
+const STAGGER = 0.07;
+const ENTER_AT = 0.38;
 const BACKGROUND_OPACITY = 0.2;
 
 const imagePriority = (index: number) =>
@@ -62,33 +62,45 @@ export function HeroSlideshow() {
       }
       transition.current?.progress(1).kill();
 
-      const details = (slide: number, motion: "text" | "image" | "background") => `[data-slide="${slide}"] [data-motion="${motion}"]`;
+      const details = (slide: number, motion: "text" | "pill" | "image" | "background") =>
+        `[data-slide="${slide}"] [data-motion="${motion}"]`;
 
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         gsap.set([details(from, "text"), details(from, "image"), details(from, "background")], { opacity: 0 });
-        gsap.set([details(active, "text"), details(active, "image")], { opacity: 1, y: 0 });
+        gsap.set([details(active, "text"), details(active, "image")], { opacity: 1, x: 0 });
         gsap.set(details(active, "background"), { opacity: BACKGROUND_OPACITY });
         return;
       }
 
       transition.current = gsap
-        .timeline({ defaults: { duration: 0.3, ease: "power1.in" } })
-        .to(details(from, "text"), { y: -10, opacity: 0, stagger: STAGGER }, 0)
-        .to(details(from, "image"), { y: 24, opacity: 0 }, 0)
-        .to(details(from, "background"), { opacity: 0, duration: 0.6, ease: "power1.inOut" }, 0)
+        .timeline()
+        .to(details(from, "text"), { x: -56, opacity: 0, duration: 0.4, ease: "power2.inOut", stagger: STAGGER }, 0)
+        .to(details(from, "image"), { x: -160, opacity: 0, duration: 0.5, ease: "power2.inOut" }, STAGGER)
+        .to(details(from, "background"), { opacity: 0, duration: 0.8, ease: "power1.inOut" }, 0)
         .fromTo(
           details(active, "background"),
           { opacity: 0 },
-          { opacity: BACKGROUND_OPACITY, duration: 0.6, ease: "power1.inOut" },
-          0,
+          { opacity: BACKGROUND_OPACITY, duration: 0.8, ease: "power1.inOut" },
+          0.2,
         )
         .fromTo(
           details(active, "text"),
-          { y: 10, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", stagger: STAGGER },
+          { x: 56, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.8, ease: "expo.out", stagger: STAGGER },
           ENTER_AT,
         )
-        .fromTo(details(active, "image"), { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, ENTER_AT);
+        .fromTo(
+          details(active, "pill"),
+          { scale: 0.7, transformOrigin: "0% 100%" },
+          { scale: 1, duration: 0.7, ease: "back.out(1.8)" },
+          ENTER_AT + STAGGER,
+        )
+        .fromTo(
+          details(active, "image"),
+          { x: 160, opacity: 0 },
+          { x: 0, opacity: 1, duration: 1, ease: "expo.out" },
+          ENTER_AT + STAGGER,
+        );
     },
     { scope: rootRef, dependencies: [active] },
   );
@@ -157,6 +169,7 @@ export function HeroSlideshow() {
                 >
                   <span>{slide.lead}</span>
                   <span
+                    data-motion="pill"
                     className={cn(
                       praise.className,
                       "ml-[12.5px] inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tl-[4px] rounded-tr-[18px] border-b-[3.2px] border-white bg-[#1E40AF] px-[33px] text-[44px] font-normal max-sm:h-[50px] max-sm:px-5 max-sm:text-[34px]",
@@ -281,7 +294,7 @@ function HeroCircles() {
       viewBox="0 0 850 447"
       preserveAspectRatio="xMidYMax meet"
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full"
+      className="pointer-events-none absolute inset-0 h-full w-full max-sm:origin-bottom max-sm:scale-150 max-sm:[&_circle]:[vector-effect:non-scaling-stroke]"
     >
       <circle cx={425} cy={361} r={311} fill="white" fillOpacity={0.04} stroke="white" strokeOpacity={0.3} strokeWidth={1.2} />
       <circle cx={425} cy={347} r={258} fill="white" fillOpacity={0.02} stroke="white" strokeOpacity={0.22} strokeWidth={1.2} />
