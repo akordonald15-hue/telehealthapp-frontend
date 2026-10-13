@@ -1,7 +1,11 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  turbopack: {
+    root: path.join(__dirname),
+  },
   images: {
     remotePatterns: [
       {
@@ -19,7 +23,7 @@ const nextConfig: NextConfig = {
 
     return [
       { source: "/dashboard", headers: protectedHeaders },
-      { source: "/dasbooard/:path*", headers: protectedHeaders },
+      { source: "/dashboard/:path*", headers: protectedHeaders },
       { source: "/appointments", headers: protectedHeaders },
       { source: "/appointments/:path*", headers: protectedHeaders },
       { source: "/messages", headers: protectedHeaders },
