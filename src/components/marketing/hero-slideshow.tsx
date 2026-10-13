@@ -294,10 +294,10 @@ function HeroCircles() {
       viewBox="0 0 850 447"
       preserveAspectRatio="xMidYMax meet"
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full max-sm:origin-bottom max-sm:scale-150 max-sm:[&_circle]:[vector-effect:non-scaling-stroke]"
+      className="pointer-events-none absolute inset-0 h-full w-full max-sm:origin-bottom max-sm:scale-[1.32] max-sm:[&_circle]:[vector-effect:non-scaling-stroke]"
     >
       <circle cx={425} cy={361} r={311} fill="white" fillOpacity={0.04} stroke="white" strokeOpacity={0.3} strokeWidth={1.2} />
-      <circle cx={425} cy={347} r={258} fill="white" fillOpacity={0.02} stroke="white" strokeOpacity={0.22} strokeWidth={1.2} />
+      <circle cx={425} cy={361} r={265} fill="white" fillOpacity={0.02} stroke="white" strokeOpacity={0.22} strokeWidth={1.2} />
     </svg>
   );
 }
