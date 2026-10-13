@@ -19,20 +19,16 @@ export function MarketingHeader() {
 
   const { contextSafe } = useGSAP(
     () => {
-      const header = headerRef.current;
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        gsap.set(header, { visibility: "visible" });
+        gsap.set("[data-intro]", { opacity: 1 });
         return;
       }
 
-      const settle = "transform,opacity,visibility";
       gsap
-        .timeline({ defaults: { ease: "expo.out", clearProps: settle } })
-        .set(header, { visibility: "visible", clearProps: "" })
-        .from('[data-intro="bar"]', { y: -28, scale: 0.98, autoAlpha: 0, duration: 0.9 })
-        .from('[data-intro="logo"]', { x: -16, autoAlpha: 0, duration: 0.8 }, 0.2)
-        .from('[data-intro="link"]', { y: -12, autoAlpha: 0, duration: 0.7, stagger: 0.06 }, 0.28)
-        .from('[data-intro="cta"]', { x: 16, autoAlpha: 0, duration: 0.8 }, 0.42);
+        .timeline({ defaults: { ease: "expo.out", clearProps: "transform" } })
+        .fromTo('[data-intro="logo"]', { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8 }, 0)
+        .fromTo('[data-intro="link"]', { y: -12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.06 }, 0.08)
+        .fromTo('[data-intro="cta"]', { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8 }, 0.22);
     },
     { scope: headerRef },
   );
@@ -100,9 +96,9 @@ export function MarketingHeader() {
           headerRef.current?.querySelector<HTMLButtonElement>('[aria-controls="mobile-nav"]')?.focus();
         }
       }}
-      className="invisible absolute left-[16.4px] right-[24.9px] top-[22.2px] z-20 text-left max-lg:inset-x-3 max-lg:top-3"
+      className="absolute left-[16.4px] [&_[data-intro]]:opacity-0 right-[24.9px] top-[22.2px] z-20 text-left max-lg:inset-x-3 max-lg:top-3"
     >
-      <nav data-intro="bar" className="rounded-[12.7px] bg-white" aria-label="Main navigation">
+      <nav className="rounded-[12.7px] bg-white" aria-label="Main navigation">
         <div className="flex h-[72.5px] items-center pl-[35.9px] pr-[40.7px] max-lg:h-16 max-lg:pl-2 max-lg:pr-3">
           <div data-intro="logo" className="flex shrink-0">
             <BrandLockup

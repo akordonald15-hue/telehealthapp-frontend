@@ -22,6 +22,9 @@ const STAGGER = 0.05;
 const ENTER_AT = 0.3;
 const BACKGROUND_OPACITY = 0.2;
 
+const imagePriority = (index: number) =>
+  index === 0 ? { preload: true } : { loading: "eager" as const, fetchPriority: "low" as const };
+
 export function HeroSlideshow() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -123,7 +126,7 @@ export function HeroSlideshow() {
               alt=""
               width={2000}
               height={1400}
-              preload={index === 0}
+              {...imagePriority(index)}
               sizes="150vw"
               data-motion="background"
               style={{ opacity: index === 0 ? BACKGROUND_OPACITY : 0 }}
@@ -135,10 +138,10 @@ export function HeroSlideshow() {
       </div>
 
       <div className="relative">
-        <div className="inline-flex h-[45.5px] items-center gap-[8px] rounded-b-[3px] rounded-t-[13px] bg-white/15 px-[30px] text-[15.15px] font-medium leading-none text-white max-sm:px-5">
-          <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#C7D2FE]" />
+        <div className="inline-flex h-[45.5px] items-center gap-[10px] rounded-bl-[16px] rounded-tr-[16px] bg-[#60A5FA]/50 px-[30px] text-[14.85px] font-medium leading-none text-white max-sm:px-5">
+          <span className="h-[11px] w-[11px] rounded-full bg-white/50" />
           Trusted Digital Healthcare
-          <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#C7D2FE]" />
+          <span className="h-[11px] w-[11px] rounded-full bg-white/50" />
         </div>
 
         <div aria-live={paused || rotationStopped ? "polite" : "off"}>
@@ -259,7 +262,7 @@ export function HeroSlideshow() {
                   src={slide.image}
                   alt={slide.alt}
                   fill
-                  preload={index === 0}
+                  {...imagePriority(index)}
                   sizes="(min-width: 1024px) 45vw, (min-width: 640px) 69vw, 100vw"
                   className="object-contain object-bottom"
                 />
