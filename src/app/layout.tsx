@@ -7,7 +7,7 @@ import { BRAND_NAME } from "@/lib/brand";
 
 const lexend = Lexend({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
   variable: "--font-lexend",
 });
 
