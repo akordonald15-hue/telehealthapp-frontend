@@ -10,9 +10,11 @@ import type { Founder50Controller } from "./use-founder50";
 export function PromotionCheckout({
   promotion: p,
   rewardSelected = false,
+  pendingDoctorName,
 }: {
   promotion: Founder50Controller;
   rewardSelected?: boolean;
+  pendingDoctorName?: string;
 }) {
   const id = useId();
   const [code, setCode] = useState("");
@@ -55,7 +57,7 @@ export function PromotionCheckout({
       <p className="font-semibold text-ash-900">Have a promo code?</p>
       {!p.ready ? (
         <p role="status" className="text-sm">
-          Checking your promotion status…
+          {p.error ? "Promotion status is unavailable. You can retry the status check." : "Checking your promotion status…"}
         </p>
       ) : null}
       {committed ? (
@@ -127,7 +129,7 @@ export function PromotionCheckout({
               Your reservation expired. Apply again to check availability.
             </p>
           ) : null}
-          {claim?.status === "expired" && !p.pending ? (
+          {(claim?.status === "expired" || p.failedApply) && !p.pending ? (
             <Button
               type="button"
               variant="secondary"
@@ -190,8 +192,10 @@ export function PromotionCheckout({
       ) : null}
       {p.pending ? (
         <Notice title="A booking request needs recovery.">
-          Retry the original doctor/time request to check its result before
-          changing your selection or paying.{" "}
+          Doctor and time changes are locked until this request is resolved.
+          Original doctor: {pendingDoctorName || `Doctor #${p.pending.doctor}`}. Original appointment:{" "}
+          {new Date(p.pending.scheduled_at).toLocaleString()}. Recover this
+          original request before changing your selection or paying.{" "}
           <Button type="button" disabled={p.busy} onClick={() => void p.book()}>
             Recover booking result
           </Button>

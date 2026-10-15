@@ -195,9 +195,83 @@ describe("reservation and booking controller", () => {
     await act(() =>
       recovered.result.current.book({ ...selection, doctor: 999 }),
     );
+    expect(promotionsApi.book).toHaveBeenCalledTimes(1);
+    expect(recovered.result.current.selectionLocked).toBe(true);
+    expect(recovered.result.current.result).toBeUndefined();
+    await act(() => recovered.result.current.book());
     expect(promotionsApi.book).toHaveBeenLastCalledWith(original);
     expect(recovered.result.current.result?.appointment.id).toBe(456);
     expect(readRecovery(1)).toEqual({});
+  });
+  it.each([new TypeError("timeout"), new ApiError(500, {}), new ApiError(403, {})])(
+    "leaves paid checkout available on optional status failure %s", async (error) => {
+      vi.mocked(promotionsApi.availability).mockRejectedValue(error);
+      const { result } = renderHook(() => useFounder50(1, true), { wrapper });
+      await waitFor(() => expect(result.current.error).toBeTruthy());
+      expect(result.current.paidBlocked).toBe(false);
+      expect(result.current.active).toBe(false);
+      expect(promotionsApi.reserve).not.toHaveBeenCalled();
+    },
+  );
+  it("retains an ambiguous snapshot even when availability fails on reload", async () => {
+    saveRecovery(1, { booking: { ...selection, reason: genericReason, notes: "",
+      promotion_reservation_id: claim.public_id, idempotency_key: "pending-key" } });
+    vi.mocked(promotionsApi.availability).mockRejectedValue(new TypeError("timeout"));
+    const { result } = renderHook(() => useFounder50(1, true), { wrapper });
+    await waitFor(() => expect(result.current.error).toBeTruthy());
+    expect(result.current.selectionLocked).toBe(true);
+    expect(result.current.paidBlocked).toBe(true);
+    expect(result.current.pending?.doctor).toBe(selection.doctor);
+  });
+  it("does not wait for a stalled optional availability request to enable clean paid checkout", async () => {
+    vi.mocked(promotionsApi.availability).mockImplementation(() => new Promise(() => {}));
+    const { result } = renderHook(() => useFounder50(1, true), { wrapper });
+    await waitFor(() => expect(result.current.paidBlocked).toBe(false));
+    expect(result.current.ready).toBe(false);
+    expect(result.current.pending).toBeUndefined();
+  });
+  it("does not let a manual status refresh hold the paid-checkout submission lock", async () => {
+    const { result } = renderHook(() => useFounder50(1, true), { wrapper });
+    await waitFor(() => expect(result.current.ready).toBe(true));
+    vi.mocked(promotionsApi.availability).mockImplementation(() => new Promise(() => {}));
+    act(() => { void result.current.refresh(); });
+    expect(result.current.busy).toBe(false);
+    expect(result.current.paidBlocked).toBe(false);
+  });
+  it("checks a newly stored other-tab operation before allowing cash checkout", async () => {
+    const { result } = renderHook(() => useFounder50(1, true), { wrapper });
+    await waitFor(() => expect(result.current.ready).toBe(true));
+    expect(result.current.canStartPaid()).toBe(true);
+    saveRecovery(1, { booking: { ...selection, reason: genericReason, notes: "",
+      promotion_reservation_id: claim.public_id, idempotency_key: "other-tab-key" } });
+    act(() => { expect(result.current.canStartPaid()).toBe(false); });
+    expect(result.current.pending?.idempotency_key).toBe("other-tab-key");
+  });
+  it.each([
+    { ...selection, scheduled_at: "2099-10-23T13:00:00+01:00" },
+    { ...selection, triage_session: 99 },
+  ])("refuses changed recovery context without mutating the saved operation %s", async (changed) => {
+    vi.mocked(promotionsApi.availability).mockResolvedValue({ ...available, claim });
+    const { result } = await ready();
+    vi.mocked(promotionsApi.book).mockRejectedValueOnce(new TypeError("response lost"));
+    await act(() => result.current.book(selection));
+    const original = readRecovery(1).booking;
+    await act(() => result.current.book(changed));
+    expect(promotionsApi.book).toHaveBeenCalledTimes(1);
+    expect(readRecovery(1).booking).toEqual(original);
+    expect(result.current.selectionLocked).toBe(true);
+  });
+  it("requires an explicit paid choice after a definite Apply rejection, including refresh", async () => {
+    const { result } = renderHook(() => useFounder50(1, true), { wrapper });
+    await waitFor(() => expect(result.current.ready).toBe(true));
+    vi.mocked(promotionsApi.reserve).mockRejectedValue(new ApiError(409, { code: "campaign_unavailable" }));
+    await act(() => result.current.apply("FOUNDER50"));
+    await act(() => result.current.refresh());
+    expect(result.current.paidBlocked).toBe(true);
+    act(() => result.current.choosePaid());
+    expect(result.current.paidBlocked).toBe(false);
+    expect(result.current.active).toBe(false);
+    expect(promotionsApi.book).not.toHaveBeenCalled();
   });
   it("does not call a missing URL success", () => {
     expect(isConfirmed({ ...confirmed, checkout_action: undefined })).toBe(

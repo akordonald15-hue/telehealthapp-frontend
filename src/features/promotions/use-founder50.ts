@@ -34,6 +34,8 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
     busy: boolean;
     error: string;
     ready: boolean;
+    localReady?: boolean;
+    failedApply?: boolean;
   }>({ busy: false, error: "", ready: false });
   const currentUser = useRef(userId);
   useEffect(() => {
@@ -55,11 +57,19 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
   );
   const refresh = useCallback(async () => {
     if (!enabled || !userId) return;
-    const recovery = readRecovery(userId);
+    let recovery = readRecovery(userId);
+    // Establish recovery safety before the optional availability network read.
+    update({
+      localReady: true,
+      pending: recovery.failed ? undefined : recovery.booking,
+      intent: Boolean(recovery.applyRejected || (recovery.applyKey && !recovery.booking)),
+      failedApply: recovery.applyRejected,
+    });
     const availability = await promotionsApi.availability();
     const reservation = availability.claim
       ? await promotionsApi.status(availability.claim.public_id)
       : undefined;
+    recovery = readRecovery(userId);
     if (
       (!recovery.booking || recovery.failed) &&
       reservation &&
@@ -70,7 +80,7 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
       availability,
       reservation,
       pending: recovery.failed ? undefined : recovery.booking,
-      intent: Boolean(recovery.applyKey && !reservation && !recovery.booking),
+      intent: Boolean(recovery.applyRejected || (recovery.applyKey && !reservation && !recovery.booking)),
       ready: true,
     });
   }, [enabled, userId, update]);
@@ -123,7 +133,7 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
       }
       const key = saved.applyKey || crypto.randomUUID();
       saveRecovery(userId!, { applyKey: key });
-      update({ intent: true, paidChosen: false });
+      update({ intent: true, paidChosen: false, failedApply: false });
       try {
         const reservation = await promotionsApi.reserve(
           code.trim().toUpperCase(),
@@ -143,7 +153,9 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
           e.status !== 429
         ) {
           clearRecovery(userId!);
-          update({ intent: false });
+          saveRecovery(userId!, { applyRejected: true });
+          // A definite rejection is safe to leave only by explicit patient choice.
+          update({ intent: true, failedApply: true });
         }
         throw e;
       }
@@ -172,6 +184,15 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
     return run(async () => {
       const saved = readRecovery(userId!);
       let body = saved.booking;
+      if (body && !saved.failed && selection && (
+        body.doctor !== selection.doctor ||
+        body.triage_session !== selection.triage_session ||
+        body.callback_url !== selection.callback_url ||
+        new Date(body.scheduled_at).toISOString() !== new Date(selection.scheduled_at).toISOString()
+      )) {
+        update({ pending: body });
+        throw new Error("Recover the original doctor and time before changing your selection.");
+      }
       if (saved.failed && selection && body) {
         const unchanged =
           body.doctor === selection.doctor &&
@@ -211,6 +232,7 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
         update({
           result,
           pending: undefined,
+          failedApply: undefined,
           reservation: undefined,
           intent: false,
         });
@@ -264,6 +286,8 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
           reservation: undefined,
           result: undefined,
           pending: undefined,
+          failedApply: undefined,
+          localReady: false,
           ready: false,
           error: "",
         }),
@@ -279,14 +303,46 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
       !state.paidChosen &&
       claim?.status === "reserved" &&
       Boolean(reservation?.pricing),
+    selectionLocked: enabled && own && Boolean(state.busy || state.pending),
+    paidBlocked: enabled && (
+      !own || !state.localReady || Boolean(
+        state.pending || state.intent || (occupied && !state.paidChosen) || expiredNeedsChoice
+      )
+    ),
+    canStartPaid: () => {
+      if (!enabled) return true;
+      try {
+        const saved = readRecovery(userId!);
+        // Storage events can arrive after a click in another tab. Check again
+        // synchronously before allowing the ordinary checkout mutation.
+        if ((saved.booking && !saved.failed) || saved.applyRejected || (saved.applyKey && !saved.booking)) {
+          update({ pending: saved.failed ? undefined : saved.booking, intent: true });
+          return false;
+        }
+        return own && Boolean(state.localReady) && !state.pending && !state.intent &&
+          !(occupied && !state.paidChosen) && !expiredNeedsChoice;
+      } catch (e) {
+        update({ error: promotionError(e) });
+        return false;
+      }
+    },
     choosePaid: () => {
-      if (claim?.status !== "reserved" && !state.pending && !state.intent)
-        update({ paidChosen: true });
+      if (claim?.status !== "reserved" && !state.pending && (!state.intent || state.failedApply)) {
+        clearRecovery(userId!);
+        update({ paidChosen: true, intent: false, failedApply: false });
+      }
     },
     apply,
     release,
     book,
-    refresh: () => run(refresh),
+    // A read-only status outage must not take the financial-operation mutex.
+    refresh: async () => {
+      try {
+        await refresh();
+      } catch (e) {
+        update({ error: promotionError(e), ready: false });
+      }
+    },
   };
 }
 export type Founder50Controller = ReturnType<typeof useFounder50>;

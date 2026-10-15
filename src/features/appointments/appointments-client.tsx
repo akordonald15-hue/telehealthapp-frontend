@@ -36,6 +36,7 @@ import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-paym
 import { RewardSelector } from "@/features/referral-program/reward-selector";
 import { PromotionCheckout, PromotionConfirmation } from "@/features/promotions/promotion-checkout";
 import { useFounder50 } from "@/features/promotions/use-founder50";
+import { earliestConsultationSlot, hourlyConsultationSlots } from "./consultation-slots";
 import { RepricingConsent, requiresRepricingConsent } from "@/features/referral-program/repricing-consent";
 import { useInvalidateReferralProgram } from "@/features/referral-program/use-referral-program";
 import { appointmentsApi, paymentsApi, profilesApi, triageApi } from "@/lib/api/endpoints";
@@ -53,7 +54,6 @@ type TriageResultData = TriageConversationResult | TriageProcessingResponse;
 type ConsultationTimingMode = "now" | "later";
 const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
 const symptomQuickReplies = ["Headache", "Fever", "Cough", "Stomach pain"];
-const hourlyConsultationSlots = Array.from({ length: 10 }, (_, index) => 8 + index);
 const hiddenDoctorNameMarkers = ["test doctor", "doctor smoke invite", "dr no phone smoke", "dr triumoh", "triumoh", "doctor donald ak", "donald ak", "dr ak", "doctor ak"];
 const severityOptions: Array<{ value: TriageSeverity; label: string }> = [
   { value: "mild", label: "Mild" },
@@ -670,6 +670,14 @@ export function AppointmentsClient() {
   function handleContinueToPayment() {
     setCheckoutError("");
     if (createAppointment.isPending || promotion.busy) return;
+    if (!promotion.free && !promotion.canStartPaid()) {
+      setCheckoutError("Resolve your promotional request before starting another checkout.");
+      return;
+    }
+    if (promotion.pending || (!promotion.free && promotion.paidBlocked)) {
+      setCheckoutError("Resolve your promotional request before starting another checkout.");
+      return;
+    }
     if (promotion.active && !promotion.free) {
       setCheckoutError("Recover your existing Founder50 booking before starting another checkout.");
       return;
@@ -694,6 +702,10 @@ export function AppointmentsClient() {
 
     if (missingFields.length) {
       setCheckoutError(`Please select ${missingFields.join(", ")} before payment.`);
+      return;
+    }
+    if (promotion.enabled && (timingMode === "now" || new Date(scheduledAtFromSelection).getTime() <= Date.now())) {
+      setCheckoutError("Choose a future hourly slot. Availability is checked when you book.");
       return;
     }
     const reason = aiSubmittedText || (isConversationResult(aiResultData) ? aiResultData.summary_preview : "") || "AI-assisted doctor consultation";
@@ -757,7 +769,7 @@ export function AppointmentsClient() {
       description={user?.role === "patient" ? "" : isDoctor ? "Open and manage assigned consultations." : undefined}
     >
       <PromotionConfirmation promotion={promotion} />
-      {promotion.enabled && (promotion.pending || ["booked", "redeemed", "forfeited"].includes(promotion.reservation?.reservation.status || "")) ? <PromotionCheckout promotion={promotion} /> : null}
+      {promotion.enabled && (promotion.pending || ["booked", "redeemed", "forfeited"].includes(promotion.reservation?.reservation.status || "")) ? <PromotionCheckout pendingDoctorName={doctorItems.find(doctor => doctor.id === promotion.pending?.doctor)?.display_name} promotion={promotion} /> : null}
       {user?.role === "patient" && !effectiveTriageSessionId && !selectedDoctor ? (
         <div className="-mx-4 -mt-5 grid min-h-[calc(100dvh-132px)] gap-5 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_42%,#F8FBFF_100%)] px-4 py-4 pb-6 sm:mx-0 sm:mt-0 sm:rounded-[8px] sm:p-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
               <div className="grid content-start gap-4">
@@ -951,7 +963,7 @@ export function AppointmentsClient() {
                       <Notice title="This is not a diagnosis" tone="neutral">
                         This assessment helps Caretekk match you with the most appropriate doctor.
                       </Notice>
-                      <Button type="button" className="w-full sm:w-fit" onClick={() => setDoctorPickerOpen(true)}>
+                      <Button type="button" className="w-full sm:w-fit" disabled={promotion.selectionLocked} onClick={() => setDoctorPickerOpen(true)}>
                         View recommended doctors
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
@@ -1013,7 +1025,7 @@ export function AppointmentsClient() {
               ) : null}
             </div>
           ) : null}
-          <Button type="button" className="w-full sm:w-fit" onClick={() => setDoctorPickerOpen(true)}>
+          <Button type="button" className="w-full sm:w-fit" disabled={promotion.selectionLocked} onClick={() => setDoctorPickerOpen(true)}>
             View recommended doctors
           </Button>
         </div>
@@ -1169,6 +1181,7 @@ export function AppointmentsClient() {
                         <span className="text-sm font-semibold text-slate-600">5-10 min</span>
                         <button
                           type="button"
+                          disabled={promotion.selectionLocked || (promotion.enabled && doctor.availability_status === "unavailable")}
                           className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
                           onClick={() => {
                             setCheckoutError("");
@@ -1218,6 +1231,7 @@ export function AppointmentsClient() {
             <div className="grid gap-2 sm:grid-cols-[auto_1fr]">
               <button
                 type="button"
+                disabled={promotion.selectionLocked}
                 className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition active:scale-[0.98]"
                 onClick={() => {
                   setScheduleSheetOpen(false);
@@ -1229,7 +1243,7 @@ export function AppointmentsClient() {
               <Button
                 type="button"
                 className="w-full"
-                disabled={!modalBookingReady || createAppointment.isPending || promotion.busy || (promotion.active && !promotion.free) || (promotion.enabled && !promotion.ready)}
+                disabled={!modalBookingReady || createAppointment.isPending || promotion.busy || (promotion.active && !promotion.free) || Boolean(promotion.pending) || (!promotion.free && promotion.paidBlocked)}
                 onClick={handleContinueToPayment}
               >
                 {createAppointment.isPending || promotion.busy ? "Confirming checkout…" : promotion.free ? "Book Free Consultation" : "Make Payment"}
@@ -1271,28 +1285,38 @@ export function AppointmentsClient() {
             <div className="grid gap-3 rounded-[8px] border border-slate-100 bg-white p-3">
               <div>
                 <p className="text-base font-semibold text-[#1F2937]">Choose consultation time</p>
-                <p className="mt-1 text-sm leading-5 text-slate-600">Start now if available, or schedule an hourly slot.</p>
+                <p className="mt-1 text-sm leading-5 text-slate-600">{promotion.enabled ? "Choose a future hourly appointment. Availability is checked when you book." : "Start now if available, or schedule an hourly slot."}</p>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2">
+              <fieldset aria-label="Consultation timing" disabled={promotion.selectionLocked} className="grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
-                  disabled={!doctorCanConsultNow}
+                  disabled={promotion.selectionLocked || (promotion.enabled ? selectedDoctorLive.availability_status === "unavailable" : !doctorCanConsultNow)}
                   onClick={() => {
                     setCheckoutError("");
-                    if (!doctorCanConsultNow) return;
+                    if (!promotion.enabled && !doctorCanConsultNow) return;
+                    if (promotion.enabled) {
+                      const slot = earliestConsultationSlot(new Date(), selectedDoctorLive.unavailable_consultation_slots);
+                      if (!slot) { setCheckoutError("No hourly slots are available today or tomorrow. Choose another date."); return; }
+                      // Explicit date also refreshes a sheet left open across midnight.
+                      setCustomScheduleDate(toDateInputValue(slot));
+                      setScheduleDay("another");
+                      setTimingMode("later");
+                      setSelectedSlotHour(slot.getHours());
+                      return;
+                    }
                     setTimingMode("now");
                     setSelectedSlotHour(null);
                   }}
                   className={cn(
                     "rounded-[8px] border p-3 text-left transition active:scale-[0.99]",
                     timingMode === "now" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
-                    !doctorCanConsultNow && "cursor-not-allowed opacity-55",
+                    !promotion.enabled && !doctorCanConsultNow && "cursor-not-allowed opacity-55",
                   )}
                 >
-                  <p className="font-semibold text-[#1F2937]">Consult now</p>
+                  <p className="font-semibold text-[#1F2937]">{promotion.enabled ? "Earliest appointment" : "Consult now"}</p>
                   <p className="mt-1 text-sm leading-5 text-slate-600">
-                    {doctorCanConsultNow ? "Start checkout for an immediate chat consultation." : "Available between 8:00 AM and 6:00 PM."}
+                    {promotion.enabled ? "Select the next hourly slot, then confirm its date and time. Availability is checked at booking." : doctorCanConsultNow ? "Start checkout for an immediate chat consultation." : "Available between 8:00 AM and 6:00 PM."}
                   </p>
                 </button>
                 <button
@@ -1310,16 +1334,16 @@ export function AppointmentsClient() {
                   <p className="font-semibold text-[#1F2937]">Schedule for later</p>
                   <p className="mt-1 text-sm leading-5 text-slate-600">Pick a time between 8:00 AM and 6:00 PM.</p>
                 </button>
-              </div>
+              </fieldset>
 
-              {!doctorCanConsultNow ? (
+              {!promotion.enabled && !doctorCanConsultNow ? (
                 <Notice title="This doctor is currently offline" tone="neutral">
                   You can schedule a consultation for an available time.
                 </Notice>
               ) : null}
 
               {timingMode === "later" ? (
-                <div className="grid gap-4">
+                <fieldset aria-label="Appointment date and time" disabled={promotion.selectionLocked} className="grid gap-4">
                   <div className="grid grid-cols-3 rounded-[8px] border border-slate-200 bg-slate-50 p-1">
                     {[
                       { value: "today", label: "Today" },
@@ -1394,7 +1418,7 @@ export function AppointmentsClient() {
                       </p>
                     </div>
                   ) : null}
-                </div>
+                </fieldset>
               ) : null}
 
               {modalBookingReady ? (
@@ -1409,7 +1433,7 @@ export function AppointmentsClient() {
                       {selectedTimeSummary}
                     </p>
                   </div>
-                  <PromotionCheckout promotion={promotion} rewardSelected={Boolean(selectedRewardId)} />
+                  <PromotionCheckout pendingDoctorName={doctorItems.find(doctor => doctor.id === promotion.pending?.doctor)?.display_name} promotion={promotion} rewardSelected={Boolean(selectedRewardId)} />
                   <RewardSelector
                     serviceType="appointment"
                     serviceLabel="Consultation"
@@ -1435,7 +1459,7 @@ export function AppointmentsClient() {
                     <Button
                       type="button"
                       className="w-full"
-                      disabled={!modalBookingReady || createAppointment.isPending || promotion.busy || (promotion.active && !promotion.free) || (promotion.enabled && !promotion.ready)}
+                      disabled={!modalBookingReady || createAppointment.isPending || promotion.busy || (promotion.active && !promotion.free) || Boolean(promotion.pending) || (!promotion.free && promotion.paidBlocked)}
                       onClick={handleContinueToPayment}
                     >
                       {createAppointment.isPending || promotion.busy ? "Confirming checkout…" : promotion.free ? "Book Free Consultation" : "Make Payment"}

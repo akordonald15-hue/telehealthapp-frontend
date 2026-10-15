@@ -4,6 +4,7 @@ export type Recovery = {
   applyKey?: string;
   booking?: BookingDraft;
   failed?: boolean;
+  applyRejected?: boolean;
 };
 const prefix = "caretekk:founder50:v1:";
 export const genericReason = "AI-assisted doctor consultation";
@@ -25,6 +26,7 @@ export function readRecovery(userId: number): Recovery {
   return {
     applyKey: value.applyKey,
     failed: value.failed === true || undefined,
+    applyRejected: value.applyRejected === true || undefined,
     booking: b
       ? {
           doctor: b.doctor,
