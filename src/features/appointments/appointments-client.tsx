@@ -34,6 +34,8 @@ import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
 import { RewardSelector } from "@/features/referral-program/reward-selector";
+import { PromotionCheckout, PromotionConfirmation } from "@/features/promotions/promotion-checkout";
+import { useFounder50 } from "@/features/promotions/use-founder50";
 import { RepricingConsent, requiresRepricingConsent } from "@/features/referral-program/repricing-consent";
 import { useInvalidateReferralProgram } from "@/features/referral-program/use-referral-program";
 import { appointmentsApi, paymentsApi, profilesApi, triageApi } from "@/lib/api/endpoints";
@@ -292,6 +294,7 @@ export function AppointmentsClient() {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const userQuery = useCurrentUser();
+  const user = userQuery.data;
   const firstTimeWelcome = searchParams.get("welcome") === "first";
   const [page, setPage] = useState(1);
   const [doctorPickerOpen, setDoctorPickerOpen] = useState(false);
@@ -314,6 +317,7 @@ export function AppointmentsClient() {
   const [checkoutError, setCheckoutError] = useState("");
   // A reward is selected by public id only; the server prices the booking.
   const [selectedRewardId, setSelectedRewardId] = useState<string | null>(null);
+  const promotion = useFounder50(user?.role === "patient" ? user.id : undefined);
   // Held back deliberately: a repriced checkout needs the patient's agreement before we send
   // them to the payment provider.
   const [repricedPayment, setRepricedPayment] = useState<PaymentInitiation | null>(null);
@@ -421,7 +425,6 @@ export function AppointmentsClient() {
       notes: "",
     },
   });
-  const user = userQuery.data;
   const isDoctor = user?.role === "doctor";
   const availableDoctors = useQuery({
     queryKey: ["appointments", "available-doctors"],
@@ -666,6 +669,11 @@ export function AppointmentsClient() {
 
   function handleContinueToPayment() {
     setCheckoutError("");
+    if (createAppointment.isPending || promotion.busy) return;
+    if (promotion.active && !promotion.free) {
+      setCheckoutError("Recover your existing Founder50 booking before starting another checkout.");
+      return;
+    }
     const missingFields = [
       !selectedDoctorLive ? "doctor" : "",
       !timingMode ? "consultation type" : "",
@@ -694,6 +702,21 @@ export function AppointmentsClient() {
     form.setValue("scheduled_at", scheduledAtFromSelection, { shouldValidate: true });
     form.setValue("reason", reason, { shouldValidate: true });
 
+    if (promotion.free) {
+      void promotion.book({
+        doctor: selectedDoctorLive!.id,
+        ...(effectiveTriageSessionId ? { triage_session: effectiveTriageSessionId } : {}),
+        scheduled_at: scheduledAtFromSelection,
+        callback_url: `${window.location.origin}/appointments`,
+      }).then(result => {
+        if (result) {
+          resetBookingCheckoutState();
+          void queryClient.invalidateQueries({ queryKey: ["appointments"] });
+          void queryClient.invalidateQueries({ queryKey: ["payments"] });
+        }
+      });
+      return;
+    }
     createAppointment.mutate({
       doctor: selectedDoctorLive!.id,
       ...(effectiveTriageSessionId ? { triage_session: effectiveTriageSessionId } : {}),
@@ -733,6 +756,8 @@ export function AppointmentsClient() {
       title={user?.role === "patient" ? "" : isDoctor ? "Consultations" : "Appointments"}
       description={user?.role === "patient" ? "" : isDoctor ? "Open and manage assigned consultations." : undefined}
     >
+      <PromotionConfirmation promotion={promotion} />
+      {promotion.enabled && (promotion.pending || ["booked", "redeemed", "forfeited"].includes(promotion.reservation?.reservation.status || "")) ? <PromotionCheckout promotion={promotion} /> : null}
       {user?.role === "patient" && !effectiveTriageSessionId && !selectedDoctor ? (
         <div className="-mx-4 -mt-5 grid min-h-[calc(100dvh-132px)] gap-5 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_42%,#F8FBFF_100%)] px-4 py-4 pb-6 sm:mx-0 sm:mt-0 sm:rounded-[8px] sm:p-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
               <div className="grid content-start gap-4">
@@ -1204,10 +1229,10 @@ export function AppointmentsClient() {
               <Button
                 type="button"
                 className="w-full"
-                disabled={!modalBookingReady || createAppointment.isPending}
+                disabled={!modalBookingReady || createAppointment.isPending || promotion.busy || (promotion.active && !promotion.free) || (promotion.enabled && !promotion.ready)}
                 onClick={handleContinueToPayment}
               >
-                {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
+                {createAppointment.isPending || promotion.busy ? "Confirming checkout…" : promotion.free ? "Book Free Consultation" : "Make Payment"}
               </Button>
             </div>
           </div>
@@ -1384,12 +1409,13 @@ export function AppointmentsClient() {
                       {selectedTimeSummary}
                     </p>
                   </div>
+                  <PromotionCheckout promotion={promotion} rewardSelected={Boolean(selectedRewardId)} />
                   <RewardSelector
                     serviceType="appointment"
                     serviceLabel="Consultation"
                     selectedRewardId={selectedRewardId}
                     onSelect={setSelectedRewardId}
-                    disabled={createAppointment.isPending}
+                    disabled={createAppointment.isPending || promotion.active || promotion.busy}
                   />
                   {repricedPayment ? (
                     <RepricingConsent
@@ -1409,10 +1435,10 @@ export function AppointmentsClient() {
                     <Button
                       type="button"
                       className="w-full"
-                      disabled={!modalBookingReady || createAppointment.isPending}
+                      disabled={!modalBookingReady || createAppointment.isPending || promotion.busy || (promotion.active && !promotion.free) || (promotion.enabled && !promotion.ready)}
                       onClick={handleContinueToPayment}
                     >
-                      {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
+                      {createAppointment.isPending || promotion.busy ? "Confirming checkout…" : promotion.free ? "Book Free Consultation" : "Make Payment"}
                     </Button>
                   )}
                 </div>
