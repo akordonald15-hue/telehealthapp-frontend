@@ -122,16 +122,29 @@ async function journey(viewport, mode) {
     else if (path.endsWith("/appointments/book/")) {
       const body = route.request().postDataJSON();
       attempts.push(body);
-      if (mode === "paid" || mode === "disabled") {
+      if (mode === "paid" || mode === "disabled" || mode === "bank") {
         expect(body).not.toHaveProperty("promotion_reservation_id");
         expect(body).not.toHaveProperty("idempotency_key");
         json = {
           appointment: { id: 456, status: "pending_payment" },
           payment: {
-            provider: "paystack",
-            status: "pending",
+            payment_id: 789,
+            provider: mode === "bank" ? "bank_transfer" : "paystack",
+            status: mode === "bank" ? "awaiting_transfer" : "pending",
             amount: "2000.00",
-            authorization_url: `${base}/synthetic-checkout`,
+            currency: "NGN",
+            authorization_url:
+              mode === "bank" ? "" : `${base}/synthetic-checkout`,
+            bank_transfer:
+              mode === "bank"
+                ? {
+                    bank_name: "Synthetic Bank",
+                    account_name: "Caretekk QA",
+                    account_number: "0000000000",
+                    instructions: "Synthetic transfer only",
+                    reference: "qa-bank",
+                  }
+                : null,
             initialization_status: "ready",
           },
         };
@@ -204,7 +217,7 @@ async function journey(viewport, mode) {
   const panel = dialog.getByRole("region", {
     name: "Promotional consultation",
   });
-  if (mode !== "paid" && mode !== "disabled") {
+  if (mode !== "paid" && mode !== "disabled" && mode !== "bank") {
     const input = panel.getByLabel("Promo code");
     await input.focus();
     await page.keyboard.type("FOUNDER50");
@@ -262,7 +275,14 @@ async function journey(viewport, mode) {
       .getByRole("button", { name: "Make Payment", exact: true })
       .first()
       .click();
-    await expect(page).toHaveURL(/synthetic-checkout/);
+    if (mode === "bank") {
+      await expect(
+        page.getByText("Bank transfer payment", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Synthetic Bank", { exact: true }),
+      ).toBeVisible();
+    } else await expect(page).toHaveURL(/synthetic-checkout/);
     expect(applyCount).toBe(0);
     if (mode === "disabled") expect(promoRequests).toBe(0);
   }
@@ -279,6 +299,7 @@ try {
   if (localFixture) await journey({ width: 390, height: 844 }, "real");
   else if (process.env.QA_DISABLED === "true") {
     await journey({ width: 390, height: 844 }, "disabled");
+    await journey({ width: 390, height: 844 }, "bank");
   } else {
     for (const viewport of [
       { width: 390, height: 844 },
