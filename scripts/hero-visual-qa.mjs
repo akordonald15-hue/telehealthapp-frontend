@@ -19,7 +19,7 @@ const phase = process.argv[2] || 'after';
     if (phase === 'before') {
       await page.waitForTimeout(8000);
     } else {
-      await page.getByRole('button', { name: 'Show homecare highlight' }).press('Enter');
+      await page.getByRole('button', { name: 'Show homecare highlight' }).click();
       await page.waitForTimeout(1400);
     }
     await page.locator('main section').first().screenshot({ path: `artifacts/hero-review/${phase}-${width}-homecare.png` });
@@ -52,9 +52,13 @@ const phase = process.argv[2] || 'after';
     await page.goto('http://localhost:3100', { waitUntil: 'networkidle', timeout: 180000 });
     const hero = page.locator('main section').first();
     const initialHeight = (await hero.boundingBox()).height;
-    await page.getByRole('button', { name: 'Show homecare highlight' }).press('Enter');
+    await page.getByRole('button', { name: 'Show homecare highlight' }).click();
     assert.equal(await page.getByRole('button', { name: 'Show homecare highlight' }).getAttribute('aria-pressed'), 'true');
     assert.equal((await hero.boundingBox()).height, initialHeight, 'Slide switching must reserve stable height');
+    await page.getByRole('button', { name: 'Show consultation highlight' }).click();
+    assert.equal(await page.getByRole('button', { name: 'Show consultation highlight' }).getAttribute('aria-pressed'), 'true');
+    await page.getByRole('button', { name: 'Show homecare highlight' }).press('Enter');
+    assert.equal(await page.getByRole('button', { name: 'Show homecare highlight' }).getAttribute('aria-pressed'), 'true');
     await page.getByRole('button', { name: 'Show consultation highlight' }).press('Enter');
     assert.equal(await page.getByRole('button', { name: 'Show consultation highlight' }).getAttribute('aria-pressed'), 'true');
     assert.equal(await page.getByRole('link', { name: 'Talk to a Doctor', exact: true }).first().getAttribute('href'), '/register');

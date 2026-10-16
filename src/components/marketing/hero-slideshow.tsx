@@ -191,8 +191,7 @@ export function HeroSlideshow() {
                 <p
                   data-motion="text"
                   className={cn(
-                    "mx-auto text-[16.5px] font-normal leading-[25.15px] text-white",
-                    slide.textClassName,
+                    "mx-auto max-w-[480px] text-[16.5px] font-normal leading-[25.15px] text-white",
                     hiddenUntilShown(index),
                   )}
                 >
@@ -223,7 +222,7 @@ export function HeroSlideshow() {
         <div
           role="group"
           aria-label="Highlight controls"
-          className="pointer-events-none absolute inset-x-0 z-10 mt-[22px] flex items-center justify-center gap-1 opacity-0 focus-within:pointer-events-auto focus-within:opacity-100"
+          className="absolute inset-x-0 z-10 mt-[22px] flex items-center justify-center"
         >
           {heroSlides.map((slide, index) => (
             <button
@@ -235,12 +234,12 @@ export function HeroSlideshow() {
                 setRotationStopped(true);
                 setActive(index);
               }}
-              className="group inline-flex h-6 items-center justify-center px-1 focus-visible:outline-none"
+              className="group inline-flex h-6 cursor-pointer items-center justify-center px-[9px] focus-visible:outline-none"
             >
               <span
                 className={cn(
-                  "block h-[7px] rounded-full transition-all duration-300 group-focus-visible:ring-2 group-focus-visible:ring-white group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#2563EB]",
-                  index === active ? "w-[26px] bg-white" : "w-[7px] bg-white/45 group-hover:bg-white/70",
+                  "block h-[7px] rounded-full transition-all duration-300 motion-reduce:transition-none group-focus-visible:ring-2 group-focus-visible:ring-white group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#2563EB]",
+                  index === active ? "w-[26px] bg-white" : "w-[7px] bg-white/70 group-hover:bg-white",
                 )}
               />
             </button>
@@ -249,7 +248,7 @@ export function HeroSlideshow() {
             type="button"
             aria-label={rotationStopped ? "Resume" : "Pause"}
             onClick={() => setRotationStopped((value) => !value)}
-            className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-white/70 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="ml-1 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-white/80 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             {rotationStopped ? (
               <Play className="h-[13px] w-[13px] fill-current" strokeWidth={0} />

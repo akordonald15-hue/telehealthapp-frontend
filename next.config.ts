@@ -23,7 +23,7 @@ const nextConfig: NextConfig = {
 
     return [
       { source: "/dashboard", headers: protectedHeaders },
-      { source: "/dashboard/:path*", headers: protectedHeaders },
+      { source: "/dasbooard/:path*", headers: protectedHeaders },
       { source: "/appointments", headers: protectedHeaders },
       { source: "/appointments/:path*", headers: protectedHeaders },
       { source: "/messages", headers: protectedHeaders },

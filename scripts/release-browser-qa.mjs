@@ -82,7 +82,7 @@ try {
     assert.ok(consult[0].loaded && consult[0].objectFit === 'contain');
     assert.ok(Math.abs(consult[0].center - width / 2) < 2);
     assert.ok(consult[0].src.includes('/img/hero/doctors-consult.webp'));
-    await page.getByRole('button', { name: 'Show homecare highlight' }).press('Enter');
+    await page.getByRole('button', { name: 'Show homecare highlight' }).click();
     await expect(page.getByRole('button', { name: 'Show homecare highlight' })).toHaveAttribute('aria-pressed', 'true');
     assert.equal((await hero.boundingBox()).height, height);
     await hero.screenshot({ caret: 'initial', path: `${output}/after-hero-homecare-${width}.png` });
@@ -127,6 +127,10 @@ try {
     for (const id of ['services', 'trust', 'doctors', 'home-care', 'how-it-works']) {
       if ([390, 768, 1440].includes(width)) await captureLoadedSection(page, page.locator(`#${id}`), `${output}/after-${id}-${width}.png`);
     }
+    await page.getByRole('button', { name: 'Show consultation highlight' }).click();
+    await expect(page.getByRole('button', { name: 'Show consultation highlight' })).toHaveAttribute('aria-pressed', 'true');
+    await page.getByRole('button', { name: 'Show homecare highlight' }).press('Enter');
+    await expect(page.getByRole('button', { name: 'Show homecare highlight' })).toHaveAttribute('aria-pressed', 'true');
     await page.getByRole('button', { name: 'Show consultation highlight' }).press('Enter');
     await captureLoadedSection(page, page.locator('main'), `${output}/after-landing-${width}.png`);
     let accessibility = null;

@@ -155,7 +155,6 @@ export const heroSlides: Array<{
   highlight: string;
   tail: string;
   text: string;
-  textClassName: string;
   image: string;
   alt: string;
   background: string;
@@ -164,9 +163,8 @@ export const heroSlides: Array<{
   {
     lead: "A Doctor’s",
     highlight: "Opinion,",
-    tail: "Minutes Away",
-    text: "Connect with a licensed doctor virtually, wherever you are in Nigeria confirmed in minutes, from ₦2,000.",
-    textClassName: "max-w-[450px]",
+    tail: "Book Today",
+    text: "Online doctor consultations from ₦2,000 where applicable. Book immediately, subject to available appointment slots.",
     image: "/img/hero/doctors-consult.webp",
     alt: "Caretekk doctors ready for a virtual consultation",
     background: "/img/hero/bg-consult.webp",
@@ -175,11 +173,10 @@ export const heroSlides: Array<{
   {
     lead: "Real Care",
     highlight: "Right",
-    tail: "Right at Your Door",
-    text: "Book a vetted nurse or caregiver for in-home care in Akwa Ibom from ₦5,000.",
-    textClassName: "max-w-[340px]",
+    tail: "at Your Door",
+    text: "Book in-home care from ₦5,000. In-home care are currently available in Akwa Ibom State, Nigeria.",
     image: "/img/hero/doctors-homecare.webp",
-    alt: "Caretekk care team available for home visits",
+    alt: "Caretekk care team available for in-home care",
     background: "/img/hero/bg-homecare.webp",
     backgroundClassName: "left-[-53%] top-0 w-[240%] max-sm:left-[-100%] max-sm:top-[26%] max-sm:w-[380%]",
   },
