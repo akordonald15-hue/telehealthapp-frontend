@@ -35,3 +35,15 @@ jobs:
             sleep 2
           done
           node scripts/founder50-browser-qa.mjs
+      - name: Enabled checkout and recovery regressions
+        env:
+          NEXT_PUBLIC_FOUNDER50_ENABLED: "true"
+          QA_BASE_URL: http://127.0.0.1:3105
+          QA_OUTPUT_DIR: artifacts/founder50-enabled-qa
+        run: |
+          npm run dev -- --hostname 127.0.0.1 --port 3105 > /tmp/caretekk-enabled-frontend.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:3105/login > /dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/founder50-remediation-qa.mjs
