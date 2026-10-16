@@ -1,5 +1,6 @@
 "use client";
 
+import { formatAppointmentTime } from "@/lib/appointment-time";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -194,7 +195,7 @@ export function PromotionCheckout({
         <Notice title="A booking request needs recovery.">
           Doctor and time changes are locked until this request is resolved.
           Original doctor: {pendingDoctorName || `Doctor #${p.pending.doctor}`}. Original appointment:{" "}
-          {new Date(p.pending.scheduled_at).toLocaleString()}. Recover this
+          {formatAppointmentTime(p.pending.scheduled_at)}. Recover this
           original request before changing your selection or paying.{" "}
           <Button type="button" disabled={p.busy} onClick={() => void p.book()}>
             Recover booking result
@@ -226,7 +227,7 @@ export function PromotionConfirmation({
       <p>Founder50 applied · Amount paid: ₦0.</p>
       <p>
         {a.doctor_profile?.display_name || "Your selected doctor"} ·{" "}
-        {new Date(a.scheduled_at).toLocaleString()}
+        {formatAppointmentTime(a.scheduled_at)}
       </p>
       <p>
         Your appointment remains funded even when scheduled beyond 24 hours.

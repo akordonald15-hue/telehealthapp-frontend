@@ -8,12 +8,12 @@ fs.mkdirSync(output,{recursive:true});
 const fixture = process.env.QA_LOCAL_BACKEND_FIXTURE ? JSON.parse(fs.readFileSync(process.env.QA_LOCAL_BACKEND_FIXTURE,'utf8')) : null;
 const browser = await chromium.launch();
 const results=[];
-async function probe(mode,width=390) {
- const context=await browser.newContext({viewport:{width,height:950},timezoneId:'Africa/Lagos'});
+async function probe(mode,width=390,zone='Africa/Lagos') {
+ const context=await browser.newContext({viewport:{width,height:950},timezoneId:zone});
  await context.addCookies([{name:'caretekk_session',value:'1',url:base},...(fixture?[{name:'caretekk_access',value:fixture.access,url:base,httpOnly:true}]:[])]);
  const page=await context.newPage();
  await page.clock.install({time:new Date('2026-10-15T11:34:56Z')});
- await page.clock.setFixedTime(new Date(mode==='skew'?'2026-10-14T11:34:56Z':'2026-10-15T11:34:56Z'));
+ await page.clock.setFixedTime(new Date(mode.startsWith('paid-future-')?'2026-10-15T16:34:56Z':mode==='skew'?'2026-10-14T11:34:56Z':'2026-10-15T11:34:56Z'));
  await page.addLocatorHandler(page.getByRole('button',{name:'Not now',exact:true}),async locator=>locator.click());
  const empty={count:0,next:null,previous:null,results:[]};
  let claim=null,posts=[],commits=0,reserves=0,promotionRequests=0,committedAppointmentId=null;
@@ -72,15 +72,16 @@ async function probe(mode,width=390) {
  await dialog.getByRole('button',{name:/Consult now/}).click();
  const panel=()=>dialog.getByRole('region',{name:'Promotional consultation'});
  if(mode.startsWith('outage')||mode.startsWith('paid-')||mode==='typedOnly'){
+  if(mode.startsWith('paid-future-')){await dialog.getByRole('button',{name:/Schedule for later/}).click();await dialog.getByRole('button',{name:'Date',exact:true}).click();await dialog.locator('input[type=date]').fill('2026-10-20');await dialog.getByRole('button',{name:'8:00 AM',exact:true}).click();}
   if(mode==='typedOnly'){await expect(panel().getByLabel('Promo code')).toBeEnabled();await panel().getByLabel('Promo code').fill('FOUNDER50');}
   const pay=dialog.getByRole('button',{name:'Make Payment',exact:true}).first();await expect(pay).toBeEnabled();
   await pay.click();await expect.poll(()=>posts.length).toBe(1);expect(posts[0].promotion_reservation_id).toBeUndefined();expect(reserves).toBe(0);
-  expect(posts[0].scheduled_at).toBe('2026-10-15T11:34:56.000Z');
+  expect(posts[0].scheduled_at).toBe(mode.startsWith('paid-future-')?'2026-10-20T07:00:00.000Z':'2026-10-15T11:34:56.000Z');
   expect(posts[0].doctor).toBe(doctorId);
   if(process.env.QA_PAID_DISABLED==='true')expect(promotionRequests).toBe(0);
   if(!mode.includes('bank'))await expect(page).toHaveURL(base+'/qa-paystack');
   else {await expect(page.getByText('Bank transfer payment',{exact:true})).toBeVisible();await expect(page.getByText('QA Bank',{exact:true})).toBeVisible();}
-  results.push({mode,paidPosts:posts.length,reserves});
+  results.push({mode,zone,scheduled_at:posts[0].scheduled_at,paidPosts:posts.length,reserves});
  }else{
   await expect(panel().getByLabel('Promo code')).toBeEnabled({timeout:15000});await panel().getByLabel('Promo code').fill('FOUNDER50');await panel().getByRole('button',{name:'Apply',exact:true}).click();
   if(mode==='released'||mode==='expired'){
@@ -131,7 +132,10 @@ async function probe(mode,width=390) {
  await page.screenshot({path:`${output}/${mode}.png`,fullPage:true});await context.close();
 }
 try{
-  for(const mode of fixture?[process.env.QA_REAL_PAID==='true'?'paid-paystack':process.env.QA_REAL_RECOVERY||'realEarliest']:(process.env.QA_CASES?.split(',')||(process.env.QA_PAID_DISABLED==='true'?['paid-paystack','paid-bank']:['paid-paystack','paid-bank','typedOnly','released','expired','earliest','unavailable','outage-503-paystack','outage-500-bank','outage-403-paystack','outage-timeout-paystack','campaignDisabled','applyTimeout','lostBefore','lostAfter','lostHistory','lostTabs','double','skew']))){
+ if(process.env.QA_TIMEZONE_MATRIX==='true') {
+  for(const zone of ['Africa/Lagos','UTC','America/New_York','Europe/London'])for(const provider of ['paystack','bank'])await probe(`paid-future-${provider}`,390,zone);
+  fs.writeFileSync(`${output}/timezone-results.json`,JSON.stringify(results,null,2));console.log('PASS timezone matrix',results.length);
+ } else for(const mode of fixture?[process.env.QA_REAL_PAID==='true'?'paid-paystack':process.env.QA_REAL_RECOVERY||'realEarliest']:(process.env.QA_CASES?.split(',')||(process.env.QA_PAID_DISABLED==='true'?['paid-paystack','paid-bank']:['paid-paystack','paid-bank','typedOnly','released','expired','earliest','unavailable','outage-503-paystack','outage-500-bank','outage-403-paystack','outage-timeout-paystack','campaignDisabled','applyTimeout','lostBefore','lostAfter','lostHistory','lostTabs','double','skew']))){
   await probe(mode,mode==='lostBefore'?1440:390);fs.writeFileSync(`${output}/results.json`,JSON.stringify(results,null,2));console.log('PASS',mode);
  }
 }finally{await browser.close();}

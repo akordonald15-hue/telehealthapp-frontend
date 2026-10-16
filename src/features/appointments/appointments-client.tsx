@@ -45,7 +45,8 @@ import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import type { Appointment, PatientProfile, Payment, ProviderDoctor, TriageConversationResult, TriageProcessingResponse, TriageSeverity } from "@/lib/types/backend";
 import type { PaymentInitiation } from "@/lib/types/backend";
 import { useFormDraft } from "@/lib/use-form-draft";
-import { cn, formatDateTime } from "@/lib/utils";
+import { lagosSelectionToInstant, formatAppointmentTime, lagosCalendarDate } from "@/lib/appointment-time";
+import { cn } from "@/lib/utils";
 import { appointmentSchema } from "@/lib/validation/features";
 
 type AppointmentFormValues = z.input<typeof appointmentSchema>;
@@ -226,7 +227,7 @@ function PatientAppointmentCard({ appointment }: { appointment: Appointment }) {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <p className="font-heading text-lg font-semibold text-[#1F2937]">{doctorName}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">{formatDateTime(appointment.scheduled_at)}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{formatAppointmentTime(appointment.scheduled_at)}</p>
           {appointment.reason ? <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{appointment.reason}</p> : null}
         </div>
         <StatusBadge value={appointment.status} />
@@ -455,7 +456,7 @@ export function AppointmentsClient() {
     promotion.reservation?.reservation.status === "reserved";
   const doctorCanConsultNow = Boolean(selectedDoctorLive?.availability_status === "available" && isWithinConsultationHours());
   const scheduleBaseDate = useMemo(() => {
-    const today = new Date();
+    const today = lagosCalendarDate(new Date());
     if (scheduleDay === "tomorrow") return addDays(today, 1);
     if (scheduleDay === "another" && customScheduleDate) {
       const [year, month, day] = customScheduleDate.split("-").map(Number);
@@ -467,7 +468,7 @@ export function AppointmentsClient() {
     if (scheduleDay === "another" && !customScheduleDate) {
       return [];
     }
-    const now = new Date();
+    const now = lagosCalendarDate(new Date());
     const selectedDateValue = toDateInputValue(scheduleBaseDate);
     const todayValue = toDateInputValue(now);
     return hourlyConsultationSlots.filter((hour) => {
@@ -482,7 +483,7 @@ export function AppointmentsClient() {
     const selectedDateValue = toDateInputValue(scheduleBaseDate);
     return new Set(
       selectedDoctorLive.unavailable_consultation_slots
-        .map((slot) => new Date(slot))
+        .map((slot) => lagosCalendarDate(new Date(slot)))
         .filter((slotDate) => !Number.isNaN(slotDate.getTime()) && toDateInputValue(slotDate) === selectedDateValue)
         .map((slotDate) => slotDate.getHours()),
     );
@@ -494,7 +495,7 @@ export function AppointmentsClient() {
     if (timingMode === "later" && selectedSlotHour !== null) {
       const scheduled = new Date(scheduleBaseDate);
       scheduled.setHours(selectedSlotHour, 0, 0, 0);
-      return toDateTimeLocalValue(scheduled);
+      return lagosSelectionToInstant(toDateTimeLocalValue(scheduled));
     }
     return "";
   }, [scheduleBaseDate, selectedSlotHour, timingMode]);
@@ -1073,7 +1074,7 @@ export function AppointmentsClient() {
             <article key={item.id} className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.38)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatAppointmentTime(item.scheduled_at)}</p>
                   {item.reason ? <p className="mt-3 text-sm leading-7 text-slate-600">{item.reason}</p> : null}
                   {item.triage_summary?.symptoms?.length ? (
                     <div className="mt-3 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
@@ -1230,7 +1231,7 @@ export function AppointmentsClient() {
               </div>
             ) : null}
             <div className="rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
-              <span className="font-semibold text-[#1F2937]">Selected time:</span> {selectedTimeSummary}
+              <span className="font-semibold text-[#1F2937]">Selected time (Lagos):</span> {selectedTimeSummary}
             </div>
             <div className="grid gap-2 sm:grid-cols-[auto_1fr]">
               <button
@@ -1300,7 +1301,7 @@ export function AppointmentsClient() {
                     setCheckoutError("");
                     if (!promotionalTiming && !doctorCanConsultNow) return;
                     if (promotionalTiming) {
-                      const slot = earliestConsultationSlot(new Date(), selectedDoctorLive.unavailable_consultation_slots);
+                      const slot = earliestConsultationSlot(lagosCalendarDate(new Date()), selectedDoctorLive.unavailable_consultation_slots?.map(value => lagosCalendarDate(new Date(value)).toISOString()));
                       if (!slot) { setCheckoutError("No hourly slots are available today or tomorrow. Choose another date."); return; }
                       // Explicit date also refreshes a sheet left open across midnight.
                       setCustomScheduleDate(toDateInputValue(slot));

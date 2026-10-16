@@ -47,3 +47,4 @@ jobs:
             sleep 2
           done
           node scripts/founder50-remediation-qa.mjs
+          QA_TIMEZONE_MATRIX=true node scripts/founder50-remediation-qa.mjs
