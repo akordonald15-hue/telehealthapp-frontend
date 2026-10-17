@@ -30,9 +30,11 @@ export function HeroSlideshow() {
   const [paused, setPaused] = useState(false);
   const [rotationStopped, setRotationStopped] = useState(false);
   const [onScreen, setOnScreen] = useState(true);
+  const [cycle, setCycle] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const previous = useRef(active);
   const transition = useRef<gsap.core.Timeline | null>(null);
+  const progress = useRef<gsap.core.Timeline | null>(null);
 
   useGSAP(() => {
     ScrollTrigger.create({
@@ -45,13 +47,34 @@ export function HeroSlideshow() {
 
   useGSAP(
     () => {
-      if (paused || rotationStopped || !onScreen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      progress.current?.kill();
+      progress.current = null;
+      const fill = (index: number) => `[data-progress="${index}"]`;
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      heroSlides.forEach((_, index) => {
+        if (index !== active) {
+          gsap.to(fill(index), { scaleX: 0, duration: reduced ? 0 : 0.3, ease: "power2.out", overwrite: true });
+        }
+      });
+
+      if (reduced) {
+        gsap.set(fill(active), { scaleX: 1 });
         return;
       }
-      gsap.delayedCall(SLIDE_INTERVAL_MS / 1000, () => setActive((index) => (index + 1) % heroSlides.length));
+
+      progress.current = gsap
+        .timeline({ paused: paused || rotationStopped || !onScreen })
+        .to(fill(active), { scaleX: 0, duration: 0.25, ease: "power2.inOut", overwrite: true })
+        .to(fill(active), { scaleX: 1, duration: SLIDE_INTERVAL_MS / 1000, ease: "none" })
+        .call(() => setActive((index) => (index + 1) % heroSlides.length));
     },
-    { dependencies: [active, paused, rotationStopped, onScreen], revertOnUpdate: true },
+    { scope: rootRef, dependencies: [active, cycle] },
   );
+
+  useGSAP(() => {
+    progress.current?.paused(paused || rotationStopped || !onScreen);
+  }, { dependencies: [paused, rotationStopped, onScreen] });
 
   useGSAP(
     () => {
@@ -123,7 +146,11 @@ export function HeroSlideshow() {
       aria-roledescription="carousel"
       aria-label="Highlights"
       ref={rootRef}
-      onFocus={() => setPaused(true)}
+      onFocus={(event) => {
+        if (event.target.matches(":focus-visible")) {
+          setPaused(true);
+        }
+      }}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
           setPaused(false);
@@ -222,7 +249,7 @@ export function HeroSlideshow() {
         <div
           role="group"
           aria-label="Highlight controls"
-          className="absolute inset-x-0 z-10 mt-[22px] flex items-center justify-center"
+          className="ct-rise-in absolute inset-x-0 z-10 mt-[22px] flex items-center justify-center gap-[10px] [animation-delay:400ms]"
         >
           {heroSlides.map((slide, index) => (
             <button
@@ -231,24 +258,26 @@ export function HeroSlideshow() {
               aria-label={index === 0 ? "Show consultation highlight" : "Show homecare highlight"}
               aria-pressed={index === active}
               onClick={() => {
-                setRotationStopped(true);
+                setRotationStopped(false);
                 setActive(index);
+                setCycle((value) => value + 1);
               }}
-              className="group inline-flex h-6 cursor-pointer items-center justify-center px-[9px] focus-visible:outline-none"
+              className="group flex h-6 w-[90px] cursor-pointer items-center focus-visible:outline-none"
             >
-              <span
-                className={cn(
-                  "block h-[7px] rounded-full transition-all duration-300 motion-reduce:transition-none group-focus-visible:ring-2 group-focus-visible:ring-white group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#2563EB]",
-                  index === active ? "w-[26px] bg-white" : "w-[7px] bg-white/70 group-hover:bg-white",
-                )}
-              />
+              <span className="relative block h-[4px] w-full overflow-hidden rounded-full bg-white/40 transition-colors group-hover:bg-white/55 group-focus-visible:ring-2 group-focus-visible:ring-white group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#2563EB]">
+                <span
+                  data-progress={index}
+                  style={{ transform: "scaleX(0)" }}
+                  className="absolute inset-0 origin-left rounded-full bg-white"
+                />
+              </span>
             </button>
           ))}
           <button
             type="button"
             aria-label={rotationStopped ? "Resume" : "Pause"}
             onClick={() => setRotationStopped((value) => !value)}
-            className="ml-1 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-white/80 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-white/80 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             {rotationStopped ? (
               <Play className="h-[13px] w-[13px] fill-current" strokeWidth={0} />
