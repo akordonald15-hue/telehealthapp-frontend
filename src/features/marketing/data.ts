@@ -154,38 +154,34 @@ export const heroSlides: Array<{
   lead: string;
   highlight: string;
   tail: string;
-  highlightClassName: string;
   text: string;
+  textClassName: string;
   image: string;
   alt: string;
-  portraits: Array<{ image: string; name: string; featured?: boolean }>;
+  background: string;
+  backgroundClassName: string;
 }> = [
   {
     lead: "A Doctor’s",
     highlight: "Opinion,",
-    tail: "Book Today",
-    highlightClassName: "bg-[#1E40AF]",
-    text: "Online doctor consultations from ₦2,000 where applicable. Book immediately, subject to available appointment slots.",
-    image: "/img/team-consult.webp",
+    tail: "Minutes Away",
+    text: "Connect with a licensed doctor virtually, wherever you are in Nigeria confirmed in minutes, from ₦2,000.",
+    textClassName: "max-w-[450px]",
+    image: "/img/hero/doctors-consult.webp",
     alt: "Caretekk doctors ready for a virtual consultation",
-    portraits: [
-      { image: "/img/Dr Paul Chinonso.jpg", name: "Dr. Paul Chinonso" },
-      { image: "/img/Dr michael Idam.jpg", name: "Dr. Michael Idam", featured: true },
-      { image: "/img/Dr effiong Okon.jpg", name: "Dr. Effiong Okon" },
-    ],
+    background: "/img/hero/bg-consult.webp",
+    backgroundClassName: "left-1/2 top-[49px] w-[166%] -translate-x-1/2 max-lg:top-[12%] max-sm:top-[27%] max-sm:w-[300%]",
   },
   {
     lead: "Real Care",
     highlight: "Right",
-    tail: "at Your Door",
-    highlightClassName: "bg-[#1E40AF]",
-    text: "Book in-home care from ₦5,000. Home visits are currently available in Akwa Ibom State, Nigeria.",
-    image: "/img/team-homecare.webp",
+    tail: "Right at Your Door",
+    text: "Book a vetted nurse or caregiver for in-home care in Akwa Ibom from ₦5,000.",
+    textClassName: "max-w-[340px]",
+    image: "/img/hero/doctors-homecare.webp",
     alt: "Caretekk care team available for home visits",
-    portraits: [
-      { image: "/img/Dr Paul Chinonso.jpg", name: "Dr. Paul Chinonso" },
-      { image: "/img/Dr effiong Okon.jpg", name: "Dr. Effiong Okon", featured: true },
-    ],
+    background: "/img/hero/bg-homecare.webp",
+    backgroundClassName: "left-[-53%] top-0 w-[240%] max-sm:left-[-100%] max-sm:top-[26%] max-sm:w-[380%]",
   },
 ];
 
