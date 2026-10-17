@@ -77,11 +77,10 @@ export function GetStartedSection() {
           </div>
         </div>
 
-        <div className="relative -mx-4 overflow-hidden pb-16 md:-mx-10 md:aspect-[834/638] md:pb-0 lg:hidden">
+        <div className="relative -mx-4 aspect-[834/638] overflow-hidden pb-0 md:-mx-10 lg:hidden">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-            <span className="absolute -top-10 left-1/4 h-72 w-72 rounded-full bg-white/5 md:hidden" />
-            <span className="absolute left-1/2 top-[29.6%] hidden aspect-square w-[93.8%] -translate-x-1/2 rounded-full bg-white/10 md:block" />
-            <span className="absolute left-1/2 top-[47.8%] hidden aspect-square w-[66%] -translate-x-1/2 rounded-full bg-white/10 md:block" />
+            <span className="absolute left-1/2 top-[29.6%] aspect-square w-[93.8%] -translate-x-1/2 rounded-full bg-white/10" />
+            <span className="absolute left-1/2 top-[47.8%] aspect-square w-[66%] -translate-x-1/2 rounded-full bg-white/10" />
           </div>
           <Image
             src="/img/get-started-care.png"
@@ -89,7 +88,7 @@ export function GetStartedSection() {
             width={1745}
             height={917}
             sizes="100vw"
-            className="relative h-auto w-full object-cover md:absolute md:left-1/2 md:top-1/2 md:w-[170%] md:max-w-none md:-translate-x-1/2 md:-translate-y-1/2 md:object-contain"
+            className="absolute left-1/2 top-1/2 w-[170%] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain object-center"
           />
         </div>
       </div>

@@ -26,21 +26,21 @@ export function TechnologySection() {
         className="pointer-events-none absolute bottom-0 right-0 hidden h-[10.125rem] w-[2.8125rem] bg-[radial-gradient(circle,white_0.09375rem,transparent_0.09375rem)] bg-[length:0.5625rem_0.5625rem] opacity-50 lg:block"
       />
       <div className="relative mx-auto max-w-[1440px] px-4 md:px-10">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 hidden md:block">
-          <span className="absolute left-[-2.875rem] top-[14.3125rem] h-[39.9375rem] w-[39.9375rem] rounded-full bg-white/10 md:max-lg:left-1/2 md:max-lg:top-[18.5625rem] md:max-lg:h-[32.875rem] md:max-lg:w-[32.875rem] md:max-lg:-translate-x-1/2" />
-          <span className="absolute left-[3rem] top-[20.25rem] h-[28.125rem] w-[28.125rem] rounded-full bg-white/10 md:max-lg:left-1/2 md:max-lg:top-[23.445rem] md:max-lg:h-[23.148rem] md:max-lg:w-[23.148rem] md:max-lg:-translate-x-1/2" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 block">
+          <span className="absolute left-1/2 top-0 aspect-square w-[70%] -translate-x-1/2 rounded-full bg-white/10 md:max-lg:left-1/2 md:max-lg:top-[18.5625rem] md:max-lg:h-[32.875rem] md:max-lg:w-[32.875rem] md:max-lg:aspect-auto md:max-lg:-translate-x-1/2 lg:left-[-2.875rem] lg:top-[14.3125rem] lg:h-[39.9375rem] lg:w-[39.9375rem] lg:aspect-auto lg:translate-x-0" />
+          <span className="absolute left-1/2 top-[10vw] aspect-square w-[48%] -translate-x-1/2 rounded-full bg-white/10 md:max-lg:left-1/2 md:max-lg:top-[23.445rem] md:max-lg:h-[23.148rem] md:max-lg:w-[23.148rem] md:max-lg:aspect-auto md:max-lg:-translate-x-1/2 lg:left-[3rem] lg:top-[20.25rem] lg:h-[28.125rem] lg:w-[28.125rem] lg:aspect-auto lg:translate-x-0" />
         </div>
 
         <div className="relative grid gap-10 md:gap-[3.5625rem] lg:grid-cols-[45.5%_1fr] lg:gap-0">
           <div className="relative z-0">
-            <div className="relative mx-auto aspect-square w-full max-w-[34rem] md:max-lg:left-1/6 md:max-lg:aspect-[1245/934] md:max-lg:w-[161%] md:max-lg:max-w-none md:max-lg:-translate-x-1/6 lg:absolute lg:left-[-4.9582rem] lg:top-[-4.3537rem] lg:mx-0 lg:aspect-auto lg:h-[58.3777rem] lg:w-[58.3777rem] lg:max-w-none">
+            <div className="relative mx-auto aspect-[1245/934] w-full max-w-[34rem] origin-bottom scale-[1.6] md:scale-100 md:max-lg:left-1/6 md:max-lg:aspect-[1245/934] md:max-lg:w-[161%] md:max-lg:max-w-none md:max-lg:-translate-x-1/6 lg:absolute lg:left-[-4.9582rem] lg:top-[-4.3537rem] lg:mx-0 lg:aspect-auto lg:h-[58.3777rem] lg:w-[58.3777rem] lg:max-w-none">
               <Image
                 src="/img/technology-care.png"
                 alt="Caretekk technology-enabled care"
                 fill
                 priority={false}
                 sizes="(min-width: 1024px) 1085px, 100vw"
-                className="object-contain"
+                className="object-contain object-right md:object-center"
               />
             </div>
           </div>
