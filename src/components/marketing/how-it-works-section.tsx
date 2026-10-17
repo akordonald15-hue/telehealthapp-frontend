@@ -37,7 +37,7 @@ export function HowItWorksSection() {
           </p>
           <h2
             id="how-it-works-heading"
-            className="mx-auto max-w-[42.5rem] font-heading text-[clamp(2.25rem,4vw,3.4375rem)] font-bold leading-[1.2] tracking-normal text-ink"
+            className="mx-auto max-w-[42.5rem] font-heading text-[clamp(1.875rem,4vw,3.4375rem)] font-bold leading-[1.2] tracking-normal text-ink md:max-lg:text-[clamp(2.75rem,7.4vw,3.4375rem)] lg:text-[3.4375rem]"
           >
             Care In <span className="text-accent-strong">Three</span> Simple Steps.
           </h2>
@@ -48,7 +48,7 @@ export function HowItWorksSection() {
             {howItWorksSteps.map((step, idx) => (
               <li
                 key={step.num}
-                className={`relative overflow-hidden rounded-[3.125rem] ${step.fill} min-h-[clamp(18rem,48vw,26rem)] md:aspect-[774/739] ${step.num === "03" ? "lg:col-span-2 lg:aspect-[1415/739]" : ""}`}
+                className={`relative overflow-hidden rounded-[3.125rem] ${step.fill} min-h-[16rem] md:aspect-[774/739] ${step.num === "03" ? "lg:col-span-2 lg:aspect-[1415/739]" : "lg:aspect-[694/739]"}`}
               >
                 <div className="pointer-events-none absolute inset-0 z-0 hidden md:block">
                   <Image
@@ -80,9 +80,9 @@ export function HowItWorksSection() {
                     </>
                   )}
                 </div>
-                <div className="relative z-10 flex flex-col gap-[2.75rem] p-6 sm:p-8 lg:p-[2.75rem] lg:pt-[5.0625rem]">
-                  <span className="grid h-20 w-20 place-items-center rounded-[1.875rem] bg-white/20 text-white lg:h-[6.25rem] lg:w-[6.25rem] lg:rounded-[2.5rem]">
-                    <span className="text-[1.75rem] font-semibold leading-none lg:text-[2.1875rem]">
+                <div className="relative z-10 flex flex-col gap-6 p-6 sm:p-8 lg:gap-[2.75rem] lg:p-[2.75rem] lg:pt-[5.0625rem]">
+                  <span className="grid h-20 w-20 place-items-center rounded-[1.875rem] bg-white/20 text-white md:h-[6.25rem] md:w-[6.25rem] md:rounded-[2.5rem] lg:h-[6.25rem] lg:w-[6.25rem] lg:rounded-[2.5rem]">
+                    <span className="text-[1.75rem] font-semibold leading-none md:text-[2.1875rem] lg:text-[2.1875rem]">
                       {step.num}
                   </span>
                   </span>

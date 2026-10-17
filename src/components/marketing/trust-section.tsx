@@ -29,7 +29,7 @@ export function TrustSection() {
           </p>
           <h2
             id="trust-heading"
-            className="mx-auto max-w-[46.9375rem] font-heading text-[clamp(2.25rem,4vw,3.8125rem)] font-bold leading-[1.2] tracking-normal text-ink md:max-lg:text-[3.8125rem]"
+            className="mx-auto max-w-[46.9375rem] font-heading text-[clamp(1.875rem,4vw,3.8125rem)] font-bold leading-[1.2] tracking-normal text-ink md:max-lg:text-[clamp(2.75rem,7.4vw,3.8125rem)] lg:text-[clamp(3.5625rem,4vw,3.8125rem)]"
           >
             Care You Can Put Your{" "}
             <span className="text-accent-strong">Family&rsquo;s</span> Name On.
@@ -65,9 +65,9 @@ export function TrustSection() {
               return (
                 <li
                   key={card.title}
-                  className={`flex items-center gap-6 rounded-[2.8125rem] bg-surface p-6 shadow-[var(--shadow-trust-card)] sm:p-8 md:min-h-[14.4375rem] md:w-[93%] md:gap-[2.8125rem] md:px-[2.5rem] md:py-0 md:max-lg:rounded-[3.125rem] lg:min-h-[13.0625rem] lg:w-[85%] lg:gap-[2.5625rem] lg:p-[2.625rem] ${cardOffsets[index]}`}
+                  className={`flex items-center gap-6 rounded-[2.8125rem] bg-surface p-6 shadow-[var(--shadow-trust-card)] sm:p-8 md:min-h-[14.4375rem] md:w-[92%] md:gap-[2.8125rem] md:px-[2.5rem] md:py-0 md:max-lg:rounded-[3.125rem] lg:min-h-[13.0625rem] lg:w-[85%] lg:gap-[2.5625rem] lg:p-[2.625rem] ${cardOffsets[index]}`}
                 >
-                  <span className="relative grid h-[72px] w-[72px] shrink-0 place-items-center rounded-full bg-primary-halo/50 sm:h-[96px] sm:w-[96px] md:h-[8.6875rem] md:w-[8.6875rem] lg:h-[126px] lg:w-[126px]">
+                  <span className="relative grid h-[72px] w-[72px] shrink-0 place-items-center rounded-full bg-primary-halo/50 md:h-[8.6875rem] md:w-[8.6875rem] lg:h-[126px] lg:w-[126px]">
                     <span className="absolute h-[69.8%] w-[69.8%] rounded-full bg-primary" />
                     <Icon className="relative h-[36%] w-[36%] text-white" />
                   </span>

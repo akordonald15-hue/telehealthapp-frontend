@@ -12,7 +12,7 @@ const pillWidths = ["lg:w-[35.75rem]", "lg:w-[49.375rem]", "lg:w-[42rem]", "lg:w
 
 const pillOffsetsMd = ["md:ml-0", "md:ml-[0.125rem]", "md:ml-[0.125rem]", "md:ml-[-0.75rem]"];
 
-const pillWidthsMd = ["md:w-[35.75rem]", "md:w-[49.375rem]", "md:w-[42rem]", "md:w-[50.4375rem]"];
+
 
 export function TechnologySection() {
   return (
@@ -48,7 +48,7 @@ export function TechnologySection() {
           <div className="relative z-10">
             <h2
               id="technology-heading"
-              className="font-heading text-[clamp(2.25rem,4vw,3.8125rem)] font-bold leading-[1.2] tracking-normal text-white md:max-lg:text-[3.8125rem]"
+              className="font-heading text-[clamp(1.875rem,4vw,3.8125rem)] font-bold leading-[1.2] tracking-normal text-white md:max-lg:text-[clamp(2.75rem,7.4vw,3.8125rem)] lg:text-[clamp(3.5625rem,4vw,3.8125rem)]"
             >
               Technology-Enabled Care, Not a Phone Book of Contacts.
             </h2>
@@ -61,12 +61,12 @@ export function TechnologySection() {
               {technologySteps.map((step, index) => (
                 <li
                   key={step.num}
-                  className={`flex w-fit items-center gap-4 rounded-full bg-primary-halo-strong/20 py-2 pl-[1.125rem] pr-[1.125rem] md:gap-[1.5625rem] md:py-[0.625rem] md:pl-[1.4375rem] md:pr-[1.4375rem] lg:gap-[1.5625rem] lg:py-[0.625rem] lg:pl-[1.4375rem] lg:pr-[1.4375rem] ${pillOffsetsMd[index]} ${pillWidthsMd[index]} ${pillOffsets[index]} ${pillWidths[index]}`}
+                  className={`flex w-full max-w-full items-center gap-4 rounded-full bg-primary-halo-strong/20 py-2 pl-[1.125rem] pr-[1.125rem] md:w-fit lg:max-w-none md:gap-[1.5625rem] md:py-[0.625rem] md:pl-[1.4375rem] md:pr-[1.4375rem] lg:gap-[1.5625rem] lg:py-[0.625rem] lg:pl-[1.4375rem] lg:pr-[1.4375rem] ${pillOffsetsMd[index]} ${pillOffsets[index]} ${pillWidths[index]}`}
                 >
                   <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-white/20 text-[1.5rem] font-semibold leading-none text-white md:h-[4.375rem] md:w-[4.375rem] md:rounded-[2.5rem] md:text-[1.875rem] lg:h-[4.375rem] lg:w-[4.375rem] lg:rounded-[2.5rem] lg:text-[1.875rem]">
                     {step.num}
                   </span>
-                  <span className="whitespace-nowrap text-[1.25rem] font-medium leading-[1.5] tracking-normal text-white md:text-[1.5625rem] lg:text-[1.5625rem]">
+                  <span className="whitespace-normal text-[1.25rem] font-medium leading-[1.5] tracking-normal text-white md:whitespace-nowrap md:text-[clamp(1.25rem,calc((100vw-229px)/26.64),1.5625rem)] lg:whitespace-nowrap lg:text-[1.5625rem]">
                     {step.title}
                   </span>
                 </li>

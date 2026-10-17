@@ -38,7 +38,7 @@ export function GetStartedSection() {
           <div className="relative z-10">
             <h2
               id="get-started-heading"
-              className="whitespace-pre-line font-heading text-[clamp(2.25rem,4vw,3.8125rem)] font-bold leading-[1.2] tracking-normal text-white md:max-lg:text-[3.8125rem]"
+              className="whitespace-pre-line font-heading text-[clamp(1.875rem,4vw,3.8125rem)] font-bold leading-[1.2] tracking-normal text-white md:max-lg:text-[clamp(2.75rem,7.4vw,3.8125rem)] lg:text-[clamp(3.5625rem,4vw,3.8125rem)]"
             >
               {getStartedCta.heading}
             </h2>
@@ -89,7 +89,7 @@ export function GetStartedSection() {
             width={1745}
             height={917}
             sizes="100vw"
-            className="relative h-auto w-full object-cover md:absolute md:inset-0 md:h-full md:w-full md:max-lg:left-1/22 md:max-lg:top-1/2 md:max-lg:h-auto md:max-lg:w-[170%] md:max-lg:max-w-none md:max-lg:-translate-x-[45%] md:max-lg:-translate-y-1/2 md:max-lg:object-contain"
+            className="relative h-auto w-full object-cover md:absolute md:left-1/2 md:top-1/2 md:w-[170%] md:max-w-none md:-translate-x-1/2 md:-translate-y-1/2 md:object-contain"
           />
         </div>
       </div>
