@@ -49,9 +49,9 @@ export function GetStartedSection() {
             <div className="mt-12 flex flex-col gap-4 sm:flex-row md:flex-nowrap md:max-lg:mt-[4.5625rem] md:gap-[1.875rem] lg:mt-[calc(4*var(--u))] lg:flex-nowrap lg:gap-[calc(3.125*var(--u))]">
               <Link
                 href={getStartedCta.primaryHref}
-                className="inline-flex h-[3.75rem] items-center justify-center whitespace-nowrap gap-[1.125rem] rounded-full bg-accent-strong px-6 font-heading text-lg font-normal tracking-normal text-white shadow-[0_9px_20px_rgba(158,154,154,0.10),0_36px_36px_rgba(158,154,154,0.09),0_81px_48px_rgba(158,154,154,0.05),0_144px_57px_rgba(158,154,154,0.01)] transition hover:-translate-y-0.5 hover:brightness-105 md:flex-1 md:h-[5.625rem] md:gap-[1.1875rem] md:px-10 md:text-[1.6875rem] lg:h-[calc(5.625*var(--u))] lg:gap-[calc(1.1875*var(--u))] lg:px-[calc(2.5*var(--u))] lg:text-[calc(1.6875*var(--u))]"
+                className="inline-flex h-[3.75rem] items-center justify-between whitespace-nowrap gap-[1.125rem] rounded-full bg-accent-strong px-6 font-heading text-lg font-normal tracking-normal text-white shadow-[0_9px_20px_rgba(158,154,154,0.10),0_36px_36px_rgba(158,154,154,0.09),0_81px_48px_rgba(158,154,154,0.05),0_144px_57px_rgba(158,154,154,0.01)] transition hover:-translate-y-0.5 hover:brightness-105 sm:flex-1 md:h-[5.625rem] md:justify-center md:gap-[0.875rem] md:px-6 md:text-[1.5rem] lg:h-[calc(5.625*var(--u))] lg:gap-[calc(1.1875*var(--u))] lg:px-[calc(2.5*var(--u))] lg:text-[calc(1.6875*var(--u))]"
               >
-                {getStartedCta.primaryLabel}
+                <span>{getStartedCta.primaryLabel}</span>
                 <Image
                   src="/img/arrow-right.png"
                   alt=""
@@ -62,9 +62,9 @@ export function GetStartedSection() {
               </Link>
               <Link
                 href={getStartedCta.secondaryHref}
-                className="inline-flex h-[3.75rem] items-center justify-center whitespace-nowrap gap-[1.125rem] rounded-full border-2 border-white bg-transparent px-6 font-heading text-lg font-normal tracking-normal text-white transition hover:-translate-y-0.5 hover:bg-white/10 md:flex-1 md:h-[5.625rem] md:gap-[1.375rem] md:px-10 md:text-[1.75rem] lg:h-[calc(5.625*var(--u))] lg:gap-[calc(1.375*var(--u))] lg:px-[calc(2.5*var(--u))] lg:text-[calc(1.75*var(--u))]"
+                className="inline-flex h-[3.75rem] items-center justify-between whitespace-nowrap gap-[1.125rem] rounded-full border-2 border-white bg-transparent px-6 font-heading text-lg font-normal tracking-normal text-white transition hover:-translate-y-0.5 hover:bg-white/10 sm:flex-1 md:h-[5.625rem] md:justify-center md:gap-[0.875rem] md:px-6 md:text-[1.5rem] lg:h-[calc(5.625*var(--u))] lg:gap-[calc(1.375*var(--u))] lg:px-[calc(2.5*var(--u))] lg:text-[calc(1.75*var(--u))]"
               >
-                {getStartedCta.secondaryLabel}
+                <span>{getStartedCta.secondaryLabel}</span>
                 <Image
                   src="/img/clinic.png"
                   alt=""
@@ -88,7 +88,7 @@ export function GetStartedSection() {
             width={1745}
             height={917}
             sizes="100vw"
-            className="absolute left-[cal(100%-30%)] top-1/2 w-[150%] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain object-center"
+            className="absolute bottom-0 left-1/2 w-[140%] max-w-none -translate-x-[75%] object-contain object-center"
           />
         </div>
       </div>
