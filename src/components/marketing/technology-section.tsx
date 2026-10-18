@@ -31,10 +31,10 @@ export function TechnologySection() {
         aria-hidden="true"
         className="pointer-events-none absolute bottom-0 right-0 hidden h-[10.125rem] w-[2.8125rem] bg-[radial-gradient(circle,white_0.09375rem,transparent_0.09375rem)] bg-[length:0.5625rem_0.5625rem] opacity-50 lg:block"
       />
-      <div className="fluid-canvas relative mx-auto px-4 md:px-10">
+      <div className="fluid-canvas relative mx-auto px-4 md:px-10 lg:mx-[calc(3.5*var(--u))]!">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 block">
-          <span className="absolute left-1/2 top-0 aspect-square w-[70%] -translate-x-1/2 rounded-full bg-white/10 md:max-lg:left-1/2 md:max-lg:top-[18.5625rem] md:max-lg:h-[32.875rem] md:max-lg:w-[32.875rem] md:max-lg:aspect-auto md:max-lg:-translate-x-1/2 lg:left-[calc(-2.875*var(--u))] lg:top-[calc(14.3125*var(--u))] lg:h-[calc(39.9375*var(--u))] lg:w-[calc(39.9375*var(--u))] lg:aspect-auto lg:translate-x-0" />
-          <span className="absolute left-1/2 top-[10vw] aspect-square w-[48%] -translate-x-1/2 rounded-full bg-white/10 md:max-lg:left-1/2 md:max-lg:top-[23.445rem] md:max-lg:h-[23.148rem] md:max-lg:w-[23.148rem] md:max-lg:aspect-auto md:max-lg:-translate-x-1/2 lg:left-[calc(3*var(--u))] lg:top-[calc(20.25*var(--u))] lg:h-[calc(28.125*var(--u))] lg:w-[calc(28.125*var(--u))] lg:aspect-auto lg:translate-x-0" />
+          <span className="absolute left-1/2 top-0 aspect-square w-[70%] -translate-x-1/2 rounded-full bg-white/10 md:max-lg:left-1/2 md:max-lg:top-[38.67vw] md:max-lg:h-[68.49vw] md:max-lg:w-[68.49vw] md:max-lg:aspect-auto md:max-lg:-translate-x-1/2 lg:left-[calc(-2.875*var(--u))] lg:top-[calc(14.3125*var(--u))] lg:h-[calc(39.9375*var(--u))] lg:w-[calc(39.9375*var(--u))] lg:aspect-auto lg:translate-x-0" />
+          <span className="absolute left-1/2 top-[10vw] aspect-square w-[48%] -translate-x-1/2 rounded-full bg-white/10 md:max-lg:left-1/2 md:max-lg:top-[48.84vw] md:max-lg:h-[48.22vw] md:max-lg:w-[48.22vw] md:max-lg:aspect-auto md:max-lg:-translate-x-1/2 lg:left-[calc(3*var(--u))] lg:top-[calc(20.25*var(--u))] lg:h-[calc(28.125*var(--u))] lg:w-[calc(28.125*var(--u))] lg:aspect-auto lg:translate-x-0" />
         </div>
 
         <div className="relative grid gap-10 md:gap-[3.5625rem] lg:grid-cols-[45.5%_1fr] lg:gap-0">
