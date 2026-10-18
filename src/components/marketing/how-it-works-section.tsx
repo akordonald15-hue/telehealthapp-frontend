@@ -30,21 +30,21 @@ export function HowItWorksSection() {
       aria-labelledby="how-it-works-heading"
       className="relative overflow-hidden bg-white py-20 lg:pt-[6.25rem] lg:pb-[11.125rem]"
     >
-      <div className="mx-auto max-w-[1440px] px-4 md:px-10">
-        <header className="mb-6 flex flex-col items-center gap-[0.875rem] text-center md:mb-8 lg:mb-[3.4375rem]">
-          <p className="text-[1.5rem] font-light uppercase leading-[1.5] tracking-normal text-primary-dark lg:text-[1.8125rem]">
+      <div className="fluid-canvas mx-auto px-4 md:px-10">
+        <header className="mb-6 flex flex-col items-center gap-[0.875rem] text-center md:mb-8 lg:mb-[calc(3.4375*var(--u))]">
+          <p className="text-[1.5rem] font-light uppercase leading-[1.5] tracking-normal text-primary-dark lg:text-[calc(1.8125*var(--u))]">
             how it works
           </p>
           <h2
             id="how-it-works-heading"
-            className="mx-auto max-w-[42.5rem] font-heading text-[clamp(1.875rem,4vw,3.4375rem)] font-bold leading-[1.2] tracking-normal text-ink md:max-lg:text-[clamp(2.75rem,7.4vw,3.4375rem)] lg:text-[3.4375rem]"
+            className="mx-auto max-w-[42.5rem] font-heading text-[clamp(1.875rem,4vw,3.4375rem)] font-bold leading-[1.2] tracking-normal text-ink md:max-lg:text-[clamp(2.75rem,7.4vw,3.4375rem)] lg:max-w-[calc(42.5*var(--u))] lg:text-[calc(3.4375*var(--u))]"
           >
             Care In <span className="text-accent-strong">Three</span> Simple Steps.
           </h2>
         </header>
 
         <div className="relative mt-12 lg:mt-[3.75rem]">
-          <ul className="relative z-10 grid gap-6 md:gap-y-[3.375rem] lg:mx-auto lg:max-w-[80rem] lg:grid-cols-2 lg:gap-x-[1.6875rem] lg:gap-y-[3.4375rem]">
+          <ul className="relative z-10 grid gap-6 md:gap-y-[3.375rem] lg:mx-auto lg:max-w-[calc(80*var(--u))] lg:grid-cols-2 lg:gap-x-[calc(1.6875*var(--u))] lg:gap-y-[calc(3.4375*var(--u))]">
             {howItWorksSteps.map((step, idx) => (
               <li
                 key={step.num}
@@ -63,34 +63,34 @@ export function HowItWorksSection() {
                 <div className="pointer-events-none absolute inset-0 z-0 hidden lg:block">
                   {idx === 0 && (
                     <>
-                      <span className="absolute left-[16.1875rem] top-[15.75rem] h-[48.0625rem] w-[48.0625rem] rounded-full bg-white opacity-5" />
-                      <span className="absolute left-[23.268rem] top-[22.890625rem] h-[33.841875rem] w-[33.841875rem] rounded-full bg-white opacity-10" />
+                      <span className="absolute left-[calc(16.1875*var(--u))] top-[calc(15.75*var(--u))] h-[calc(48.0625*var(--u))] w-[calc(48.0625*var(--u))] rounded-full bg-white opacity-5" />
+                      <span className="absolute left-[calc(23.268*var(--u))] top-[calc(22.890625*var(--u))] h-[calc(33.841875*var(--u))] w-[calc(33.841875*var(--u))] rounded-full bg-white opacity-10" />
                     </>
                   )}
                   {idx === 1 && (
                     <>
-                      <span className="absolute left-[13.6875rem] top-[18.4375rem] h-[48.0625rem] w-[48.0625rem] rounded-full bg-white opacity-5" />
-                      <span className="absolute left-[20.8125rem] top-[25.5625rem] h-[33.841875rem] w-[33.841875rem] rounded-full bg-white opacity-10" />
+                      <span className="absolute left-[calc(13.6875*var(--u))] top-[calc(18.4375*var(--u))] h-[calc(48.0625*var(--u))] w-[calc(48.0625*var(--u))] rounded-full bg-white opacity-5" />
+                      <span className="absolute left-[calc(20.8125*var(--u))] top-[calc(25.5625*var(--u))] h-[calc(33.841875*var(--u))] w-[calc(33.841875*var(--u))] rounded-full bg-white opacity-10" />
                     </>
                   )}
                   {idx === 2 && (
                     <>
-                      <span className="absolute left-[-9.875rem] top-[17.5rem] h-[48.0625rem] w-[48.0625rem] rounded-full bg-white opacity-10" />
-                      <span className="absolute left-[-2.794375rem] top-[24.640625rem] h-[33.841875rem] w-[33.841875rem] rounded-full bg-white opacity-10" />
+                      <span className="absolute left-[calc(-9.875*var(--u))] top-[calc(17.5*var(--u))] h-[calc(48.0625*var(--u))] w-[calc(48.0625*var(--u))] rounded-full bg-white opacity-10" />
+                      <span className="absolute left-[calc(-2.794375*var(--u))] top-[calc(24.640625*var(--u))] h-[calc(33.841875*var(--u))] w-[calc(33.841875*var(--u))] rounded-full bg-white opacity-10" />
                     </>
                   )}
                 </div>
-                <div className="relative z-10 flex flex-col gap-6 p-6 sm:p-8 lg:gap-[2.75rem] lg:p-[2.75rem] lg:pt-[5.0625rem]">
-                  <span className="grid h-20 w-20 place-items-center rounded-[1.875rem] bg-white/20 text-white md:h-[6.25rem] md:w-[6.25rem] md:rounded-[2.5rem] lg:h-[6.25rem] lg:w-[6.25rem] lg:rounded-[2.5rem]">
-                    <span className="text-[1.75rem] font-semibold leading-none md:text-[2.1875rem] lg:text-[2.1875rem]">
+                <div className="relative z-10 flex flex-col gap-6 p-6 sm:p-8 lg:gap-[calc(2.75*var(--u))] lg:p-[calc(2.75*var(--u))] lg:pt-[calc(5.0625*var(--u))]">
+                  <span className="grid h-20 w-20 place-items-center rounded-[1.875rem] bg-white/20 text-white md:h-[6.25rem] md:w-[6.25rem] md:rounded-[2.5rem] lg:h-[calc(6.25*var(--u))] lg:w-[calc(6.25*var(--u))] lg:rounded-[calc(2.5*var(--u))]">
+                    <span className="text-[1.75rem] font-semibold leading-none md:text-[2.1875rem] lg:text-[calc(2.1875*var(--u))]">
                       {step.num}
                   </span>
                   </span>
                   <div className="flex flex-col gap-[1.125rem]">
-                    <h3 className="font-heading text-[1.375rem] font-bold leading-[1.2] tracking-normal text-white lg:text-[1.75rem]">
+                    <h3 className="font-heading text-[1.375rem] font-bold leading-[1.2] tracking-normal text-white lg:text-[calc(1.75*var(--u))]">
                       {step.title}
                     </h3>
-                    <p className="max-w-[30.5625rem] text-[1.0625rem] font-normal leading-[1.5] text-white lg:text-[1.4125rem]">
+                    <p className="max-w-[30.5625rem] text-[1.0625rem] font-normal leading-[1.5] text-white lg:max-w-[calc(30.5625*var(--u))] lg:text-[calc(1.4125*var(--u))]">
                       {step.text}
                     </p>
                   </div>
