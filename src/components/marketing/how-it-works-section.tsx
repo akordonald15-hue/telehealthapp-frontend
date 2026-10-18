@@ -87,10 +87,10 @@ export function HowItWorksSection() {
                   </span>
                   </span>
                   <div className="flex flex-col gap-[1.125rem]">
-                    <h3 className="font-heading text-[1.375rem] font-bold leading-[1.2] tracking-normal text-white lg:text-[calc(1.75*var(--u))]">
+                    <h3 className="font-heading text-[1.375rem] font-bold leading-[1.2] tracking-normal text-white md:text-[1.9375rem] lg:text-[calc(1.75*var(--u))]">
                       {step.title}
                     </h3>
-                    <p className="max-w-[30.5625rem] text-[1.0625rem] font-normal leading-[1.5] text-white lg:max-w-[calc(30.5625*var(--u))] lg:text-[calc(1.4125*var(--u))]">
+                    <p className="max-w-[30.5625rem] text-[1.0625rem] font-normal leading-[1.5] text-white md:text-[1.5625rem] lg:max-w-[calc(30.5625*var(--u))] lg:text-[calc(1.4125*var(--u))]">
                       {step.text}
                     </p>
                   </div>
