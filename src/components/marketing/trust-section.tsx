@@ -38,7 +38,7 @@ export function TrustSection() {
 
         <div className="mt-9 grid gap-10 md:max-lg:mt-[8.625rem] md:gap-[6.1875rem] lg:grid-cols-[45.5%_1fr] lg:gap-0">
           <div className="relative mx-auto w-full md:w-[96.5%] lg:w-full">
-            <div className="relative mx-auto w-full max-w-[36.625rem] md:mx-0 md:w-[97%] md:max-w-none lg:absolute lg:left-[calc(-3.125*var(--u))] lg:top-[calc(7.5*var(--u))] lg:w-[calc(36.625*var(--u))] lg:max-w-none">
+            <div className="relative mx-auto w-full max-w-[36.625rem] md:mx-0 md:w-[97%] md:max-w-none lg:absolute lg:left-0 lg:top-[calc(7.5*var(--u))] lg:w-[calc(36.625*var(--u))] lg:max-w-none">
               <Image
                 src="/img/trust-care-team.png"
                 alt="Caretekk professional supporting a patient during a home visit"
