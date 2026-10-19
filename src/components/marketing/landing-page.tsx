@@ -1,37 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Calendar,
-  CheckCircle2,
-  MessageCircle,
-  Sparkles,
-  Stethoscope,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { HeroSlideshow } from "@/components/marketing/hero-slideshow";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
 import { PlatformStats } from "@/components/marketing/platform-stats";
 import { RevealLines } from "@/components/marketing/reveal-lines";
-import {
-  doctors,
-  howItWorksSteps,
-  platformHighlights,
-  serviceOffers,
-  trustItems,
-} from "@/features/marketing/data";
+import { doctors, platformHighlights, serviceOffers } from "@/features/marketing/data";
 import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
 import { SolutionCard } from "./solution-card";
 import { ServiceCard } from "./service-card";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { SiteFooter } from "@/components/marketing/site-footer";
+import { HowItWorksSection } from "@/components/marketing/how-it-works-section";
+import { TrustSection } from "@/components/marketing/trust-section";
+import { TechnologySection } from "@/components/marketing/technology-section";
+import { GetStartedSection } from "@/components/marketing/get-started-section";
 
 const LIGHT_DOTS = "bg-[radial-gradient(rgb(78_82_229/0.1)_1px,transparent_1.4px)] bg-[size:16px_16px]";
 const PANEL_DOTS = "bg-[radial-gradient(rgb(255_255_255/0.12)_1px,transparent_1.4px)] bg-[size:16px_16px]";
-import { FaqSection } from "@/components/marketing/faq-section";
-import { SiteFooter } from "@/components/marketing/site-footer";
 
 const homeCareChips = ["Mother & baby care", "Elderly care", "Postnatal care", "General homecare"];
-const stepIcons = [Calendar, Stethoscope, Sparkles, MessageCircle];
 
 export function LandingPage() {
   const [advice, homeVisits, verified, confirmation, pricing] = platformHighlights;
@@ -103,120 +93,11 @@ export function LandingPage() {
         </section>
       </div>
 
-      <div className="ct-mesh">
-        {/* Bento — Trust */}
-        <section id="trust" className="mx-auto max-w-[1440px] px-4 py-24 sm:py-28 md:px-10 lg:py-32">
-          <div className="mb-16 text-center">
-            <p className="ct-caption text-[#2563EB]">Why people trust Caretekk</p>
-            <h2 className="mx-auto mt-4 max-w-3xl font-heading text-3xl font-semibold leading-tight text-[#0b1c30] sm:text-4xl">
-              A modern care experience designed to feel safe and easy.
-            </h2>
-          </div>
-
-          <div className="grid auto-rows-fr gap-6 md:grid-cols-12">
-            {/* Verified doctors — big */}
-            <article className="ct-hero-shadow group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-[rgba(116,118,134,0.18)] bg-white p-8 sm:p-10 md:col-span-8">
-              <div>
-                <div className="mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eff4ff] text-[#2563EB] transition group-hover:bg-[#2563EB] group-hover:text-white">
-                  {(() => {
-                    const Icon = trustItems[0].icon;
-                    return <Icon className="h-7 w-7" />;
-                  })()}
-                </div>
-                <h3 className="font-heading text-2xl font-semibold text-[#0b1c30]">
-                  {trustItems[0].title}
-                </h3>
-                <p className="mt-4 max-w-md text-base leading-7 text-[#434655]">
-                  {trustItems[0].text}
-                </p>
-              </div>
-              <div className="mt-10 flex items-center gap-3">
-                <div className="flex -space-x-3">
-                  {doctors.map((doctor) => (
-                    <div
-                      key={doctor.name}
-                      className="h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-[#dce9ff] shadow-sm"
-                    >
-                      <Image
-                        src={doctor.image}
-                        alt={doctor.name}
-                        width={120}
-                        height={120}
-                        className="h-full w-full object-cover object-top"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <span className="text-sm font-semibold text-[#0b1c30]">+ board-certified specialists</span>
-              </div>
-            </article>
-
-            {/* Licensed nurses — dark */}
-            <article className="group relative overflow-hidden rounded-[2rem] bg-[#0b1c30] p-8 sm:p-10 md:col-span-4">
-              <div className="mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#2563EB]/25 text-[#b7c4ff]">
-                {(() => {
-                  const Icon = trustItems[1].icon;
-                  return <Icon className="h-7 w-7" />;
-                })()}
-              </div>
-              <h3 className="font-heading text-2xl font-semibold text-white">{trustItems[1].title}</h3>
-              <p className="mt-4 text-base leading-7 text-white/75">{trustItems[1].text}</p>
-              <div className="mt-8 space-y-2">
-                <div className="ct-glass-dark rounded-xl px-4 py-2.5 text-sm text-white/90">Mother & baby visits</div>
-                <div className="ct-glass-dark rounded-xl px-4 py-2.5 text-sm text-white/90">Elderly care support</div>
-              </div>
-            </article>
-
-            {/* Secure payments */}
-            <article className="ct-hero-shadow group rounded-[2rem] border border-[rgba(116,118,134,0.18)] bg-white p-8 sm:p-10 md:col-span-4">
-              <div className="mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eff4ff] text-[#2563EB] transition group-hover:bg-[#2563EB] group-hover:text-white">
-                {(() => {
-                  const Icon = trustItems[2].icon;
-                  return <Icon className="h-7 w-7" />;
-                })()}
-              </div>
-              <h3 className="font-heading text-xl font-semibold text-[#0b1c30]">{trustItems[2].title}</h3>
-              <p className="mt-3 text-sm leading-7 text-[#434655]">{trustItems[2].text}</p>
-            </article>
-
-            {/* 24/7 access */}
-            <article className="ct-hero-shadow group rounded-[2rem] border border-[rgba(116,118,134,0.18)] bg-white p-8 sm:p-10 md:col-span-4">
-              <div className="mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eff4ff] text-[#2563EB] transition group-hover:bg-[#2563EB] group-hover:text-white">
-                {(() => {
-                  const Icon = trustItems[3].icon;
-                  return <Icon className="h-7 w-7" />;
-                })()}
-              </div>
-              <h3 className="font-heading text-xl font-semibold text-[#0b1c30]">{trustItems[3].title}</h3>
-              <p className="mt-3 text-sm leading-7 text-[#434655]">{trustItems[3].text}</p>
-            </article>
-
-            {/* Live consultations */}
-            <article className="group flex flex-col justify-between rounded-[2rem] border border-[rgba(116,118,134,0.18)] bg-[#e5eeff] p-8 sm:p-10 md:col-span-4">
-              <div>
-                <div className="mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#2563EB]/10 text-[#2563EB]">
-                  {(() => {
-                    const Icon = trustItems[4].icon;
-                    return <Icon className="h-7 w-7" />;
-                  })()}
-                </div>
-                <h3 className="font-heading text-xl font-semibold text-[#0b1c30]">{trustItems[4].title}</h3>
-                <p className="mt-3 text-sm leading-7 text-[#434655]">{trustItems[4].text}</p>
-              </div>
-              <ul className="mt-6 space-y-2">
-                <li className="flex items-center gap-2 text-xs font-semibold text-[#0b1c30]">
-                  <CheckCircle2 className="h-4 w-4 text-[#2563EB]" />
-                  Secure messaging
-                </li>
-                <li className="flex items-center gap-2 text-xs font-semibold text-[#0b1c30]">
-                  <CheckCircle2 className="h-4 w-4 text-[#2563EB]" />
-                  Connected follow-ups
-                </li>
-              </ul>
-            </article>
-          </div>
-        </section>
-      </div>
+      {/* New marketing sections (How It Works, Trust, Technology, Get Started) */}
+      <HowItWorksSection />
+      <TrustSection />
+      <TechnologySection />
+      <GetStartedSection />
 
       {/* Doctor showcase — dark */}
       <section id="doctors" className="overflow-hidden bg-[#0b1c30] py-24 text-white sm:py-28 lg:py-32">
@@ -340,67 +221,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* How it works — timeline */}
-      <section id="how-it-works" className="mx-auto max-w-[1000px] px-4 py-24 md:px-10 lg:py-32">
-        <div className="mb-16 text-center">
-          <p className="ct-caption text-[#2563EB]">How it works</p>
-          <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight text-[#0b1c30] sm:text-4xl">
-            A simple path from sign-up to care.
-          </h2>
-          <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-[#434655] sm:text-lg">
-            Caretekk keeps the care journey clear so patients always know the next step.
-          </p>
-        </div>
-
-        <div className="relative space-y-12 md:space-y-16">
-          <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-[rgba(116,118,134,0.2)] md:block" />
-
-          {howItWorksSteps.map((step, i) => {
-            const Icon = stepIcons[i] ?? Calendar;
-            const reversed = i % 2 === 1;
-            const progress = ((i + 1) / howItWorksSteps.length) * 100;
-
-            return (
-              <div
-                key={step.id}
-                className={`group relative flex flex-col items-center gap-8 md:flex-row md:gap-12 ${reversed ? "md:flex-row-reverse" : ""
-                  }`}
-              >
-                <div className={`flex-1 text-center md:text-left ${reversed ? "" : "md:text-right"}`}>
-                  <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#2563EB] font-bold text-white md:hidden">
-                    {step.id}
-                  </div>
-                  <h3 className="font-heading text-xl font-semibold text-[#0b1c30] sm:text-2xl">{step.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-[#434655] sm:text-base">{step.text}</p>
-                </div>
-
-                <div className="relative z-10 hidden h-12 w-12 items-center justify-center rounded-full border-2 border-[#2563EB] bg-white font-bold text-[#2563EB] transition group-hover:bg-[#2563EB] group-hover:text-white md:flex">
-                  {step.id}
-                </div>
-
-                <div className="w-full flex-1">
-                  <div
-                    className={`rounded-[1.5rem] border border-[rgba(116,118,134,0.15)] bg-[#e5eeff] p-5 shadow-sm transition duration-500 group-hover:rotate-0 sm:p-6 ${reversed ? "md:-rotate-1" : "md:rotate-1"
-                      }`}
-                  >
-                    <div className="mb-4 flex items-center gap-3">
-                      <Icon className="h-5 w-5 text-[#2563EB]" />
-                      <span className="text-sm font-semibold text-[#0b1c30]">{step.title}</span>
-                    </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-white/70">
-                      <div
-                        className="h-full rounded-full bg-[#2563EB] transition-all duration-700"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
       {/* Final CTA */}
       <section className="mx-auto max-w-[1440px] px-4 pb-24 md:px-10">
         <div className="relative overflow-hidden rounded-[2.5rem] bg-[#0b1c30] px-6 py-16 text-center sm:px-10 sm:py-20 lg:px-16 lg:py-24">
@@ -442,6 +262,3 @@ export function LandingPage() {
     </main>
   );
 }
-
-
-

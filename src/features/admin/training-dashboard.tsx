@@ -28,13 +28,17 @@ const previousRevenue = previousDoctorRevenue + previousNurseRevenue;
 const olderWeekDoctorRevenue = 20_000;
 const olderWeekNurseRevenue = 23_000;
 const olderWeekRevenue = olderWeekDoctorRevenue + olderWeekNurseRevenue;
-const lastWeekDoctorCount = 4;
-const lastWeekDoctorRevenue = 8_000;
-const lastWeekNurseRevenue = 10_000;
+const priorWeekDoctorRevenue = 8_000;
+const priorWeekNurseRevenue = 10_000;
+const priorWeekRevenue = priorWeekDoctorRevenue + priorWeekNurseRevenue;
+const lastWeekDoctorCount = 5;
+const lastWeekDoctorRevenue = 10_000;
+const lastWeekNurseRevenue = 20_000;
 const lastWeekRevenue = lastWeekDoctorRevenue + lastWeekNurseRevenue;
-const thisWeekDoctorCount = 5;
-const thisWeekDoctorRevenue = 10_000;
-const thisWeekNurseRevenue = 20_000;
+const thisWeekDoctorCount = 25;
+const thisWeekDoctorRevenue = 50_000;
+const thisWeekHomeCarePrices = [5_000, 5_000, 5_000, 5_000, 10_000, 10_000, 15_000];
+const thisWeekNurseRevenue = thisWeekHomeCarePrices.reduce((total, price) => total + price, 0);
 const thisWeekRevenue = thisWeekDoctorRevenue + thisWeekNurseRevenue;
 
 function calculateRevenueSplit(doctorRevenue: number, nurseRevenue: number) {
@@ -50,18 +54,20 @@ function calculateRevenueSplit(doctorRevenue: number, nurseRevenue: number) {
 
 const previousSplit = calculateRevenueSplit(previousDoctorRevenue, previousNurseRevenue);
 const olderWeekSplit = calculateRevenueSplit(olderWeekDoctorRevenue, olderWeekNurseRevenue);
+const priorWeekSplit = calculateRevenueSplit(priorWeekDoctorRevenue, priorWeekNurseRevenue);
 const lastWeekSplit = calculateRevenueSplit(lastWeekDoctorRevenue, lastWeekNurseRevenue);
 const thisWeekSplit = calculateRevenueSplit(thisWeekDoctorRevenue, thisWeekNurseRevenue);
-const revenueBeforeLastWeek = previousRevenue + olderWeekRevenue;
+const revenueBeforeLastWeek = previousRevenue + olderWeekRevenue + priorWeekRevenue;
 const totalRevenue = revenueBeforeLastWeek + lastWeekRevenue + thisWeekRevenue;
-const cumulativeProviderEarnings = previousSplit.providerEarnings + olderWeekSplit.providerEarnings + lastWeekSplit.providerEarnings + thisWeekSplit.providerEarnings;
-const cumulativePlatformShare = previousSplit.platformShare + olderWeekSplit.platformShare + lastWeekSplit.platformShare + thisWeekSplit.platformShare;
-const cumulativeMaintenance = previousSplit.maintenance + olderWeekSplit.maintenance + lastWeekSplit.maintenance + thisWeekSplit.maintenance;
+const cumulativeProviderEarnings = previousSplit.providerEarnings + olderWeekSplit.providerEarnings + priorWeekSplit.providerEarnings + lastWeekSplit.providerEarnings + thisWeekSplit.providerEarnings;
+const cumulativePlatformShare = previousSplit.platformShare + olderWeekSplit.platformShare + priorWeekSplit.platformShare + lastWeekSplit.platformShare + thisWeekSplit.platformShare;
+const cumulativeMaintenance = previousSplit.maintenance + olderWeekSplit.maintenance + priorWeekSplit.maintenance + lastWeekSplit.maintenance + thisWeekSplit.maintenance;
 const financialHistory = [
   { period: "Opening balance", activity: "Existing doctor and home-care revenue", revenue: previousRevenue, split: previousSplit, runningRevenue: previousRevenue },
-  { period: "Earlier week", activity: "10 doctor consultations · 3 home-care visits", revenue: olderWeekRevenue, split: olderWeekSplit, runningRevenue: revenueBeforeLastWeek },
-  { period: "Last week", activity: "4 doctor consultations · 1 home-care visit", revenue: lastWeekRevenue, split: lastWeekSplit, runningRevenue: revenueBeforeLastWeek + lastWeekRevenue },
-  { period: "This week", activity: "5 doctor consultations · 1 home-care visit", revenue: thisWeekRevenue, split: thisWeekSplit, runningRevenue: totalRevenue },
+  { period: "Sep 21–27", activity: "10 doctor consultations · 3 home-care visits", revenue: olderWeekRevenue, split: olderWeekSplit, runningRevenue: previousRevenue + olderWeekRevenue },
+  { period: "Sep 28–Oct 4", activity: "4 doctor consultations · 1 home-care visit", revenue: priorWeekRevenue, split: priorWeekSplit, runningRevenue: previousRevenue + olderWeekRevenue + priorWeekRevenue },
+  { period: "Oct 5–11", activity: "5 doctor consultations · 1 home-care visit", revenue: lastWeekRevenue, split: lastWeekSplit, runningRevenue: revenueBeforeLastWeek + lastWeekRevenue },
+  { period: "Oct 12–18", activity: "25 doctor consultations · 7 home-care visits", revenue: thisWeekRevenue, split: thisWeekSplit, runningRevenue: totalRevenue },
 ];
 
 function Metric({ label, value, icon: Icon, tone = "blue" }: {
@@ -127,7 +133,7 @@ export function TrainingDashboard() {
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(thisWeekDoctorRevenue)}</p>
             </article>
             <article className="rounded-[18px] border border-emerald-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Home-care visit</p><p className="mt-1 text-xs text-slate-500">1 completed visit</p>
+              <p className="text-sm font-bold text-[#1F2937]">Home-care visits</p><p className="mt-1 text-xs text-slate-500">7 visits: 4 × ₦5k · 2 × ₦10k · 1 × ₦15k</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(thisWeekNurseRevenue)}</p>
             </article>
           </div>
