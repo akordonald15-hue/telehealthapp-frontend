@@ -187,7 +187,7 @@ export const howItWorksSteps: Array<{ num: string; title: string; text: string; 
 ];
 
 export const technologySteps: Array<{ num: string; title: string }> = [
-  { num: "01", title: "Book in minutes, from your phone" },
+  { num: "01", title: "Book from your phone" },
   { num: "02", title: "See your provider's credentials before you confirm" },
   { num: "03", title: "Track homecare visit status and arrival" },
   { num: "04", title: "Keep consultation history and visit notes in one place" },
