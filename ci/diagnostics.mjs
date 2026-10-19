@@ -20,6 +20,29 @@ chromium.launch=async options=>{
       events.push({utc:new Date().toISOString(),...data});
       fs.writeFileSync(path.join(dir,'events.json'),JSON.stringify(events,null,2));
     };
+    await context.exposeBinding('__ciConnectivityRecord',(_source,data)=>record(data));
+    await context.addInitScript(()=>{
+      const snapshot=kind=>{
+        const getter=Object.getOwnPropertyDescriptor(Navigator.prototype,'onLine')?.get;
+        void window.__ciConnectivityRecord({kind,nativeOnline:getter?getter.call(navigator):navigator.onLine,
+          effectiveOnline:navigator.onLine,visibility:document.visibilityState,browserDate:Date.now()});
+      };
+      snapshot('native-document-start');
+      for(const name of ['online','offline','focus'])window.addEventListener(name,()=>snapshot(`event-${name}`));
+      document.addEventListener('visibilitychange',()=>snapshot('event-visibility'));
+    });
+    const syntheticAfterLoopback=async()=>{
+      const response=await fetch('/login',{credentials:'omit',cache:'no-store',redirect:'error'});
+      if(response.status!==200)throw new Error('Synthetic online requires loopback HTTP 200');
+      const getter=Object.getOwnPropertyDescriptor(Navigator.prototype,'onLine')?.get;
+      const nativeOnline=getter?getter.call(navigator):navigator.onLine;
+      if(nativeOnline){await window.__ciConnectivityRecord({kind:'synthetic-skipped-native-online'});return;}
+      await window.__ciConnectivityRecord({kind:'loopback-verified',status:response.status,nativeOnline});
+      Object.defineProperty(navigator,'onLine',{configurable:true,get:()=>true});
+      await window.__ciConnectivityRecord({kind:'synthetic-online-applied',nativeOnline,effectiveOnline:navigator.onLine});
+      window.dispatchEvent(new Event('online'));
+    };
+    let firstAppointments=true;
     await context.tracing.start({screenshots:true,snapshots:true,sources:false});
     // Test-browser CSP only. No external request is fulfilled or whitelisted.
     // Only loopback document responses are fetched; API fixture routes remain unchanged.
@@ -43,10 +66,33 @@ chromium.launch=async options=>{
         }catch(error){record({kind:'auth-response-error',message:error.message});}
       }
     });
+    context.on('request',request=>{
+      if(new URL(request.url()).pathname==='/api/auth/me/')
+        record({kind:'auth-request',connectivityCheck:request.headers()['x-caretekk-connectivity-check']==='1'});
+    });
     context.on('requestfailed',request=>record({kind:'requestfailed',url:request.url(),error:request.failure()}));
     context.on('page',page=>{
       page.on('console',msg=>record({kind:'console',level:msg.type(),text:msg.text()}));
       page.on('pageerror',error=>record({kind:'pageerror',message:error.message}));
+      const goto=page.goto.bind(page);
+      page.goto=async(...args)=>{
+        const response=await goto(...args);
+        if(firstAppointments && new URL(args[0]).pathname==='/appointments'){
+          firstAppointments=false;
+          const before=await page.evaluate(()=>({nativeOnline:navigator.onLine,visibility:document.visibilityState,
+            browserDate:Date.now(),text:document.body.innerText}));
+          record({kind:'native-before-signal',...before});
+          await new Promise(resolve=>setTimeout(resolve,250));
+          const after=await page.evaluate(()=>({browserDate:Date.now(),text:document.body.innerText}));
+          record({kind:'clock-grace-observation',hostElapsedMinimumMs:250,browserDeltaMs:after.browserDate-before.browserDate,
+            graceMs:180000,frozenDate:after.browserDate===before.browserDate,text:after.text});
+          if(before.nativeOnline===false){
+            await page.evaluate(syntheticAfterLoopback);
+            await context.addInitScript(syntheticAfterLoopback);
+          }else record({kind:'synthetic-skipped-native-online'});
+        }
+        return response;
+      };
     });
     let closed=false;
     const close=context.close.bind(context);
