@@ -1,0 +1,14 @@
+
+ RUN  v3.2.7 C:/Projects/Caretekk/hero-review
+
+ ✓ src/features/referral-program/refer-discoverability.test.tsx (9 tests) 5003ms
+   ✓ Refer & Earn is discoverable from Home > shows a patient a card linking to /refer  2077ms
+   ✓ Refer & Earn is discoverable from Home > uses generic copy rather than hard-coding terms Home has not loaded  851ms
+   ✓ Refer & Earn is discoverable from Home > does not break Home when the referral programme is unavailable  740ms
+   ✓ Refer & Earn is discoverable from Profile > gives a patient a Refer & Earn shortcut  526ms
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  13:21:40
+   Duration  28.83s (transform 2.04s, setup 3.00s, collect 4.01s, tests 5.00s, environment 9.80s, prepare 528ms)
+

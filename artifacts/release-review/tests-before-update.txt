@@ -1,0 +1,29 @@
+
+> frontend@0.1.0 test
+> vitest run --maxWorkers=2
+
+
+ RUN  v3.2.7 C:/Projects/Caretekk/frontend-release
+
+ ✓ src/components/layout/app-shell.test.tsx (7 tests) 1850ms
+   ✓ desktop navigation > gives a patient a Refer & Earn entry without touching the bottom nav  785ms
+ ✓ src/features/auth/register-referral.test.tsx (6 tests) 2764ms
+   ✓ registration referral integration > treats a refused referral as information, not a failed signup  1120ms
+   ✓ registration referral integration > goes straight to sign-in when the referral was applied  739ms
+   ✓ registration referral integration > does not send a referral_code when the field is left empty  608ms
+ ✓ src/features/referral-program/reward-selector.test.tsx (11 tests) 500ms
+ ✓ src/features/referral-program/referral-program-client.test.tsx (10 tests) 1299ms
+   ✓ Refer & Earn > offers copy and WhatsApp sharing  402ms
+ ✓ src/features/referral-program/referral-landing-client.test.tsx (7 tests) 213ms
+ ✓ src/features/referral-program/repricing-consent.test.tsx (4 tests) 287ms
+ ✓ src/features/referral-program/use-referral-program.test.ts (3 tests) 3ms
+ ✓ src/features/referral-program/referral-code-storage.test.ts (6 tests) 3ms
+ ✓ src/features/referral-program/refer-discoverability.test.tsx (9 tests) 2131ms
+   ✓ Refer & Earn is discoverable from Home > shows a patient a card linking to /refer  885ms
+   ✓ Refer & Earn is discoverable from Home > uses generic copy rather than hard-coding terms Home has not loaded  340ms
+
+ Test Files  9 passed (9)
+      Tests  63 passed (63)
+   Start at  13:43:45
+   Duration  23.54s (transform 1.63s, setup 3.06s, collect 5.71s, tests 9.05s, environment 9.03s, prepare 826ms)
+

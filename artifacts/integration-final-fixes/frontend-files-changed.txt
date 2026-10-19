@@ -1,0 +1,15 @@
+scripts/local-backend-integration.mjs
+scripts/local-clinical-ui-qa.mjs
+src/app/api/payments/[id]/route.ts
+src/app/api/referrals/[id]/route.ts
+src/app/layout.tsx
+src/app/r/[code]/page.tsx
+src/components/ui/clinical-location.test.tsx
+src/components/ui/clinical-location.tsx
+src/features/appointments/appointments-client.tsx
+src/features/homecare/homecare-booking-client.tsx
+src/features/marketing/data.ts
+src/features/referral-program/referral-landing-client.tsx
+src/features/triage/triage-client.tsx
+src/lib/api/endpoints.ts
+src/lib/server/service-routes.test.ts

@@ -342,6 +342,7 @@ export function HomeCareBookingClient() {
   return (
     <Section
       title="Home Care"
+      description="Home visits are currently available in Akwa Ibom State, Nigeria."
       action={
         <Link href="/home-care/requests" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--primary)]">
           View requests
@@ -433,7 +434,7 @@ export function HomeCareBookingClient() {
         </div>
 
         <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
-          <span className="font-semibold text-[#1F2937]">Payment method:</span> Secure online payment with Paystack.
+          <span className="font-semibold text-[#1F2937]">Payment:</span> Secure payment instructions are shown when you continue.
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -583,7 +584,7 @@ export function HomeCareBookingClient() {
               <p className="mt-3 rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">Select a nurse to see available times.</p>
             ) : slotsQuery.isError ? (
               <Notice title="We couldn't load available slots." tone="warning">
-                Please try again before continuing to Paystack.
+                Please try again before continuing to payment.
                 <button
                   type="button"
                   className="ml-2 font-semibold text-[#2563EB] underline"
@@ -693,7 +694,7 @@ export function HomeCareBookingClient() {
         ) : (
           <Button type="submit" disabled={createRequest.isPending || !canSubmit}>
             {createRequest.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {createRequest.isPending ? "Preparing checkout..." : "Continue to Paystack"}
+            {createRequest.isPending ? "Preparing checkout..." : "Continue to payment"}
           </Button>
         )}
       </form>

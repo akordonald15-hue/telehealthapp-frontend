@@ -34,7 +34,7 @@ export function HeroMockup() {
           className="right-full bottom-12 mr-4"
           icon={<Home className="h-3.5 w-3.5 text-[#2563EB]" />}
         >
-          Nurse en route · 12 min
+          Home visits in Akwa Ibom State, Nigeria
         </FloatingChip>
 
         {/* Live preview pulse badge */}

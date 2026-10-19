@@ -1,0 +1,91 @@
+
+> frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v3.2.7 C:/Projects/Caretekk/hero-review
+
+ ✓ src/features/referral-program/referral-code-storage.test.ts (6 tests) 198ms
+ ✓ src/features/referral-program/use-referral-program.test.ts (3 tests) 227ms
+ ✓ src/features/referral-program/referral-landing-client.test.tsx (7 tests) 13305ms
+   ✓ /r/<code> landing > welcomes the visitor and sends them into the normal signup flow  9345ms
+   ✓ /r/<code> landing > preserves the code for the signup request  591ms
+   ✓ /r/<code> landing > never names or hints at the referrer  446ms
+   ✓ /r/<code> landing > still renders and still allows signup when the code is malformed  1176ms
+   ✓ /r/<code> landing for someone already signed in > explains the rule instead of offering to apply the code  909ms
+   ✓ /r/<code> landing for someone already signed in > offers a way back into the app and to their own invite page  633ms
+ ✓ src/features/referral-program/reward-selector.test.tsx (11 tests) 18634ms
+   ✓ reward selection during booking > offers an eligible reward using the server's own values  10035ms
+   ✓ reward selection during booking > reports the selected reward by public id and nothing else  3878ms
+   ✓ reward selection during booking > shows the server's non-binding preview once a reward is chosen  1412ms
+   ✓ reward selection during booking > prices the chosen home-care service, not a guess  460ms
+   ✓ reward selection during booking > hides itself when a reward is not eligible for this service  367ms
+   ✓ reward selection during booking > drops a selection the server no longer offers  381ms
+   ✓ reward selection during booking > surfaces a refused preview without blocking the booking  675ms
+   ✓ pricing breakdown > renders exactly what the server returned, with no recalculation  314ms
+   ✓ pricing breakdown > omits the discount line for an ordinary booking  602ms
+ ✓ src/features/referral-program/repricing-consent.test.tsx (4 tests) 14797ms
+   ✓ repricing consent > states both amounts and why the reward is gone  2274ms
+   ✓ repricing consent > does not move the patient on until they explicitly continue  9956ms
+   ✓ repricing consent > lets the patient back out  1888ms
+   ✓ repricing consent > announces itself to assistive technology  612ms
+ ✓ src/features/referral-program/referral-program-client.test.tsx (10 tests) 32193ms
+   ✓ Refer & Earn > renders the code, share link and the programme terms the backend returned  4480ms
+   ✓ Refer & Earn > offers copy and WhatsApp sharing  9546ms
+   ✓ Refer & Earn > hides the programme instead of breaking when it is unavailable  2344ms
+   ✓ Refer & Earn > shows an empty referral state with a way to share  4052ms
+   ✓ Refer & Earn > lists referrals with privacy-safe status only  2702ms
+   ✓ Refer & Earn > shows an available reward with the server's own values  1708ms
+   ✓ Refer & Earn > explains a reserved reward and how to release it  1716ms
+   ✓ Refer & Earn > marks an expired reward without relying on colour  1466ms
+   ✓ Refer & Earn > never offers an existing user a way to apply a referral code  2032ms
+   ✓ Refer & Earn > still offers nothing to apply once the patient already has a referral  2033ms
+ ✓ src/features/auth/register-referral.test.tsx (6 tests) 32409ms
+   ✓ registration referral integration > persists a code arriving on the URL so it survives the OTP hop  1884ms
+   ✓ registration referral integration > pre-fills the optional field from the stored code on the final step  1381ms
+   ✓ registration referral integration > lets the patient clear the pre-filled code before submitting  1010ms
+   ✓ registration referral integration > treats a refused referral as information, not a failed signup  17377ms
+   ✓ registration referral integration > goes straight to sign-in when the referral was applied  6143ms
+   ✓ registration referral integration > does not send a referral_code when the field is left empty  4552ms
+ ✓ src/components/layout/app-shell.test.tsx (7 tests) 36143ms
+   ✓ desktop navigation > gives a patient a Refer & Earn entry without touching the bottom nav  15636ms
+   ✓ desktop navigation > does not expose Refer & Earn to a doctor  5885ms
+   ✓ desktop navigation > does not expose Refer & Earn to a nurse  4058ms
+   ✓ desktop navigation > does not expose Refer & Earn to a admin  5578ms
+   ✓ desktop navigation > orders Refer & Earn with the other patient links rather than first  2404ms
+   ✓ layout does not hide page content behind the fixed nav > hides the fixed bottom nav once the desktop sidebar takes over  1375ms
+   ✓ layout does not hide page content behind the fixed nav > reserves bottom room with a longhand no shorthand can override  1115ms
+ ❯ src/features/referral-program/refer-discoverability.test.tsx (9 tests | 1 failed) 41913ms
+   × Refer & Earn is discoverable from Home > shows a patient a card linking to /refer 20896ms
+     → Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   ✓ Refer & Earn is discoverable from Home > uses generic copy rather than hard-coding terms Home has not loaded  8925ms
+   ✓ Refer & Earn is discoverable from Home > does not break Home when the referral programme is unavailable  5596ms
+   ✓ Refer & Earn is discoverable from Home > shows no referral card to a doctor  664ms
+   ✓ Refer & Earn is discoverable from Home > shows no referral card to a nurse  653ms
+   ✓ Refer & Earn is discoverable from Home > shows no referral card to a admin  838ms
+   ✓ Refer & Earn is discoverable from Profile > gives a patient a Refer & Earn shortcut  2456ms
+   ✓ Refer & Earn is discoverable from Profile > shows no Refer & Earn shortcut to a doctor  1096ms
+   ✓ Refer & Earn is discoverable from Profile > shows no Refer & Earn shortcut to a nurse  721ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/referral-program/refer-discoverability.test.tsx > Refer & Earn is discoverable from Home > shows a patient a card linking to /refer
+Error: Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/referral-program/refer-discoverability.test.tsx:80:3
+     78| // Nobody should ever have to type /refer to find the referral program…
+     79| describe("Refer & Earn is discoverable from Home", () => {
+     80|   it("shows a patient a card linking to /refer", async () => {
+       |   ^
+     81|     signInAs("patient");
+     82|     render(<DashboardClient />, { wrapper });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  1 failed | 62 passed (63)
+   Start at  13:16:19
+   Duration  165.33s (transform 93.70s, setup 197.21s, collect 182.34s, tests 189.82s, environment 296.31s, prepare 25.96s)
+

@@ -140,6 +140,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
   return (
     <Section
       title={request ? request.contact_name_snapshot || "Home Care" : "Home Care"}
+      description="Home visits are currently available in Akwa Ibom State, Nigeria."
       action={<Link href="/home-care/requests" className="text-sm font-semibold text-[var(--primary)]">Back to requests</Link>}
     >
       {requestQuery.isError ? (

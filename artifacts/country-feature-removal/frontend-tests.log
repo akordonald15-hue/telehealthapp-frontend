@@ -1,0 +1,13 @@
+
+> frontend@0.1.0 test
+> vitest run --maxWorkers=1
+
+
+ RUN  v4.1.11 C:/Projects/Caretekk/frontend-release
+
+
+ Test Files  12 passed (12)
+      Tests  70 passed (70)
+   Start at  15:24:37
+   Duration  146.95s (transform 2.17s, setup 16.31s, import 12.11s, tests 19.74s, environment 62.38s)
+
