@@ -24,6 +24,7 @@ test "$ready" = true
 export QA_BASE_URL=http://127.0.0.1:3105
 export QA_OUTPUT_DIR="$EVIDENCE_DIR/enabled"
 # Existing harness retains its loopback guard and mocked API contract.
+python3 "$CONTROL_DIR/ci/synchronize-skew.py"
 NODE_OPTIONS="--import=$CONTROL_DIR/ci/network-audit.mjs --import=$CONTROL_DIR/ci/diagnostics.mjs" node scripts/founder50-remediation-qa.mjs
 QA_TIMEZONE_MATRIX=true QA_OUTPUT_DIR="$EVIDENCE_DIR/timezones" \
   NODE_OPTIONS="--import=$CONTROL_DIR/ci/network-audit.mjs --import=$CONTROL_DIR/ci/diagnostics.mjs" node scripts/founder50-remediation-qa.mjs
