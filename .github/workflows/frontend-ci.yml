@@ -1,0 +1,50 @@
+name: Frontend validation
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000/api/v1
+      BACKEND_API_BASE_URL: http://127.0.0.1:8000/api/v1
+      NEXT_PUBLIC_FOUNDER50_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Disabled checkout browser regression
+        env:
+          QA_DISABLED: "true"
+        run: |
+          npm run start -- --hostname 127.0.0.1 --port 3104 > /tmp/caretekk-frontend.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:3104/login > /dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/founder50-browser-qa.mjs
+      - name: Enabled checkout and recovery regressions
+        env:
+          NEXT_PUBLIC_FOUNDER50_ENABLED: "true"
+          QA_BASE_URL: http://127.0.0.1:3105
+          QA_OUTPUT_DIR: artifacts/founder50-enabled-qa
+        run: |
+          npm run dev -- --hostname 127.0.0.1 --port 3105 > /tmp/caretekk-enabled-frontend.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:3105/login > /dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/founder50-remediation-qa.mjs
+          QA_TIMEZONE_MATRIX=true node scripts/founder50-remediation-qa.mjs
