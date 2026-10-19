@@ -67,12 +67,12 @@ export function TechnologySection() {
               {technologySteps.map((step, index) => (
                 <li
                   key={step.num}
-                  className={`flex w-full max-w-full items-center gap-4 rounded-full bg-primary-halo-strong/20 py-2 pl-[1.125rem] pr-[1.125rem] md:w-fit lg:max-w-none md:gap-[1.5625rem] md:py-[0.625rem] md:pl-[1.4375rem] md:pr-[1.4375rem] lg:gap-[calc(1.5625*var(--u))] lg:py-[calc(0.625*var(--u))] lg:pl-[calc(1.4375*var(--u))] lg:pr-[calc(1.4375*var(--u))] ${pillGeometry[index].md} ${pillGeometry[index].lg}`}
+                  className={`flex w-full min-w-0 max-w-full items-center gap-4 rounded-full bg-primary-halo-strong/20 py-2 pl-[1.125rem] pr-[1.125rem] md:w-fit lg:max-w-none md:gap-[1.5625rem] md:py-[0.625rem] md:pl-[1.4375rem] md:pr-[1.4375rem] lg:gap-[calc(1.5625*var(--u))] lg:py-[calc(0.625*var(--u))] lg:pl-[calc(1.4375*var(--u))] lg:pr-[calc(1.4375*var(--u))] ${pillGeometry[index].md} ${pillGeometry[index].lg}`}
                 >
                   <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-white/20 text-[1.5rem] font-semibold leading-none text-white md:h-[4.375rem] md:w-[4.375rem] md:rounded-[2.5rem] md:text-[1.875rem] lg:h-[calc(4.375*var(--u))] lg:w-[calc(4.375*var(--u))] lg:rounded-[calc(2.5*var(--u))] lg:text-[calc(1.875*var(--u))]">
                     {step.num}
                   </span>
-                  <span className="whitespace-normal text-[1.25rem] font-medium leading-[1.5] tracking-normal text-white md:whitespace-nowrap md:text-[clamp(1.25rem,calc((100vw-229px)/26.64),1.5625rem)] lg:whitespace-nowrap lg:text-[calc(1.5625*var(--u))]">
+                  <span className="min-w-0 break-words whitespace-normal text-[1.25rem] font-medium leading-[1.5] tracking-normal text-white md:text-[clamp(1.25rem,calc((100vw-229px)/26.64),1.5625rem)] lg:whitespace-nowrap lg:text-[calc(1.5625*var(--u))]">
                     {step.title}
                   </span>
                 </li>
