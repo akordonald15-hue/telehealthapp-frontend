@@ -1,8 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "git": {
-    "deploymentEnabled": {
-      "feature/founder50-pr4-checkout-experience": false
-    }
-  }
+  "git": { "deploymentEnabled": false }
 }

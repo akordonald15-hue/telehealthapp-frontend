@@ -1,50 +1,74 @@
-name: Frontend validation
+name: Founder50 optimized isolated acceptance
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      reviewed_control_sha:
+        description: Exact separately reviewed control commit SHA
+        required: true
+        type: string
 permissions:
   contents: read
+concurrency:
+  group: founder50-optimized-isolated-single-run
+  cancel-in-progress: false
 jobs:
-  frontend:
-    runs-on: ubuntu-latest
+  acceptance:
+    if: github.ref == 'refs/heads/ci/founder50-enabled-optimized-20261019'
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
-    env:
-      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000/api/v1
-      BACKEND_API_BASE_URL: http://127.0.0.1:8000/api/v1
-      NEXT_PUBLIC_FOUNDER50_ENABLED: "false"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Assert dispatch and reviewed control identity
+        env:
+          EXPECTED_CONTROL_SHA: ${{ inputs.reviewed_control_sha }}
+        run: |
+          test "$GITHUB_EVENT_NAME" = workflow_dispatch
+          test "$GITHUB_SHA" = "$EXPECTED_CONTROL_SHA"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm test
-      - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - name: Disabled checkout browser regression
-        env:
-          QA_DISABLED: "true"
+          ref: ${{ github.sha }}
+          path: control
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 5052545d93ce58cf1cffe9d8472d03da2e6b6819
+          path: app
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+      - name: Verify exact application and no private environment files
+        working-directory: app
         run: |
-          npm run start -- --hostname 127.0.0.1 --port 3104 > /tmp/caretekk-frontend.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl --silent --fail http://127.0.0.1:3104/login > /dev/null; then break; fi
-            sleep 2
+          test "$(git rev-parse HEAD)" = 5052545d93ce58cf1cffe9d8472d03da2e6b6819
+          test "$(git rev-parse HEAD^{tree})" = 5c9ee2aba287a8b6c00add34b65b2143f9711610
+          test -z "$(git status --porcelain --untracked-files=no)"
+          for f in .env .env.local .env.production .env.production.local .vercel/project.json; do
+            test ! -e "$f"
           done
-          node scripts/founder50-browser-qa.mjs
-      - name: Enabled checkout and recovery regressions
+      - name: Locked installation and optimized enabled build
+        working-directory: app
         env:
-          NEXT_PUBLIC_FOUNDER50_ENABLED: "true"
-          QA_BASE_URL: http://127.0.0.1:3105
-          QA_OUTPUT_DIR: artifacts/founder50-enabled-qa
+          NEXT_PUBLIC_FOUNDER50_ENABLED: 'true'
+          NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:9/api/v1
+          BACKEND_API_BASE_URL: http://127.0.0.1:9/api/v1
+          NEXT_PUBLIC_WS_BASE_URL: ws://127.0.0.1:9
+          NEXT_TELEMETRY_DISABLED: '1'
         run: |
-          npm run dev -- --hostname 127.0.0.1 --port 3105 > /tmp/caretekk-enabled-frontend.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl --silent --fail http://127.0.0.1:3105/login > /dev/null; then break; fi
-            sleep 2
-          done
-          node scripts/founder50-remediation-qa.mjs
-          QA_TIMEZONE_MATRIX=true node scripts/founder50-remediation-qa.mjs
+          mkdir -p ../evidence
+          npm ci
+          npx --no-install playwright install --with-deps chromium
+          npm run build > ../evidence/build.log 2>&1
+          git rev-parse HEAD HEAD^{tree} > ../evidence/source.txt
+          sha256sum package-lock.json >> ../evidence/source.txt
+          cat .next/BUILD_ID >> ../evidence/source.txt
+      - name: Isolated optimized browser acceptance
+        run: |
+          bash control/ci/launch-isolated-acceptance.sh
+      - name: Retain synthetic evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: founder50-optimized-isolated-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 7
