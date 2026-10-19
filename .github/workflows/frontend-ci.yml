@@ -64,11 +64,15 @@ jobs:
       - name: Isolated optimized browser acceptance
         run: |
           bash control/ci/launch-isolated-acceptance.sh
-      - name: Retain synthetic evidence only
+      - name: Sanitize synthetic diagnostics before upload
+        id: sanitize
         if: always()
+        run: python3 control/ci/sanitize-evidence.py evidence evidence-sanitized
+      - name: Retain sanitized synthetic evidence only
+        if: always() && steps.sanitize.outcome == 'success'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: founder50-optimized-isolated-${{ github.run_id }}
-          path: evidence/
+          path: evidence-sanitized/
           if-no-files-found: error
           retention-days: 7
