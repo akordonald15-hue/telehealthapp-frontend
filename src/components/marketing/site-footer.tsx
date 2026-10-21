@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -78,20 +77,22 @@ export function SiteFooter() {
             <p className="mt-6 text-lg font-light leading-[1.5] md:mt-[30px] md:text-[27px] lg:text-xl">
               Trusted digital healthcare for online doctor consultations, records, and follow-up care. Home visits are currently available in Akwa Ibom State, Nigeria.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3 md:mt-[47px] md:gap-[14px]">
+            {/* Circles are 56px (phones) / 75px (md+) at most, but shrink together so all icons always fit on one row,
+                e.g. on 320px phones and in the narrow brand column of small laptops. */}
+            <div className="mt-8 flex gap-2.5 md:mt-[47px] md:gap-[14px]">
               {socialLinks.map(({ label, href, icon, w, h }) => {
                 const circle =
-                  "flex h-14 w-14 items-center justify-center rounded-full border border-[#1e40af] bg-[#eff6ff] md:h-[75px] md:w-[75px]";
+                  "flex aspect-square min-w-0 max-w-14 flex-1 items-center justify-center rounded-full border border-[#1e40af] bg-[#eff6ff] md:max-w-[75px]";
                 const glyph = (
-                  // Each icon keeps its own Figma size; phones use 75% of it.
+                  // Each icon keeps its Figma size relative to the 75px Figma circle, so it scales with the circle.
                   <Image
                     src={`/img/footer/${icon}.svg`}
                     alt=""
                     width={w}
                     height={h}
                     unoptimized
-                    style={{ "--w": `${w}px` } as CSSProperties}
-                    className="h-auto w-[calc(var(--w)*0.75)] md:w-(--w)"
+                    style={{ width: `${(w / 75) * 100}%` }}
+                    className="h-auto"
                   />
                 );
                 const external = href.startsWith("http");
