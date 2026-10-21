@@ -27,14 +27,14 @@ const phase = process.argv[2] || 'after';
       viewport: innerWidth,
       documentWidth: document.documentElement.scrollWidth,
       missingAnchors: [...document.querySelectorAll('a[href^="#"]')].map(a => a.getAttribute('href')).filter(h => h.length > 1 && !document.querySelector(h)),
-      portraits: [...document.querySelectorAll('[data-slide][aria-hidden="false"] [data-portrait]')].map(el => { const b = el.getBoundingClientRect(); return { name: el.getAttribute('data-portrait'), x: b.x, right: b.right, width: b.width }; }),
+      heroImages: [...document.querySelectorAll('[data-slide][aria-hidden="false"] [data-hero-image]')].map(el => { const b = el.getBoundingClientRect(); return { src: el.querySelector('img').getAttribute('src'), x: b.x, right: b.right, width: b.width }; }),
     }));
     assert.equal(layout.documentWidth, width, `Horizontal overflow at ${width}px`);
     assert.deepEqual(errors, [], `Browser errors at ${width}px`);
     if (phase === 'after') {
-      const okon = layout.portraits.find(p => p.name === 'Dr. Effiong Okon');
-      assert.ok(okon && Math.abs((okon.x + okon.right) / 2 - width / 2) < 2, 'Dr. Okon must be centered');
-      assert.equal(layout.portraits.length, 2, 'Removed middle doctor must not appear');
+      assert.equal(layout.heroImages.length, 1, 'Each slide shows one group photo');
+      const [image] = layout.heroImages;
+      assert.ok(Math.abs((image.x + image.right) / 2 - width / 2) < 2, 'Group photo must be centered');
       if (width < 1024) {
         const menu = page.getByRole('button', { name: 'Toggle navigation' });
         await menu.click();
@@ -56,6 +56,10 @@ const phase = process.argv[2] || 'after';
     assert.equal(await page.getByRole('button', { name: 'Show homecare highlight' }).getAttribute('aria-pressed'), 'true');
     assert.equal((await hero.boundingBox()).height, initialHeight, 'Slide switching must reserve stable height');
     await page.getByRole('button', { name: 'Show consultation highlight' }).click();
+    assert.equal(await page.getByRole('button', { name: 'Show consultation highlight' }).getAttribute('aria-pressed'), 'true');
+    await page.getByRole('button', { name: 'Show homecare highlight' }).press('Enter');
+    assert.equal(await page.getByRole('button', { name: 'Show homecare highlight' }).getAttribute('aria-pressed'), 'true');
+    await page.getByRole('button', { name: 'Show consultation highlight' }).press('Enter');
     assert.equal(await page.getByRole('button', { name: 'Show consultation highlight' }).getAttribute('aria-pressed'), 'true');
     assert.equal(await page.getByRole('link', { name: 'Talk to a Doctor', exact: true }).first().getAttribute('href'), '/register');
     assert.equal(await page.getByRole('link', { name: 'Book Homecare', exact: true }).first().getAttribute('href'), '/register');

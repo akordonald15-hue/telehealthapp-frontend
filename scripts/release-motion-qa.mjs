@@ -7,7 +7,7 @@ const browser = await chromium.launch();
 const results = [];
 try {
   for (const width of [390, 1440]) {
-    const page = await browser.newPage({ viewport: { width, height: 1100 }, serviceWorkers: 'block' });
+    const page = await browser.newPage({ viewport: { width, height: 1100 }, serviceWorkers: 'block', hasTouch: width === 390 });
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
@@ -25,23 +25,48 @@ try {
     const first = page.getByRole('button', { name: 'Show consultation highlight' });
     const second = page.getByRole('button', { name: 'Show homecare highlight' });
     const hero = page.locator('main section').first();
+    const controls = page.getByRole('group', { name: 'Highlight controls' });
+    assert.ok(await controls.evaluate(el => el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })), 'Carousel controls must be visible without focus');
     const initialHeight = (await hero.boundingBox()).height;
+    const fill = index => page.locator(`[data-progress="${index}"]`).evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a);
     await second.click();
-    await page.waitForTimeout(1400);
+    await page.waitForTimeout(1600);
     await expect(second).toHaveAttribute('aria-pressed', 'true');
     assert.equal((await hero.boundingBox()).height, initialHeight);
     const opacity = await page.locator('[data-slide="1"][aria-hidden="false"] [data-motion="image"]').evaluate(el => getComputedStyle(el).opacity);
     assert.equal(opacity, '1');
-    await first.click();
-    await page.waitForTimeout(1400);
-    await page.getByRole('button', { name: 'Resume', exact: true }).click();
-    await page.locator('h1').click();
-    await page.waitForTimeout(9400);
-    await expect(second).toHaveAttribute('aria-pressed', 'true');
+    assert.ok(await fill(1) > 0, 'Clicked indicator must start filling');
+    await expect(first).toHaveAttribute('aria-pressed', 'true', { timeout: 7000 });
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: 'Pause', exact: true }).click();
-    await page.locator('h1').click();
-    await page.waitForTimeout(9400);
+    const pausedAt = await fill(0);
+    assert.ok(pausedAt > 0 && pausedAt < 1, 'Pause must hold the fill mid-way');
+    await page.waitForTimeout(2000);
+    assert.equal(await fill(0), pausedAt, 'Fill must not move while paused');
+    await expect(first).toHaveAttribute('aria-pressed', 'true');
+    await page.getByRole('button', { name: 'Resume', exact: true }).click();
+    await page.waitForTimeout(800);
+    assert.ok(await fill(0) > pausedAt, 'Play must continue from the paused point');
+    await expect(second).toHaveAttribute('aria-pressed', 'true', { timeout: 7000 });
+    await hero.getByRole('link', { name: 'Book Homecare', exact: true }).focus();
+    await page.keyboard.press('Tab');
+    await expect(first).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(first).toHaveAttribute('aria-pressed', 'true');
+    await page.keyboard.press('Tab');
+    await expect(second).toBeFocused();
+    await page.keyboard.press('Space');
     await expect(second).toHaveAttribute('aria-pressed', 'true');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'Resume', exact: true })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeFocused();
+    if (width === 390) {
+      await first.tap();
+      await expect(first).toHaveAttribute('aria-pressed', 'true');
+    }
     assert.equal((await hero.boundingBox()).height, initialHeight);
     if (width === 390) {
       const menu = page.getByRole('button', { name: 'Toggle navigation' });
@@ -70,7 +95,7 @@ try {
     assert.ok(contrastRegions.footerMaxTextBottom <= 0.85);
     const layoutShift = await page.evaluate(() => window.releaseLayoutShifts.reduce((sum, value) => sum + value, 0));
     assert.deepEqual(errors, []);
-    results.push({ width, manualTransition: 'passed', automaticRotation: 'passed', pause: 'passed', menuAnimation: width === 390 ? 'passed' : 'desktop navigation', stableHeroHeight: initialHeight, observedLayoutShift: layoutShift, contrastRegions, errors });
+    results.push({ width, manualTransition: 'passed', automaticRotation: 'passed', pause: 'passed', pointer: 'passed', keyboard: 'passed', touch: width === 390 ? 'passed' : 'not tested', menuAnimation: width === 390 ? 'passed' : 'desktop navigation', stableHeroHeight: initialHeight, observedLayoutShift: layoutShift, contrastRegions, errors });
     await page.close();
   }
   fs.writeFileSync(`${process.env.QA_OUTPUT_DIR || 'artifacts/release-review'}/motion-qa.json`, JSON.stringify(results, null, 2));
