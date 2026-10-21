@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, type CSSProperties, type FormEvent } from "react";
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -13,7 +11,9 @@ import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
 
 const socialLinks = [
   { label: "LinkedIn", href: "https://www.linkedin.com/company/caretekk-health-technologies-ltd/", icon: "linkedin", w: 36, h: 34 },
-  { label: "Facebook", href: "https://www.facebook.com/share/1BSrQHdC8m/", icon: "facebook", w: 17, h: 29 },
+  { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61590257786343", icon: "facebook", w: 17, h: 29 },
+  { label: "Instagram", href: "https://www.instagram.com/caretekk_health/", icon: "instagram", w: 30, h: 30 },
+  { label: "TikTok", href: "https://www.tiktok.com/@caretekk.health", icon: "tiktok", w: 25, h: 27 },
   { label: "Email", href: `mailto:${BRAND_SUPPORT_EMAIL}`, icon: "email", w: 31, h: 22 },
 ];
 
@@ -24,14 +24,19 @@ export function SiteFooter() {
   return (
     <footer
       id="contact"
-      className="relative overflow-hidden rounded-[30px] bg-gradient-to-b from-[#2563eb] to-[#60a5fa] text-white lg:mx-[10px] lg:mb-[9px]"
+      className="relative overflow-hidden rounded-[30px] text-white lg:mx-[10px] lg:mb-[9px]"
+      // Inline so the white text never ends up on the page background if the utility CSS is missing.
+      style={{
+        backgroundColor: "#2563eb",
+        backgroundImage: "linear-gradient(180deg, #2563eb 0%, #2563eb 85%, #60a5fa 100%)",
+      }}
     >
-      {/* Figma: 20% pattern fill (4px dots every 24px) plus a 21%-opacity perspective grid. */}
+      {/* Keep the Figma dot/grid geometry; quieter patterns preserve white text contrast. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.2) 2px, transparent 2.5px)",
+          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.05) 2px, transparent 2.5px)",
           backgroundSize: "24px 24px",
           backgroundPosition: "-10px -10px",
         }}
@@ -43,7 +48,7 @@ export function SiteFooter() {
         aria-hidden="true"
         width={4638}
         height={1460}
-        className="pointer-events-none absolute -left-[1670px] -top-[350px] w-[4638px] max-w-none"
+        className="pointer-events-none absolute -left-[1670px] -top-[350px] w-[4638px] max-w-none opacity-10"
       />
 
       <div className="relative px-5 pb-12 pt-14 md:pb-[71px] md:px-[57px] md:pt-[92px] lg:pb-[90px] lg:pt-[148px]">
@@ -71,9 +76,9 @@ export function SiteFooter() {
               <Image src="/img/footer/logo-name.png" alt={BRAND_NAME} width={173} height={44} className="h-[35px] w-auto md:h-[44px]" />
             </Link>
             <p className="mt-6 text-lg font-light leading-[1.5] md:mt-[30px] md:text-[27px] lg:text-xl">
-              Trusted digital healthcare for doctor consultations, homecare support, records, and follow-up care.
+              Trusted digital healthcare for online doctor consultations, records, and follow-up care. Home visits are currently available in Akwa Ibom State, Nigeria.
             </p>
-            <div className="mt-8 flex gap-3 md:mt-[47px] md:gap-[14px]">
+            <div className="mt-8 flex flex-wrap gap-3 md:mt-[47px] md:gap-[14px]">
               {socialLinks.map(({ label, href, icon, w, h }) => {
                 const circle =
                   "flex h-14 w-14 items-center justify-center rounded-full border border-[#1e40af] bg-[#eff6ff] md:h-[75px] md:w-[75px]";
@@ -119,7 +124,7 @@ export function SiteFooter() {
           aria-hidden="true"
           width={956}
           height={165}
-          className="mx-auto mt-14 h-auto w-full max-w-[956px] md:mt-[116px] md:h-[131px] md:w-auto lg:mt-[122px] lg:h-[165px]"
+          className="mx-auto mt-14 h-auto w-full max-w-[956px] md:mt-[116px] lg:mt-[122px]"
         />
       </div>
     </footer>
@@ -155,49 +160,38 @@ function FooterColumn({
 // so the input needs `!` on its font classes and the button text lives in a <span>.
 // Tablet and desktop form are intentionally ~70% of the Figma size (402x90 / 249x90), on request.
 function NewsletterForm() {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    // TODO: send `email` to the newsletter endpoint once the backend exposes one.
-    setSubmitted(true);
-    setEmail("");
-  }
-
-  if (submitted) {
-    return (
-      <p role="status" className="rounded-[20px] bg-white/15 px-6 py-4 text-base md:text-[21px]">
-        Thanks! You&apos;re on the list.
-      </p>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="flex w-full shrink-0 gap-2.5 md:w-auto md:gap-4">
-      <label htmlFor="newsletter-email" className="sr-only">
-        Email address
-      </label>
-      <input
-        id="newsletter-email"
-        type="email"
-        required
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        placeholder="Enter your email address"
-        className={`h-12 min-w-0 flex-[402] rounded-[14px] bg-[#eff6ff] px-4 text-sm! font-extralight! leading-[1.2]! text-black outline-none placeholder:text-black focus:ring-2 focus:ring-white/70 md:h-16 md:w-[320px] md:flex-none md:rounded-2xl md:px-7 md:text-lg! ${formShadow}`}
-      />
-      <button
-        type="submit"
-        className={`inline-flex h-12 min-w-0 flex-[249] items-center justify-center gap-2.5 rounded-[50px] bg-[#1e40af] px-4 transition hover:bg-[#1a368f] md:h-16 md:w-[200px] md:flex-none md:gap-3.5 md:px-2.5 ${formShadow}`}
-      >
-        <span className="text-sm font-normal leading-[1.2] md:text-lg">Subscribe</span>
-        {/* Vuesax arrow exported from Figma */}
-        <svg viewBox="0 0 32 24" fill="none" aria-hidden="true" className="h-3.5 w-[18px] shrink-0 md:h-[18px] md:w-6">
-          <path d="M20.136 1.53193L30.468 11.864L20.136 22.196" stroke="white" strokeWidth={3.06} strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M1.53193 11.8635H30.179" stroke="white" strokeWidth={3.06} strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-    </form>
+    <div className="w-full shrink-0 md:w-auto">
+      <div className="flex w-full gap-2.5 md:w-auto md:gap-4">
+        <label htmlFor="newsletter-email" className="sr-only">
+          Email address
+        </label>
+        <input
+          id="newsletter-email"
+          type="email"
+          disabled
+          aria-describedby="newsletter-unavailable"
+          placeholder="Sign-up coming soon"
+          className={`h-12 min-w-0 flex-[402] rounded-[14px] bg-[#eff6ff] px-4 text-sm! font-extralight! leading-[1.2]! text-black outline-none placeholder:text-black focus:ring-2 focus:ring-white/70 md:h-16 md:w-[320px] md:flex-none md:rounded-2xl md:px-7 md:text-lg! ${formShadow}`}
+        />
+        <button
+          type="button"
+          disabled
+          aria-describedby="newsletter-unavailable"
+          className={`inline-flex h-12 min-w-0 flex-[249] items-center justify-center gap-2.5 rounded-[50px] bg-[#1e40af] px-4 transition disabled:cursor-not-allowed disabled:opacity-70 md:h-16 md:w-[200px] md:flex-none md:gap-3.5 md:px-2.5 ${formShadow}`}
+        >
+          <span className="text-sm font-normal leading-[1.2] md:text-lg">Subscribe</span>
+          {/* Vuesax arrow exported from Figma */}
+          <svg viewBox="0 0 32 24" fill="none" aria-hidden="true" className="h-3.5 w-[18px] shrink-0 md:h-[18px] md:w-6">
+            <path d="M20.136 1.53193L30.468 11.864L20.136 22.196" stroke="white" strokeWidth={3.06} strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M1.53193 11.8635H30.179" stroke="white" strokeWidth={3.06} strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </div>
+      <p id="newsletter-unavailable" className="mt-4 max-w-[536px] text-sm leading-relaxed">
+        Newsletter sign-up is not available yet. No email address is collected.
+        {" "}<a href={`mailto:${BRAND_SUPPORT_EMAIL}`} className="underline underline-offset-4">Contact support</a> for updates.
+      </p>
+    </div>
   );
 }
