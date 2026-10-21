@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -11,7 +10,9 @@ import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
 
 const socialLinks = [
   { label: "LinkedIn", href: "https://www.linkedin.com/company/caretekk-health-technologies-ltd/", icon: "linkedin", w: 36, h: 34 },
-  { label: "Facebook", href: "https://www.facebook.com/share/1BSrQHdC8m/", icon: "facebook", w: 17, h: 29 },
+  { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61590257786343", icon: "facebook", w: 17, h: 29 },
+  { label: "Instagram", href: "https://www.instagram.com/caretekk_health/", icon: "instagram", w: 30, h: 30 },
+  { label: "TikTok", href: "https://www.tiktok.com/@caretekk.health", icon: "tiktok", w: 25, h: 27 },
   { label: "Email", href: `mailto:${BRAND_SUPPORT_EMAIL}`, icon: "email", w: 31, h: 22 },
 ];
 
@@ -22,7 +23,12 @@ export function SiteFooter() {
   return (
     <footer
       id="contact"
-      className="relative overflow-hidden rounded-[30px] bg-[linear-gradient(180deg,#2563eb_0%,#2563eb_85%,#60a5fa_100%)] text-white lg:mx-[10px] lg:mb-[9px]"
+      className="relative overflow-hidden rounded-[30px] text-white lg:mx-[10px] lg:mb-[9px]"
+      // Inline so the white text never ends up on the page background if the utility CSS is missing.
+      style={{
+        backgroundColor: "#2563eb",
+        backgroundImage: "linear-gradient(180deg, #2563eb 0%, #2563eb 85%, #60a5fa 100%)",
+      }}
     >
       {/* Keep the Figma dot/grid geometry; quieter patterns preserve white text contrast. */}
       <div
@@ -71,20 +77,22 @@ export function SiteFooter() {
             <p className="mt-6 text-lg font-light leading-[1.5] md:mt-[30px] md:text-[27px] lg:text-xl">
               Trusted digital healthcare for online doctor consultations, records, and follow-up care. Home visits are currently available in Akwa Ibom State, Nigeria.
             </p>
-            <div className="mt-8 flex gap-3 md:mt-[47px] md:gap-[14px]">
+            {/* Circles are 56px (phones) / 75px (md+) at most, but shrink together so all icons always fit on one row,
+                e.g. on 320px phones and in the narrow brand column of small laptops. */}
+            <div className="mt-8 flex gap-2.5 md:mt-[47px] md:gap-[14px]">
               {socialLinks.map(({ label, href, icon, w, h }) => {
                 const circle =
-                  "flex h-14 w-14 items-center justify-center rounded-full border border-[#1e40af] bg-[#eff6ff] md:h-[75px] md:w-[75px]";
+                  "flex aspect-square min-w-0 max-w-14 flex-1 items-center justify-center rounded-full border border-[#1e40af] bg-[#eff6ff] md:max-w-[75px]";
                 const glyph = (
-                  // Each icon keeps its own Figma size; phones use 75% of it.
+                  // Each icon keeps its Figma size relative to the 75px Figma circle, so it scales with the circle.
                   <Image
                     src={`/img/footer/${icon}.svg`}
                     alt=""
                     width={w}
                     height={h}
                     unoptimized
-                    style={{ "--w": `${w}px` } as CSSProperties}
-                    className="h-auto w-[calc(var(--w)*0.75)] md:w-(--w)"
+                    style={{ width: `${(w / 75) * 100}%` }}
+                    className="h-auto"
                   />
                 );
                 const external = href.startsWith("http");
