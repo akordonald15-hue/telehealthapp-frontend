@@ -7,7 +7,7 @@ import { Praise } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import { HousePlus, Pause, Play } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ArrowLongRightIcon } from "@/components/marketing/marketing-icons";
 import { heroSlides } from "@/features/marketing/data";
@@ -35,6 +35,21 @@ export function HeroSlideshow() {
   const previous = useRef(active);
   const transition = useRef<gsap.core.Timeline | null>(null);
   const progress = useRef<gsap.core.Timeline | null>(null);
+  const textLayers = useRef<(HTMLDivElement | null)[]>([]);
+  const [textHeights, setTextHeights] = useState<number[] | null>(null);
+
+  useEffect(() => {
+    const layers = textLayers.current.filter((layer) => layer !== null);
+    const observer = new ResizeObserver(() => setTextHeights(layers.map((layer) => parseFloat(getComputedStyle(layer).height))));
+    layers.forEach((layer) => observer.observe(layer));
+    return () => observer.disconnect();
+  }, []);
+
+  const textSlack = textHeights ? Math.max(...textHeights) - textHeights[active] : 0;
+  const followText = {
+    style: { translate: `0 ${-textSlack}px` },
+    className: "transition-[translate] duration-500 ease-in-out motion-reduce:transition-none",
+  };
 
   useGSAP(() => {
     ScrollTrigger.create({
@@ -140,6 +155,19 @@ export function HeroSlideshow() {
 
   const hiddenUntilShown = (index: number) => index !== 0 && "opacity-0";
 
+  const highlightPill = (text: string, className: string) => (
+    <span
+      data-motion="pill"
+      className={cn(
+        praise.className,
+        "inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tl-[4px] rounded-tr-[18px] border-b-[3.2px] border-white bg-[#1E40AF] px-[33px] text-[44px] font-normal max-sm:h-[38px] max-sm:px-4 max-sm:text-[28px]",
+        className,
+      )}
+    >
+      {text}
+    </span>
+  );
+
   return (
     <div
       role="region"
@@ -183,53 +211,51 @@ export function HeroSlideshow() {
           <span className="h-[11px] w-[11px] rounded-full bg-white/50" />
         </div>
 
-        <div aria-live={paused || rotationStopped ? "polite" : "off"}>
-          <h1 className="mt-[22.8px] grid text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[1.15]">
-            {heroSlides.map((slide, index) => (
-              <span key={slide.highlight} {...slideLayer(index)}>
+        <div aria-live={paused || rotationStopped ? "polite" : "off"} className="mt-[22.8px] grid">
+          {heroSlides.map((slide, index) => (
+            <div
+              key={slide.highlight}
+              ref={(layer) => {
+                textLayers.current[index] = layer;
+              }}
+              {...slideLayer(index, "self-start")}
+            >
+              <h1 className="text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[42px]">
                 <span
                   data-motion="text"
                   className={cn(
-                    "flex h-[60.9px] items-center justify-center max-lg:h-auto max-lg:flex-wrap max-lg:gap-y-3",
+                    "flex h-[60.9px] items-center justify-center gap-x-[12.5px] max-lg:h-auto max-lg:flex-wrap max-lg:gap-y-2 max-sm:block",
                     hiddenUntilShown(index),
                   )}
                 >
                   <span>{slide.lead}</span>
-                  <span
-                    data-motion="pill"
-                    className={cn(
-                      praise.className,
-                      "ml-[12.5px] inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tl-[4px] rounded-tr-[18px] border-b-[3.2px] border-white bg-[#1E40AF] px-[33px] text-[44px] font-normal max-sm:h-[50px] max-sm:px-5 max-sm:text-[34px]",
-                    )}
-                  >
-                    {slide.highlight}
-                  </span>
+                  {highlightPill(slide.highlight, "max-sm:hidden")}
                 </span>
-                <span data-motion="text" className={cn("mt-[7.7px] block max-sm:mt-3", hiddenUntilShown(index))}>
+                <span data-motion="text" className={cn("mt-[7.7px] block text-balance max-sm:mt-0", hiddenUntilShown(index))}>
+                  {highlightPill(slide.highlight, "-my-1 mr-[14px] align-middle sm:hidden")}
                   {slide.tail}
                 </span>
-              </span>
-            ))}
-          </h1>
-
-          <div className="mt-[23.9px] grid">
-            {heroSlides.map((slide, index) => (
-              <div key={slide.highlight} {...slideLayer(index)}>
-                <p
-                  data-motion="text"
-                  className={cn(
-                    "mx-auto max-w-[480px] text-[16.5px] font-normal leading-[25.15px] text-white",
-                    hiddenUntilShown(index),
-                  )}
-                >
-                  {slide.text}
-                </p>
-              </div>
-            ))}
-          </div>
+              </h1>
+              <p
+                data-motion="text"
+                className={cn(
+                  "mx-auto mt-[23.9px] max-w-[480px] text-[16.5px] font-normal leading-[25.15px] text-white max-sm:mt-4",
+                  hiddenUntilShown(index),
+                )}
+              >
+                {slide.text}
+              </p>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-[50.5px] flex justify-center gap-[33.9px] max-sm:mt-[35px] max-sm:flex-col max-sm:gap-4">
+        <div
+          style={followText.style}
+          className={cn(
+            "mt-[50.5px] flex justify-center gap-[33.9px] max-sm:mt-[35px] max-sm:flex-col max-sm:gap-4",
+            followText.className,
+          )}
+        >
           <Link
             href="/register"
             className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[17.6px] rounded-full bg-[#1E40AF] text-[18px] font-medium leading-none text-white shadow-[0_16px_32px_-14px_rgba(11,28,48,0.55)] hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
@@ -249,7 +275,11 @@ export function HeroSlideshow() {
         <div
           role="group"
           aria-label="Highlight controls"
-          className="ct-rise-in absolute inset-x-0 z-10 mt-[22px] flex items-center justify-center gap-[10px] [animation-delay:400ms]"
+          style={followText.style}
+          className={cn(
+            "ct-rise-in absolute inset-x-0 z-10 mt-[22px] flex items-center justify-center gap-[10px] [animation-delay:400ms]",
+            followText.className,
+          )}
         >
           {heroSlides.map((slide, index) => (
             <button
