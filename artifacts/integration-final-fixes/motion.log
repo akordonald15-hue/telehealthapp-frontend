@@ -1,0 +1,12 @@
+
+> frontend@0.1.0 test:motion
+> node scripts/release-motion-qa.mjs
+
+390 {
+  heroMaxTextBottom: 0.7469135802469136,
+  footerMaxTextBottom: 0.8495727692954195
+}
+1440 {
+  heroMaxTextBottom: 0.5590191601310434,
+  footerMaxTextBottom: 0.6128283760312636
+}

@@ -308,7 +308,7 @@ export function DashboardClient() {
                   <QuickAction
                     href="/home-care/book"
                     title="Home Care"
-                    description="Book a nurse at home"
+                    description="Home visits in Akwa Ibom State, Nigeria"
                     icon={Home}
                     className="bg-[#EFF6FF]"
                     delay={120}

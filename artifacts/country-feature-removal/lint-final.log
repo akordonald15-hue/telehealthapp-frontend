@@ -1,0 +1,21 @@
+
+> frontend@0.1.0 lint
+> eslint
+
+
+C:\Projects\Caretekk\frontend-release\src\features\appointments\appointments-client.tsx
+  531:30  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+C:\Projects\Caretekk\frontend-release\src\features\appointments\appointments-client.tsx:531:30
+  529 |   const paymentRejected = activePaymentStatus === "rejected";
+  530 |   const paymentAwaitingVerification = activePaymentStatus === "awaiting_manual_verification" || activePaymentStatus === "transfer_submitted";
+> 531 |   const watchedAppointment = form.watch();
+      |                              ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  532 |   const consultationDraftValue = useMemo(
+  533 |     () => ({
+  534 |       aiSessionId,  react-hooks/incompatible-library
+
+✖ 1 problem (0 errors, 1 warning)
+

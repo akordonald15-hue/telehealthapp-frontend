@@ -1,0 +1,157 @@
+[
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "export const platformStats: Array<{ value: number; suffix: string; label: string }> = [\n  { value: 1200, suffix: \"+\", label: \"Consultations & visits\" },\n  { value: 8, suffix: \"min\", label: \"Avg. connect time\" },\n  { value: 50, suffix: \"+\", label: \"Vetted doctors & nurses\" },\n  { value: 3, suffix: \"\", label: \"Lagos, Abuja, PH\" },\n];",
+    "replacement": "export const platformStats: Array<{ value: string; label: string }> = [\n  { value: \"Online care\", label: \"Doctor consultations\" },\n  { value: \"Book now\", label: \"Subject to available appointment slots\" },\n  { value: \"Care team\", label: \"Connect with healthcare professionals.\" },\n  { value: \"Akwa Ibom\", label: \"Home visits in Akwa Ibom State, Nigeria\" },\n];"
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Medical advice without the wait",
+    "replacement": "Online doctor consultations"
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Consult a licensed doctor virtually in minutes, from anywhere in Nigeria no travel, no queue.",
+    "replacement": "Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Book a vetted nurse or caregiver for home visits in the cities we serve.",
+    "replacement": "Book a vetted nurse or caregiver for home visits. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Virtual consultations connect you in minutes. Homecare visits are matched quickly, with same-day availability where we have providers nearby.",
+    "replacement": "Book a doctor appointment immediately, subject to available appointment slots. Available times are shown when you book. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "See a doctor from ₦2,000, or book home care from ₦5,000 no surprise costs.",
+    "replacement": "Doctor consultations from ₦2,000 where applicable. Home care from ₦5,000 in Akwa Ibom State, Nigeria. Review the price before booking."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Talk to a licensed doctor virtually, anywhere in Nigeria confirmed in minutes, from ₦2,000.",
+    "replacement": "Access online healthcare consultations from wherever you are. Doctor consultations from ₦2,000 where applicable. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Home nursing, mother & baby care from registered midwives. Same-day, from ₦5,000.",
+    "replacement": "Home nursing, mother & baby care from registered midwives, from ₦5,000. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Daily support for aging parents check-ins, medication, mobility help matched to your family.",
+    "replacement": "Daily support for aging parents: check-ins, medication, mobility help matched to your family. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Virtual doctor support, plus in-person mother and baby care from our registered midwives.",
+    "replacement": "Virtual doctor support, plus in-person mother and baby care from our registered midwives. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Book home-care support for recovery, routine care, and family needs.",
+    "replacement": "Book home-care support for recovery, routine care, and family needs in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Start care, check updates, and keep next steps in one place.",
+    "replacement": "Access your care workspace around the clock. Doctor responses depend on appointment availability."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "tail: \"Minutes Away\"",
+    "replacement": "tail: \"Book Today\""
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Connect with a licensed doctor virtually, wherever you are in Nigeria confirmed in minutes, from ₦2,000.",
+    "replacement": "Online doctor consultations from ₦2,000 where applicable. Book immediately, subject to available appointment slots."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Book a vetted nurse or caregiver for in-home care in Akwa Ibom from ₦5,000.",
+    "replacement": "Book in-home care from ₦5,000. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Virtual doctor consultations are typically confirmed within minutes, anywhere in Nigeria. For in-home nursing or caregiver visits, we offer same-day availability in the cities we currently serve you'll see real-time availability when you book.",
+    "replacement": "Book a doctor appointment immediately, subject to available appointment slots. Available appointment times are shown when you book; an immediate doctor response is not guaranteed. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Virtual doctor consultations are available anywhere in Nigeria. In-person homecare and nursing visits are currently available in Akwa Ibom, with more locations coming soon.",
+    "replacement": "Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Enter your location when you book and we'll confirm what's available near you.",
+    "replacement": "Home visits depend on provider and appointment availability within Akwa Ibom State."
+  },
+  {
+    "file": "src/features/marketing/data.ts",
+    "removed": "Yes. Your medical information is kept confidential and secure within the Caretekk platform, and only shared with the doctor or provider handling your consultation or visit.",
+    "replacement": "Caretekk supports confidential care through access controls that restrict access to medical information. Authorized care, support, and administrative access may be needed to provide the service."
+  },
+  {
+    "file": "src/components/marketing/landing-page.tsx",
+    "removed": "${BRAND_NAME} in numbers",
+    "replacement": "${BRAND_NAME} service overview"
+  },
+  {
+    "file": "src/components/marketing/landing-page.tsx",
+    "removed": "Caretekk connects you with trusted home-care nurses for mother and baby care, elderly care, postnatal support, and general homecare follow-up.",
+    "replacement": "Caretekk connects you with trusted home-care nurses for mother and baby care, elderly care, postnatal support, and general homecare follow-up. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/components/marketing/site-footer.tsx",
+    "removed": "Trusted digital healthcare for doctor consultations, homecare support, records, and follow-up care.",
+    "replacement": "Trusted digital healthcare for online doctor consultations, records, and follow-up care. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/referral-program/referral-landing-client.tsx",
+    "removed": "Speak with doctors and access home-care services from Caretekk.",
+    "replacement": "Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability."
+  },
+  {
+    "file": "src/features/referral-program/referral-landing-client.tsx",
+    "removed": "A qualified nurse comes to you.",
+    "replacement": "Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/app/r/[code]/page.tsx",
+    "removed": "Speak with doctors and access home-care services from Caretekk.",
+    "replacement": "Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/app/layout.tsx",
+    "removed": "Book appointments, message your care team, manage records, and coordinate home visits with ${BRAND_NAME}.",
+    "replacement": "Book online appointments, message your care team, and manage records with ${BRAND_NAME}. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/app/manifest.ts",
+    "removed": "Caretekk healthcare platform for doctor consultations and home-care nursing",
+    "replacement": "Caretekk healthcare platform for online doctor consultations. Home visits are currently available in Akwa Ibom State, Nigeria."
+  },
+  {
+    "file": "src/features/dashboard/dashboard-client.tsx",
+    "removed": "description=\"Book a nurse at home\"",
+    "replacement": "description=\"Home visits in Akwa Ibom State, Nigeria\""
+  },
+  {
+    "file": "src/features/homecare/homecare-booking-client.tsx",
+    "removed": "title=\"Home Care\"\n",
+    "replacement": "title=\"Home Care\"\n      description=\"Home visits are currently available in Akwa Ibom State, Nigeria.\"\n"
+  },
+  {
+    "file": "src/features/homecare/homecare-requests-client.tsx",
+    "removed": "title=\"Home Care\"\n",
+    "replacement": "title=\"Home Care\"\n      description=\"Home visits are currently available in Akwa Ibom State, Nigeria.\"\n"
+  },
+  {
+    "file": "src/features/homecare/homecare-request-detail-client.tsx",
+    "removed": "title={request ? request.contact_name_snapshot || \"Home Care\" : \"Home Care\"}",
+    "replacement": "title={request ? request.contact_name_snapshot || \"Home Care\" : \"Home Care\"}\n      description=\"Home visits are currently available in Akwa Ibom State, Nigeria.\""
+  }
+]

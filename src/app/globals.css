@@ -235,6 +235,12 @@ textarea {
     radial-gradient(at 0% 100%, hsla(240, 100%, 96%, 1) 0px, transparent 50%);
 }
 
+@media (min-width: 1024px) {
+  .lp-scale {
+    zoom: calc(tan(atan2(min(100cqw, 1920px), 1000px)));
+  }
+}
+
 .ct-glass {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);

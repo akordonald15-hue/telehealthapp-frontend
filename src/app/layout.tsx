@@ -13,7 +13,7 @@ const lexend = Lexend({
 
 export const metadata: Metadata = {
   title: `${BRAND_NAME} | Trusted Telehealth And Home Care`,
-  description: `Book appointments, message your care team, manage records, and coordinate home visits with ${BRAND_NAME}.`,
+  description: `Book online appointments, message your care team, and manage records with ${BRAND_NAME}. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability. Home visits are currently available in Akwa Ibom State, Nigeria.`,
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [

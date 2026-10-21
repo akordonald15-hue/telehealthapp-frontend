@@ -37,6 +37,7 @@ export function HomeCareRequestsClient() {
   return (
     <Section
       title="Home Care"
+      description="Home visits are currently available in Akwa Ibom State, Nigeria."
       action={
         <Link href="/home-care/book" className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[var(--primary)] px-4 text-sm font-extrabold text-white transition hover:-translate-y-0.5">
           Request Home Care

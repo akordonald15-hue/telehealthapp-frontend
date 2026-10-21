@@ -1,0 +1,172 @@
+{
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "nodes": [
+        [
+          ".\\[grid-area\\:1\\/1\\][data-slide=\"0\"][aria-hidden=\"false\"] > .max-lg\\:h-auto.max-lg\\:flex-wrap.max-lg\\:gap-y-3 > span:nth-child(1)"
+        ],
+        [
+          ".\\[grid-area\\:1\\/1\\][data-slide=\"0\"][aria-hidden=\"false\"] > .mt-\\[7\\.7px\\].max-sm\\:mt-3.block"
+        ],
+        [
+          ".\\[grid-area\\:1\\/1\\][data-slide=\"0\"][aria-hidden=\"false\"] > .max-w-\\[480px\\].text-\\[16\\.5px\\].leading-\\[25\\.15px\\]"
+        ],
+        [
+          ".gap-\\[16\\.4px\\]"
+        ],
+        [
+          "button[aria-label=\"Show homecare highlight\"]"
+        ],
+        [
+          ".underline.underline-offset-4.focus-visible\\:outline-2"
+        ],
+        [
+          ".flex-col-reverse.border-\\[\\#1E40AFE5\\].px-2:nth-child(1) > dt"
+        ],
+        [
+          ".flex-col-reverse.border-\\[\\#1E40AFE5\\].px-2:nth-child(1) > dd"
+        ],
+        [
+          ".flex-col-reverse.border-\\[\\#1E40AFE5\\].px-2:nth-child(2) > dt"
+        ],
+        [
+          ".flex-col-reverse.border-\\[\\#1E40AFE5\\].px-2:nth-child(2) > dd"
+        ],
+        [
+          ".flex-col-reverse.border-\\[\\#1E40AFE5\\].px-2:nth-child(3) > dt"
+        ],
+        [
+          ".flex-col-reverse.border-\\[\\#1E40AFE5\\].px-2:nth-child(3) > dd"
+        ],
+        [
+          ".flex-col-reverse.border-\\[\\#1E40AFE5\\].px-2:nth-child(4) > dt"
+        ],
+        [
+          ".flex-col-reverse.border-\\[\\#1E40AFE5\\].px-2:nth-child(4) > dd"
+        ],
+        [
+          ".text-\\[14px\\]"
+        ],
+        [
+          ".text-\\[\\#131A2F\\]"
+        ],
+        [
+          ".text-\\[\\#3B82F6\\]"
+        ],
+        [
+          ".bg-\\[\\#1E3A8A\\] > .mt-\\[28px\\].text-\\[21px\\].leading-\\[1\\.25\\]"
+        ],
+        [
+          ".text-white\\/85.max-w-\\[372px\\].leading-\\[24px\\]"
+        ],
+        [
+          ".tracking-\\[0\\.04em\\]"
+        ],
+        [
+          ".mt-\\[18px\\]"
+        ],
+        [
+          "#trust > .mb-16.text-center > .ct-caption.text-\\[\\#2563EB\\]"
+        ],
+        [
+          ".max-w-3xl"
+        ],
+        [
+          ".aspect-\\[3\\/4\\].cursor-pointer.rounded-\\[2rem\\]:nth-child(1) > .translate-y-2.p-6.group-hover\\:translate-y-0 > .mb-1.text-\\[\\#b7c4ff\\].ct-caption"
+        ],
+        [
+          ".aspect-\\[3\\/4\\].cursor-pointer.rounded-\\[2rem\\]:nth-child(1) > .translate-y-2.p-6.group-hover\\:translate-y-0 > h4"
+        ],
+        [
+          ".aspect-\\[3\\/4\\].cursor-pointer.rounded-\\[2rem\\]:nth-child(2) > .translate-y-2.p-6.group-hover\\:translate-y-0 > .mb-1.text-\\[\\#b7c4ff\\].ct-caption"
+        ],
+        [
+          ".aspect-\\[3\\/4\\].cursor-pointer.rounded-\\[2rem\\]:nth-child(2) > .translate-y-2.p-6.group-hover\\:translate-y-0 > h4"
+        ],
+        [
+          ".aspect-\\[3\\/4\\].cursor-pointer.rounded-\\[2rem\\]:nth-child(3) > .translate-y-2.p-6.group-hover\\:translate-y-0 > .mb-1.text-\\[\\#b7c4ff\\].ct-caption"
+        ],
+        [
+          ".aspect-\\[3\\/4\\].cursor-pointer.rounded-\\[2rem\\]:nth-child(3) > .translate-y-2.p-6.group-hover\\:translate-y-0 > h4"
+        ],
+        [
+          ".aspect-\\[3\\/4\\].cursor-pointer.rounded-\\[2rem\\]:nth-child(4) > .translate-y-2.p-6.group-hover\\:translate-y-0 > .mb-1.text-\\[\\#b7c4ff\\].ct-caption"
+        ],
+        [
+          ".aspect-\\[3\\/4\\].cursor-pointer.rounded-\\[2rem\\]:nth-child(4) > .translate-y-2.p-6.group-hover\\:translate-y-0 > h4"
+        ],
+        [
+          ".text-white\\/75.ct-caption"
+        ],
+        [
+          ".max-w-\\[16ch\\]"
+        ],
+        [
+          ".leading-8.text-white\\/85.max-w-xl"
+        ],
+        [
+          "#demo"
+        ],
+        [
+          "div:nth-child(2) > .ct-caption.text-\\[\\#2563EB\\]"
+        ],
+        [
+          ".lg\\:grid-cols-\\[minmax\\(320px\\,0\\.96fr\\)_minmax\\(0\\,1\\.04fr\\)\\] > div:nth-child(2) > .sm\\:text-4xl.mt-4.text-3xl"
+        ],
+        [
+          ".lg\\:grid-cols-\\[minmax\\(320px\\,0\\.96fr\\)_minmax\\(0\\,1\\.04fr\\)\\] > div:nth-child(2) > .leading-8.sm\\:text-lg.mt-5"
+        ],
+        [
+          ".ct-glass"
+        ],
+        [
+          ".md\\:text-\\[49px\\]"
+        ],
+        [
+          ".md\\:mt-5"
+        ],
+        [
+          "#newsletter-unavailable"
+        ],
+        [
+          ".underline.underline-offset-4[href=\"mailto:support@caretekk.com\"]"
+        ],
+        [
+          ".md\\:mt-\\[30px\\].md\\:text-\\[27px\\].mt-6"
+        ],
+        [
+          ".md\\:w-\\[208px\\] > .md\\:text-\\[27px\\].lg\\:text-\\[22px\\].text-xl"
+        ],
+        [
+          ".hover\\:underline.md\\:text-\\[24px\\][href$=\"#home\"]"
+        ],
+        [
+          ".hover\\:underline.md\\:text-\\[24px\\][href$=\"#how-it-works\"]"
+        ],
+        [
+          ".hover\\:underline.md\\:text-\\[24px\\][href$=\"#trust\"]"
+        ],
+        [
+          ".hover\\:underline.md\\:text-\\[24px\\][href$=\"#contact\"]"
+        ],
+        [
+          ".md\\:w-\\[255px\\] > .md\\:text-\\[27px\\].lg\\:text-\\[22px\\].text-xl"
+        ],
+        [
+          ".md\\:w-\\[255px\\] > .md\\:space-y-\\[26px\\] > li:nth-child(1) > .hover\\:underline.md\\:text-\\[24px\\].lg\\:text-lg"
+        ],
+        [
+          "li:nth-child(2) > .hover\\:underline.md\\:text-\\[24px\\][href$=\"#home-care\"]"
+        ],
+        [
+          "li:nth-child(3) > .hover\\:underline.md\\:text-\\[24px\\][href$=\"#home-care\"]"
+        ],
+        [
+          "li:nth-child(4) > .hover\\:underline.md\\:text-\\[24px\\][href$=\"#home-care\"]"
+        ]
+      ]
+    }
+  ]
+}

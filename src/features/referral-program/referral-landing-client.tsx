@@ -97,14 +97,14 @@ export function ReferralLandingClient({ code }: { code: string }) {
           You&apos;ve been invited to Caretekk
         </h1>
         <p className="text-[15px] leading-relaxed text-slate-600">
-          Speak with doctors and access home-care services from Caretekk.
+          Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability.
         </p>
       </header>
 
       <ul className="grid gap-3">
         {[
           { icon: Stethoscope, title: "Talk to a doctor", body: "Book a consultation without leaving home." },
-          { icon: Home, title: "Home care visits", body: "A qualified nurse comes to you." },
+          { icon: Home, title: "Home care visits", body: "Home visits are currently available in Akwa Ibom State, Nigeria." },
         ].map((item) => (
           <li key={item.title} className="ct-surface flex items-start gap-3 rounded-[8px] p-4">
             <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]" aria-hidden />

@@ -1,0 +1,8 @@
+390 {
+  heroMaxTextBottom: 0.7392231617091952,
+  footerMaxTextBottom: 0.8458413482242829
+}
+1440 {
+  heroMaxTextBottom: 0.548632280616185,
+  footerMaxTextBottom: 0.629221466785555
+}
