@@ -179,7 +179,7 @@ function NewsletterForm() {
           type="button"
           disabled
           aria-describedby="newsletter-unavailable"
-          className={`inline-flex h-12 min-w-0 flex-[249] items-center justify-center gap-2.5 rounded-[50px] bg-[#1e40af] px-4 transition disabled:cursor-not-allowed disabled:opacity-70 md:h-16 md:w-[200px] md:flex-none md:gap-3.5 md:px-2.5 ${formShadow}`}
+          className={`inline-flex h-12 min-w-0 shrink-0 items-center justify-center gap-2.5 rounded-[50px] bg-[#1e40af] px-4 transition disabled:cursor-not-allowed disabled:opacity-70 md:h-16 md:w-[200px] md:flex-none md:gap-3.5 md:px-2.5 ${formShadow}`}
         >
           <span className="text-sm font-normal leading-[1.2] md:text-lg">Subscribe</span>
           {/* Vuesax arrow exported from Figma */}
