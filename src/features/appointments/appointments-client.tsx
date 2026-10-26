@@ -34,6 +34,9 @@ import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
 import { RewardSelector } from "@/features/referral-program/reward-selector";
+import { PromotionCheckout, PromotionConfirmation } from "@/features/promotions/promotion-checkout";
+import { useFounder50 } from "@/features/promotions/use-founder50";
+import { earliestConsultationSlot, hourlyConsultationSlots } from "./consultation-slots";
 import { RepricingConsent, requiresRepricingConsent } from "@/features/referral-program/repricing-consent";
 import { useInvalidateReferralProgram } from "@/features/referral-program/use-referral-program";
 import { appointmentsApi, paymentsApi, profilesApi, triageApi } from "@/lib/api/endpoints";
@@ -42,7 +45,8 @@ import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import type { Appointment, PatientProfile, Payment, ProviderDoctor, TriageConversationResult, TriageProcessingResponse, TriageSeverity } from "@/lib/types/backend";
 import type { PaymentInitiation } from "@/lib/types/backend";
 import { useFormDraft } from "@/lib/use-form-draft";
-import { cn, formatDateTime } from "@/lib/utils";
+import { lagosSelectionToInstant, formatAppointmentTime, lagosCalendarDate } from "@/lib/appointment-time";
+import { cn } from "@/lib/utils";
 import { appointmentSchema } from "@/lib/validation/features";
 
 type AppointmentFormValues = z.input<typeof appointmentSchema>;
@@ -51,7 +55,6 @@ type TriageResultData = TriageConversationResult | TriageProcessingResponse;
 type ConsultationTimingMode = "now" | "later";
 const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
 const symptomQuickReplies = ["Headache", "Fever", "Cough", "Stomach pain"];
-const hourlyConsultationSlots = Array.from({ length: 10 }, (_, index) => 8 + index);
 const hiddenDoctorNameMarkers = ["test doctor", "doctor smoke invite", "dr no phone smoke", "dr triumoh", "triumoh", "doctor donald ak", "donald ak", "dr ak", "doctor ak"];
 const severityOptions: Array<{ value: TriageSeverity; label: string }> = [
   { value: "mild", label: "Mild" },
@@ -224,7 +227,7 @@ function PatientAppointmentCard({ appointment }: { appointment: Appointment }) {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <p className="font-heading text-lg font-semibold text-[#1F2937]">{doctorName}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">{formatDateTime(appointment.scheduled_at)}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{formatAppointmentTime(appointment.scheduled_at)}</p>
           {appointment.reason ? <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{appointment.reason}</p> : null}
         </div>
         <StatusBadge value={appointment.status} />
@@ -292,6 +295,7 @@ export function AppointmentsClient() {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const userQuery = useCurrentUser();
+  const user = userQuery.data;
   const firstTimeWelcome = searchParams.get("welcome") === "first";
   const [page, setPage] = useState(1);
   const [doctorPickerOpen, setDoctorPickerOpen] = useState(false);
@@ -314,6 +318,7 @@ export function AppointmentsClient() {
   const [checkoutError, setCheckoutError] = useState("");
   // A reward is selected by public id only; the server prices the booking.
   const [selectedRewardId, setSelectedRewardId] = useState<string | null>(null);
+  const promotion = useFounder50(user?.role === "patient" ? user.id : undefined);
   // Held back deliberately: a repriced checkout needs the patient's agreement before we send
   // them to the payment provider.
   const [repricedPayment, setRepricedPayment] = useState<PaymentInitiation | null>(null);
@@ -421,7 +426,6 @@ export function AppointmentsClient() {
       notes: "",
     },
   });
-  const user = userQuery.data;
   const isDoctor = user?.role === "doctor";
   const availableDoctors = useQuery({
     queryKey: ["appointments", "available-doctors"],
@@ -448,9 +452,11 @@ export function AppointmentsClient() {
   const selectedDoctorLive = selectedDoctor
     ? doctorItems.find((doctor) => doctor.id === selectedDoctor.id) ?? (availableDoctors.isSuccess ? null : selectedDoctor)
     : null;
+  const promotionalTiming = promotion.enabled && promotion.active &&
+    promotion.reservation?.reservation.status === "reserved";
   const doctorCanConsultNow = Boolean(selectedDoctorLive?.availability_status === "available" && isWithinConsultationHours());
   const scheduleBaseDate = useMemo(() => {
-    const today = new Date();
+    const today = lagosCalendarDate(new Date());
     if (scheduleDay === "tomorrow") return addDays(today, 1);
     if (scheduleDay === "another" && customScheduleDate) {
       const [year, month, day] = customScheduleDate.split("-").map(Number);
@@ -462,7 +468,7 @@ export function AppointmentsClient() {
     if (scheduleDay === "another" && !customScheduleDate) {
       return [];
     }
-    const now = new Date();
+    const now = lagosCalendarDate(new Date());
     const selectedDateValue = toDateInputValue(scheduleBaseDate);
     const todayValue = toDateInputValue(now);
     return hourlyConsultationSlots.filter((hour) => {
@@ -477,7 +483,7 @@ export function AppointmentsClient() {
     const selectedDateValue = toDateInputValue(scheduleBaseDate);
     return new Set(
       selectedDoctorLive.unavailable_consultation_slots
-        .map((slot) => new Date(slot))
+        .map((slot) => lagosCalendarDate(new Date(slot)))
         .filter((slotDate) => !Number.isNaN(slotDate.getTime()) && toDateInputValue(slotDate) === selectedDateValue)
         .map((slotDate) => slotDate.getHours()),
     );
@@ -489,7 +495,7 @@ export function AppointmentsClient() {
     if (timingMode === "later" && selectedSlotHour !== null) {
       const scheduled = new Date(scheduleBaseDate);
       scheduled.setHours(selectedSlotHour, 0, 0, 0);
-      return toDateTimeLocalValue(scheduled);
+      return lagosSelectionToInstant(toDateTimeLocalValue(scheduled));
     }
     return "";
   }, [scheduleBaseDate, selectedSlotHour, timingMode]);
@@ -666,6 +672,19 @@ export function AppointmentsClient() {
 
   function handleContinueToPayment() {
     setCheckoutError("");
+    if (createAppointment.isPending || promotion.busy) return;
+    if (!promotion.free && !promotion.canStartPaid()) {
+      setCheckoutError("Resolve your promotional request before starting another checkout.");
+      return;
+    }
+    if (promotion.pending || (!promotion.free && promotion.paidBlocked)) {
+      setCheckoutError("Resolve your promotional request before starting another checkout.");
+      return;
+    }
+    if (promotion.active && !promotion.free) {
+      setCheckoutError("Recover your existing Founder50 booking before starting another checkout.");
+      return;
+    }
     const missingFields = [
       !selectedDoctorLive ? "doctor" : "",
       !timingMode ? "consultation type" : "",
@@ -688,16 +707,37 @@ export function AppointmentsClient() {
       setCheckoutError(`Please select ${missingFields.join(", ")} before payment.`);
       return;
     }
+    if (promotionalTiming && (timingMode === "now" || new Date(scheduledAtFromSelection).getTime() <= Date.now())) {
+      setCheckoutError("Choose a future hourly slot. Availability is checked when you book.");
+      return;
+    }
     const reason = aiSubmittedText || (isConversationResult(aiResultData) ? aiResultData.summary_preview : "") || "AI-assisted doctor consultation";
 
     form.setValue("doctor", selectedDoctorLive!.id, { shouldValidate: true });
     form.setValue("scheduled_at", scheduledAtFromSelection, { shouldValidate: true });
     form.setValue("reason", reason, { shouldValidate: true });
 
+    if (promotion.free) {
+      void promotion.book({
+        doctor: selectedDoctorLive!.id,
+        ...(effectiveTriageSessionId ? { triage_session: effectiveTriageSessionId } : {}),
+        scheduled_at: scheduledAtFromSelection,
+        callback_url: `${window.location.origin}/appointments`,
+      }).then(result => {
+        if (result) {
+          resetBookingCheckoutState();
+          void queryClient.invalidateQueries({ queryKey: ["appointments"] });
+          void queryClient.invalidateQueries({ queryKey: ["payments"] });
+        }
+      });
+      return;
+    }
     createAppointment.mutate({
       doctor: selectedDoctorLive!.id,
       ...(effectiveTriageSessionId ? { triage_session: effectiveTriageSessionId } : {}),
-      scheduled_at: scheduledAtFromSelection,
+      // Cash checkout supports immediate consultation. Serialize the actual
+      // submission instant with its offset, rather than a cached local minute.
+      scheduled_at: timingMode === "now" ? new Date().toISOString() : scheduledAtFromSelection,
       reason,
       notes: "",
       callback_url: `${window.location.origin}/appointments`,
@@ -733,6 +773,8 @@ export function AppointmentsClient() {
       title={user?.role === "patient" ? "" : isDoctor ? "Consultations" : "Appointments"}
       description={user?.role === "patient" ? "" : isDoctor ? "Open and manage assigned consultations." : undefined}
     >
+      <PromotionConfirmation promotion={promotion} />
+      {promotion.enabled && (promotion.pending || ["booked", "redeemed", "forfeited"].includes(promotion.reservation?.reservation.status || "")) ? <PromotionCheckout pendingDoctorName={doctorItems.find(doctor => doctor.id === promotion.pending?.doctor)?.display_name} promotion={promotion} /> : null}
       {user?.role === "patient" && !effectiveTriageSessionId && !selectedDoctor ? (
         <div className="-mx-4 -mt-5 grid min-h-[calc(100dvh-132px)] gap-5 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_42%,#F8FBFF_100%)] px-4 py-4 pb-6 sm:mx-0 sm:mt-0 sm:rounded-[8px] sm:p-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
               <div className="grid content-start gap-4">
@@ -926,7 +968,7 @@ export function AppointmentsClient() {
                       <Notice title="This is not a diagnosis" tone="neutral">
                         This assessment helps Caretekk match you with the most appropriate doctor.
                       </Notice>
-                      <Button type="button" className="w-full sm:w-fit" onClick={() => setDoctorPickerOpen(true)}>
+                      <Button type="button" className="w-full sm:w-fit" disabled={promotion.selectionLocked} onClick={() => setDoctorPickerOpen(true)}>
                         View recommended doctors
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
@@ -988,7 +1030,7 @@ export function AppointmentsClient() {
               ) : null}
             </div>
           ) : null}
-          <Button type="button" className="w-full sm:w-fit" onClick={() => setDoctorPickerOpen(true)}>
+          <Button type="button" className="w-full sm:w-fit" disabled={promotion.selectionLocked} onClick={() => setDoctorPickerOpen(true)}>
             View recommended doctors
           </Button>
         </div>
@@ -1032,7 +1074,7 @@ export function AppointmentsClient() {
             <article key={item.id} className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.38)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatAppointmentTime(item.scheduled_at)}</p>
                   {item.reason ? <p className="mt-3 text-sm leading-7 text-slate-600">{item.reason}</p> : null}
                   {item.triage_summary?.symptoms?.length ? (
                     <div className="mt-3 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
@@ -1144,6 +1186,7 @@ export function AppointmentsClient() {
                         <span className="text-sm font-semibold text-slate-600">5-10 min</span>
                         <button
                           type="button"
+                          disabled={promotion.selectionLocked || (promotion.enabled && doctor.availability_status === "unavailable")}
                           className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
                           onClick={() => {
                             setCheckoutError("");
@@ -1188,11 +1231,12 @@ export function AppointmentsClient() {
               </div>
             ) : null}
             <div className="rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
-              <span className="font-semibold text-[#1F2937]">Selected time:</span> {selectedTimeSummary}
+              <span className="font-semibold text-[#1F2937]">Selected time (Lagos):</span> {selectedTimeSummary}
             </div>
             <div className="grid gap-2 sm:grid-cols-[auto_1fr]">
               <button
                 type="button"
+                disabled={promotion.selectionLocked}
                 className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition active:scale-[0.98]"
                 onClick={() => {
                   setScheduleSheetOpen(false);
@@ -1204,10 +1248,10 @@ export function AppointmentsClient() {
               <Button
                 type="button"
                 className="w-full"
-                disabled={!modalBookingReady || createAppointment.isPending}
+                disabled={!modalBookingReady || createAppointment.isPending || promotion.busy || (promotion.active && !promotion.free) || Boolean(promotion.pending) || (promotionalTiming && timingMode !== "later") || (!promotion.free && promotion.paidBlocked)}
                 onClick={handleContinueToPayment}
               >
-                {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
+                {createAppointment.isPending || promotion.busy ? "Confirming checkout…" : promotion.free ? "Book Free Consultation" : "Make Payment"}
               </Button>
             </div>
           </div>
@@ -1246,28 +1290,38 @@ export function AppointmentsClient() {
             <div className="grid gap-3 rounded-[8px] border border-slate-100 bg-white p-3">
               <div>
                 <p className="text-base font-semibold text-[#1F2937]">Choose consultation time</p>
-                <p className="mt-1 text-sm leading-5 text-slate-600">Start now if available, or schedule an hourly slot.</p>
+                <p className="mt-1 text-sm leading-5 text-slate-600">{promotionalTiming ? "Choose a future hourly appointment. Availability is checked when you book." : "Start now if available, or schedule an hourly slot."}</p>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2">
+              <fieldset aria-label="Consultation timing" disabled={promotion.selectionLocked} className="grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
-                  disabled={!doctorCanConsultNow}
+                  disabled={promotion.selectionLocked || (promotionalTiming ? selectedDoctorLive.availability_status === "unavailable" : !doctorCanConsultNow)}
                   onClick={() => {
                     setCheckoutError("");
-                    if (!doctorCanConsultNow) return;
+                    if (!promotionalTiming && !doctorCanConsultNow) return;
+                    if (promotionalTiming) {
+                      const slot = earliestConsultationSlot(lagosCalendarDate(new Date()), selectedDoctorLive.unavailable_consultation_slots?.map(value => lagosCalendarDate(new Date(value)).toISOString()));
+                      if (!slot) { setCheckoutError("No hourly slots are available today or tomorrow. Choose another date."); return; }
+                      // Explicit date also refreshes a sheet left open across midnight.
+                      setCustomScheduleDate(toDateInputValue(slot));
+                      setScheduleDay("another");
+                      setTimingMode("later");
+                      setSelectedSlotHour(slot.getHours());
+                      return;
+                    }
                     setTimingMode("now");
                     setSelectedSlotHour(null);
                   }}
                   className={cn(
                     "rounded-[8px] border p-3 text-left transition active:scale-[0.99]",
-                    timingMode === "now" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
-                    !doctorCanConsultNow && "cursor-not-allowed opacity-55",
+                    !promotionalTiming && timingMode === "now" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
+                    !promotionalTiming && !doctorCanConsultNow && "cursor-not-allowed opacity-55",
                   )}
                 >
-                  <p className="font-semibold text-[#1F2937]">Consult now</p>
+                  <p className="font-semibold text-[#1F2937]">{promotionalTiming ? "Earliest appointment" : "Consult now"}</p>
                   <p className="mt-1 text-sm leading-5 text-slate-600">
-                    {doctorCanConsultNow ? "Start checkout for an immediate chat consultation." : "Available between 8:00 AM and 6:00 PM."}
+                    {promotionalTiming ? "Select the next hourly slot, then confirm its date and time. Availability is checked at booking." : doctorCanConsultNow ? "Start checkout for an immediate chat consultation." : "Available between 8:00 AM and 6:00 PM."}
                   </p>
                 </button>
                 <button
@@ -1285,16 +1339,25 @@ export function AppointmentsClient() {
                   <p className="font-semibold text-[#1F2937]">Schedule for later</p>
                   <p className="mt-1 text-sm leading-5 text-slate-600">Pick a time between 8:00 AM and 6:00 PM.</p>
                 </button>
-              </div>
+              </fieldset>
 
-              {!doctorCanConsultNow ? (
+              {promotionalTiming && timingMode === "now" ? (
+                <Notice title="Choose a future time for Founder50" tone="neutral">
+                  Your selected doctor and Consult now choice have not changed.
+                  Founder50 requires a future appointment. Select Earliest appointment
+                  or Schedule for later before confirming your free consultation.
+                  To use ordinary paid checkout, explicitly remove the promotion first.
+                </Notice>
+              ) : null}
+
+              {!promotionalTiming && !doctorCanConsultNow ? (
                 <Notice title="This doctor is currently offline" tone="neutral">
                   You can schedule a consultation for an available time.
                 </Notice>
               ) : null}
 
               {timingMode === "later" ? (
-                <div className="grid gap-4">
+                <fieldset aria-label="Appointment date and time" disabled={promotion.selectionLocked} className="grid gap-4">
                   <div className="grid grid-cols-3 rounded-[8px] border border-slate-200 bg-slate-50 p-1">
                     {[
                       { value: "today", label: "Today" },
@@ -1369,7 +1432,7 @@ export function AppointmentsClient() {
                       </p>
                     </div>
                   ) : null}
-                </div>
+                </fieldset>
               ) : null}
 
               {modalBookingReady ? (
@@ -1384,12 +1447,13 @@ export function AppointmentsClient() {
                       {selectedTimeSummary}
                     </p>
                   </div>
+                  <PromotionCheckout pendingDoctorName={doctorItems.find(doctor => doctor.id === promotion.pending?.doctor)?.display_name} promotion={promotion} rewardSelected={Boolean(selectedRewardId)} />
                   <RewardSelector
                     serviceType="appointment"
                     serviceLabel="Consultation"
                     selectedRewardId={selectedRewardId}
                     onSelect={setSelectedRewardId}
-                    disabled={createAppointment.isPending}
+                    disabled={createAppointment.isPending || promotion.active || promotion.busy}
                   />
                   {repricedPayment ? (
                     <RepricingConsent
@@ -1409,10 +1473,10 @@ export function AppointmentsClient() {
                     <Button
                       type="button"
                       className="w-full"
-                      disabled={!modalBookingReady || createAppointment.isPending}
+                      disabled={!modalBookingReady || createAppointment.isPending || promotion.busy || (promotion.active && !promotion.free) || Boolean(promotion.pending) || (promotionalTiming && timingMode !== "later") || (!promotion.free && promotion.paidBlocked)}
                       onClick={handleContinueToPayment}
                     >
-                      {createAppointment.isPending ? "Starting checkout..." : "Make Payment"}
+                      {createAppointment.isPending || promotion.busy ? "Confirming checkout…" : promotion.free ? "Book Free Consultation" : "Make Payment"}
                     </Button>
                   )}
                 </div>
