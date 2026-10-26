@@ -220,7 +220,7 @@ export function HeroSlideshow() {
               }}
               {...slideLayer(index, "self-start")}
             >
-              <h1 className="text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[42px]">
+              <h2 className="text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[42px]">
                 <span
                   data-motion="text"
                   className={cn(
@@ -235,7 +235,7 @@ export function HeroSlideshow() {
                   {highlightPill(slide.highlight, "-my-1 mr-[14px] align-middle sm:hidden")}
                   {slide.tail}
                 </span>
-              </h1>
+              </h2>
               <p
                 data-motion="text"
                 className={cn(

@@ -44,6 +44,7 @@ export function LandingPage() {
         <section className="lp-scale bg-white px-[7px] pb-[3px] pt-[7px]">
           <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#3B82F6_0%,#1E40AF_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
             <MarketingHeader />
+            <h1 className="sr-only">Caretekk: online doctor consultations and in-home care</h1>
             <HeroSlideshow />
           </div>
         </section>
