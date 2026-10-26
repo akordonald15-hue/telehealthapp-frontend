@@ -42,6 +42,9 @@ export type ProviderSetupVerifyResponse = DetailResponse & {
 };
 
 export type BackendErrorPayload = {
+  /** Promotion domain errors retain these machine-readable fields. */
+  code?: string;
+  errors?: Record<string, unknown>;
   error?: string;
   message?: string | Record<string, string[] | string> | unknown[];
   detail?: string;
