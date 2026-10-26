@@ -1,9 +1,11 @@
 import { createRequire } from 'node:module';
 const load = createRequire(import.meta.url);
-const { chromium } = load('../../telehealthapp-frontend/node_modules/@playwright/test');
+const { chromium } = load('@playwright/test');
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 const phase = process.argv[2] || 'after';
+const base = process.env.QA_BASE_URL || 'http://localhost:3100';
+fs.mkdirSync('artifacts/hero-review', { recursive: true });
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const results = [];
@@ -12,7 +14,7 @@ const phase = process.argv[2] || 'after';
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
-    await page.goto('http://localhost:3100', { waitUntil: 'networkidle', timeout: 180000 });
+    await page.goto(base, { waitUntil: 'networkidle', timeout: 180000 });
     await page.waitForTimeout(1500);
     if (await page.getByRole('button', { name: 'Not now', exact: true }).isVisible()) await page.getByRole('button', { name: 'Not now', exact: true }).click();
     await page.locator('main section').first().screenshot({ path: `artifacts/hero-review/${phase}-${width}-consult.png` });
@@ -49,7 +51,7 @@ const phase = process.argv[2] || 'after';
   }
   if (phase === 'after') {
     const page = await browser.newPage({ viewport: { width: 390, height: 1000 }, reducedMotion: 'reduce' });
-    await page.goto('http://localhost:3100', { waitUntil: 'networkidle', timeout: 180000 });
+    await page.goto(base, { waitUntil: 'networkidle', timeout: 180000 });
     const hero = page.locator('main section').first();
     const initialHeight = (await hero.boundingBox()).height;
     await page.getByRole('button', { name: 'Show homecare highlight' }).click();
