@@ -182,6 +182,10 @@ export const appointmentsApi = {
 };
 
 export const messagingApi = {
+  realtimeTicket: (threadId: number, signal?: AbortSignal) =>
+    apiRequest<{ ticket: string; expires_in: number; websocket_url: string }>(`/messages/threads/${threadId}/realtime-ticket/`, {
+      method: "POST", body: {}, signal,
+    }),
   threads: (query?: { page?: number; page_size?: number }) => apiList<Thread>("/messages/threads/", query),
   createThread: (body: { patient?: number; doctor?: number; appointment_id?: number }) =>
     apiRequest<Thread>("/messages/threads/", { method: "POST", body }),
