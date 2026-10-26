@@ -198,10 +198,18 @@ async function journey(viewport, mode) {
       body: JSON.stringify(json),
     });
   });
+  const doctorResponsePromise = page.waitForResponse((response) =>
+    new URL(response.url()).pathname.includes("/available-doctors") &&
+    response.request().method() === "GET",
+  );
   await page.goto(
     `${base}/appointments?triage_session=${localFixture?.triage || 5}`,
     { waitUntil: "domcontentloaded" },
   );
+  const doctorResponse = await doctorResponsePromise;
+  expect(doctorResponse.status()).toBe(200);
+  const doctorPayload = await doctorResponse.json();
+  expect(doctorPayload.results.map((item) => item.id)).toContain(localFixture?.doctor || doctor.id);
   const dismiss = page.getByRole("button", { name: "Not now", exact: true });
   if (await dismiss.isVisible()) await dismiss.click();
   await page
