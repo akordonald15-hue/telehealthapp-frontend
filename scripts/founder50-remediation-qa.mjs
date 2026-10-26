@@ -119,6 +119,7 @@ async function probe(mode,width=390,zone='Africa/Lagos') {
    }else if(mode==='skew'){
     await expect(panel().getByRole('alert')).toBeVisible();await expect(page.getByText('Your free consultation is confirmed.',{exact:true})).toHaveCount(0);
     await dialog.getByRole('button',{name:'Date',exact:true}).click();await dialog.locator('input[type=date]').fill('2026-10-17');await dialog.getByRole('button',{name:'8:00 AM',exact:true}).click();await confirm.click();
+    await expect.poll(()=>posts.length).toBe(2);
     expect(posts[1].idempotency_key).not.toBe(posts[0].idempotency_key);
    }
    let realResult;
