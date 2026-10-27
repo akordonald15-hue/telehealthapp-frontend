@@ -154,38 +154,31 @@ export const heroSlides: Array<{
   lead: string;
   highlight: string;
   tail: string;
-  highlightClassName: string;
   text: string;
   image: string;
   alt: string;
-  portraits: Array<{ image: string; name: string; featured?: boolean }>;
+  background: string;
+  backgroundClassName: string;
 }> = [
   {
-    lead: "A Doctor’s",
+    lead: "Get a Doctor’s",
     highlight: "Opinion,",
-    tail: "Book Today",
-    highlightClassName: "bg-[#1E40AF]",
+    tail: "Without the Waiting Room",
     text: "Online doctor consultations from ₦2,000 where applicable. Book immediately, subject to available appointment slots.",
-    image: "/img/team-consult.webp",
-    alt: "Caretekk doctors ready for a virtual consultation",
-    portraits: [
-      { image: "/img/Dr Paul Chinonso.jpg", name: "Dr. Paul Chinonso" },
-      { image: "/img/Dr michael Idam.jpg", name: "Dr. Michael Idam", featured: true },
-      { image: "/img/Dr effiong Okon.jpg", name: "Dr. Effiong Okon" },
-    ],
+    image: "/img/hero/doctors-consult.webp",
+    alt: "Three Caretekk doctors in white coats, ready for an online consultation",
+    background: "/img/hero/bg-consult.webp",
+    backgroundClassName: "left-1/2 top-[49px] w-[166%] -translate-x-1/2 max-lg:top-[12%] max-sm:top-[27%] max-sm:w-[300%]",
   },
   {
-    lead: "Real Care",
+    lead: "The Care You Need,",
     highlight: "Right",
-    tail: "at Your Door",
-    highlightClassName: "bg-[#1E40AF]",
-    text: "Book in-home care from ₦5,000. Home visits are currently available in Akwa Ibom State, Nigeria.",
-    image: "/img/team-homecare.webp",
-    alt: "Caretekk care team available for home visits",
-    portraits: [
-      { image: "/img/Dr Paul Chinonso.jpg", name: "Dr. Paul Chinonso" },
-      { image: "/img/Dr effiong Okon.jpg", name: "Dr. Effiong Okon", featured: true },
-    ],
+    tail: "Where You Are",
+    text: "Book in-home care from ₦5,000. In-home care are currently available in Akwa Ibom State, Nigeria.",
+    image: "/img/hero/doctors-homecare.webp",
+    alt: "Caretekk doctor in blue scrubs with two colleagues, ready to provide care at home",
+    background: "/img/hero/bg-homecare.webp",
+    backgroundClassName: "left-[-53%] top-0 w-[240%] max-sm:left-[-100%] max-sm:top-[26%] max-sm:w-[380%]",
   },
 ];
 

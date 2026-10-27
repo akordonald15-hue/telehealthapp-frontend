@@ -3,10 +3,11 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Praise } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
-import { HousePlus } from "lucide-react";
-import { useRef, useState } from "react";
+import { HousePlus, Pause, Play } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { ArrowLongRightIcon } from "@/components/marketing/marketing-icons";
 import { heroSlides } from "@/features/marketing/data";
@@ -14,18 +15,41 @@ import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const SLIDE_INTERVAL_MS = 8000;
+const praise = Praise({ weight: "400", subsets: ["latin"] });
+
+const SLIDE_INTERVAL_MS = 6000;
 const STAGGER = 0.07;
 const ENTER_AT = 0.38;
+const BACKGROUND_OPACITY = 0.2;
+
+const imagePriority = (index: number) =>
+  index === 0 ? { preload: true } : { loading: "eager" as const, fetchPriority: "low" as const };
 
 export function HeroSlideshow() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [rotationStopped, setRotationStopped] = useState(false);
   const [onScreen, setOnScreen] = useState(true);
+  const [cycle, setCycle] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const previous = useRef(active);
   const transition = useRef<gsap.core.Timeline | null>(null);
+  const progress = useRef<gsap.core.Timeline | null>(null);
+  const textLayers = useRef<(HTMLDivElement | null)[]>([]);
+  const [textHeights, setTextHeights] = useState<number[] | null>(null);
+
+  useEffect(() => {
+    const layers = textLayers.current.filter((layer) => layer !== null);
+    const observer = new ResizeObserver(() => setTextHeights(layers.map((layer) => parseFloat(getComputedStyle(layer).height))));
+    layers.forEach((layer) => observer.observe(layer));
+    return () => observer.disconnect();
+  }, []);
+
+  const textSlack = textHeights ? Math.max(...textHeights) - textHeights[active] : 0;
+  const followText = {
+    style: { translate: `0 ${-textSlack}px` },
+    className: "transition-[translate] duration-500 ease-in-out motion-reduce:transition-none",
+  };
 
   useGSAP(() => {
     ScrollTrigger.create({
@@ -38,13 +62,34 @@ export function HeroSlideshow() {
 
   useGSAP(
     () => {
-      if (paused || rotationStopped || !onScreen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      progress.current?.kill();
+      progress.current = null;
+      const fill = (index: number) => `[data-progress="${index}"]`;
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      heroSlides.forEach((_, index) => {
+        if (index !== active) {
+          gsap.to(fill(index), { scaleX: 0, duration: reduced ? 0 : 0.3, ease: "power2.out", overwrite: true });
+        }
+      });
+
+      if (reduced) {
+        gsap.set(fill(active), { scaleX: 1 });
         return;
       }
-      gsap.delayedCall(SLIDE_INTERVAL_MS / 1000, () => setActive((index) => (index + 1) % heroSlides.length));
+
+      progress.current = gsap
+        .timeline({ paused: paused || rotationStopped || !onScreen })
+        .to(fill(active), { scaleX: 0, duration: 0.25, ease: "power2.inOut", overwrite: true })
+        .to(fill(active), { scaleX: 1, duration: SLIDE_INTERVAL_MS / 1000, ease: "none" })
+        .call(() => setActive((index) => (index + 1) % heroSlides.length));
     },
-    { dependencies: [active, paused, rotationStopped, onScreen], revertOnUpdate: true },
+    { scope: rootRef, dependencies: [active, cycle] },
   );
+
+  useGSAP(() => {
+    progress.current?.paused(paused || rotationStopped || !onScreen);
+  }, { dependencies: [paused, rotationStopped, onScreen] });
 
   useGSAP(
     () => {
@@ -54,18 +99,28 @@ export function HeroSlideshow() {
         return;
       }
       transition.current?.progress(1).kill();
+
+      const details = (slide: number, motion: "text" | "pill" | "image" | "background") =>
+        `[data-slide="${slide}"] [data-motion="${motion}"]`;
+
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        gsap.set(`[data-slide="${from}"] [data-motion="text"], [data-slide="${from}"] [data-motion="image"]`, { opacity: 0 });
-        gsap.set(`[data-slide="${active}"] [data-motion="text"], [data-slide="${active}"] [data-motion="image"]`, { opacity: 1, x: 0 });
+        gsap.set([details(from, "text"), details(from, "image"), details(from, "background")], { opacity: 0 });
+        gsap.set([details(active, "text"), details(active, "image")], { opacity: 1, x: 0 });
+        gsap.set(details(active, "background"), { opacity: BACKGROUND_OPACITY });
         return;
       }
-
-      const details = (slide: number, motion: "text" | "pill" | "image") => `[data-slide="${slide}"] [data-motion="${motion}"]`;
 
       transition.current = gsap
         .timeline()
         .to(details(from, "text"), { x: -56, opacity: 0, duration: 0.4, ease: "power2.inOut", stagger: STAGGER }, 0)
         .to(details(from, "image"), { x: -160, opacity: 0, duration: 0.5, ease: "power2.inOut" }, STAGGER)
+        .to(details(from, "background"), { opacity: 0, duration: 0.8, ease: "power1.inOut" }, 0)
+        .fromTo(
+          details(active, "background"),
+          { opacity: 0 },
+          { opacity: BACKGROUND_OPACITY, duration: 0.8, ease: "power1.inOut" },
+          0.2,
+        )
         .fromTo(
           details(active, "text"),
           { x: 56, opacity: 0 },
@@ -100,62 +155,91 @@ export function HeroSlideshow() {
 
   const hiddenUntilShown = (index: number) => index !== 0 && "opacity-0";
 
+  const highlightPill = (text: string, className: string) => (
+    <span
+      data-motion="pill"
+      className={cn(
+        praise.className,
+        "inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tl-[4px] rounded-tr-[18px] border-b-[3.2px] border-white bg-[#1E40AF] px-[33px] text-[44px] font-normal max-sm:h-[38px] max-sm:px-4 max-sm:text-[28px]",
+        className,
+      )}
+    >
+      {text}
+    </span>
+  );
+
   return (
     <div
       role="region"
       aria-roledescription="carousel"
       aria-label="Highlights"
       ref={rootRef}
-      className="relative"
-      onFocus={() => setPaused(true)}
+      onFocus={(event) => {
+        if (event.target.matches(":focus-visible")) {
+          setPaused(true);
+        }
+      }}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
           setPaused(false);
         }
       }}
     >
-      <div className="inline-flex h-[47.6px] items-center gap-[8px] rounded-[22px] rounded-br-none rounded-tl-[2px] bg-[#1E40AF] pl-[30.2px] pr-[30px] text-[15.15px] font-medium leading-none text-white max-sm:px-5">
-        <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#B3C2F7]" />
-        Trusted Digital Healthcare
-        <span className="h-[10.6px] w-[10.6px] rounded-full bg-[#B3C2F7]" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        {heroSlides.map((slide, index) => (
+          <div key={slide.background} data-slide={index}>
+            <Image
+              src={slide.background}
+              alt=""
+              width={2000}
+              height={1400}
+              {...imagePriority(index)}
+              sizes="150vw"
+              data-motion="background"
+              style={{ opacity: index === 0 ? BACKGROUND_OPACITY : 0 }}
+              className={cn("absolute h-auto max-w-none mix-blend-screen", slide.backgroundClassName)}
+            />
+          </div>
+        ))}
+        <div className="absolute inset-0 bg-[radial-gradient(rgb(255_255_255/0.22)_1.2px,transparent_1.6px)] bg-[size:16px_16px]" />
       </div>
 
-      <div aria-live={paused || rotationStopped ? "polite" : "off"}>
-        <h1 className="mt-[22.8px] grid text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[1.15]">
+      <div className="relative">
+        <div className="inline-flex h-[45.5px] items-center gap-[10px] rounded-bl-[16px] rounded-tr-[16px] bg-[#60A5FA]/50 px-[30px] text-[14.85px] font-medium leading-none text-white max-sm:px-5">
+          <span className="h-[11px] w-[11px] rounded-full bg-white/50" />
+          Trusted Digital Healthcare
+          <span className="h-[11px] w-[11px] rounded-full bg-white/50" />
+        </div>
+
+        <div aria-live={paused || rotationStopped ? "polite" : "off"} className="mt-[22.8px] grid">
           {heroSlides.map((slide, index) => (
-            <span key={slide.highlight} {...slideLayer(index)}>
-              <span
-                data-motion="text"
-                className={cn(
-                  "flex h-[60.9px] items-center justify-center max-lg:h-auto max-lg:flex-wrap max-lg:gap-y-3",
-                  hiddenUntilShown(index),
-                )}
-              >
-                <span>{slide.lead}</span>
+            <div
+              key={slide.highlight}
+              ref={(layer) => {
+                textLayers.current[index] = layer;
+              }}
+              {...slideLayer(index, "self-start")}
+            >
+              <h2 className="text-[40.25px] font-bold leading-none text-white max-sm:text-[30px] max-sm:leading-[42px]">
                 <span
-                  data-motion="pill"
+                  data-motion="text"
                   className={cn(
-                    "ml-[12.5px] inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tr-[18px] border-b-[3.2px] border-white pl-[10.3px] pr-[16.2px] text-[31.75px] max-sm:h-[48px] max-sm:text-[24px]",
-                    slide.highlightClassName,
+                    "flex h-[60.9px] items-center justify-center gap-x-[12.5px] max-lg:h-auto max-lg:flex-wrap max-lg:gap-y-2 max-sm:block",
+                    hiddenUntilShown(index),
                   )}
                 >
-                  {slide.highlight}
+                  <span>{slide.lead}</span>
+                  {highlightPill(slide.highlight, "max-sm:hidden")}
                 </span>
-              </span>
-              <span data-motion="text" className={cn("mt-[7.7px] block max-sm:mt-3", hiddenUntilShown(index))}>
-                {slide.tail}
-              </span>
-            </span>
-          ))}
-        </h1>
-
-        <div className="mt-[23.9px] grid">
-          {heroSlides.map((slide, index) => (
-            <div key={slide.highlight} {...slideLayer(index)}>
+                <span data-motion="text" className={cn("mt-[7.7px] block text-balance max-sm:mt-0", hiddenUntilShown(index))}>
+                  {highlightPill(slide.highlight, "-my-1 mr-[14px] align-middle sm:hidden")}
+                  {slide.tail}
+                </span>
+              </h2>
               <p
                 data-motion="text"
                 className={cn(
-                  "mx-auto max-w-[480px] text-[16.5px] font-light leading-[25.15px] text-[#F7FAFE]",
+                  "mx-auto mt-[23.9px] max-w-[480px] text-[16.5px] font-normal leading-[25.15px] text-white max-sm:mt-4",
                   hiddenUntilShown(index),
                 )}
               >
@@ -164,78 +248,99 @@ export function HeroSlideshow() {
             </div>
           ))}
         </div>
-      </div>
 
-      <div className="mt-[35.15px] flex justify-center gap-[33.9px] max-sm:flex-col max-sm:gap-4">
-        <Link
-          href="/register"
-          className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[17.6px] rounded-full bg-[#1E40AF] text-[18px] font-medium leading-none text-white shadow-[0_16px_32px_-14px_rgba(30,64,175,0.6)] hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
+        <div
+          style={followText.style}
+          className={cn(
+            "mt-[50.5px] flex justify-center gap-[33.9px] max-sm:mt-[35px] max-sm:flex-col max-sm:gap-4",
+            followText.className,
+          )}
         >
-          Talk to a Doctor
-          <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
-        </Link>
-        <Link
-          href="/register"
-          className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[16.4px] rounded-full border border-white text-[18px] font-medium leading-none text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
-        >
-          Book Homecare
-          <HousePlus className="h-[28px] w-[28px]" strokeWidth={1.7} />
-        </Link>
-      </div>
-
-      <div role="group" className="mt-6 flex items-center justify-center gap-3" aria-label="Highlight controls">
-        {heroSlides.map((slide, index) => (
-          <button
-            key={slide.highlight}
-            type="button"
-            aria-label={index === 0 ? "Show consultation highlight" : "Show homecare highlight"}
-            aria-pressed={index === active}
-            onClick={() => { setRotationStopped(true); setActive(index); }}
-            className={cn("h-11 rounded-full border border-white/60 px-4 text-sm text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white", index === active && "bg-[#1E40AF]")}
+          <Link
+            href="/register"
+            className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[17.6px] rounded-full bg-[#1E40AF] text-[18px] font-medium leading-none text-white shadow-[0_16px_32px_-14px_rgba(11,28,48,0.55)] hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
           >
-            {index === 0 ? "Consultations" : "Homecare"}
-          </button>
-        ))}
-        <button
-          type="button"
-          onClick={() => setRotationStopped((value) => !value)}
-          className="h-11 rounded-full px-3 text-sm text-white underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-        >
-          {rotationStopped ? "Resume" : "Pause"}
-        </button>
-      </div>
+            Talk to a Doctor
+            <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
+          </Link>
+          <Link
+            href="/register"
+            className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[16.4px] rounded-full border border-white text-[18px] font-medium leading-none text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
+          >
+            Book Homecare
+            <HousePlus className="h-[28px] w-[28px]" strokeWidth={1.7} />
+          </Link>
+        </div>
 
-      <div className="relative mx-auto mt-[32px] grid aspect-[850/447] w-[850px] max-w-full">
-        <HeroCircles />
-        {heroSlides.map((slide, index) => (
-          <div key={slide.image} {...slideLayer(index, "relative")}>
-            <div
-              data-motion="image"
-              className={cn("absolute inset-0 flex items-end justify-center gap-[2%] px-[3%] will-change-[transform,opacity]", hiddenUntilShown(index))}
+        <div
+          role="group"
+          aria-label="Highlight controls"
+          style={followText.style}
+          className={cn(
+            "ct-rise-in absolute inset-x-0 z-10 mt-[22px] flex items-center justify-center gap-[10px] [animation-delay:400ms]",
+            followText.className,
+          )}
+        >
+          {heroSlides.map((slide, index) => (
+            <button
+              key={slide.highlight}
+              type="button"
+              aria-label={index === 0 ? "Show consultation highlight" : "Show homecare highlight"}
+              aria-pressed={index === active}
+              onClick={() => {
+                setRotationStopped(false);
+                setActive(index);
+                setCycle((value) => value + 1);
+              }}
+              className="group flex h-6 w-[90px] cursor-pointer items-center focus-visible:outline-none"
             >
-              {slide.portraits.map((portrait) => (
-                <div
-                  key={portrait.name}
-                  data-portrait={portrait.name}
-                  className={cn(
-                    "relative aspect-[4/5] w-[27%] shrink-0 overflow-hidden rounded-t-[80px] border border-white/50 bg-white/10 shadow-lg",
-                    portrait.featured ? "order-2 w-[38%]" : "first:order-1 last:order-3",
-                  )}
-                >
-                  <Image
-                    src={portrait.image}
-                    alt={portrait.name}
-                    fill
-                    preload={index === 0 && portrait.featured}
-                    sizes={portrait.featured ? "(min-width: 1024px) 33vw, 38vw" : "(min-width: 1024px) 23vw, 27vw"}
-                    className="object-contain object-bottom"
-                  />
-                </div>
-              ))}
-              {slide.portraits.length === 2 && <div aria-hidden="true" className="order-3 w-[27%] shrink-0" />}
+              <span className="relative block h-[4px] w-full overflow-hidden rounded-full bg-white/40 transition-colors group-hover:bg-white/55 group-focus-visible:ring-2 group-focus-visible:ring-white group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#2563EB]">
+                <span
+                  data-progress={index}
+                  style={{ transform: "scaleX(0)" }}
+                  className="absolute inset-0 origin-left rounded-full bg-white"
+                />
+              </span>
+            </button>
+          ))}
+          <button
+            type="button"
+            aria-label={rotationStopped ? "Resume" : "Pause"}
+            onClick={() => setRotationStopped((value) => !value)}
+            className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-white/80 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            {rotationStopped ? (
+              <Play className="h-[13px] w-[13px] fill-current" strokeWidth={0} />
+            ) : (
+              <Pause className="h-[13px] w-[13px] fill-current" strokeWidth={0} />
+            )}
+          </button>
+        </div>
+
+        <div className="relative mx-auto mt-[75px] grid aspect-[850/447] w-[850px] max-w-full max-sm:aspect-[4/3]">
+          <HeroCircles />
+          {heroSlides.map((slide, index) => (
+            <div key={slide.image} {...slideLayer(index, "relative")}>
+              <div
+                data-motion="image"
+                data-hero-image
+                className={cn(
+                  "absolute inset-x-0 bottom-0 mx-auto aspect-[3632/2448] w-[69%] will-change-[transform,opacity] max-sm:w-full",
+                  hiddenUntilShown(index),
+                )}
+              >
+                <Image
+                  src={slide.image}
+                  alt={slide.alt}
+                  fill
+                  {...imagePriority(index)}
+                  sizes="(min-width: 1024px) 45vw, (min-width: 640px) 69vw, 100vw"
+                  className="object-contain object-bottom"
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -247,10 +352,10 @@ function HeroCircles() {
       viewBox="0 0 850 447"
       preserveAspectRatio="xMidYMax meet"
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full"
+      className="pointer-events-none absolute inset-0 h-full w-full max-sm:origin-bottom max-sm:scale-[1.32] max-sm:[&_circle]:[vector-effect:non-scaling-stroke]"
     >
-      <circle cx={424.9} cy={423.9} r={423.1} fill="white" fillOpacity={0.06} stroke="white" strokeOpacity={0.26} strokeWidth={1.6} />
-      <circle cx={430.6} cy={432.9} r={369.5} fill="white" fillOpacity={0.02} stroke="white" strokeOpacity={0.2} strokeWidth={1.6} />
+      <circle cx={425} cy={361} r={311} fill="white" fillOpacity={0.04} stroke="white" strokeOpacity={0.3} strokeWidth={1.2} />
+      <circle cx={425} cy={361} r={265} fill="white" fillOpacity={0.02} stroke="white" strokeOpacity={0.22} strokeWidth={1.2} />
     </svg>
   );
 }
