@@ -39,7 +39,7 @@ import { earliestConsultationSlot, hourlyConsultationSlots } from "./consultatio
 import { RepricingConsent, requiresRepricingConsent } from "@/features/referral-program/repricing-consent";
 import { useInvalidateReferralProgram } from "@/features/referral-program/use-referral-program";
 import { appointmentsApi, paymentsApi, profilesApi, triageApi } from "@/lib/api/endpoints";
-import { canRateAppointment, ConsultationReviewForm, ConsultationReviewSummary } from "./consultation-review";
+import { canRateAppointment, ConsultationReviewForm, ConsultationReviewSummary, DoctorPublicReviews } from "./consultation-review";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import type { Appointment, PatientProfile, Payment, ProviderDoctor, TriageConversationResult, TriageProcessingResponse, TriageSeverity } from "@/lib/types/backend";
@@ -1219,6 +1219,7 @@ export function AppointmentsClient() {
                   </div>
                 </div>
               </div>
+              <DoctorPublicReviews reviews={selectedDoctorLive.recent_reviews} className="mt-3" />
             </div>
 
             <div className="grid gap-3 rounded-[8px] border border-slate-100 bg-white p-3">
