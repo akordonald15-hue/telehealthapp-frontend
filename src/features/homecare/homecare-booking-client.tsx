@@ -325,6 +325,8 @@ export function HomeCareBookingClient() {
     key: draftUserId ? `caretekk:draft:bank-transfer:homecare:${draftUserId}` : null,
     value: manualPayment,
     enabled: userQuery.data?.role === "patient" && Boolean(manualPayment),
+    // Patients leave to make the transfer; the details must still be here when they return.
+    restoreEnabled: userQuery.data?.role === "patient",
     expiresInMs: 2 * 60 * 60 * 1000,
     onRestore: (draft) => setManualPayment(draft),
     isSignificant: (draft) => Boolean(draft?.provider === "bank_transfer" && draft.bank_transfer),

@@ -556,17 +556,21 @@ export function AppointmentsClient() {
     key: paymentDraftKey,
     value: manualPayment,
     enabled: user?.role === "patient" && Boolean(manualPayment),
+    // Patients leave to make the transfer; the details must still be here when they return.
+    restoreEnabled: user?.role === "patient",
     expiresInMs: 2 * 60 * 60 * 1000,
     onRestore: (draft) => setManualPayment(draft),
     isSignificant: (draft) => Boolean(draft?.provider === "bank_transfer" && draft.bank_transfer),
     sanitize: (draft) => draft,
   });
+  const clearPaymentDraft = paymentDraft.clearDraft;
 
   useEffect(() => {
     if (!paymentConfirmed) return;
+    clearPaymentDraft();
     void queryClient.invalidateQueries({ queryKey: ["appointments"] });
     void queryClient.invalidateQueries({ queryKey: ["payments"] });
-  }, [paymentConfirmed, queryClient]);
+  }, [clearPaymentDraft, paymentConfirmed, queryClient]);
 
   useEffect(() => {
     if (aiFinished && aiSessionId) {

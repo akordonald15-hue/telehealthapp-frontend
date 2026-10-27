@@ -221,7 +221,9 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
         markConfirmedOffline();
         return;
       }
-      void runProbe({ blocking: !stayedWithinGrace, destructive: !stayedWithinGrace && !inLifecycleGrace() });
+      // Never block here: the loader unmounts the page, wiping in-progress work such as
+      // bank-transfer details a patient left to pay. A failed probe still goes offline.
+      void runProbe({ destructive: !stayedWithinGrace && !inLifecycleGrace() });
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
