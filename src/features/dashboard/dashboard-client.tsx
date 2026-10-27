@@ -12,6 +12,7 @@ import {
   Home,
   MessageSquareText,
   Sparkles,
+  Star,
   Video,
 } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +22,7 @@ import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { canRateAppointment, ConsultationReviewForm, ConsultationReviewSummary } from "@/features/appointments/consultation-review";
 import { appointmentsApi, messagingApi, paymentsApi, profilesApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
@@ -150,6 +152,13 @@ export function DashboardClient() {
     queryFn: () => appointmentsApi.list({ page_size: 5 }),
     enabled: !isNurse,
   });
+  // Separate from the five-item "next appointments" query: upcoming visits sort first, so
+  // recent completed consultations would otherwise fall off the list.
+  const reviewableAppointments = useQuery({
+    queryKey: ["appointments", "dashboard", "reviews"],
+    queryFn: () => appointmentsApi.list({ page_size: 20 }),
+    enabled: user?.role === "patient",
+  });
   const threads = useQuery({
     queryKey: ["threads", "dashboard"],
     queryFn: () => messagingApi.threads({ page_size: 5 }),
@@ -187,6 +196,9 @@ export function DashboardClient() {
   const paymentMetric = canLoadPayments ? listMetric(payments) : 0;
   const nextAppointment = upcomingAppointment(appointments.data?.results);
   const recentThread = latestThread(threads.data?.results);
+  const completedAppointments = (reviewableAppointments.data?.results ?? []).filter((item) => item.status === "completed");
+  const appointmentToRate = completedAppointments.find(canRateAppointment);
+  const ownReviews = completedAppointments.filter((item) => item.rating).slice(0, 2);
   const patientName = firstName(user?.full_name || patientProfile.data?.full_name);
   const dashboardErrors = [
     appointments.isError ? `Appointments: ${getFriendlyErrorMessage(appointments.error, "dashboard")}` : null,
@@ -298,6 +310,38 @@ export function DashboardClient() {
                   </div>
                 )}
               </section>
+
+              {appointmentToRate || ownReviews.length ? (
+                <section className="ct-rise-in rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_20px_60px_-48px_rgba(15,23,42,0.36)] sm:p-5" style={{ animationDelay: "100ms" }}>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
+                        <Star className="h-4 w-4" />
+                      </span>
+                      <h3 className="font-semibold text-[#1F2937]">Your Feedback</h3>
+                    </div>
+                    <Link href="/appointments" className="text-sm font-semibold text-[#2563EB]">View all</Link>
+                  </div>
+                  <div className="grid gap-3">
+                    {appointmentToRate ? (
+                      <div>
+                        <p className="mb-2 text-sm text-slate-600">
+                          {appointmentToRate.doctor_profile?.display_name || "Caretekk doctor"} &middot; {formatDateTime(appointmentToRate.scheduled_at)}
+                        </p>
+                        <ConsultationReviewForm key={appointmentToRate.id} appointmentId={appointmentToRate.id} />
+                      </div>
+                    ) : null}
+                    {ownReviews.map((item) => (
+                      <div key={item.id}>
+                        <p className="mb-2 text-sm text-slate-600">
+                          {item.doctor_profile?.display_name || "Caretekk doctor"} &middot; {formatDateTime(item.scheduled_at)}
+                        </p>
+                        <ConsultationReviewSummary rating={item.rating!} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
 
               <section>
                 <div className="mb-3 flex items-center justify-between">
