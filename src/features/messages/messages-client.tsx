@@ -14,7 +14,7 @@ import {
   Stethoscope,
   X,
 } from "lucide-react";
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -23,7 +23,7 @@ import { Section } from "@/components/ui/section";
 import { messagingApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
 import { beginFilePickerGrace } from "@/lib/pwa/file-picker-guard";
-import { buildWebSocketUrl } from "@/lib/realtime";
+import { useThreadRealtime } from "./use-thread-realtime";
 import type { Message, Thread, UserRole } from "@/lib/types/backend";
 import { cn } from "@/lib/utils";
 
@@ -211,38 +211,39 @@ export function MessagesClient() {
   const [disputeReason, setDisputeReason] = useState("need_clarification");
   const [disputeExplanation, setDisputeExplanation] = useState("");
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
-  const [liveConnected, setLiveConnected] = useState(false);
-  const [realtimeUnavailable, setRealtimeUnavailable] = useState(false);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [recordingError, setRecordingError] = useState<Error | null>(null);
   const [clockNow, setClockNow] = useState(() => Date.now());
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const socketRef = useRef<WebSocket | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordingChunksRef = useRef<BlobPart[]>([]);
   const recordingStreamRef = useRef<MediaStream | null>(null);
   const recordingTimerRef = useRef<number | null>(null);
   const recordingElapsedSecondsRef = useRef(0);
 
-  function markRealtimeUnavailable() {
-    window.setTimeout(() => {
-      setLiveConnected(false);
-      setRealtimeUnavailable(true);
-    }, 0);
-  }
+  const refreshMessages = useCallback(() => {
+    if (!activeThread) return;
+    void queryClient.invalidateQueries({ queryKey: ["messages", activeThread] });
+    void queryClient.invalidateQueries({ queryKey: ["threads"] });
+  }, [activeThread, queryClient]);
+  const { liveConnected, realtimeUnavailable } = useThreadRealtime(
+    activeThread, Boolean(currentUser && ["patient", "doctor"].includes(currentUser.role)), refreshMessages,
+  );
 
   const threads = useQuery({
     queryKey: ["threads"],
     queryFn: () => messagingApi.threads(),
-    refetchInterval: liveConnected ? false : 12000,
+    refetchInterval: 12000,
+    refetchIntervalInBackground: true,
   });
   const messages = useQuery({
     queryKey: ["messages", activeThread],
     queryFn: () => messagingApi.messages(activeThread as number),
     enabled: Boolean(activeThread),
-    refetchInterval: activeThread && !liveConnected ? 6000 : false,
+    refetchInterval: activeThread ? 6000 : false,
+    refetchIntervalInBackground: true,
   });
 
   const createMessage = useMutation({
@@ -374,64 +375,7 @@ export function MessagesClient() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!activeThread || !currentUser || !["patient", "doctor"].includes(currentUser.role)) {
-      socketRef.current?.close();
-      socketRef.current = null;
-      return;
-    }
-
-    const wsUrl = buildWebSocketUrl(`/ws/threads/${activeThread}/`);
-    if (!wsUrl) {
-      markRealtimeUnavailable();
-      return;
-    }
-
-    let socket: WebSocket;
-    let closedByCleanup = false;
-    try {
-      socket = new WebSocket(wsUrl);
-    } catch (error) {
-      console.warn("Realtime messaging connection could not be started.", error);
-      markRealtimeUnavailable();
-      return;
-    }
-    socketRef.current = socket;
-
-    socket.onopen = () => {
-      setLiveConnected(true);
-      setRealtimeUnavailable(false);
-    };
-    socket.onerror = () => {
-      setLiveConnected(false);
-      setRealtimeUnavailable(true);
-    };
-    socket.onclose = () => {
-      if (socketRef.current === socket) {
-        socketRef.current = null;
-      }
-      setLiveConnected(false);
-      if (!closedByCleanup) {
-        setRealtimeUnavailable(true);
-      }
-    };
-    socket.onmessage = async () => {
-      await queryClient.invalidateQueries({ queryKey: ["messages", activeThread] });
-      await queryClient.invalidateQueries({ queryKey: ["threads"] });
-    };
-
-    return () => {
-      closedByCleanup = true;
-      socket.close();
-      if (socketRef.current === socket) {
-        socketRef.current = null;
-      }
-    };
-  }, [activeThread, currentUser, queryClient]);
-
   function selectThread(threadId: number) {
-    setLiveConnected(false);
-    setRealtimeUnavailable(false);
     setActiveThread(threadId);
     setIsMobileChatOpen(true);
   }
@@ -570,13 +514,8 @@ export function MessagesClient() {
       return;
     }
 
-    const socket = socketRef.current;
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ type: "message", body: trimmed }));
-      setComposerValue("");
-      return;
-    }
-
+    // Persist through authenticated HTTP, so connection loss cannot silently
+    // discard a message after clearing the composer. WebSockets notify readers.
     createMessage.mutate({ body: trimmed });
   }
 
@@ -666,7 +605,7 @@ export function MessagesClient() {
             ) : null}
             {activeThread && realtimeUnavailable ? (
               <div className="border-b border-amber-100 bg-amber-50/70 px-4 py-2 text-xs font-medium text-amber-800 sm:px-6">
-                Realtime paused. Messages will refresh manually.
+                Live connection interrupted. Reconnecting; messages refresh automatically when connected to the internet.
               </div>
             ) : null}
             {activeThreadDetails?.triage_summary ? (
@@ -1057,7 +996,7 @@ function ConsultationHeader({
           ) : null}
           <div className="hidden items-center gap-2 rounded-full bg-[#ECFDF5] px-3 py-2 text-xs font-semibold text-[#047857] md:inline-flex">
             <Stethoscope className="h-4 w-4" />
-            {liveConnected ? "Live chat" : realtimeUnavailable ? "Manual refresh" : "Secure chat"}
+            {liveConnected ? "Live chat" : realtimeUnavailable ? "Reconnecting" : "Secure chat"}
           </div>
         </div>
       </div>
