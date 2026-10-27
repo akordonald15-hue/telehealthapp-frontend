@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type DraftPayload<T> = {
   version: number;
@@ -12,6 +12,9 @@ type UseFormDraftOptions<T> = {
   key: string | null | undefined;
   value: T;
   enabled?: boolean;
+  // Defaults to `enabled`. Set separately when saving depends on the very state a
+  // restore would bring back, otherwise the saved draft can never be read.
+  restoreEnabled?: boolean;
   storage?: "local" | "session";
   debounceMs?: number;
   expiresInMs?: number;
@@ -49,6 +52,7 @@ export function useFormDraft<T>({
   key,
   value,
   enabled = true,
+  restoreEnabled = enabled,
   storage = "local",
   debounceMs = 600,
   expiresInMs = DEFAULT_EXPIRY_MS,
@@ -77,7 +81,7 @@ export function useFormDraft<T>({
     restoredRef.current = false;
     submittedRef.current = false;
 
-    if (!enabled || !key || !storageRef) {
+    if (!restoreEnabled || !key || !storageRef) {
       setReady(true);
       return;
     }
@@ -98,7 +102,7 @@ export function useFormDraft<T>({
     onRestoreRef.current?.(payload.data);
     setRestored(true);
     setReady(true);
-  }, [enabled, key, storageRef]);
+  }, [enabled, restoreEnabled, key, storageRef]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
@@ -137,13 +141,13 @@ export function useFormDraft<T>({
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [significant]);
 
-  function clearDraft() {
+  const clearDraft = useCallback(() => {
     submittedRef.current = true;
     if (key && storageRef) {
       storageRef.removeItem(key);
     }
     setRestored(false);
-  }
+  }, [key, storageRef]);
 
   return {
     restored,
