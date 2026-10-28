@@ -9,7 +9,7 @@ const fixture = process.env.QA_LOCAL_BACKEND_FIXTURE ? JSON.parse(fs.readFileSyn
 const browser = await chromium.launch();
 const results=[];
 async function probe(mode,width=390,zone='Africa/Lagos') {
- const context=await browser.newContext({viewport:{width,height:950},timezoneId:zone});
+ const context=await browser.newContext({viewport:{width,height:950},timezoneId:zone,serviceWorkers:"block"});
  await context.addCookies([{name:'caretekk_session',value:'1',url:base},...(fixture?[{name:'caretekk_access',value:fixture.access,url:base,httpOnly:true}]:[])]);
  const page=await context.newPage();
  await page.clock.install({time:new Date('2026-10-15T11:34:56Z')});
