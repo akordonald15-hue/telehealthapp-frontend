@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Landmark, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { InlineLoader } from "@/components/ui/loaders";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { BankTransferPaymentPanel } from "@/features/payments/bank-transfer-payment-panel";
 import { RepricingConsent, requiresRepricingConsent } from "@/features/referral-program/repricing-consent";
 import { paymentsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
@@ -19,6 +20,25 @@ import type { Payment, PaymentInitiation } from "@/lib/types/backend";
 import { formatMoney } from "@/lib/utils";
 
 const MANUAL_PAYMENT_WAITING_STATUSES = new Set(["awaiting_transfer", "transfer_submitted", "awaiting_manual_verification"]);
+// The backend accepts a transfer proof in these states; a rejected proof can be replaced.
+const TRANSFER_PROOF_OPEN_STATUSES = new Set(["awaiting_transfer", "rejected"]);
+
+function transferCheckout(payment: Payment): PaymentInitiation {
+  return {
+    payment_id: payment.id,
+    provider: payment.provider,
+    amount: payment.amount,
+    currency: payment.currency,
+    status: payment.status,
+    appointment_id: payment.appointment,
+    homecare_request_id: payment.homecare_request,
+    authorization_url: null,
+    external_ref: payment.external_ref,
+    transfer_notified_at: payment.transfer_notified_at,
+    transfer_proof_uploaded: payment.transfer_proof_uploaded,
+    bank_transfer: payment.bank_transfer,
+  };
+}
 
 export function PaymentsClient() {
   const queryClient = useQueryClient();
@@ -28,6 +48,7 @@ export function PaymentsClient() {
   // releases its reward. The patient agrees to the new amount before we hand off to the
   // provider, so nobody is redirected to a larger charge than they last saw.
   const [repricedPayment, setRepricedPayment] = useState<PaymentInitiation | null>(null);
+  const [openTransferId, setOpenTransferId] = useState<number | null>(null);
   const payments = useQuery({
     queryKey: ["payments"],
     queryFn: () => paymentsApi.list(),
@@ -55,8 +76,23 @@ export function PaymentsClient() {
     },
   });
 
+  const submitTransfer = useMutation({
+    mutationFn: paymentsApi.submitTransfer,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["payments"] });
+    },
+  });
+
+  const isServicePayment = (payment: Payment) => payment.appointment !== null || payment.homecare_request !== null;
+  // Bank transfers are never re-initialized: the backend only retries provider checkouts that
+  // are still pending, so a transfer is completed by paying and uploading proof instead.
   const canRetryPayment = (payment: Payment) =>
-    payment.status !== "success" && (payment.appointment !== null || payment.homecare_request !== null);
+    payment.provider !== "bank_transfer" && payment.status !== "success" && isServicePayment(payment);
+  const canCompleteTransfer = (payment: Payment) =>
+    payment.provider === "bank_transfer" &&
+    TRANSFER_PROOF_OPEN_STATUSES.has(payment.status) &&
+    Boolean(payment.bank_transfer) &&
+    isServicePayment(payment);
 
   return (
     <Section
@@ -144,8 +180,25 @@ export function PaymentsClient() {
                       Retry payment
                     </Button>
                   ) : null}
+                  {canCompleteTransfer(payment) && openTransferId !== payment.id ? (
+                    <Button variant="secondary" onClick={() => setOpenTransferId(payment.id)} className="gap-2">
+                      <Landmark className="h-4 w-4" />
+                      Complete bank transfer
+                    </Button>
+                  ) : null}
                 </div>
               </div>
+              {openTransferId === payment.id && canCompleteTransfer(payment) ? (
+                <div className="mt-4">
+                  <BankTransferPaymentPanel
+                    payment={transferCheckout(payment)}
+                    isSubmitting={submitTransfer.isPending}
+                    submitted={submitTransfer.isSuccess && submitTransfer.variables?.paymentId === payment.id}
+                    error={submitTransfer.error ? getFriendlyErrorMessage(submitTransfer.error, "payments") : null}
+                    onSubmit={(proofFile) => submitTransfer.mutate({ paymentId: payment.id, proofFile })}
+                  />
+                </div>
+              ) : null}
             </article>
           )}
         />

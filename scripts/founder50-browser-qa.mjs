@@ -28,7 +28,8 @@ const doctor = {
 };
 const results = [];
 async function journey(viewport, mode) {
-  const context = await browser.newContext({ viewport });
+  // The app service worker fetches /api itself, which page.route cannot intercept.
+  const context = await browser.newContext({ viewport, serviceWorkers: "block" });
   await context.addCookies([
     { name: "caretekk_session", value: "1", url: base },
   ]);
