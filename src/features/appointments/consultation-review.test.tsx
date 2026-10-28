@@ -5,13 +5,13 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "@/lib/api/client";
-import type { Appointment } from "@/lib/types/backend";
+import type { Appointment, ProviderReview } from "@/lib/types/backend";
 
 const mocks = vi.hoisted(() => ({ submitRating: vi.fn() }));
 
 vi.mock("@/lib/api/endpoints", () => ({ appointmentsApi: mocks }));
 
-import { canRateAppointment, ConsultationReviewForm, ConsultationReviewSummary } from "./consultation-review";
+import { canRateAppointment, ConsultationReviewForm, ConsultationReviewSummary, DoctorPublicReviews } from "./consultation-review";
 
 function appointment(overrides: Partial<Appointment> = {}): Appointment {
   return {
@@ -50,6 +50,11 @@ describe("canRateAppointment", () => {
 });
 
 describe("ConsultationReviewForm", () => {
+  it("tells the patient their comment may be shown anonymously", () => {
+    renderWithClient(<ConsultationReviewForm appointmentId={41} />);
+    expect(screen.getByText(/Your name is never shown/)).toBeInTheDocument();
+  });
+
   it("submits the selected score with a trimmed comment and refreshes appointments", async () => {
     mocks.submitRating.mockResolvedValue({ id: 9, score: 4, feedback: "Clear advice", created_at: "2026-10-27T10:00:00Z" });
     const onSubmitted = vi.fn();
@@ -61,7 +66,7 @@ describe("ConsultationReviewForm", () => {
     await user.click(screen.getByRole("button", { name: "Submit review" }));
 
     await waitFor(() => expect(screen.getByText("Review submitted")).toBeInTheDocument());
-    expect(mocks.submitRating).toHaveBeenCalledWith(41, { score: 4, feedback: "Clear advice" });
+    expect(mocks.submitRating).toHaveBeenCalledWith(41, { score: 4, feedback: "Clear advice", public_comment: true });
     expect(onSubmitted).toHaveBeenCalledTimes(1);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["appointments"] });
   });
@@ -91,5 +96,46 @@ describe("ConsultationReviewSummary", () => {
     render(<ConsultationReviewSummary rating={{ id: 3, score: 5, feedback: "Very patient", created_at: "2026-10-27T10:00:00Z" }} />);
     expect(screen.getByLabelText("5 star rating")).toBeInTheDocument();
     expect(screen.getByText(/Very patient/)).toBeInTheDocument();
+  });
+});
+
+describe("ConsultationReviewSummary visibility", () => {
+  it.each([
+    ["published", /Visible to other patients as .Verified patient./],
+    ["private", /Only visible to you and Caretekk/],
+    ["hidden", /Hidden from other patients by Caretekk/],
+  ] as const)("explains a %s comment", (commentStatus, text) => {
+    render(
+      <ConsultationReviewSummary
+        rating={{ id: 3, score: 4, feedback: "Helpful", comment_status: commentStatus, created_at: "2026-10-27T10:00:00Z" }}
+      />,
+    );
+    expect(screen.getByText(text)).toBeInTheDocument();
+  });
+
+  it("omits the note when the backend does not report visibility", () => {
+    render(<ConsultationReviewSummary rating={{ id: 3, score: 4, feedback: "Helpful", created_at: "2026-10-27T10:00:00Z" }} />);
+    expect(screen.queryByText(/other patients|Only visible/)).not.toBeInTheDocument();
+  });
+});
+
+describe("DoctorPublicReviews", () => {
+  const review = (id: number, comment: string): ProviderReview => ({ id, score: 5, comment, created_at: "2026-10-27T10:00:00Z" });
+
+  it("shows up to three comments attributed only to a verified patient", () => {
+    render(<DoctorPublicReviews reviews={[review(1, "One"), review(2, "Two"), review(3, "Three"), review(4, "Four")]} />);
+    expect(screen.getAllByText("Verified patient")).toHaveLength(3);
+    expect(screen.queryByText(/Four/)).not.toBeInTheDocument();
+  });
+
+  it("ignores reviews from an API that still identifies reviewers", () => {
+    const legacy = { ...review(1, "Written privately"), patient_name: "Adaeze Okafor" } as ProviderReview;
+    const { container } = render(<DoctorPublicReviews reviews={[legacy]} />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("renders nothing without reviews", () => {
+    const { container } = render(<DoctorPublicReviews reviews={[]} />);
+    expect(container).toBeEmptyDOMElement();
   });
 });

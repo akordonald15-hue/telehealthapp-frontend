@@ -24,7 +24,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ApiError, extractErrorMessage } from "@/lib/api/client";
 import { adminApi, appointmentsApi, auditApi, homeCareApi, paymentsApi, referralsApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
-import type { AdminDashboardResponse, AdminProvider, AdminProviderCreateResponse, AdminUser, HomeCareZone, Payment, ProviderAvailabilityStatus, ReferralStatus, UserRole } from "@/lib/types/backend";
+import type { AdminDashboardResponse, AdminDoctorReview, AdminProvider, AdminProviderCreateResponse, AdminUser, HomeCareZone, Payment, ProviderAvailabilityStatus, ReferralStatus, UserRole } from "@/lib/types/backend";
 import { paymentSummary } from "@/lib/ui/humanize";
 import { formatDateTime, formatMoney } from "@/lib/utils";
 
@@ -534,6 +534,59 @@ function ProviderCreatePanel() {
   );
 }
 
+function DoctorReviewRow({ review }: { review: AdminDoctorReview }) {
+  const queryClient = useQueryClient();
+  const hidden = review.comment_status === "hidden";
+  const setVisibility = useMutation({
+    mutationFn: () => adminApi.setDoctorReviewVisibility(review.id, !hidden),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "doctor-reviews"] });
+    },
+  });
+
+  return (
+    <article className={`rounded-[16px] border p-3 ${hidden ? "border-slate-200 bg-slate-50" : "border-[#DBEAFE] bg-white"}`}>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-[#1F2937]">
+            {review.doctor_name} | {"★".repeat(review.score)}
+          </p>
+          <p className="mt-1 break-words text-sm leading-6 text-slate-700">&ldquo;{review.comment}&rdquo;</p>
+          <p className="mt-1 text-xs text-slate-500">
+            {review.patient_name} | Consultation #{review.appointment_id} | {formatDateTime(review.created_at)}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone={hidden ? "rose" : "green"}>{hidden ? "Hidden" : "Public"}</Badge>
+          {hidden ? (
+            <ConfirmActionButton
+              label="Show"
+              title="Show this comment to patients again?"
+              description="The comment will appear on the doctor's profile as “Verified patient”."
+              disabled={setVisibility.isPending}
+              onConfirm={() => setVisibility.mutate()}
+            />
+          ) : (
+            <ConfirmActionButton
+              label="Hide"
+              title="Hide this comment from patients?"
+              description="The comment stops appearing on the doctor's profile. The star rating still counts."
+              tone="danger"
+              disabled={setVisibility.isPending}
+              onConfirm={() => setVisibility.mutate()}
+            />
+          )}
+        </div>
+      </div>
+      {setVisibility.isError ? (
+        <Notice title="Review action failed." tone="warning">
+          Please refresh and try again.
+        </Notice>
+      ) : null}
+    </article>
+  );
+}
+
 function ManualPaymentRow({ payment }: { payment: Payment }) {
   const queryClient = useQueryClient();
   const confirmPayment = useMutation({
@@ -649,6 +702,7 @@ export function AdminDashboardClient() {
   const appointments = useQuery({ queryKey: ["admin", "appointments"], queryFn: () => appointmentsApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
   const homecare = useQuery({ queryKey: ["admin", "homecare"], queryFn: () => homeCareApi.requests({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
   const payments = useQuery({ queryKey: ["admin", "payments"], queryFn: () => paymentsApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
+  const doctorReviews = useQuery({ queryKey: ["admin", "doctor-reviews"], queryFn: () => adminApi.doctorReviews({ page_size: 20 }), enabled: userQuery.data?.role === "admin" });
   const manualPayments = useQuery({ queryKey: ["admin", "manual-payments"], queryFn: () => adminApi.pendingManualPayments({ page_size: 20 }), enabled: userQuery.data?.role === "admin" });
   const referrals = useQuery({ queryKey: ["admin", "referrals"], queryFn: () => referralsApi.list({ page_size: 8 }), enabled: userQuery.data?.role === "admin" });
   const audit = useQuery({ queryKey: ["admin", "audit"], queryFn: () => auditApi.list({ page_size: 6 }), enabled: userQuery.data?.role === "admin" });
@@ -817,6 +871,21 @@ export function AdminDashboardClient() {
           </div>
         </Panel>
       </div>
+
+      <Panel title="Doctor reviews" action={<Badge tone="blue">{doctorReviews.data?.count ?? 0} comments</Badge>}>
+        <div className="grid gap-3">
+          {doctorReviews.isError ? (
+            <Notice title="Reviews unavailable." tone="warning">Please try again.</Notice>
+          ) : doctorReviews.data?.results.length ? (
+            doctorReviews.data.results.map((review) => <DoctorReviewRow key={review.id} review={review} />)
+          ) : (
+            <EmptyState
+              title="No public comments yet"
+              description="Patient comments shown on doctor profiles appear here so you can hide inappropriate ones."
+            />
+          )}
+        </div>
+      </Panel>
 
       <Panel title="Analytics">
         <div className="grid gap-4 lg:grid-cols-2">

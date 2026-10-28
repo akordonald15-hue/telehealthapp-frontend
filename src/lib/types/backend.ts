@@ -194,10 +194,14 @@ export type AppointmentStatus =
   | "cancelled"
   | "missed";
 
+export type ReviewCommentStatus = "private" | "published" | "hidden";
+
 export type AppointmentRating = {
   id: number;
   score: number;
   feedback: string;
+  /** Absent until the backend supports public reviews. */
+  comment_status?: ReviewCommentStatus;
   created_at: string;
 };
 
@@ -374,11 +378,23 @@ export type ProviderNurse = {
 
 export type RatingBreakdown = Record<string, { count: number; percentage: number }>;
 
+/** Public review: reviewers are never identified. */
 export type ProviderReview = {
   id: number;
   score: number;
   comment: string;
+  created_at: string;
+};
+
+export type AdminDoctorReview = {
+  id: number;
+  appointment_id: number;
+  doctor_id: number;
+  doctor_name: string;
   patient_name: string;
+  score: number;
+  comment: string;
+  comment_status: Exclude<ReviewCommentStatus, "private">;
   created_at: string;
 };
 

@@ -10,7 +10,7 @@ import { Field } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/input";
 import { Notice } from "@/components/ui/notice";
 import { appointmentsApi } from "@/lib/api/endpoints";
-import type { Appointment, AppointmentRating } from "@/lib/types/backend";
+import type { Appointment, AppointmentRating, ProviderReview } from "@/lib/types/backend";
 import { cn } from "@/lib/utils";
 
 // Mirrors the backend rule: only the patient's own completed, not-yet-rated consultation.
@@ -29,9 +29,18 @@ export function ConsultationReviewSummary({ rating, className }: { rating: Appoi
         ))}
       </div>
       {rating.feedback ? <p className="mt-3 text-sm leading-6 text-slate-600">&ldquo;{rating.feedback}&rdquo;</p> : null}
+      {rating.feedback && rating.comment_status ? (
+        <p className="mt-2 text-xs text-slate-500">{COMMENT_VISIBILITY[rating.comment_status]}</p>
+      ) : null}
     </div>
   );
 }
+
+const COMMENT_VISIBILITY: Record<NonNullable<AppointmentRating["comment_status"]>, string> = {
+  published: "Visible to other patients as “Verified patient”.",
+  private: "Only visible to you and Caretekk.",
+  hidden: "Hidden from other patients by Caretekk.",
+};
 
 export function ConsultationReviewForm({
   appointmentId,
@@ -50,6 +59,7 @@ export function ConsultationReviewForm({
       appointmentsApi.submitRating(appointmentId, {
         score,
         feedback: feedback.trim(),
+        public_comment: true,
       }),
     onSuccess: async () => {
       setFeedback("");
@@ -63,6 +73,7 @@ export function ConsultationReviewForm({
       <div>
         <p className="text-sm font-semibold text-[#1F2937]">Rate this consultation</p>
         <p className="mt-1 text-sm leading-6 text-slate-600">Add a comment if you want to share what went well.</p>
+        <p className="mt-1 text-xs leading-5 text-slate-500">Other patients may see your stars and comment as &ldquo;Verified patient&rdquo;. Your name is never shown.</p>
       </div>
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Rate consultation">
         {[1, 2, 3, 4, 5].map((item) => (
@@ -97,6 +108,34 @@ export function ConsultationReviewForm({
       <Button type="button" className="w-full sm:w-fit" disabled={ratingMutation.isPending} onClick={() => ratingMutation.mutate()}>
         {ratingMutation.isPending ? "Submitting..." : "Submit review"}
       </Button>
+    </div>
+  );
+}
+
+// Older API responses identified reviewers and included comments written as private;
+// only anonymised reviews are shown.
+function isAnonymousReview(review: ProviderReview) {
+  return !("patient_name" in review);
+}
+
+export function DoctorPublicReviews({ reviews, className }: { reviews?: ProviderReview[]; className?: string }) {
+  const visible = (reviews ?? []).filter(isAnonymousReview).slice(0, 3);
+  if (!visible.length) return null;
+
+  return (
+    <div className={cn("grid gap-2", className)}>
+      <p className="text-xs font-semibold text-slate-500">What patients say</p>
+      {visible.map((review) => (
+        <figure key={review.id} className="rounded-[8px] border border-slate-100 bg-white p-3">
+          <div className="flex items-center gap-1 text-[#2563EB]" aria-label={`${review.score} star rating`}>
+            {[1, 2, 3, 4, 5].map((item) => (
+              <Star key={item} className={cn("h-3.5 w-3.5", item <= review.score && "fill-current")} />
+            ))}
+          </div>
+          <blockquote className="mt-2 text-sm leading-6 text-slate-600">&ldquo;{review.comment}&rdquo;</blockquote>
+          <figcaption className="mt-1 text-xs text-slate-500">Verified patient</figcaption>
+        </figure>
+      ))}
     </div>
   );
 }

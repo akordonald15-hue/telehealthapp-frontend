@@ -1,6 +1,7 @@
 import { apiList, apiRequest } from "@/lib/api/client";
 import type {
   AdminAuditLog,
+  AdminDoctorReview,
   AdminDashboardResponse,
   AdminProvider,
   AdminProviderCreateResponse,
@@ -173,7 +174,7 @@ export const appointmentsApi = {
   update: (id: number, body: Partial<Pick<Appointment, "doctor" | "scheduled_at" | "status" | "reason" | "notes">>) =>
     apiRequest<Appointment>(`/appointments/${id}/`, { method: "PATCH", body }),
   cancel: (id: number) => apiRequest<DetailResponse>(`/appointments/${id}/cancel/`, { method: "POST" }),
-  submitRating: (id: number, body: { score: number; feedback?: string }) =>
+  submitRating: (id: number, body: { score: number; feedback?: string; public_comment?: boolean }) =>
     apiRequest<AppointmentRating>(`/appointments/${id}/rating/`, { method: "POST", body }),
   reschedule: (id: number, body: { scheduled_at: string }) =>
     apiRequest<DetailResponse>(`/appointments/${id}/reschedule/`, { method: "POST", body }),
@@ -375,6 +376,10 @@ export const adminApi = {
       license_no?: string;
     },
   ) => apiRequest<DetailResponse>(`/admin/providers/${providerType}/${providerId}/status/`, { method: "PATCH", body }),
+  doctorReviews: (query?: { page?: number; page_size?: number; status?: "published" | "hidden" }) =>
+    apiList<AdminDoctorReview>("/admin/doctor-reviews/", query),
+  setDoctorReviewVisibility: (ratingId: number, hidden: boolean) =>
+    apiRequest<AdminDoctorReview>(`/admin/doctor-reviews/${ratingId}/visibility/`, { method: "POST", body: { hidden } }),
   pendingManualPayments: (query?: { page?: number; page_size?: number }) =>
     apiList<Payment>("/admin/payments/manual-verification/", query),
   confirmManualPayment: (paymentId: number, body?: { provider_reference?: string; note?: string }) =>
