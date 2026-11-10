@@ -22,7 +22,7 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
   if (!children) return null;
   return (
     <p>
-      <span className="font-semibold text-[#1F2937]">{label}:</span> {children}
+      <span className="font-semibold text-grey-800">{label}:</span> {children}
     </p>
   );
 }
@@ -62,12 +62,12 @@ export function ReferralsClient({ mode = "referrals" }: { mode?: "referrals" | "
           renderItem={(carePlan) => (
             <article key={carePlan.id} className="ct-surface rounded-[24px] p-5">
               <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#DBEAFE] text-[#2563EB]">
+                <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-primary-100 text-primary-500">
                   <FileText className="h-5 w-5" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-heading text-lg font-semibold text-[#1F2937]">Care plan</p>
-                  <div className="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
+                  <p className="font-heading text-lg font-semibold text-grey-800">Care plan</p>
+                  <div className="mt-3 grid gap-2 text-sm leading-6 text-grey-600">
                     <Detail label="Complaint summary">{carePlan.complaint_summary || "Not added"}</Detail>
                     <Detail label="Care plan">{carePlan.care_steps}</Detail>
                     <Detail label="Follow-up date">{carePlan.follow_up_date || "Not scheduled"}</Detail>
@@ -114,15 +114,15 @@ export function ReferralsClient({ mode = "referrals" }: { mode?: "referrals" | "
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-[#ECFEFF] text-[#0F766E]">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-grey-50 text-success-700">
                     <ClipboardList className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">
-                    <p className="font-heading text-lg font-semibold text-[#1F2937]">{referral.referred_to}</p>
-                    <p className="mt-1 text-sm text-slate-500">{referralSummary(userQuery.data?.role)}</p>
+                    <p className="font-heading text-lg font-semibold text-grey-800">{referral.referred_to}</p>
+                    <p className="mt-1 text-sm text-grey-500">{referralSummary(userQuery.data?.role)}</p>
                   </div>
                 </div>
-                <div className="mt-4 grid gap-2 text-sm leading-6 text-slate-600">
+                <div className="mt-4 grid gap-2 text-sm leading-6 text-grey-600">
                   <Detail label="Reason">{referral.notes || "Details are available from the consultation record."}</Detail>
                   <Detail label="Doctor">{referral.doctor_name || "Caretekk doctor"}</Detail>
                   {userQuery.data?.role === "admin" ? <Detail label="Patient">{referral.patient_name || `Patient #${referral.patient}`}</Detail> : null}

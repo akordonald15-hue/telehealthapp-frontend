@@ -154,9 +154,9 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
       ) : request ? (
         <div className={`grid gap-4 ${HOMECARE_BOTTOM_SAFE_PADDING}`}>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.86fr)]">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-heading text-2xl font-semibold text-[#1F2937]">{homeCareStatusLabel(request.status)}</h2>
+                <h2 className="font-heading text-2xl font-semibold text-grey-800">{homeCareStatusLabel(request.status)}</h2>
                 <Badge tone="blue">{bookingSourceLabel(request.booking_source)}</Badge>
               </div>
 
@@ -169,26 +169,26 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
                 <Info label="Last update" value={formatDateTime(request.updated_at)} />
               </div>
 
-              <div className="mt-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
-                <p className="text-sm font-semibold text-[#1F2937]">Visit address</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{request.service_address_snapshot || "Address not provided yet."}</p>
-                {request.service_location_notes ? <p className="mt-2 text-sm leading-6 text-slate-600">{request.service_location_notes}</p> : null}
+              <div className="mt-4 rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-4">
+                <p className="text-sm font-semibold text-grey-800">Visit address</p>
+                <p className="mt-2 text-sm leading-6 text-grey-600">{request.service_address_snapshot || "Address not provided yet."}</p>
+                {request.service_location_notes ? <p className="mt-2 text-sm leading-6 text-grey-600">{request.service_location_notes}</p> : null}
               </div>
 
-              <div className="mt-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
-                <p className="text-sm font-semibold text-[#1F2937]">Notes</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{request.care_notes || "No care notes were added."}</p>
+              <div className="mt-4 rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-4">
+                <p className="text-sm font-semibold text-grey-800">Notes</p>
+                <p className="mt-2 text-sm leading-6 text-grey-600">{request.care_notes || "No care notes were added."}</p>
                 {notesFromReferral ? (
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
-                    <span className="font-semibold text-[#1F2937]">Doctor notes: </span>
+                  <p className="mt-3 text-sm leading-6 text-grey-600">
+                    <span className="font-semibold text-grey-800">Doctor notes: </span>
                     {notesFromReferral}
                   </p>
                 ) : null}
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
-              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Status timeline</h2>
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+              <h2 className="font-heading text-xl font-semibold text-grey-800">Status timeline</h2>
               <div className="mt-5 grid gap-3">
                 {homeCareTimeline.map((step) => {
                   const state = statusStepState(step.status, request.status);
@@ -197,13 +197,13 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
                       <span
                         className={
                           state === "done"
-                            ? "h-3 w-3 rounded-full bg-emerald-600"
+                            ? "h-3 w-3 rounded-full bg-success-600"
                             : state === "current"
-                              ? "h-3 w-3 rounded-full bg-[var(--primary)] shadow-[0_0_0_6px_rgba(66,107,179,0.14)]"
-                              : "h-3 w-3 rounded-full bg-slate-200"
+                              ? "h-3 w-3 rounded-full bg-[var(--primary)] shadow-[0_0_0_6px_rgba(57,97,169,0.14)]"
+                              : "h-3 w-3 rounded-full bg-grey-200"
                         }
                       />
-                      <span className={state === "pending" ? "text-sm text-slate-400" : "text-sm font-semibold text-[#1F2937]"}>
+                      <span className={state === "pending" ? "text-sm text-grey-400" : "text-sm font-semibold text-grey-800"}>
                         {step.label}
                       </span>
                     </div>
@@ -297,19 +297,19 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.86fr)]">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
-              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Request activity</h2>
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+              <h2 className="font-heading text-xl font-semibold text-grey-800">Request activity</h2>
               {eventsQuery.isLoading ? (
                 <InlineLoader className="mt-5" compact label="Loading request activity" />
               ) : eventsQuery.data?.results.length ? (
                 <div className="mt-5 grid gap-3">
                   {eventsQuery.data.results.map((event) => (
-                    <div key={event.id} className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+                    <div key={event.id} className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-4">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="text-sm font-semibold text-[#1F2937]">{eventSummary(event)}</p>
-                        <p className="text-xs text-slate-500">{formatDateTime(event.created_at)}</p>
+                        <p className="text-sm font-semibold text-grey-800">{eventSummary(event)}</p>
+                        <p className="text-xs text-grey-500">{formatDateTime(event.created_at)}</p>
                       </div>
-                      {event.actor_email ? <p className="mt-1 text-sm text-slate-600">{event.actor_email}</p> : null}
+                      {event.actor_email ? <p className="mt-1 text-sm text-grey-600">{event.actor_email}</p> : null}
                     </div>
                   ))}
                 </div>
@@ -318,14 +318,14 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               )}
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <MapPinned className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Travel updates</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Location updates appear here.</p>
+                  <h2 className="font-heading text-xl font-semibold text-grey-800">Travel updates</h2>
+                  <p className="mt-1 text-sm leading-6 text-grey-600">Location updates appear here.</p>
                 </div>
               </div>
               {trackingQuery.isLoading ? (
@@ -333,12 +333,12 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               ) : trackingQuery.data?.results.length ? (
                 <div className="mt-5 grid gap-3">
                   {trackingQuery.data.results.map((point) => (
-                    <div key={point.id} className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
-                      <p className="text-sm font-semibold text-[#1F2937]">
+                    <div key={point.id} className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-4">
+                      <p className="text-sm font-semibold text-grey-800">
                         {point.latitude}, {point.longitude}
                       </p>
-                      <p className="mt-1 text-sm text-slate-600">{point.accuracy_meters}m accuracy - {point.source}</p>
-                      <p className="mt-1 text-xs text-slate-500">{formatDateTime(point.created_at)}</p>
+                      <p className="mt-1 text-sm text-grey-600">{point.accuracy_meters}m accuracy - {point.source}</p>
+                      <p className="mt-1 text-xs text-grey-500">{formatDateTime(point.created_at)}</p>
                     </div>
                   ))}
                 </div>
@@ -364,7 +364,7 @@ function StarRatingInput({
 }) {
   return (
     <div className="grid gap-2">
-      <p className="text-sm font-semibold text-[#1F2937]">Rating</p>
+      <p className="text-sm font-semibold text-grey-800">Rating</p>
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Rate nurse">
         {[1, 2, 3, 4, 5].map((score) => (
           <button
@@ -376,7 +376,7 @@ function StarRatingInput({
             onClick={() => onChange(score)}
             className={[
               "inline-flex h-11 w-11 items-center justify-center rounded-[10px] border text-lg transition",
-              score <= value ? "border-amber-200 bg-amber-50 text-amber-500" : "border-slate-200 bg-white text-slate-300",
+              score <= value ? "border-warning-200 bg-warning-50 text-warning-500" : "border-grey-200 bg-white text-grey-300",
               disabled ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5",
             ].join(" ")}
           >
@@ -384,16 +384,16 @@ function StarRatingInput({
           </button>
         ))}
       </div>
-      <p className="text-xs text-slate-500">{value} out of 5</p>
+      <p className="text-xs text-grey-500">{value} out of 5</p>
     </div>
   );
 }
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-      <p className="text-sm font-semibold text-[#1F2937]">{label}</p>
-      <p className="mt-1 text-sm text-slate-600">{value}</p>
+    <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
+      <p className="text-sm font-semibold text-grey-800">{label}</p>
+      <p className="mt-1 text-sm text-grey-600">{value}</p>
     </div>
   );
 }
@@ -408,10 +408,10 @@ function ActionPanel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid content-start gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6">
+    <div className="grid content-start gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)] sm:p-6">
       <div>
-        <h2 className="font-heading text-xl font-semibold text-[#1F2937]">{title}</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-600">{description}</p>
+        <h2 className="font-heading text-xl font-semibold text-grey-800">{title}</h2>
+        <p className="mt-1 text-sm leading-6 text-grey-600">{description}</p>
       </div>
       {children}
     </div>

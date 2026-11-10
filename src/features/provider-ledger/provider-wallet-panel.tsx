@@ -42,10 +42,10 @@ function MoneyCard({
   description: string;
 }) {
   return (
-    <div className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</p>
-      <p className="mt-2 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(value, currency)}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+    <div className="rounded-[8px] border border-grey-200 bg-grey-50 p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-grey-500">{label}</p>
+      <p className="mt-2 font-heading text-2xl font-semibold text-grey-800">{formatMoney(value, currency)}</p>
+      <p className="mt-2 text-sm leading-6 text-grey-600">{description}</p>
     </div>
   );
 }
@@ -63,11 +63,11 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
 
   if (walletQuery.isLoading) {
     return (
-      <div className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6">
+      <div className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)] sm:p-6">
         <InlineLoader compact label="Preparing your wallet summary" />
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {[0, 1, 2, 3].map((item) => (
-            <div key={item} className="h-32 rounded-[8px] bg-slate-50" />
+            <div key={item} className="h-32 rounded-[8px] bg-grey-50" />
           ))}
         </div>
       </div>
@@ -97,15 +97,15 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
   const transactions = transactionsQuery.data?.results ?? [];
 
   return (
-    <div className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6">
+    <div className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)] sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[var(--primary-soft)] text-[var(--primary)]">
             <WalletCards className="h-5 w-5" />
           </span>
           <div>
-            <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Wallet summary</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">Earnings and payout status.</p>
+            <h2 className="font-heading text-xl font-semibold text-grey-800">Wallet summary</h2>
+            <p className="mt-1 text-sm leading-6 text-grey-600">Earnings and payout status.</p>
           </div>
         </div>
         <Badge tone={role === "doctor" ? "cyan" : "blue"}>{wallet.currency}</Badge>
@@ -119,26 +119,26 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
       </div>
 
       {role === "doctor" ? null : <div className="mt-4 grid gap-3 md:grid-cols-3">
-        <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
+        <div className="rounded-[8px] border border-primary-100 bg-grey-50 p-4">
           <div className="flex items-center gap-2 text-sm font-semibold text-[var(--primary)]">
             <Clock3 className="h-4 w-4" />
             Next payout date
           </div>
-          <p className="mt-2 text-sm font-semibold text-[#1F2937]">{wallet.next_available_at ? formatDateTime(wallet.next_available_at) : "No payout date yet"}</p>
+          <p className="mt-2 text-sm font-semibold text-grey-800">{wallet.next_available_at ? formatDateTime(wallet.next_available_at) : "No payout date yet"}</p>
         </div>
-        <div className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+        <div className="rounded-[8px] border border-grey-200 bg-grey-50 p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-grey-700">
             <CreditCard className="h-4 w-4" />
             Requested
           </div>
-          <p className="mt-2 text-sm font-semibold text-[#1F2937]">{formatMoney(wallet.payout_requested_balance, wallet.currency)}</p>
+          <p className="mt-2 text-sm font-semibold text-grey-800">{formatMoney(wallet.payout_requested_balance, wallet.currency)}</p>
         </div>
-        <div className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+        <div className="rounded-[8px] border border-grey-200 bg-grey-50 p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-grey-700">
             <Banknote className="h-4 w-4" />
             Refunds / disputes
           </div>
-          <p className="mt-2 text-sm font-semibold text-[#1F2937]">
+          <p className="mt-2 text-sm font-semibold text-grey-800">
             {formatMoney(wallet.refunded_balance, wallet.currency)} refunded
           </p>
         </div>
@@ -147,7 +147,7 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
       <div className={role === "doctor" ? "mt-4" : "mt-6"}>
         <div className="mb-4 flex items-center gap-2">
           <History className="h-5 w-5 text-[var(--primary)]" />
-          <h3 className="font-heading text-lg font-semibold text-[#1F2937]">Recent activity</h3>
+          <h3 className="font-heading text-lg font-semibold text-grey-800">Recent activity</h3>
         </div>
 
         {transactionsQuery.isLoading ? (
@@ -159,15 +159,15 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
         ) : transactions.length ? (
           <div className="grid gap-3">
             {transactions.map((transaction) => (
-              <div key={transaction.id} className="rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4">
+              <div key={transaction.id} className="rounded-[8px] border border-grey-200 bg-grey-50 px-4 py-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="font-semibold text-[#1F2937]">{ledgerLabel(transaction.transaction_type)}</p>
-                    <p className="mt-1 text-sm text-slate-600">{formatDateTime(transaction.created_at)}</p>
+                    <p className="font-semibold text-grey-800">{ledgerLabel(transaction.transaction_type)}</p>
+                    <p className="mt-1 text-sm text-grey-600">{formatDateTime(transaction.created_at)}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {transactionAmount(transaction) ? (
-                      <span className="text-sm font-semibold text-[#1F2937]">{transactionAmount(transaction)}</span>
+                      <span className="text-sm font-semibold text-grey-800">{transactionAmount(transaction)}</span>
                     ) : null}
                     <Badge tone="neutral">{ledgerLabel(transaction.status)}</Badge>
                   </div>

@@ -160,7 +160,7 @@ export function HeroSlideshow() {
       data-motion="pill"
       className={cn(
         praise.className,
-        "inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tl-[4px] rounded-tr-[18px] border-b-[3.2px] border-white bg-[#1E40AF] px-[33px] text-[44px] font-normal max-sm:h-[38px] max-sm:px-4 max-sm:text-[28px]",
+        "inline-flex h-[60.9px] items-center rounded-bl-[18px] rounded-tl-[4px] rounded-tr-[18px] border-b-[3.2px] border-white bg-primary-600 px-[33px] text-[44px] font-normal max-sm:h-[38px] max-sm:px-4 max-sm:text-[28px]",
         className,
       )}
     >
@@ -205,7 +205,7 @@ export function HeroSlideshow() {
       </div>
 
       <div className="relative">
-        <div className="inline-flex h-[45.5px] items-center gap-[10px] rounded-bl-[16px] rounded-tr-[16px] bg-[#60A5FA]/50 px-[30px] text-[14.85px] font-medium leading-none text-white max-sm:px-5">
+        <div className="inline-flex h-[45.5px] items-center gap-[10px] rounded-bl-[16px] rounded-tr-[16px] bg-primary-400/50 px-[30px] text-[14.85px] font-medium leading-none text-white max-sm:px-5">
           <span className="h-[11px] w-[11px] rounded-full bg-white/50" />
           Trusted Digital Healthcare
           <span className="h-[11px] w-[11px] rounded-full bg-white/50" />
@@ -258,7 +258,7 @@ export function HeroSlideshow() {
         >
           <Link
             href="/register"
-            className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[17.6px] rounded-full bg-[#1E40AF] text-[18px] font-medium leading-none text-white shadow-[0_16px_32px_-14px_rgba(11,28,48,0.55)] hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
+            className="inline-flex h-[58.8px] w-[249.5px] items-center justify-center gap-[17.6px] rounded-full bg-primary-600 text-[18px] font-medium leading-none text-white shadow-[0_16px_32px_-14px_rgba(11,28,48,0.55)] hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 max-sm:w-full"
           >
             Talk to a Doctor
             <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
@@ -294,7 +294,7 @@ export function HeroSlideshow() {
               }}
               className="group flex h-6 w-[90px] cursor-pointer items-center focus-visible:outline-none"
             >
-              <span className="relative block h-[4px] w-full overflow-hidden rounded-full bg-white/40 transition-colors group-hover:bg-white/55 group-focus-visible:ring-2 group-focus-visible:ring-white group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#2563EB]">
+              <span className="relative block h-[4px] w-full overflow-hidden rounded-full bg-white/40 transition-colors group-hover:bg-white/55 group-focus-visible:ring-2 group-focus-visible:ring-white group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-primary-500">
                 <span
                   data-progress={index}
                   style={{ transform: "scaleX(0)" }}

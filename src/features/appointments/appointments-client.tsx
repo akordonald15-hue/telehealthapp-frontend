@@ -171,7 +171,7 @@ function TypingDots() {
       {[0, 1, 2].map((item) => (
         <span
           key={item}
-          className="h-2 w-2 animate-pulse rounded-full bg-[#2563EB]"
+          className="h-2 w-2 animate-pulse rounded-full bg-primary-500"
           style={{ animationDelay: `${item * 150}ms` }}
         />
       ))}
@@ -183,7 +183,7 @@ function AssistantBubble({ speaker, children }: { speaker: "assistant" | "user";
   return (
     <div className={cn("ct-rise-in flex items-end gap-2", speaker === "user" ? "justify-end" : "justify-start")}>
       {speaker === "assistant" ? (
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-[0_10px_28px_-20px_rgba(37,99,235,0.5)] ring-1 ring-[#DBEAFE]">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-primary-500 shadow-[0_10px_28px_-20px_rgba(57,97,169,0.5)] ring-1 ring-primary-100">
           <Bot className="h-5 w-5" />
         </span>
       ) : null}
@@ -192,13 +192,13 @@ function AssistantBubble({ speaker, children }: { speaker: "assistant" | "user";
           className={cn(
             "rounded-[18px] px-4 py-3 text-sm leading-6 shadow-sm",
             speaker === "user"
-              ? "rounded-br-[6px] bg-[#2563EB] text-white"
-              : "rounded-bl-[6px] border border-[#DBEAFE] bg-[#EFF6FF] text-slate-700",
+              ? "rounded-br-[6px] bg-primary-500 text-white"
+              : "rounded-bl-[6px] border border-primary-100 bg-primary-50 text-grey-700",
           )}
         >
           {children}
         </div>
-        <span className="px-1 text-[11px] font-medium text-slate-400">Just now</span>
+        <span className="px-1 text-[11px] font-medium text-grey-400">Just now</span>
       </div>
     </div>
   );
@@ -208,12 +208,12 @@ function PatientAppointmentCard({ appointment }: { appointment: Appointment }) {
   const doctorName = appointment.doctor_profile?.display_name || "Caretekk doctor";
 
   return (
-    <article className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.38)]">
+    <article className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(19,25,39,0.38)]">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <p className="font-heading text-lg font-semibold text-[#1F2937]">{doctorName}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">{formatAppointmentTime(appointment.scheduled_at)}</p>
-          {appointment.reason ? <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{appointment.reason}</p> : null}
+          <p className="font-heading text-lg font-semibold text-grey-800">{doctorName}</p>
+          <p className="mt-1 text-sm leading-6 text-grey-600">{formatAppointmentTime(appointment.scheduled_at)}</p>
+          {appointment.reason ? <p className="mt-3 line-clamp-2 text-sm leading-6 text-grey-600">{appointment.reason}</p> : null}
         </div>
         <StatusBadge value={appointment.status} />
       </div>
@@ -714,38 +714,38 @@ export function AppointmentsClient() {
       <PromotionConfirmation promotion={promotion} />
       {promotion.enabled && (promotion.pending || ["booked", "redeemed", "forfeited"].includes(promotion.reservation?.reservation.status || "")) ? <PromotionCheckout pendingDoctorName={doctorItems.find(doctor => doctor.id === promotion.pending?.doctor)?.display_name} promotion={promotion} /> : null}
       {user?.role === "patient" && !effectiveTriageSessionId && !selectedDoctor ? (
-        <div className="-mx-4 -mt-5 grid min-h-[calc(100dvh-132px)] gap-5 bg-[linear-gradient(180deg,#F8FBFF_0%,#FFFFFF_42%,#F8FBFF_100%)] px-4 py-4 pb-6 sm:mx-0 sm:mt-0 sm:rounded-[8px] sm:p-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+        <div className="-mx-4 -mt-5 grid min-h-[calc(100dvh-132px)] gap-5 bg-[linear-gradient(180deg,#F9FAFB_0%,#FFFFFF_42%,#F9FAFB_100%)] px-4 py-4 pb-6 sm:mx-0 sm:mt-0 sm:rounded-[8px] sm:p-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
               <div className="grid content-start gap-4">
                 {profileIncomplete ? (
                   <Notice title="Complete your profile before booking" tone="warning">
                     Doctors need your name, phone, date of birth, gender, state, and LGA before consultation.
-                    <Link className="ml-2 font-semibold text-amber-800 underline" href="/profile">Update profile</Link>
+                    <Link className="ml-2 font-semibold text-warning-800 underline" href="/profile">Update profile</Link>
                   </Notice>
                 ) : null}
                 {firstTimeWelcome ? (
                   <div className="mx-auto flex w-40 items-center justify-center gap-2 sm:hidden" aria-hidden="true">
-                    <span className="h-1.5 w-12 rounded-full bg-[#2563EB]" />
-                    <span className="h-1.5 w-12 rounded-full bg-slate-200" />
-                    <span className="h-1.5 w-12 rounded-full bg-slate-200" />
+                    <span className="h-1.5 w-12 rounded-full bg-primary-500" />
+                    <span className="h-1.5 w-12 rounded-full bg-grey-200" />
+                    <span className="h-1.5 w-12 rounded-full bg-grey-200" />
                   </div>
                 ) : null}
                 <div className="grid grid-cols-[minmax(0,1fr)_112px] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_140px]">
                   <div className="min-w-0">
-                    <h2 className="font-heading text-[1.75rem] font-semibold leading-tight text-[#1F2937] sm:text-3xl">
+                    <h2 className="font-heading text-[1.75rem] font-semibold leading-tight text-grey-800 sm:text-3xl">
                       Hi {user?.full_name?.trim().split(/\s+/)[0] || "there"}! 👋
                     </h2>
-                    <p className="mt-1 font-heading text-[1.55rem] font-semibold leading-tight text-[#2563EB] sm:text-2xl">
+                    <p className="mt-1 font-heading text-[1.55rem] font-semibold leading-tight text-primary-500 sm:text-2xl">
                       I&apos;m your Caretekk Assistant
                     </p>
-                    <p className="mt-3 max-w-sm text-sm leading-7 text-slate-600">
+                    <p className="mt-3 max-w-sm text-sm leading-7 text-grey-600">
                       {firstTimeWelcome
                         ? "I'll ask a few questions so I can understand how you're feeling and recommend the right doctor for you."
                         : "Tell me how you're feeling today, and I'll recommend the most suitable doctor."}
                     </p>
                   </div>
                   <span className="ct-float-gentle relative flex h-28 w-28 items-center justify-center justify-self-end sm:h-36 sm:w-36">
-                    <span className="absolute h-24 w-24 rounded-full bg-[#DBEAFE] sm:h-32 sm:w-32" />
-                    <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-[0_18px_42px_-30px_rgba(37,99,235,0.48)] sm:h-20 sm:w-20">
+                    <span className="absolute h-24 w-24 rounded-full bg-primary-100 sm:h-32 sm:w-32" />
+                    <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary-500 shadow-[0_18px_42px_-30px_rgba(57,97,169,0.48)] sm:h-20 sm:w-20">
                       <Bot className="h-9 w-9 sm:h-11 sm:w-11" />
                     </span>
                   </span>
@@ -760,8 +760,8 @@ export function AppointmentsClient() {
                     Let&apos;s Get Started
                   </Button>
                 ) : null}
-                <div className="grid gap-3 rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_18px_44px_-38px_rgba(15,23,42,0.28)]">
-                  <p className="text-sm font-semibold text-[#1F2937]">Here&apos;s how it works:</p>
+                <div className="grid gap-3 rounded-[8px] border border-grey-100 bg-white p-4 shadow-[0_18px_44px_-38px_rgba(19,25,39,0.28)]">
+                  <p className="text-sm font-semibold text-grey-800">Here&apos;s how it works:</p>
                   {[
                     { icon: MessageCircle, title: "You tell me how you're feeling", text: "Share your symptoms in your own words." },
                     { icon: BrainCircuit, title: "I analyze your symptoms", text: "Caretekk prepares a care summary for this consultation." },
@@ -770,12 +770,12 @@ export function AppointmentsClient() {
                     const Icon = item.icon;
                     return (
                       <div key={item.title} className="flex items-start gap-3">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-500">
                           <Icon className="h-4 w-4" />
                         </span>
                         <span>
-                          <span className="block text-sm font-semibold text-[#1F2937]">{item.title}</span>
-                          <span className="block text-xs leading-5 text-slate-600">{item.text}</span>
+                          <span className="block text-sm font-semibold text-grey-800">{item.title}</span>
+                          <span className="block text-xs leading-5 text-grey-600">{item.text}</span>
                         </span>
                       </div>
                     );
@@ -787,7 +787,7 @@ export function AppointmentsClient() {
                 <ErrorMessage error={startAiSession.error || startConversation.error || sendAiMessage.error || aiResult.error} context="triage" />
                 <div className="grid flex-1 content-start gap-3 overflow-y-auto pr-1">
                   <AssistantBubble speaker="assistant">
-                    <p className="font-semibold text-[#1F2937]">
+                    <p className="font-semibold text-grey-800">
                       {firstTimeWelcome ? "Hi 👋" : "Welcome back 👋"}
                     </p>
                     <p>
@@ -812,31 +812,31 @@ export function AppointmentsClient() {
                         {firstTimeWelcome ? "How are you feeling today?" : "What symptoms are you experiencing today?"}
                       </AssistantBubble>
                       <div className="grid gap-2">
-                        <p className="text-xs font-semibold text-slate-500">Examples you can try:</p>
+                        <p className="text-xs font-semibold text-grey-500">Examples you can try:</p>
                         <div className="flex flex-wrap gap-2">
                           {symptomQuickReplies.map((reply) => (
                             <button
                               key={reply}
                               type="button"
                               onClick={() => setAiSymptomText(reply)}
-                              className="inline-flex min-h-9 items-center justify-center rounded-full border border-[#DBEAFE] bg-white px-3 text-xs font-semibold text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                              className="inline-flex min-h-9 items-center justify-center rounded-full border border-primary-100 bg-white px-3 text-xs font-semibold text-primary-500 transition hover:bg-primary-50"
                             >
                               {reply}
                             </button>
                           ))}
                         </div>
                       </div>
-                      <form className="sticky bottom-0 flex min-h-14 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-[0_18px_42px_-32px_rgba(15,23,42,0.35)]" onSubmit={handleAiSymptomSubmit}>
+                      <form className="sticky bottom-0 flex min-h-14 items-center gap-2 rounded-full border border-grey-200 bg-white px-3 py-2 shadow-[0_18px_42px_-32px_rgba(19,25,39,0.35)]" onSubmit={handleAiSymptomSubmit}>
                         <input
                           value={aiSymptomText}
                           onChange={(event) => setAiSymptomText(event.target.value)}
                           placeholder="Type your symptoms here..."
-                          className="min-w-0 flex-1 bg-transparent px-2 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8]"
+                          className="min-w-0 flex-1 bg-transparent px-2 text-sm text-grey-800 outline-none placeholder:text-grey-400"
                         />
                         <button
                           type="submit"
                           disabled={!aiSymptomText.trim()}
-                          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-500 text-white transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                           aria-label="Send symptoms"
                         >
                           <SendHorizonal className="h-5 w-5" />
@@ -860,7 +860,7 @@ export function AppointmentsClient() {
                             key={option.value}
                             type="button"
                             onClick={() => handleAiSeveritySelect(option.value)}
-                            className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition hover:border-[#93C5FD] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                            className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-grey-200 bg-white px-4 text-sm font-semibold text-grey-800 transition hover:border-primary-300 hover:bg-primary-50 hover:text-primary-500"
                           >
                             {option.label}
                           </button>
@@ -878,30 +878,30 @@ export function AppointmentsClient() {
                   {sendAiMessage.isPending || aiResult.isLoading || aiResultData?.status === "processing" ? (
                     <AssistantBubble speaker="assistant">
                       <div className="grid gap-2">
-                        <span className="inline-flex items-center gap-2 font-semibold text-[#1F2937]">
+                        <span className="inline-flex items-center gap-2 font-semibold text-grey-800">
                           <LoaderCircle className="h-4 w-4 animate-spin" />
                           Understanding your symptoms...
                         </span>
-                        <span className="text-slate-600">Looking for possible causes...</span>
-                        <span className="text-slate-600">Identifying the most appropriate specialist...</span>
-                        <span className="text-slate-600">Finding available doctors...</span>
+                        <span className="text-grey-600">Looking for possible causes...</span>
+                        <span className="text-grey-600">Identifying the most appropriate specialist...</span>
+                        <span className="text-grey-600">Finding available doctors...</span>
                       </div>
                     </AssistantBubble>
                   ) : null}
 
                   {aiFinished && aiResultData ? (
-                    <div className="grid gap-3 rounded-[8px] border border-[#DBEAFE] bg-[#EFF6FF]/80 p-4">
+                    <div className="grid gap-3 rounded-[8px] border border-primary-100 bg-primary-50/80 p-4">
                       <div className="flex items-start gap-3">
-                        <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#2563EB]" />
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 text-primary-500" />
                         <div>
-                          <p className="font-semibold text-[#1F2937]">Your consultation summary is ready.</p>
-                          <p className="mt-1 text-sm leading-6 text-slate-600">{aiResultData.summary_preview || "Your symptoms have been summarized for the doctor."}</p>
+                          <p className="font-semibold text-grey-800">Your consultation summary is ready.</p>
+                          <p className="mt-1 text-sm leading-6 text-grey-600">{aiResultData.summary_preview || "Your symptoms have been summarized for the doctor."}</p>
                         </div>
                       </div>
-                      <div className="grid gap-2 text-sm text-slate-700">
-                        <p><span className="font-semibold text-[#1F2937]">Symptoms:</span> {triageSymptoms.join(", ") || "Shared with assistant"}</p>
-                        <p><span className="font-semibold text-[#1F2937]">Suggested specialty:</span> {formatSpecialty(aiResultData.department)}</p>
-                        <p><span className="font-semibold text-[#1F2937]">Risk level:</span> {formatSpecialty(aiResultData.risk_level)}</p>
+                      <div className="grid gap-2 text-sm text-grey-700">
+                        <p><span className="font-semibold text-grey-800">Symptoms:</span> {triageSymptoms.join(", ") || "Shared with assistant"}</p>
+                        <p><span className="font-semibold text-grey-800">Suggested specialty:</span> {formatSpecialty(aiResultData.department)}</p>
+                        <p><span className="font-semibold text-grey-800">Risk level:</span> {formatSpecialty(aiResultData.risk_level)}</p>
                       </div>
                       <Notice title="This is not a diagnosis" tone="neutral">
                         This assessment helps Caretekk match you with the most appropriate doctor.
@@ -913,8 +913,8 @@ export function AppointmentsClient() {
                     </div>
                   ) : null}
                 </div>
-                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
-                  <ShieldCheck className="h-4 w-4 text-[#2563EB]" />
+                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-grey-500">
+                  <ShieldCheck className="h-4 w-4 text-primary-500" />
                   Your conversation is private and secure.
                 </div>
               </div>
@@ -922,12 +922,12 @@ export function AppointmentsClient() {
       ) : user?.role === "patient" ? (
         <div className="ct-panel grid gap-4 rounded-[8px] p-5 sm:p-6">
           <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
+            <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
               <CalendarPlus2 className="h-5 w-5" />
             </span>
             <div>
-              <p className="ct-card-title text-[#1F2937]">Choose your doctor and time</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">Your AI summary is ready. Continue inside the recommendation screen.</p>
+              <p className="ct-card-title text-grey-800">Choose your doctor and time</p>
+              <p className="mt-1 text-sm leading-6 text-grey-600">Your AI summary is ready. Continue inside the recommendation screen.</p>
             </div>
           </div>
           <ErrorMessage error={createAppointment.error} context="appointments" />
@@ -944,7 +944,7 @@ export function AppointmentsClient() {
               {paymentConfirmed ? (
                 <Notice title="Payment confirmed" tone="success">
                   Your consultation is now active.
-                  <Link className="ml-2 font-semibold text-[#2563EB] underline" href="/messages">
+                  <Link className="ml-2 font-semibold text-primary-500 underline" href="/messages">
                     Open Consultation
                   </Link>
                 </Notice>
@@ -1009,14 +1009,14 @@ export function AppointmentsClient() {
           onNext={appointments.data?.next ? () => setPage((current) => current + 1) : undefined}
           onPrevious={appointments.data?.previous ? () => setPage((current) => Math.max(1, current - 1)) : undefined}
           renderItem={(item) => (
-            <article key={item.id} className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(15,23,42,0.38)]">
+            <article key={item.id} className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(19,25,39,0.38)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatAppointmentTime(item.scheduled_at)}</p>
-                  {item.reason ? <p className="mt-3 text-sm leading-7 text-slate-600">{item.reason}</p> : null}
+                  <p className="font-heading text-xl font-semibold text-grey-800">{formatAppointmentTime(item.scheduled_at)}</p>
+                  {item.reason ? <p className="mt-3 text-sm leading-7 text-grey-600">{item.reason}</p> : null}
                   {item.triage_summary?.symptoms?.length ? (
-                    <div className="mt-3 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
-                      <span className="font-semibold text-[#1F2937]">Care check-in:</span>{" "}
+                    <div className="mt-3 rounded-[8px] border border-primary-100 bg-grey-50 px-3 py-2 text-sm text-grey-600">
+                      <span className="font-semibold text-grey-800">Care check-in:</span>{" "}
                       {item.triage_summary.symptoms.join(", ")}
                     </div>
                   ) : null}
@@ -1026,7 +1026,7 @@ export function AppointmentsClient() {
                   {isDoctor ? (
                     <Link
                       href={`/appointments/${item.id}`}
-                      className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+                      className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-primary-500 px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5"
                     >
                       View consultation
                     </Link>
@@ -1053,12 +1053,12 @@ export function AppointmentsClient() {
         {availableDoctors.isLoading ? (
           <div className="grid gap-3" aria-busy="true" aria-label="Loading recommended doctors">
             {[0, 1, 2, 3].map((item) => (
-              <div key={item} className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
+              <div key={item} className="rounded-[8px] border border-grey-200 bg-grey-50 p-4">
                 <div className="flex gap-3">
                   <div className="h-12 w-12 animate-pulse rounded-[8px] bg-white" />
                   <div className="flex-1">
-                    <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
-                    <div className="mt-3 h-3 w-28 animate-pulse rounded-full bg-slate-200" />
+                    <div className="h-4 w-40 animate-pulse rounded-full bg-grey-200" />
+                    <div className="mt-3 h-3 w-28 animate-pulse rounded-full bg-grey-200" />
                   </div>
                 </div>
               </div>
@@ -1070,7 +1070,7 @@ export function AppointmentsClient() {
           </Notice>
         ) : doctorItems.length ? (
           <div className="grid gap-5">
-            <div className="mx-auto h-1.5 w-16 rounded-full bg-slate-200" aria-hidden="true" />
+            <div className="mx-auto h-1.5 w-16 rounded-full bg-grey-200" aria-hidden="true" />
             <div className="grid gap-4">
               {doctorItems.map((doctor, index) => {
                 const selected = selectedDoctor?.id === doctor.id;
@@ -1080,52 +1080,52 @@ export function AppointmentsClient() {
                   <article
                     key={doctor.id}
                     className={cn(
-                      "ct-rise-in grid gap-4 rounded-[8px] border bg-white p-4 shadow-[0_22px_56px_-46px_rgba(15,23,42,0.42)] transition duration-200",
-                      selected ? "border-[#2563EB] ring-2 ring-[#DBEAFE]" : "border-slate-100",
-                      index === 0 && !selectedDoctor ? "border-[#93C5FD] bg-[#F8FBFF]" : "",
+                      "ct-rise-in grid gap-4 rounded-[8px] border bg-white p-4 shadow-[0_22px_56px_-46px_rgba(19,25,39,0.42)] transition duration-200",
+                      selected ? "border-primary-500 ring-2 ring-primary-100" : "border-grey-100",
+                      index === 0 && !selectedDoctor ? "border-primary-300 bg-grey-50" : "",
                       dimmed && "opacity-55",
                     )}
                     style={{ animationDelay: `${index * 70}ms` }}
                   >
                     {index === 0 ? (
-                      <span className="w-fit rounded-full bg-[#DBEAFE] px-3 py-1 text-xs font-semibold text-[#2563EB]">Best Match</span>
+                      <span className="w-fit rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-500">Best Match</span>
                     ) : null}
                     <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-4 sm:grid-cols-[88px_minmax(0,1fr)_auto] sm:items-center">
-                      <div className="relative h-[72px] w-[72px] overflow-hidden rounded-full bg-[#EFF6FF] text-[#2563EB] sm:h-[88px] sm:w-[88px]">
+                      <div className="relative h-[72px] w-[72px] overflow-hidden rounded-full bg-primary-50 text-primary-500 sm:h-[88px] sm:w-[88px]">
                         {doctor.profile_image_url ? (
                           <Image src={doctor.profile_image_url} alt="" width={88} height={88} className="h-full w-full object-cover" unoptimized />
                         ) : (
                           <span className="grid h-full w-full place-items-center text-lg font-bold">{initials(doctor.display_name)}</span>
                         )}
-                        <span className={cn("absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white", available ? "bg-[#2563EB]" : "bg-slate-300")} />
+                        <span className={cn("absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white", available ? "bg-primary-500" : "bg-grey-300")} />
                       </div>
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate text-base font-semibold text-[#1F2937]">{doctor.display_name}</p>
-                          {selected ? <span className="rounded-full bg-[#DBEAFE] px-2 py-0.5 text-xs font-semibold text-[#2563EB]">Selected</span> : null}
+                          <p className="truncate text-base font-semibold text-grey-800">{doctor.display_name}</p>
+                          {selected ? <span className="rounded-full bg-primary-100 px-2 py-0.5 text-xs font-semibold text-primary-500">Selected</span> : null}
                         </div>
-                        <p className="mt-1 text-sm text-slate-600">General Physician</p>
-                        <p className="mt-2 line-clamp-1 text-sm text-slate-600">{oneLineBio(doctor)}</p>
-                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
-                          <span className="rounded-full bg-slate-50 px-3 py-1">★ {doctor.rating ?? "New"} ({doctor.review_count ?? 0} reviews)</span>
-                          <span className="rounded-full bg-slate-50 px-3 py-1">English</span>
-                          <span className="rounded-full bg-slate-50 px-3 py-1">Chat</span>
+                        <p className="mt-1 text-sm text-grey-600">General Physician</p>
+                        <p className="mt-2 line-clamp-1 text-sm text-grey-600">{oneLineBio(doctor)}</p>
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-grey-500">
+                          <span className="rounded-full bg-grey-50 px-3 py-1">★ {doctor.rating ?? "New"} ({doctor.review_count ?? 0} reviews)</span>
+                          <span className="rounded-full bg-grey-50 px-3 py-1">English</span>
+                          <span className="rounded-full bg-grey-50 px-3 py-1">Chat</span>
                         </div>
                       </div>
                       <div className="col-span-2 grid gap-3 sm:col-span-1 sm:min-w-36">
                         <span
                           className={cn(
                             "inline-flex min-h-8 items-center justify-center rounded-full px-3 text-xs font-semibold",
-                            available ? "bg-[#DBEAFE] text-[#2563EB]" : "bg-slate-100 text-slate-600",
+                            available ? "bg-primary-100 text-primary-500" : "bg-grey-100 text-grey-600",
                           )}
                         >
                           {available ? "Available now" : "Offline — schedule for later"}
                         </span>
-                        <span className="text-sm font-semibold text-slate-600">5-10 min</span>
+                        <span className="text-sm font-semibold text-grey-600">5-10 min</span>
                         <button
                           type="button"
                           disabled={promotion.selectionLocked || (promotion.enabled && doctor.availability_status === "unavailable")}
-                          className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
+                          className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-primary-500 px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
                           onClick={() => {
                             setCheckoutError("");
                             setSelectedDoctor(doctor);
@@ -1164,18 +1164,18 @@ export function AppointmentsClient() {
         footer={
           <div className="grid w-full gap-3">
             {checkoutError ? (
-              <div className="rounded-[8px] border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+              <div className="rounded-[8px] border border-warning-200 bg-warning-50 px-3 py-2 text-sm font-semibold text-warning-900">
                 {checkoutError}
               </div>
             ) : null}
-            <div className="rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">
-              <span className="font-semibold text-[#1F2937]">Selected time (Lagos):</span> {selectedTimeSummary}
+            <div className="rounded-[8px] bg-grey-50 px-3 py-2 text-sm text-grey-600">
+              <span className="font-semibold text-grey-800">Selected time (Lagos):</span> {selectedTimeSummary}
             </div>
             <div className="grid gap-2 sm:grid-cols-[auto_1fr]">
               <button
                 type="button"
                 disabled={promotion.selectionLocked}
-                className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition active:scale-[0.98]"
+                className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-grey-200 bg-white px-4 text-sm font-semibold text-grey-800 transition active:scale-[0.98]"
                 onClick={() => {
                   setScheduleSheetOpen(false);
                   setDoctorPickerOpen(true);
@@ -1197,11 +1197,11 @@ export function AppointmentsClient() {
       >
         {selectedDoctorLive ? (
           <div className="grid gap-3">
-            <div className="mx-auto h-1.5 w-16 rounded-full bg-slate-200" aria-hidden="true" />
-            <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-3">
-              <p className="text-sm font-semibold text-[#1F2937]">Is this the doctor you want?</p>
+            <div className="mx-auto h-1.5 w-16 rounded-full bg-grey-200" aria-hidden="true" />
+            <div className="rounded-[8px] border border-primary-100 bg-grey-50 p-3">
+              <p className="text-sm font-semibold text-grey-800">Is this the doctor you want?</p>
               <div className="mt-3 grid grid-cols-[56px_minmax(0,1fr)] gap-3">
-                <div className="relative h-14 w-14 overflow-hidden rounded-full bg-[#EFF6FF] text-[#2563EB]">
+                <div className="relative h-14 w-14 overflow-hidden rounded-full bg-primary-50 text-primary-500">
                   {selectedDoctorLive.profile_image_url ? (
                     <Image src={selectedDoctorLive.profile_image_url} alt="" width={64} height={64} className="h-full w-full object-cover" unoptimized />
                   ) : (
@@ -1210,14 +1210,14 @@ export function AppointmentsClient() {
                   <span
                     className={cn(
                       "absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white",
-                      selectedDoctorLive.availability_status === "available" ? "bg-[#2563EB]" : "bg-slate-300",
+                      selectedDoctorLive.availability_status === "available" ? "bg-primary-500" : "bg-grey-300",
                     )}
                   />
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-base font-semibold text-[#1F2937]">{selectedDoctorLive.display_name}</p>
-                  <p className="mt-1 text-sm text-slate-600">General Physician</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                  <p className="truncate text-base font-semibold text-grey-800">{selectedDoctorLive.display_name}</p>
+                  <p className="mt-1 text-sm text-grey-600">General Physician</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-grey-500">
                     <span className="rounded-full bg-white px-3 py-1">★ {selectedDoctorLive.rating ?? "New"} ({selectedDoctorLive.review_count ?? 0} reviews)</span>
                     <span className="rounded-full bg-white px-3 py-1">Chat</span>
                   </div>
@@ -1226,10 +1226,10 @@ export function AppointmentsClient() {
               <DoctorPublicReviews reviews={selectedDoctorLive.recent_reviews} className="mt-3" />
             </div>
 
-            <div className="grid gap-3 rounded-[8px] border border-slate-100 bg-white p-3">
+            <div className="grid gap-3 rounded-[8px] border border-grey-100 bg-white p-3">
               <div>
-                <p className="text-base font-semibold text-[#1F2937]">Choose consultation time</p>
-                <p className="mt-1 text-sm leading-5 text-slate-600">{promotionalTiming ? "Choose a future hourly appointment. Availability is checked when you book." : "Start now if available, or schedule an hourly slot."}</p>
+                <p className="text-base font-semibold text-grey-800">Choose consultation time</p>
+                <p className="mt-1 text-sm leading-5 text-grey-600">{promotionalTiming ? "Choose a future hourly appointment. Availability is checked when you book." : "Start now if available, or schedule an hourly slot."}</p>
               </div>
 
               <fieldset aria-label="Consultation timing" disabled={promotion.selectionLocked} className="grid gap-2 sm:grid-cols-2">
@@ -1254,12 +1254,12 @@ export function AppointmentsClient() {
                   }}
                   className={cn(
                     "rounded-[8px] border p-3 text-left transition active:scale-[0.99]",
-                    !promotionalTiming && timingMode === "now" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
+                    !promotionalTiming && timingMode === "now" ? "border-primary-500 bg-primary-50" : "border-grey-200 bg-white",
                     !promotionalTiming && !doctorCanConsultNow && "cursor-not-allowed opacity-55",
                   )}
                 >
-                  <p className="font-semibold text-[#1F2937]">{promotionalTiming ? "Earliest appointment" : "Consult now"}</p>
-                  <p className="mt-1 text-sm leading-5 text-slate-600">
+                  <p className="font-semibold text-grey-800">{promotionalTiming ? "Earliest appointment" : "Consult now"}</p>
+                  <p className="mt-1 text-sm leading-5 text-grey-600">
                     {promotionalTiming ? "Select the next hourly slot, then confirm its date and time. Availability is checked at booking." : doctorCanConsultNow ? "Start checkout for an immediate chat consultation." : "Available between 8:00 AM and 6:00 PM."}
                   </p>
                 </button>
@@ -1272,11 +1272,11 @@ export function AppointmentsClient() {
                   }}
                   className={cn(
                     "rounded-[8px] border p-3 text-left transition active:scale-[0.99]",
-                    timingMode === "later" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-slate-200 bg-white",
+                    timingMode === "later" ? "border-primary-500 bg-primary-50" : "border-grey-200 bg-white",
                   )}
                 >
-                  <p className="font-semibold text-[#1F2937]">Schedule for later</p>
-                  <p className="mt-1 text-sm leading-5 text-slate-600">Pick a time between 8:00 AM and 6:00 PM.</p>
+                  <p className="font-semibold text-grey-800">Schedule for later</p>
+                  <p className="mt-1 text-sm leading-5 text-grey-600">Pick a time between 8:00 AM and 6:00 PM.</p>
                 </button>
               </fieldset>
 
@@ -1297,7 +1297,7 @@ export function AppointmentsClient() {
 
               {timingMode === "later" ? (
                 <fieldset aria-label="Appointment date and time" disabled={promotion.selectionLocked} className="grid gap-4">
-                  <div className="grid grid-cols-3 rounded-[8px] border border-slate-200 bg-slate-50 p-1">
+                  <div className="grid grid-cols-3 rounded-[8px] border border-grey-200 bg-grey-50 p-1">
                     {[
                       { value: "today", label: "Today" },
                       { value: "tomorrow", label: "Tomorrow" },
@@ -1313,7 +1313,7 @@ export function AppointmentsClient() {
                         }}
                         className={cn(
                           "min-h-10 rounded-[8px] px-2 text-sm font-semibold transition active:scale-[0.98]",
-                          scheduleDay === item.value ? "bg-white text-[#2563EB] shadow-sm" : "text-[#1F2937]",
+                          scheduleDay === item.value ? "bg-white text-primary-500 shadow-sm" : "text-grey-800",
                         )}
                       >
                         {item.label}
@@ -1350,8 +1350,8 @@ export function AppointmentsClient() {
                           }}
                           className={cn(
                             "min-h-12 rounded-[8px] border px-3 text-sm font-semibold transition active:scale-[0.98]",
-                            selectedSlotHour === hour ? "border-[#2563EB] bg-[#2563EB] text-white" : "border-slate-200 bg-white text-[#1F2937]",
-                            unavailableSlotHours.has(hour) && "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400 line-through active:scale-100",
+                            selectedSlotHour === hour ? "border-primary-500 bg-primary-500 text-white" : "border-grey-200 bg-white text-grey-800",
+                            unavailableSlotHours.has(hour) && "cursor-not-allowed border-grey-100 bg-grey-50 text-grey-400 line-through active:scale-100",
                           )}
                           title={unavailableSlotHours.has(hour) ? "This time is already booked" : undefined}
                         >
@@ -1360,14 +1360,14 @@ export function AppointmentsClient() {
                         </button>
                       ))
                     ) : (
-                      <p className="col-span-full rounded-[8px] bg-slate-50 p-3 text-sm text-slate-600">No available hourly slots for this date.</p>
+                      <p className="col-span-full rounded-[8px] bg-grey-50 p-3 text-sm text-grey-600">No available hourly slots for this date.</p>
                     )}
                   </div>
 
                   {selectedSlotHour !== null && !unavailableSlotHours.has(selectedSlotHour) ? (
-                    <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-3">
-                      <p className="text-sm text-slate-600">
-                        <span className="font-semibold text-[#1F2937]">Selected:</span> {selectedTimeSummary}
+                    <div className="rounded-[8px] border border-primary-100 bg-grey-50 p-3">
+                      <p className="text-sm text-grey-600">
+                        <span className="font-semibold text-grey-800">Selected:</span> {selectedTimeSummary}
                       </p>
                     </div>
                   ) : null}
@@ -1375,14 +1375,14 @@ export function AppointmentsClient() {
               ) : null}
 
               {modalBookingReady ? (
-                <div className="grid gap-3 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
-                  <div className="grid gap-2 text-sm text-slate-600">
+                <div className="grid gap-3 rounded-[8px] border border-primary-100 bg-grey-50 p-4">
+                  <div className="grid gap-2 text-sm text-grey-600">
                     <p>
-                      <span className="font-semibold text-[#1F2937]">Selected doctor:</span>{" "}
+                      <span className="font-semibold text-grey-800">Selected doctor:</span>{" "}
                       {selectedDoctorLive.display_name}
                     </p>
                     <p>
-                      <span className="font-semibold text-[#1F2937]">Selected date & time:</span>{" "}
+                      <span className="font-semibold text-grey-800">Selected date & time:</span>{" "}
                       {selectedTimeSummary}
                     </p>
                   </div>

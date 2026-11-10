@@ -69,7 +69,7 @@ export function RewardSelector({
 
   return (
     <fieldset className="ct-surface grid gap-2 rounded-[8px] p-4" disabled={disabled}>
-      <legend className="flex items-center gap-2 px-1 text-sm font-semibold text-slate-900">
+      <legend className="flex items-center gap-2 px-1 text-sm font-semibold text-grey-900">
         <Ticket className="h-4 w-4 text-[var(--primary)]" aria-hidden />
         Apply a reward
       </legend>
@@ -77,7 +77,7 @@ export function RewardSelector({
         {eligible.map((reward) => (
           <label
             key={reward.public_id}
-            className="flex min-h-11 cursor-pointer items-start gap-3 rounded-[8px] border border-slate-200 p-3 transition hover:bg-slate-50 has-[:checked]:border-[var(--primary)] has-[:checked]:bg-[var(--primary-soft)]"
+            className="flex min-h-11 cursor-pointer items-start gap-3 rounded-[8px] border border-grey-200 p-3 transition hover:bg-grey-50 has-[:checked]:border-[var(--primary)] has-[:checked]:bg-[var(--primary-soft)]"
           >
             <input
               type="radio"
@@ -88,12 +88,12 @@ export function RewardSelector({
               onChange={() => onSelect(reward.public_id)}
             />
             <span className="grid gap-0.5">
-              <span className="text-sm font-semibold text-slate-900">{rewardLabel(reward)}</span>
-              <span className="text-xs text-slate-500">Expires {formatReferralDate(reward.expires_at)}</span>
+              <span className="text-sm font-semibold text-grey-900">{rewardLabel(reward)}</span>
+              <span className="text-xs text-grey-500">Expires {formatReferralDate(reward.expires_at)}</span>
             </span>
           </label>
         ))}
-        <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-[8px] border border-slate-200 p-3 transition hover:bg-slate-50 has-[:checked]:border-[var(--primary)] has-[:checked]:bg-[var(--primary-soft)]">
+        <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-[8px] border border-grey-200 p-3 transition hover:bg-grey-50 has-[:checked]:border-[var(--primary)] has-[:checked]:bg-[var(--primary-soft)]">
           <input
             type="radio"
             name="referral-reward"
@@ -102,7 +102,7 @@ export function RewardSelector({
             checked={selectedRewardId === null}
             onChange={() => onSelect(null)}
           />
-          <span className="text-sm text-slate-700">Don&apos;t use a reward</span>
+          <span className="text-sm text-grey-700">Don&apos;t use a reward</span>
         </label>
       </div>
 
@@ -110,13 +110,13 @@ export function RewardSelector({
       {selectedRewardId && preview.data ? (
         <>
           <PricingBreakdown pricing={preview.data} serviceLabel={serviceLabel} />
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-grey-500">
             Final price is confirmed when you continue to payment.
           </p>
         </>
       ) : null}
       {selectedRewardId && preview.isError ? (
-        <p className="text-sm text-amber-700" role="status">
+        <p className="text-sm text-warning-700" role="status">
           This reward can&apos;t be previewed right now. You can still continue, or choose another reward.
         </p>
       ) : null}
@@ -152,20 +152,20 @@ export function PricingBreakdown({
   };
 
   return (
-    <dl className="grid gap-1.5 rounded-[8px] bg-slate-50 p-4 text-sm">
+    <dl className="grid gap-1.5 rounded-[8px] bg-grey-50 p-4 text-sm">
       <div className="flex items-center justify-between">
-        <dt className="text-slate-600">{serviceLabel}</dt>
-        <dd className="font-medium text-slate-900">{money(pricing.service_value)}</dd>
+        <dt className="text-grey-600">{serviceLabel}</dt>
+        <dd className="font-medium text-grey-900">{money(pricing.service_value)}</dd>
       </div>
       {pricing.reward_applied ? (
         <div className="flex items-center justify-between">
-          <dt className="text-emerald-700">Referral reward</dt>
-          <dd className="font-medium text-emerald-700">-{money(pricing.discount)}</dd>
+          <dt className="text-success-700">Referral reward</dt>
+          <dd className="font-medium text-success-700">-{money(pricing.discount)}</dd>
         </div>
       ) : null}
-      <div className="mt-1 flex items-center justify-between border-t border-slate-200 pt-2">
-        <dt className="font-semibold text-slate-900">Amount due</dt>
-        <dd className="text-base font-bold text-slate-900">{money(pricing.amount_due)}</dd>
+      <div className="mt-1 flex items-center justify-between border-t border-grey-200 pt-2">
+        <dt className="font-semibold text-grey-900">Amount due</dt>
+        <dd className="text-base font-bold text-grey-900">{money(pricing.amount_due)}</dd>
       </div>
     </dl>
   );

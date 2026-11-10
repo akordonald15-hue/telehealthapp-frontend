@@ -96,8 +96,8 @@ export function ProfileClient() {
         {user?.role === "patient" ? (
           <div className="ct-panel rounded-[8px] p-5 sm:p-6">
             <div>
-              <h2 className="ct-card-title text-[#1F2937]">Profile shortcuts</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">Records, care updates, rewards, settings, and account access.</p>
+              <h2 className="ct-card-title text-grey-800">Profile shortcuts</h2>
+              <p className="mt-1 text-sm leading-6 text-grey-600">Records, care updates, rewards, settings, and account access.</p>
             </div>
             {/* Six tiles including Logout, so three across on desktop keeps the rows even. */}
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -113,9 +113,9 @@ export function ProfileClient() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="flex min-h-20 items-center gap-3 rounded-[8px] border border-slate-100 bg-white px-4 py-3 text-sm font-semibold text-[#1F2937] shadow-[0_14px_42px_-36px_rgba(15,23,42,0.35)] transition hover:border-[#DBEAFE] hover:bg-[#F8FBFF]"
+                    className="flex min-h-20 items-center gap-3 rounded-[8px] border border-grey-100 bg-white px-4 py-3 text-sm font-semibold text-grey-800 shadow-[0_14px_42px_-36px_rgba(19,25,39,0.35)] transition hover:border-primary-100 hover:bg-grey-50"
                   >
-                    <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
                       <Icon className="h-5 w-5" />
                     </span>
                     {item.label}
@@ -126,9 +126,9 @@ export function ProfileClient() {
                 type="button"
                 onClick={() => logout.mutate()}
                 disabled={logout.isPending}
-                className="flex min-h-20 items-center gap-3 rounded-[8px] border border-slate-100 bg-white px-4 py-3 text-left text-sm font-semibold text-[#1F2937] shadow-[0_14px_42px_-36px_rgba(15,23,42,0.35)] transition hover:border-[#DBEAFE] hover:bg-[#F8FBFF] disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex min-h-20 items-center gap-3 rounded-[8px] border border-grey-100 bg-white px-4 py-3 text-left text-sm font-semibold text-grey-800 shadow-[0_14px_42px_-36px_rgba(19,25,39,0.35)] transition hover:border-primary-100 hover:bg-grey-50 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
+                <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
                   <LogOut className="h-5 w-5" />
                 </span>
                 {logout.isPending ? "Signing out..." : "Logout"}
@@ -143,8 +143,8 @@ export function ProfileClient() {
           updateUser.mutate();
         }}>
           <div>
-            <h2 className="ct-card-title text-[#1F2937]">Account details</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">Your account information.</p>
+            <h2 className="ct-card-title text-grey-800">Account details</h2>
+            <p className="mt-1 text-sm leading-6 text-grey-600">Your account information.</p>
           </div>
           <ErrorMessage error={updateUser.error} context="profile" />
           {accountDraft.restored ? (
@@ -172,8 +172,8 @@ export function ProfileClient() {
           updateProfile.mutate();
         }}>
           <div>
-            <h2 className="ct-card-title text-[#1F2937]">Profile information</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">Keep your details up to date.</p>
+            <h2 className="ct-card-title text-grey-800">Profile information</h2>
+            <p className="mt-1 text-sm leading-6 text-grey-600">Keep your details up to date.</p>
           </div>
           <ErrorMessage error={updateProfile.error} context="profile" />
           {profileFormDraft.restored ? (

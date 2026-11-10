@@ -139,7 +139,7 @@ export function OptionCardGroup({
                   className={cn(
                     "min-h-12 rounded-[14px] border px-4 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15",
                     selected
-                      ? "border-primary bg-primary-soft text-primary shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+                      ? "border-primary bg-primary-soft text-primary shadow-[0_1px_2px_rgba(19,25,39,0.04)]"
                       : "border-ash-200 bg-surface text-ash-700 hover:border-primary hover:text-primary",
                   )}
                 >

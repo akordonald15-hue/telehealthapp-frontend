@@ -24,17 +24,17 @@ import { formatDateTime } from "@/lib/utils";
 function InfoTile({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="ct-soft-panel rounded-[8px] px-4 py-3">
-      <p className="text-sm font-semibold text-[#1F2937]">{label}</p>
-      <p className="mt-1 break-words text-sm leading-6 text-slate-600">{value || "Not available"}</p>
+      <p className="text-sm font-semibold text-grey-800">{label}</p>
+      <p className="mt-1 break-words text-sm leading-6 text-grey-600">{value || "Not available"}</p>
     </div>
   );
 }
 
 function ClinicalNote({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4">
-      <p className="text-sm font-semibold text-[#1F2937]">{title}</p>
-      <div className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{children}</div>
+    <div className="rounded-[8px] border border-grey-200 bg-grey-50 px-4 py-4">
+      <p className="text-sm font-semibold text-grey-800">{title}</p>
+      <div className="mt-2 whitespace-pre-line text-sm leading-6 text-grey-600">{children}</div>
     </div>
   );
 }
@@ -145,7 +145,7 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
     <Section
       title={appointment ? `Consultation #${appointment.id}` : "Consultation detail"}
       description="Patient context, messaging, care plan, and referral actions."
-      action={<Link href="/appointments" className="text-sm font-semibold text-[#0F766E]">Back to consultations</Link>}
+      action={<Link href="/appointments" className="text-sm font-semibold text-success-700">Back to consultations</Link>}
     >
       {appointmentQuery.isError ? (
         <Notice title="We couldn't load this consultation." tone="warning">
@@ -160,12 +160,12 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
             <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#ECFEFF] text-[#0F766E]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-grey-50 text-success-700">
                   <Stethoscope className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Patient consultation</h2>
-                  <p className="mt-1 text-sm text-slate-600">{appointmentCompanionLabel(userQuery.data?.role)}</p>
+                  <h2 className="font-heading text-xl font-semibold text-grey-800">Patient consultation</h2>
+                  <p className="mt-1 text-sm text-grey-600">{appointmentCompanionLabel(userQuery.data?.role)}</p>
                 </div>
                 <StatusBadge value={appointment.status} />
               </div>
@@ -189,13 +189,13 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                 ) : null}
                 {appointment.triage_summary ? (
                   <ClinicalNote title="Consultation triage">
-                    <span className="font-semibold text-[#1F2937]">Symptoms:</span>{" "}
+                    <span className="font-semibold text-grey-800">Symptoms:</span>{" "}
                     {appointment.triage_summary.symptoms.join(", ") || "Not recorded"}
                     {"\n"}
-                    <span className="font-semibold text-[#1F2937]">Severity:</span>{" "}
+                    <span className="font-semibold text-grey-800">Severity:</span>{" "}
                     {appointment.triage_summary.severity || appointment.triage_summary.risk_level || "Not recorded"}
                     {"\n"}
-                    <span className="font-semibold text-[#1F2937]">Summary:</span>{" "}
+                    <span className="font-semibold text-grey-800">Summary:</span>{" "}
                     {appointment.triage_summary.recommendation || "No summary available."}
                     {"\n\n"}
                     {appointment.triage_summary.disclaimer}
@@ -208,12 +208,12 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
 
             <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#ECFEFF] text-[#0F766E]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-grey-50 text-success-700">
                   <UserRoundCheck className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="ct-card-title text-[#1F2937]">Patient information</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Key profile details.</p>
+                  <p className="ct-card-title text-grey-800">Patient information</p>
+                  <p className="mt-1 text-sm leading-6 text-grey-600">Key profile details.</p>
                 </div>
               </div>
 
@@ -229,9 +229,9 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
 
           <div className="grid gap-4 xl:grid-cols-3">
             <div className="ct-panel rounded-[8px] p-5 sm:p-6">
-              <MessageSquareText className="h-6 w-6 text-[#0F766E]" />
-              <h2 className="ct-card-title mt-4 text-[#1F2937]">Message patient</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">The 20-minute timer starts when you send the first reply.</p>
+              <MessageSquareText className="h-6 w-6 text-success-700" />
+              <h2 className="ct-card-title mt-4 text-grey-800">Message patient</h2>
+              <p className="mt-2 text-sm leading-6 text-grey-600">The 20-minute timer starts when you send the first reply.</p>
               <ErrorMessage error={createThread.error} context="messages" />
               {createThread.isSuccess ? (
                 <Notice title="Conversation ready" tone="success">
@@ -243,16 +243,16 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
                   {createThread.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquareText className="mr-2 h-4 w-4" />}
                   Prepare message thread
                 </Button>
-                <Link href="/messages" className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-[#1F2937] transition hover:border-cyan-100 hover:bg-cyan-50">
+                <Link href="/messages" className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-grey-200 bg-white px-4 text-sm font-semibold text-grey-800 transition hover:border-success-100 hover:bg-success-50">
                   Open messages
                 </Link>
               </div>
             </div>
 
             <div className="ct-panel rounded-[8px] p-5 sm:p-6">
-              <ClipboardList className="h-6 w-6 text-[#0F766E]" />
-              <h2 className="ct-card-title mt-4 text-[#1F2937]">Create referral</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Saved to admin review and the patient dashboard.</p>
+              <ClipboardList className="h-6 w-6 text-success-700" />
+              <h2 className="ct-card-title mt-4 text-grey-800">Create referral</h2>
+              <p className="mt-2 text-sm leading-6 text-grey-600">Saved to admin review and the patient dashboard.</p>
               <form
                 className="mt-5 grid gap-3"
                 onSubmit={(event) => {
@@ -291,9 +291,9 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
             </div>
 
             <div className="ct-panel rounded-[8px] p-5 sm:p-6">
-              <FileText className="h-6 w-6 text-[#0F766E]" />
-              <h2 className="ct-card-title mt-4 text-[#1F2937]">Create care plan</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Keep it concise: complaint, plan, follow-up.</p>
+              <FileText className="h-6 w-6 text-success-700" />
+              <h2 className="ct-card-title mt-4 text-grey-800">Create care plan</h2>
+              <p className="mt-2 text-sm leading-6 text-grey-600">Keep it concise: complaint, plan, follow-up.</p>
               <form
                 className="mt-5 grid gap-3"
                 onSubmit={(event) => {
@@ -341,34 +341,34 @@ export function AppointmentDetailClient({ appointmentId }: { appointmentId: numb
           <div className="ct-panel rounded-[8px] p-5 sm:p-6">
             <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h2 className="ct-card-title text-[#1F2937]">Patient history</h2>
-                <p className="mt-1 text-sm text-slate-500">Previous complaints, care plans, and follow-ups for this patient.</p>
+                <h2 className="ct-card-title text-grey-800">Patient history</h2>
+                <p className="mt-1 text-sm text-grey-500">Previous complaints, care plans, and follow-ups for this patient.</p>
               </div>
-              <UserRoundCheck className="h-5 w-5 text-[#0F766E]" />
+              <UserRoundCheck className="h-5 w-5 text-success-700" />
             </div>
             {historyAppointments.isLoading || carePlans.isLoading ? (
               <InlineLoader compact label="Loading patient history" />
             ) : previousAppointments.length || patientCarePlans.length ? (
               <div className="grid gap-4 lg:grid-cols-2">
                 <div className="grid gap-3">
-                  <p className="text-sm font-semibold text-[#1F2937]">Consultations</p>
+                  <p className="text-sm font-semibold text-grey-800">Consultations</p>
                   {previousAppointments.length ? previousAppointments.map((item) => (
-                    <div key={item.id} className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
+                    <div key={item.id} className="rounded-[8px] border border-grey-200 bg-grey-50 p-4">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                        <p className="break-words text-sm font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
+                        <p className="break-words text-sm font-semibold text-grey-800">{formatDateTime(item.scheduled_at)}</p>
                         <StatusBadge value={item.status} />
                       </div>
-                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{item.reason || "No complaint summary added."}</p>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-grey-600">{item.reason || "No complaint summary added."}</p>
                     </div>
                   )) : <Notice title="No previous consultations" tone="neutral" />}
                 </div>
                 <div className="grid gap-3">
-                  <p className="text-sm font-semibold text-[#1F2937]">Care plans</p>
+                  <p className="text-sm font-semibold text-grey-800">Care plans</p>
                   {patientCarePlans.length ? patientCarePlans.map((plan) => (
-                    <div key={plan.id} className="rounded-[8px] border border-slate-200 bg-slate-50 p-4">
-                      <p className="line-clamp-2 text-sm font-semibold text-[#1F2937]">{plan.complaint_summary || "Care plan"}</p>
-                      <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{plan.care_steps || plan.medications || "No care plan instructions added."}</p>
-                      <p className="mt-2 text-sm text-slate-500">Follow-up: {plan.follow_up_date || "Not set"}</p>
+                    <div key={plan.id} className="rounded-[8px] border border-grey-200 bg-grey-50 p-4">
+                      <p className="line-clamp-2 text-sm font-semibold text-grey-800">{plan.complaint_summary || "Care plan"}</p>
+                      <p className="mt-2 line-clamp-3 text-sm leading-6 text-grey-600">{plan.care_steps || plan.medications || "No care plan instructions added."}</p>
+                      <p className="mt-2 text-sm text-grey-500">Follow-up: {plan.follow_up_date || "Not set"}</p>
                     </div>
                   )) : <Notice title="No care plans yet" tone="neutral" />}
                 </div>

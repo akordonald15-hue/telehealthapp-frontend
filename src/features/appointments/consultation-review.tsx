@@ -21,16 +21,16 @@ export function canRateAppointment(appointment: Appointment) {
 
 export function ConsultationReviewSummary({ rating, className }: { rating: AppointmentRating; className?: string }) {
   return (
-    <div className={cn("rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4", className)}>
-      <p className="text-sm font-semibold text-[#1F2937]">Your review</p>
-      <div className="mt-2 flex items-center gap-1 text-[#2563EB]" aria-label={`${rating.score} star rating`}>
+    <div className={cn("rounded-[8px] border border-primary-100 bg-grey-50 p-4", className)}>
+      <p className="text-sm font-semibold text-grey-800">Your review</p>
+      <div className="mt-2 flex items-center gap-1 text-primary-500" aria-label={`${rating.score} star rating`}>
         {[1, 2, 3, 4, 5].map((item) => (
           <Star key={item} className={cn("h-4 w-4", item <= rating.score && "fill-current")} />
         ))}
       </div>
-      {rating.feedback ? <p className="mt-3 text-sm leading-6 text-slate-600">&ldquo;{rating.feedback}&rdquo;</p> : null}
+      {rating.feedback ? <p className="mt-3 text-sm leading-6 text-grey-600">&ldquo;{rating.feedback}&rdquo;</p> : null}
       {rating.feedback && rating.comment_status ? (
-        <p className="mt-2 text-xs text-slate-500">{COMMENT_VISIBILITY[rating.comment_status]}</p>
+        <p className="mt-2 text-xs text-grey-500">{COMMENT_VISIBILITY[rating.comment_status]}</p>
       ) : null}
     </div>
   );
@@ -69,11 +69,11 @@ export function ConsultationReviewForm({
   });
 
   return (
-    <div className={cn("grid gap-3 rounded-[8px] border border-slate-200 bg-slate-50 p-4", className)}>
+    <div className={cn("grid gap-3 rounded-[8px] border border-grey-200 bg-grey-50 p-4", className)}>
       <div>
-        <p className="text-sm font-semibold text-[#1F2937]">Rate this consultation</p>
-        <p className="mt-1 text-sm leading-6 text-slate-600">Add a comment if you want to share what went well.</p>
-        <p className="mt-1 text-xs leading-5 text-slate-500">Other patients may see your stars and comment as &ldquo;Verified patient&rdquo;. Your name is never shown.</p>
+        <p className="text-sm font-semibold text-grey-800">Rate this consultation</p>
+        <p className="mt-1 text-sm leading-6 text-grey-600">Add a comment if you want to share what went well.</p>
+        <p className="mt-1 text-xs leading-5 text-grey-500">Other patients may see your stars and comment as &ldquo;Verified patient&rdquo;. Your name is never shown.</p>
       </div>
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Rate consultation">
         {[1, 2, 3, 4, 5].map((item) => (
@@ -86,7 +86,7 @@ export function ConsultationReviewForm({
             onClick={() => setScore(item)}
             className={cn(
               "inline-flex h-11 w-11 items-center justify-center rounded-[8px] border transition active:scale-95",
-              item <= score ? "border-[#BFDBFE] bg-[#DBEAFE] text-[#2563EB]" : "border-slate-200 bg-white text-slate-300",
+              item <= score ? "border-primary-200 bg-primary-100 text-primary-500" : "border-grey-200 bg-white text-grey-300",
             )}
           >
             <Star className={cn("h-5 w-5", item <= score && "fill-current")} />
@@ -102,7 +102,7 @@ export function ConsultationReviewForm({
           onChange={(event) => setFeedback(event.target.value)}
         />
       </Field>
-      <p className="text-xs text-slate-500">{feedback.length}/500 characters</p>
+      <p className="text-xs text-grey-500">{feedback.length}/500 characters</p>
       <ErrorMessage error={ratingMutation.error} context="appointments" />
       {ratingMutation.isSuccess ? <Notice title="Review submitted" tone="success" /> : null}
       <Button type="button" className="w-full sm:w-fit" disabled={ratingMutation.isPending} onClick={() => ratingMutation.mutate()}>
@@ -124,16 +124,16 @@ export function DoctorPublicReviews({ reviews, className }: { reviews?: Provider
 
   return (
     <div className={cn("grid gap-2", className)}>
-      <p className="text-xs font-semibold text-slate-500">What patients say</p>
+      <p className="text-xs font-semibold text-grey-500">What patients say</p>
       {visible.map((review) => (
-        <figure key={review.id} className="rounded-[8px] border border-slate-100 bg-white p-3">
-          <div className="flex items-center gap-1 text-[#2563EB]" aria-label={`${review.score} star rating`}>
+        <figure key={review.id} className="rounded-[8px] border border-grey-100 bg-white p-3">
+          <div className="flex items-center gap-1 text-primary-500" aria-label={`${review.score} star rating`}>
             {[1, 2, 3, 4, 5].map((item) => (
               <Star key={item} className={cn("h-3.5 w-3.5", item <= review.score && "fill-current")} />
             ))}
           </div>
-          <blockquote className="mt-2 text-sm leading-6 text-slate-600">&ldquo;{review.comment}&rdquo;</blockquote>
-          <figcaption className="mt-1 text-xs text-slate-500">Verified patient</figcaption>
+          <blockquote className="mt-2 text-sm leading-6 text-grey-600">&ldquo;{review.comment}&rdquo;</blockquote>
+          <figcaption className="mt-1 text-xs text-grey-500">Verified patient</figcaption>
         </figure>
       ))}
     </div>

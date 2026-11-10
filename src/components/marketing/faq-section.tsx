@@ -14,15 +14,15 @@ export function FaqSection() {
   return (
     <section
       id="faq"
-      className="relative overflow-hidden bg-[#fcfdff] px-4 pb-24 pt-20 md:px-3 md:pb-[115px] md:pt-[120px] lg:px-10 lg:pb-[220px] lg:pt-[161px]"
+      className="relative overflow-hidden bg-grey-50 px-4 pb-24 pt-20 md:px-3 md:pb-[115px] md:pt-[120px] lg:px-10 lg:pb-[220px] lg:pt-[161px]"
     >
       <div className="text-center">
-        <p className="text-lg font-light uppercase text-[#1e40af] sm:text-2xl md:text-[32px] md:leading-[48px] lg:text-2xl lg:leading-9">faqs</p>
+        <p className="text-lg font-light uppercase text-primary-600 sm:text-2xl md:text-[32px] md:leading-[48px] lg:text-2xl lg:leading-9">faqs</p>
         {/* Figma uses 0 letter-spacing, so no `font-heading` (it tightens tracking). Line breaks match each frame. */}
-        <h2 className="mx-auto mt-2 text-3xl font-bold leading-[1.2] text-[#0b1c30] sm:text-5xl md:mt-3.5 md:text-[61px] lg:text-5xl">
+        <h2 className="mx-auto mt-2 text-3xl font-bold leading-[1.2] text-grey-900 sm:text-5xl md:mt-3.5 md:text-[61px] lg:text-5xl">
           Need To Know More
           <br className="hidden md:inline lg:hidden" /> On
-          <br className="hidden lg:inline" /> Our <span className="text-[#3b82f6]">Platform?</span>
+          <br className="hidden lg:inline" /> Our <span className="text-primary-400">Platform?</span>
         </h2>
       </div>
 
@@ -46,7 +46,7 @@ export function FaqSection() {
             return (
               <div
                 key={item.question}
-                className={`rounded-[28px] md:rounded-[41px] lg:rounded-[50px] ${open ? "bg-[#eff6ff]" : "bg-[#dbeafe]"}`}
+                className={`rounded-[28px] md:rounded-[41px] lg:rounded-[50px] ${open ? "bg-primary-50" : "bg-primary-100"}`}
               >
                 <button
                   type="button"
@@ -60,7 +60,7 @@ export function FaqSection() {
                   }`}
                 >
                   <span
-                    className={`text-[15px] leading-[1.2] text-[#0b1c30] sm:text-xl md:text-[23px] lg:text-[22px] ${
+                    className={`text-[15px] leading-[1.2] text-grey-900 sm:text-xl md:text-[23px] lg:text-[22px] ${
                       open ? "font-medium" : "font-normal"
                     }`}
                   >
@@ -72,7 +72,7 @@ export function FaqSection() {
                 <div
                   id={panelId}
                   hidden={!open}
-                  className="mt-5 space-y-[1.56em] pb-8 pl-6 pr-6 text-sm font-light leading-[1.56] text-[#0b1c30] sm:pl-10 sm:pr-10 sm:text-lg md:mt-8 md:max-w-[736px] md:pb-[60px] md:pl-[62px] md:pr-0 md:text-[22px] lg:mt-[39px] lg:max-w-[895px] lg:pb-[76px] lg:pl-[75px] lg:text-xl"
+                  className="mt-5 space-y-[1.56em] pb-8 pl-6 pr-6 text-sm font-light leading-[1.56] text-grey-900 sm:pl-10 sm:pr-10 sm:text-lg md:mt-8 md:max-w-[736px] md:pb-[60px] md:pl-[62px] md:pr-0 md:text-[22px] lg:mt-[39px] lg:max-w-[895px] lg:pb-[76px] lg:pl-[75px] lg:text-xl"
                 >
                   {item.answer.map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
@@ -93,7 +93,7 @@ function FaqArrow({ open }: { open: boolean }) {
     <svg
       viewBox="0 0 71 71"
       fill="none"
-      stroke="#1E40AF"
+      stroke="#2E4E87"
       strokeWidth={3}
       strokeLinecap="round"
       strokeLinejoin="round"

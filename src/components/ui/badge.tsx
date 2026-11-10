@@ -5,7 +5,7 @@ const tones = {
   green: "bg-success-soft text-success",
   amber: "bg-warning-soft text-warning",
   rose: "bg-danger-soft text-danger",
-  cyan: "bg-cyan-50 text-cyan-700",
+  cyan: "bg-success-50 text-success-700",
   blue: "bg-primary-soft text-primary-strong",
 };
 

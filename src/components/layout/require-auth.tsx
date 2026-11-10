@@ -294,13 +294,13 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   if (mounted && secureState === "offline") {
     return (
-      <main className="flex min-h-[100dvh] items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.18),_transparent_28%),linear-gradient(180deg,#F8FBFF_0%,#F4F7FB_42%,#FFFFFF_100%)] px-4 py-10">
-        <div className="w-full max-w-lg rounded-[28px] border border-white/80 bg-white/95 p-8 text-center shadow-[0_24px_72px_-44px_rgba(15,23,42,0.34)] backdrop-blur">
-          <h1 className="font-heading text-3xl font-semibold tracking-[-0.03em] text-[#1F2937]">You&apos;re offline</h1>
-          <p className="mt-4 text-base leading-7 text-slate-600">
+      <main className="flex min-h-[100dvh] items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(136,160,203,0.18),_transparent_28%),linear-gradient(180deg,#F9FAFB_0%,#F9FAFB_42%,#FFFFFF_100%)] px-4 py-10">
+        <div className="w-full max-w-lg rounded-[28px] border border-white/80 bg-white/95 p-8 text-center shadow-[0_24px_72px_-44px_rgba(19,25,39,0.34)] backdrop-blur">
+          <h1 className="font-heading text-3xl font-semibold tracking-[-0.03em] text-grey-800">You&apos;re offline</h1>
+          <p className="mt-4 text-base leading-7 text-grey-600">
             You&apos;re offline. Secure Caretekk features require internet access.
           </p>
-          <p className="mt-3 text-sm leading-6 text-slate-500">
+          <p className="mt-3 text-sm leading-6 text-grey-500">
             Chat, payments, live nurse tracking, and dashboard data will resume when your connection returns.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">

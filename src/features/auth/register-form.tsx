@@ -197,9 +197,9 @@ export function RegisterForm() {
       ) : null}
 
       {referralOutcome && !referralOutcome.applied ? (
-        <div className="grid gap-3 rounded-[8px] border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-semibold text-amber-900">Your account was created</p>
-          <p className="text-sm text-amber-800">
+        <div className="grid gap-3 rounded-[8px] border border-warning-200 bg-warning-50 p-4">
+          <p className="text-sm font-semibold text-warning-900">Your account was created</p>
+          <p className="text-sm text-warning-800">
             {referralOutcome.detail || "That referral code could not be applied."} You can add a referral code from
             Refer &amp; Earn after signing in.
           </p>

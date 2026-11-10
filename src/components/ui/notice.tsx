@@ -17,10 +17,10 @@ export function Notice({
       role={isWarning ? "alert" : "status"}
       className={
         isSuccess
-          ? "rounded-[8px] border border-emerald-200 bg-success-soft p-4 shadow-[0_14px_32px_-24px_rgba(16,185,129,0.18)]"
+          ? "rounded-[8px] border border-success-200 bg-success-soft p-4 shadow-[0_14px_32px_-24px_rgba(51,174,127,0.18)]"
           : isWarning
-            ? "rounded-[8px] border border-amber-200 bg-warning-soft p-4 shadow-[0_14px_32px_-24px_rgba(245,158,11,0.18)]"
-            : "rounded-[8px] border border-primary/15 bg-primary-soft p-4 shadow-[0_14px_32px_-24px_rgba(66,107,179,0.14)]"
+            ? "rounded-[8px] border border-warning-200 bg-warning-soft p-4 shadow-[0_14px_32px_-24px_rgba(245,158,11,0.18)]"
+            : "rounded-[8px] border border-primary/15 bg-primary-soft p-4 shadow-[0_14px_32px_-24px_rgba(57,97,169,0.14)]"
       }
     >
       <div className="flex gap-3">

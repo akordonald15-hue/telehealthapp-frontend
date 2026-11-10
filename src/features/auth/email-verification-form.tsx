@@ -77,7 +77,7 @@ export function EmailVerificationForm() {
       </Notice>
 
       <form
-        className="grid gap-5 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.45)] sm:p-6"
+        className="grid gap-5 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(19,25,39,0.45)] sm:p-6"
         onSubmit={confirmForm.handleSubmit((values) =>
           confirmVerification.mutate(values, {
             onSuccess: () => {
@@ -109,7 +109,7 @@ export function EmailVerificationForm() {
 
         <div className="grid gap-2">
           <span className="text-sm font-bold text-ash-700">
-            Verification code <span className="ml-1 text-rose-600" aria-hidden="true">*</span>
+            Verification code <span className="ml-1 text-danger-600" aria-hidden="true">*</span>
           </span>
           <Controller
             control={confirmForm.control}
@@ -124,7 +124,7 @@ export function EmailVerificationForm() {
             )}
           />
           {confirmForm.formState.errors.code?.message ? (
-            <span className="text-xs font-semibold text-rose-700">{confirmForm.formState.errors.code.message}</span>
+            <span className="text-xs font-semibold text-danger-700">{confirmForm.formState.errors.code.message}</span>
           ) : (
             <span className="text-xs text-ash-500">Paste the 6-digit code from your email.</span>
           )}

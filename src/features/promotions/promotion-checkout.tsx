@@ -88,7 +88,7 @@ export function PromotionCheckout({
       ) : null}
       {p.free && price ? (
         <>
-          <div role="status" className="text-sm font-semibold text-emerald-800">
+          <div role="status" className="text-sm font-semibold text-success-800">
             Founder50 applied. Your consultation is free.
           </div>
           <dl className="space-y-2 text-sm">
@@ -187,7 +187,7 @@ export function PromotionCheckout({
         </>
       ) : null}
       {p.error ? (
-        <p id={`${id}-error`} role="alert" className="text-sm text-red-800">
+        <p id={`${id}-error`} role="alert" className="text-sm text-danger-800">
           {p.error}
         </p>
       ) : null}

@@ -141,7 +141,7 @@ export function PasswordResetForm() {
 
       {step === "otp" ? (
         <form
-          className="grid gap-4 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.45)] sm:p-6"
+          className="grid gap-4 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(19,25,39,0.45)] sm:p-6"
           onSubmit={otpForm.handleSubmit((values) => verifyReset.mutate(values))}
         >
           <div>
@@ -173,7 +173,7 @@ export function PasswordResetForm() {
 
       {step === "password" ? (
         <form
-          className="grid gap-4 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.45)] sm:p-6"
+          className="grid gap-4 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(19,25,39,0.45)] sm:p-6"
           onSubmit={passwordForm.handleSubmit((values) => confirmReset.mutate(values))}
         >
           <div>

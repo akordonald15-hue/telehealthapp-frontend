@@ -13,7 +13,7 @@ export function EmptyState({ title, description, icon: Icon, action }: EmptyStat
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex gap-4">
           {Icon ? (
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[8px] bg-primary-soft text-primary shadow-[0_10px_22px_-18px_rgba(66,107,179,0.4)]">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[8px] bg-primary-soft text-primary shadow-[0_10px_22px_-18px_rgba(57,97,169,0.4)]">
               <Icon className="h-6 w-6" />
             </span>
           ) : null}

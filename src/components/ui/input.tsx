@@ -5,7 +5,7 @@ import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes 
 import { cn } from "@/lib/utils";
 
 const baseField =
-  "w-full rounded-[8px] border border-ash-200 bg-surface px-4 text-sm text-ash-800 shadow-[0_8px_24px_rgba(31,41,55,0.035)] outline-none transition placeholder:text-ash-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/15 aria-[invalid=true]:border-rose-300 aria-[invalid=true]:focus:ring-rose-100";
+  "w-full rounded-[8px] border border-ash-200 bg-surface px-4 text-sm text-ash-800 shadow-[0_8px_24px_rgba(33,41,54,0.035)] outline-none transition placeholder:text-ash-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/15 aria-[invalid=true]:border-danger-300 aria-[invalid=true]:focus:ring-danger-100";
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return (

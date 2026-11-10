@@ -48,7 +48,7 @@ export function PingBadge({
 
   return (
     <span ref={rootRef} className={cn("flex shrink-0", className)}>
-      <span data-ping aria-hidden className={cn("absolute inset-0 rounded-full opacity-0", dark ? "bg-[#BFDBFE]/25" : "bg-[#BFDBFE]")} />
+      <span data-ping aria-hidden className={cn("absolute inset-0 rounded-full opacity-0", dark ? "bg-primary-200/25" : "bg-primary-200")} />
       {children}
     </span>
   );

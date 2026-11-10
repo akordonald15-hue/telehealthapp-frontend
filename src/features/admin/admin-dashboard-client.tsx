@@ -60,11 +60,11 @@ function Metric({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   const toneClasses = {
-    blue: "bg-blue-50 text-[#2563EB]",
-    green: "bg-emerald-50 text-[#047857]",
-    amber: "bg-amber-50 text-[#B45309]",
-    rose: "bg-rose-50 text-[#BE123C]",
-    cyan: "bg-cyan-50 text-[#0F766E]",
+    blue: "bg-primary-50 text-primary-500",
+    green: "bg-success-50 text-success-700",
+    amber: "bg-warning-50 text-warning-800",
+    rose: "bg-danger-50 text-danger-700",
+    cyan: "bg-success-50 text-success-700",
   };
   return (
     <div className="ct-surface rounded-[20px] p-4">
@@ -73,8 +73,8 @@ function Metric({
           <Icon className="h-5 w-5" />
         </span>
       </div>
-      <p className="mt-4 text-sm font-semibold text-slate-500">{label}</p>
-      <p className="mt-1 font-heading text-[1.8rem] font-semibold text-[#1F2937]">{value}</p>
+      <p className="mt-4 text-sm font-semibold text-grey-500">{label}</p>
+      <p className="mt-1 font-heading text-[1.8rem] font-semibold text-grey-800">{value}</p>
     </div>
   );
 }
@@ -83,7 +83,7 @@ function Panel({ title, children, action }: { title: string; children: React.Rea
   return (
     <section className="ct-panel rounded-[24px] p-5">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="ct-card-title text-[#1F2937]">{title}</h2>
+        <h2 className="ct-card-title text-grey-800">{title}</h2>
         {action}
       </div>
       {children}
@@ -111,10 +111,10 @@ function ConfirmActionButton({
   const [open, setOpen] = useState(false);
   const buttonClass =
     tone === "danger"
-      ? "bg-rose-700 text-white hover:bg-rose-800"
+      ? "bg-danger-700 text-white hover:bg-danger-800"
       : tone === "primary"
-        ? "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
-        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50";
+        ? "bg-primary-500 text-white hover:bg-primary-600"
+        : "border border-grey-200 bg-white text-grey-700 hover:bg-grey-50";
 
   return (
     <>
@@ -122,7 +122,7 @@ function ConfirmActionButton({
         type="button"
         disabled={disabled}
         onClick={() => setOpen(true)}
-        className={`min-h-10 rounded-[12px] px-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 disabled:opacity-50 ${buttonClass}`}
+        className={`min-h-10 rounded-[12px] px-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/15 disabled:opacity-50 ${buttonClass}`}
       >
         {label}
       </button>
@@ -137,7 +137,7 @@ function ConfirmActionButton({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="min-h-10 rounded-[8px] border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
+              className="min-h-10 rounded-[8px] border border-grey-200 px-4 text-sm font-bold text-grey-700 transition hover:bg-grey-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/15"
             >
               Cancel
             </button>
@@ -147,7 +147,7 @@ function ConfirmActionButton({
                 setOpen(false);
                 onConfirm();
               }}
-              className={`min-h-10 rounded-[8px] px-4 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${tone === "danger" ? "bg-rose-700 text-white hover:bg-rose-800" : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"}`}
+              className={`min-h-10 rounded-[8px] px-4 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/15 ${tone === "danger" ? "bg-danger-700 text-white hover:bg-danger-800" : "bg-primary-500 text-white hover:bg-primary-600"}`}
             >
               {confirmLabel}
             </button>
@@ -170,10 +170,10 @@ function AdminUserRow({ user }: { user: AdminUser }) {
   });
 
   return (
-    <article className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+    <article className="rounded-[20px] border border-grey-200 bg-grey-50 p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-[#1F2937]">{user.email}</p>
+          <p className="truncate text-sm font-bold text-grey-800">{user.email}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Badge tone={user.role === "admin" ? "rose" : user.role === "doctor" ? "cyan" : user.role === "nurse" ? "green" : "blue"}>{user.role}</Badge>
             <Badge tone={user.is_active ? "green" : "rose"}>{user.is_active ? "active" : "inactive"}</Badge>
@@ -226,11 +226,11 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
   const setAvailability = (availability_status: ProviderAvailabilityStatus) => updateProvider.mutate({ availability_status });
 
   return (
-    <article className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+    <article className="rounded-[20px] border border-grey-200 bg-grey-50 p-4">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-[#1F2937]">{provider.display_name}</p>
-          <p className="mt-1 truncate text-xs text-slate-500">{provider.user_email}</p>
+          <p className="truncate text-sm font-bold text-grey-800">{provider.display_name}</p>
+          <p className="mt-1 truncate text-xs text-grey-500">{provider.user_email}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Badge tone={provider.provider_type === "doctor" ? "cyan" : "green"}>{provider.provider_type}</Badge>
             <StatusBadge value={provider.availability_status} />
@@ -238,17 +238,17 @@ function ProviderRow({ provider }: { provider: AdminProvider }) {
             <Badge tone={provider.is_active ? "green" : "rose"}>{provider.is_active ? "active" : "inactive"}</Badge>
             {provider.onboarding_status ? <StatusBadge value={provider.onboarding_status} /> : null}
           </div>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-grey-500">
             Active workload: {provider.active_workload} | Completed: {provider.completed_workload}
             {provider.rating ? ` | Rating: ${provider.rating}` : ""}
           </p>
           {provider.provider_type === "nurse" ? (
-            <p className="mt-1 text-xs font-semibold text-slate-600">
+            <p className="mt-1 text-xs font-semibold text-grey-600">
               Zone: {provider.service_zone_label || "Zone not set"}
               {provider.base_address ? ` | Base: ${provider.base_address}` : ""}
             </p>
           ) : null}
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-grey-500">
             {provider.active_job_label}
             {provider.last_active_at ? ` | Heartbeat ${formatDateTime(provider.last_active_at)}` : ""}
           </p>
@@ -387,75 +387,75 @@ function ProviderCreatePanel() {
         }}
       >
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="grid gap-1 text-sm font-semibold text-slate-600">
+          <label className="grid gap-1 text-sm font-semibold text-grey-600">
             Role
             <select
               value={form.role}
               onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as "doctor" | "nurse" }))}
-              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
             >
               <option value="doctor">Doctor</option>
               <option value="nurse">Nurse</option>
             </select>
           </label>
-          <label className="grid gap-1 text-sm font-semibold text-slate-600">
+          <label className="grid gap-1 text-sm font-semibold text-grey-600">
             Name
             <input
               required
               value={form.name}
               onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
               placeholder={form.role === "doctor" ? "Dr. Ada Care" : "Nurse Ada Care"}
             />
           </label>
-          <label className="grid gap-1 text-sm font-semibold text-slate-600">
+          <label className="grid gap-1 text-sm font-semibold text-grey-600">
             Email
             <input
               required
               type="email"
               value={form.email}
               onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
             />
           </label>
-          <label className="grid gap-1 text-sm font-semibold text-slate-600">
+          <label className="grid gap-1 text-sm font-semibold text-grey-600">
             Phone
             <input
               value={form.phone}
               onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))}
-              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
             />
           </label>
           {form.role === "doctor" ? (
-            <label className="grid gap-1 text-sm font-semibold text-slate-600">
+            <label className="grid gap-1 text-sm font-semibold text-grey-600">
               Specialty
               <input
                 required
                 value={form.specialty}
                 onChange={(event) => setForm((current) => ({ ...current, specialty: event.target.value }))}
-                className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+                className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
               />
             </label>
           ) : (
-            <label className="grid gap-1 text-sm font-semibold text-slate-600">
+            <label className="grid gap-1 text-sm font-semibold text-grey-600">
               Service type
               <input
                 required
                 value={form.service_type}
                 onChange={(event) => setForm((current) => ({ ...current, service_type: event.target.value }))}
-                className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+                className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
               />
             </label>
           )}
           {form.role === "nurse" ? (
             <>
-              <label className="grid gap-1 text-sm font-semibold text-slate-600">
+              <label className="grid gap-1 text-sm font-semibold text-grey-600">
                 Service zone
                 <select
                   required
                   value={form.service_zone}
                   onChange={(event) => setForm((current) => ({ ...current, service_zone: event.target.value as HomeCareZone }))}
-                  className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+                  className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
                 >
                   {HOMECARE_ZONES.map((item) => (
                     <option key={item.value} value={item.value}>
@@ -464,23 +464,23 @@ function ProviderCreatePanel() {
                   ))}
                 </select>
               </label>
-              <label className="grid gap-1 text-sm font-semibold text-slate-600">
+              <label className="grid gap-1 text-sm font-semibold text-grey-600">
                 Base address
                 <input
                   value={form.base_address}
                   onChange={(event) => setForm((current) => ({ ...current, base_address: event.target.value }))}
-                  className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+                  className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
                   placeholder="Optional nurse base address"
                 />
               </label>
             </>
           ) : null}
-          <label className="grid gap-1 text-sm font-semibold text-slate-600">
+          <label className="grid gap-1 text-sm font-semibold text-grey-600">
             Availability
             <select
               value={form.availability_status}
               onChange={(event) => setForm((current) => ({ ...current, availability_status: event.target.value as ProviderAvailabilityStatus }))}
-              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937]"
+              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
             >
               <option value="offline">Offline</option>
               <option value="available">Available</option>
@@ -488,7 +488,7 @@ function ProviderCreatePanel() {
             </select>
           </label>
         </div>
-        <div className="flex flex-wrap gap-3 rounded-[16px] border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-600">
+        <div className="flex flex-wrap gap-3 rounded-[16px] border border-grey-200 bg-grey-50 p-3 text-sm font-semibold text-grey-600">
           <label className="inline-flex items-center gap-2">
             <input type="checkbox" checked={form.is_active} onChange={(event) => setForm((current) => ({ ...current, is_active: event.target.checked }))} />
             Active
@@ -506,7 +506,7 @@ function ProviderCreatePanel() {
               <select
                 value={form.provider_status}
                 onChange={(event) => setForm((current) => ({ ...current, provider_status: event.target.value as "pending" | "approved" | "suspended" }))}
-                className="min-h-9 rounded-[10px] border border-slate-200 bg-white px-2"
+                className="min-h-9 rounded-[10px] border border-grey-200 bg-white px-2"
               >
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
@@ -520,13 +520,13 @@ function ProviderCreatePanel() {
           <Notice title="Provider created. Setup email queued." tone="success">
             <div className="grid gap-1">
               <span>{created.email}</span>
-              <span className="text-xs text-slate-600">
+              <span className="text-xs text-grey-600">
                 Caretekk queued a secure password setup code for this provider.
               </span>
             </div>
           </Notice>
         ) : null}
-        <button type="submit" disabled={createProvider.isPending} className="min-h-11 rounded-[12px] bg-[#2563EB] px-4 text-sm font-extrabold text-white disabled:opacity-50">
+        <button type="submit" disabled={createProvider.isPending} className="min-h-11 rounded-[12px] bg-primary-500 px-4 text-sm font-extrabold text-white disabled:opacity-50">
           {createProvider.isPending ? "Creating..." : "Create provider"}
         </button>
       </form>
@@ -545,14 +545,14 @@ function DoctorReviewRow({ review }: { review: AdminDoctorReview }) {
   });
 
   return (
-    <article className={`rounded-[16px] border p-3 ${hidden ? "border-slate-200 bg-slate-50" : "border-[#DBEAFE] bg-white"}`}>
+    <article className={`rounded-[16px] border p-3 ${hidden ? "border-grey-200 bg-grey-50" : "border-primary-100 bg-white"}`}>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <p className="text-sm font-bold text-[#1F2937]">
+          <p className="text-sm font-bold text-grey-800">
             {review.doctor_name} | {"★".repeat(review.score)}
           </p>
-          <p className="mt-1 break-words text-sm leading-6 text-slate-700">&ldquo;{review.comment}&rdquo;</p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 break-words text-sm leading-6 text-grey-700">&ldquo;{review.comment}&rdquo;</p>
+          <p className="mt-1 text-xs text-grey-500">
             {review.patient_name} | Consultation #{review.appointment_id} | {formatDateTime(review.created_at)}
           </p>
         </div>
@@ -611,17 +611,17 @@ function ManualPaymentRow({ payment }: { payment: Payment }) {
   const bookingLabel = payment.appointment ? `Doctor consultation #${payment.appointment}` : payment.homecare_request ? `Home care request #${payment.homecare_request}` : "Service booking";
 
   return (
-    <article className="rounded-[16px] border border-amber-100 bg-amber-50/70 p-3">
+    <article className="rounded-[16px] border border-warning-100 bg-warning-50/70 p-3">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
-          <p className="text-sm font-bold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)}</p>
-          <p className="mt-1 break-words text-xs text-slate-600">
+          <p className="text-sm font-bold text-grey-800">{formatMoney(payment.amount, payment.currency)}</p>
+          <p className="mt-1 break-words text-xs text-grey-600">
             Reference: {payment.external_ref || payment.bank_transfer?.reference || "No reference"}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-grey-500">
             {payment.patient_name || `Patient #${payment.patient}`} {payment.patient_phone ? `| ${payment.patient_phone}` : ""}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-grey-500">
             {bookingLabel}
             {payment.transfer_notified_at ? ` | Payment notice ${formatDateTime(payment.transfer_notified_at)}` : ""}
           </p>
@@ -631,12 +631,12 @@ function ManualPaymentRow({ payment }: { payment: Payment }) {
                 href={payment.transfer_proof_url || `/api/admin/payments/${payment.id}/proof/`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex min-h-8 items-center rounded-[8px] border border-amber-200 bg-white px-3 text-xs font-semibold text-amber-800 transition hover:bg-amber-50"
+                className="inline-flex min-h-8 items-center rounded-[8px] border border-warning-200 bg-white px-3 text-xs font-semibold text-warning-800 transition hover:bg-warning-50"
               >
                 View payment proof
               </a>
             ) : (
-              <p className="text-xs font-semibold text-amber-700">No payment proof uploaded.</p>
+              <p className="text-xs font-semibold text-warning-700">No payment proof uploaded.</p>
             )}
           </div>
         </div>
@@ -762,11 +762,11 @@ export function AdminDashboardClient() {
         {updateReferral.isError ? <Notice title="Referral status was not updated" tone="warning">Please try again in a moment.</Notice> : null}
         <div className="grid gap-3">
           {referrals.data?.results.length ? referrals.data.results.map((referral) => (
-            <article key={referral.id} className="rounded-[18px] border border-slate-200 bg-slate-50 p-3">
+            <article key={referral.id} className="rounded-[18px] border border-grey-200 bg-grey-50 p-3">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-[#1F2937]">{referral.referred_to}</p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="truncate text-sm font-bold text-grey-800">{referral.referred_to}</p>
+                  <p className="mt-1 text-xs text-grey-500">
                     {referral.patient_name || `Patient #${referral.patient}`} | {referral.doctor_name || `Doctor #${referral.doctor}`} | {referral.created_at ? formatDateTime(referral.created_at) : "No date"}
                   </p>
                 </div>
@@ -776,7 +776,7 @@ export function AdminDashboardClient() {
                     value={referral.status}
                     disabled={updateReferral.isPending}
                     onChange={(event) => updateReferral.mutate({ id: referral.id, status: event.target.value as ReferralStatus })}
-                    className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700"
+                    className="min-h-10 rounded-[12px] border border-grey-200 bg-white px-3 text-sm font-semibold text-grey-700"
                   >
                     <option value="pending">Pending</option>
                     <option value="reviewed">Reviewed</option>
@@ -794,17 +794,17 @@ export function AdminDashboardClient() {
       <div className="grid gap-4 xl:grid-cols-2">
         <Panel title="Booking management">
           <div className="grid gap-3">
-            <h3 className="text-sm font-bold text-slate-500">Appointments</h3>
+            <h3 className="text-sm font-bold text-grey-500">Appointments</h3>
             {appointments.data?.results.map((appointment) => (
-              <div key={appointment.id} className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-sm font-semibold text-[#1F2937]">#{appointment.id} | {formatDateTime(appointment.scheduled_at)}</span>
+              <div key={appointment.id} className="flex flex-col gap-2 rounded-[16px] border border-grey-200 bg-grey-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-sm font-semibold text-grey-800">#{appointment.id} | {formatDateTime(appointment.scheduled_at)}</span>
                 <StatusBadge value={appointment.status} />
               </div>
             ))}
-            <h3 className="mt-3 text-sm font-bold text-slate-500">Homecare</h3>
+            <h3 className="mt-3 text-sm font-bold text-grey-500">Homecare</h3>
             {homecare.data?.results.map((request) => (
-              <div key={request.id} className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-sm font-semibold text-[#1F2937]">#{request.id} | {request.service_address_snapshot || "No address"}</span>
+              <div key={request.id} className="flex flex-col gap-2 rounded-[16px] border border-grey-200 bg-grey-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-sm font-semibold text-grey-800">#{request.id} | {request.service_address_snapshot || "No address"}</span>
                 <StatusBadge value={request.status} />
               </div>
             ))}
@@ -814,15 +814,15 @@ export function AdminDashboardClient() {
         <Panel
           title="Financial management"
           action={
-            <button type="button" onClick={() => exportFinancialReport(dashboard.data)} className="inline-flex min-h-10 items-center gap-2 rounded-[12px] bg-[#2563EB] px-3 text-sm font-extrabold text-white">
+            <button type="button" onClick={() => exportFinancialReport(dashboard.data)} className="inline-flex min-h-10 items-center gap-2 rounded-[12px] bg-primary-500 px-3 text-sm font-extrabold text-white">
               <Download className="h-4 w-4" /> Export
             </button>
           }
         >
           <div className="grid gap-3">
-            <div className="rounded-[18px] border border-amber-100 bg-white p-3">
+            <div className="rounded-[18px] border border-warning-100 bg-white p-3">
               <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-              <h3 className="text-sm font-bold text-[#1F2937]">Payments - Pending Manual Verification</h3>
+              <h3 className="text-sm font-bold text-grey-800">Payments - Pending Manual Verification</h3>
                 <Badge tone="amber">{manualPayments.data?.results.length ?? 0} pending</Badge>
               </div>
               <div className="grid gap-3">
@@ -841,8 +841,8 @@ export function AdminDashboardClient() {
               <Metric label="Disputes" value={overview?.unresolved_disputes ?? "..."} icon={ShieldCheck} tone={overview?.unresolved_disputes ? "rose" : "green"} />
             </div>
             {payments.data?.results.map((payment) => (
-              <div key={payment.id} className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-sm font-semibold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)} | {paymentSummary(payment.provider, "admin")}</span>
+              <div key={payment.id} className="flex flex-col gap-2 rounded-[16px] border border-grey-200 bg-grey-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-sm font-semibold text-grey-800">{formatMoney(payment.amount, payment.currency)} | {paymentSummary(payment.provider, "admin")}</span>
                 <StatusBadge value={payment.status} />
               </div>
             ))}
@@ -857,15 +857,15 @@ export function AdminDashboardClient() {
             <Metric label="Pending refunds" value={dashboard.data?.operations.pending_refunds ?? "..."} icon={Banknote} tone="amber" />
             <Metric label="Audit events" value={dashboard.data?.operations.recent_audit_events ?? "..."} icon={ShieldCheck} tone="cyan" />
           </div>
-          <p className="mt-4 text-sm leading-6 text-slate-600">Conversation content remains governed by existing messaging permissions. Escalation queues can be added here when support-ticket workflow is introduced.</p>
+          <p className="mt-4 text-sm leading-6 text-grey-600">Conversation content remains governed by existing messaging permissions. Escalation queues can be added here when support-ticket workflow is introduced.</p>
         </Panel>
 
         <Panel title="Audit and activity logs">
           <div className="grid gap-3">
             {audit.data?.results.map((event) => (
-              <div key={event.id} className="rounded-[16px] border border-slate-200 bg-slate-50 p-3">
-                <p className="text-sm font-semibold text-[#1F2937]">{event.action}</p>
-                <p className="mt-1 text-xs text-slate-500">{event.object_type} #{event.object_id} | {formatDateTime(event.created_at)}</p>
+              <div key={event.id} className="rounded-[16px] border border-grey-200 bg-grey-50 p-3">
+                <p className="text-sm font-semibold text-grey-800">{event.action}</p>
+                <p className="mt-1 text-xs text-grey-500">{event.object_type} #{event.object_id} | {formatDateTime(event.created_at)}</p>
               </div>
             ))}
           </div>
@@ -890,10 +890,10 @@ export function AdminDashboardClient() {
       <Panel title="Analytics">
         <div className="grid gap-4 lg:grid-cols-2">
           <div>
-            <h3 className="text-sm font-bold text-slate-500">Weekly revenue</h3>
+            <h3 className="text-sm font-bold text-grey-500">Weekly revenue</h3>
             <div className="mt-3 grid gap-2">
               {dashboard.data?.analytics.weekly_revenue.map((row) => (
-                <div key={row.week} className="flex items-center justify-between rounded-[14px] bg-slate-50 px-3 py-2 text-sm">
+                <div key={row.week} className="flex items-center justify-between rounded-[14px] bg-grey-50 px-3 py-2 text-sm">
                   <span>{row.week}</span>
                   <strong>{formatMoney(row.amount)}</strong>
                 </div>
@@ -901,15 +901,15 @@ export function AdminDashboardClient() {
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-500">Top providers</h3>
+            <h3 className="text-sm font-bold text-grey-500">Top providers</h3>
             <div className="mt-3 grid gap-2">
               {dashboard.data?.analytics.top_doctors.map((doctor) => (
-                <div key={`doctor-${doctor.id}`} className="rounded-[14px] bg-slate-50 px-3 py-2 text-sm">
+                <div key={`doctor-${doctor.id}`} className="rounded-[14px] bg-grey-50 px-3 py-2 text-sm">
                   <strong>{doctor.display_name}</strong> | {doctor.completed_consultations} completed
                 </div>
               ))}
               {dashboard.data?.analytics.top_nurses.map((nurse) => (
-                <div key={`nurse-${nurse.id}`} className="rounded-[14px] bg-slate-50 px-3 py-2 text-sm">
+                <div key={`nurse-${nurse.id}`} className="rounded-[14px] bg-grey-50 px-3 py-2 text-sm">
                   <strong>{nurse.email}</strong> | {nurse.completed_visits} visits{nurse.rating ? ` | ${nurse.rating}/5` : ""}
                 </div>
               ))}
@@ -930,7 +930,7 @@ function RoleFilter({ value, onChange }: { value: UserRole | ""; onChange: (valu
     <select
       value={value}
       onChange={(event) => onChange(event.target.value as UserRole | "")}
-      className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700"
+      className="min-h-10 rounded-[12px] border border-grey-200 bg-white px-3 text-sm font-semibold text-grey-700"
     >
       <option value="">All roles</option>
       <option value="patient">Patients</option>

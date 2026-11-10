@@ -423,7 +423,7 @@ export function HomeCareBookingClient() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="ct-card-title text-[#1F2937]">Book home care</p>
+            <p className="ct-card-title text-grey-800">Book home care</p>
             {selectedService ? (
               <p className="mt-1 text-sm font-semibold text-[var(--primary)]">
                 {selectedService.name} - {formatMoney(selectedService.price)}
@@ -435,8 +435,8 @@ export function HomeCareBookingClient() {
           </Button>
         </div>
 
-        <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
-          <span className="font-semibold text-[#1F2937]">Payment:</span> Secure payment instructions are shown when you continue.
+        <div className="rounded-[8px] border border-primary-100 bg-grey-50 px-4 py-3 text-sm text-grey-700">
+          <span className="font-semibold text-grey-800">Payment:</span> Secure payment instructions are shown when you continue.
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -449,7 +449,7 @@ export function HomeCareBookingClient() {
                 setSelectedNurse(null);
                 setPreferredTime("");
               }}
-              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
+              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800 outline-none transition focus:border-[var(--primary)]"
               required
             >
               <option value="">Select location</option>
@@ -468,7 +468,7 @@ export function HomeCareBookingClient() {
                 setSelectedNurse(null);
                 setPreferredTime("");
               }}
-              className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
+              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800 outline-none transition focus:border-[var(--primary)]"
               disabled={!zone || servicesQuery.isLoading}
               required
             >
@@ -495,8 +495,8 @@ export function HomeCareBookingClient() {
 
         {selectedService ? (
           <div className="ct-soft-panel rounded-[20px] px-4 py-4">
-            <p className="font-semibold text-[#1F2937]">{selectedService.name}</p>
-            <p className="mt-1 text-sm text-slate-600">{selectedService.description || "Home care service"}</p>
+            <p className="font-semibold text-grey-800">{selectedService.name}</p>
+            <p className="mt-1 text-sm text-grey-600">{selectedService.description || "Home care service"}</p>
             <p className="mt-2 text-sm font-semibold text-[var(--primary)]">{formatMoney(selectedService.price)}</p>
           </div>
         ) : null}
@@ -505,7 +505,7 @@ export function HomeCareBookingClient() {
           type="button"
           className={[
             "rounded-[18px] border px-4 py-4 text-left transition",
-            selectedNurse ? "border-[var(--primary)] bg-[var(--primary-soft)]" : "border-slate-200 bg-slate-50",
+            selectedNurse ? "border-[var(--primary)] bg-[var(--primary-soft)]" : "border-grey-200 bg-grey-50",
           ].join(" ")}
           onClick={() => {
             setAssignmentMode("choose");
@@ -513,11 +513,11 @@ export function HomeCareBookingClient() {
             setPreferredTime("");
           }}
         >
-          <span className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
+          <span className="flex items-center gap-2 text-sm font-semibold text-grey-800">
             <CheckCircle2 className="h-4 w-4 text-[var(--primary)]" />
             {selectedNurse ? selectedNurse.display_name : "Choose nurse"}
           </span>
-          <span className="mt-1 block text-sm text-slate-600">
+          <span className="mt-1 block text-sm text-grey-600">
             Select a nurse first so Caretekk can show only that nurse&apos;s available hourly slots.
           </span>
         </button>
@@ -525,8 +525,8 @@ export function HomeCareBookingClient() {
         {assignmentMode === "choose" && selectedNurse ? (
           <div className="ct-soft-panel flex items-center justify-between gap-3 rounded-[20px] px-4 py-4">
             <div>
-              <p className="font-semibold text-[#1F2937]">{selectedNurse.display_name}</p>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="font-semibold text-grey-800">{selectedNurse.display_name}</p>
+              <p className="mt-1 text-sm text-grey-600">
                 {selectedNurse.rating ? `Star ${selectedNurse.rating} (${selectedNurse.review_count ?? 0} reviews)` : "No reviews yet"}
                 {selectedNurse.completed_visits !== undefined ? ` · ${selectedNurse.completed_visits} completed visits` : ""}
               </p>
@@ -574,22 +574,22 @@ export function HomeCareBookingClient() {
               required
             />
           </Field>
-          <div className="rounded-[18px] border border-slate-200 bg-white p-4">
+          <div className="rounded-[18px] border border-grey-200 bg-white p-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-semibold text-[#1F2937]">Available hourly slots</p>
-                <p className="text-xs text-slate-500">Choose one slot between 8:00 AM and 7:00 PM.</p>
+                <p className="text-sm font-semibold text-grey-800">Available hourly slots</p>
+                <p className="text-xs text-grey-500">Choose one slot between 8:00 AM and 7:00 PM.</p>
               </div>
-              {slotsQuery.isFetching ? <span className="text-xs font-semibold text-[#2563EB]">Refreshing slots...</span> : null}
+              {slotsQuery.isFetching ? <span className="text-xs font-semibold text-primary-500">Refreshing slots...</span> : null}
             </div>
             {!selectedNurse ? (
-              <p className="mt-3 rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">Select a nurse to see available times.</p>
+              <p className="mt-3 rounded-[8px] bg-grey-50 px-3 py-2 text-sm text-grey-600">Select a nurse to see available times.</p>
             ) : slotsQuery.isError ? (
               <Notice title="We couldn't load available slots." tone="warning">
                 Please try again before continuing to payment.
                 <button
                   type="button"
-                  className="ml-2 font-semibold text-[#2563EB] underline"
+                  className="ml-2 font-semibold text-primary-500 underline"
                   onClick={() => slotsQuery.refetch()}
                 >
                   Try again
@@ -598,11 +598,11 @@ export function HomeCareBookingClient() {
             ) : slotsQuery.isLoading ? (
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, index) => (
-                  <div key={index} className="h-11 animate-pulse rounded-[8px] bg-slate-100" />
+                  <div key={index} className="h-11 animate-pulse rounded-[8px] bg-grey-100" />
                 ))}
               </div>
             ) : slotItems.length === 0 ? (
-              <p className="mt-3 rounded-[8px] bg-[#F8FBFF] px-3 py-2 text-sm text-slate-600">No slots available for this date.</p>
+              <p className="mt-3 rounded-[8px] bg-grey-50 px-3 py-2 text-sm text-grey-600">No slots available for this date.</p>
             ) : (
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {slotItems.map((slot) => {
@@ -613,8 +613,8 @@ export function HomeCareBookingClient() {
                       type="button"
                       className={[
                         "min-h-11 rounded-[8px] border px-3 text-sm font-semibold transition",
-                        selected ? "border-[#2563EB] bg-[#DBEAFE] text-[#1D4ED8]" : "border-slate-200 bg-white text-[#1F2937]",
-                        "hover:border-[#2563EB]",
+                        selected ? "border-primary-500 bg-primary-100 text-primary-600" : "border-grey-200 bg-white text-grey-800",
+                        "hover:border-primary-500",
                       ].join(" ")}
                       onClick={() => {
                         setPreferredTime(slot.starts_at);
@@ -635,8 +635,8 @@ export function HomeCareBookingClient() {
         </Field>
 
         <div className="ct-soft-panel rounded-[20px] px-4 py-4">
-          <p className="text-sm font-semibold text-[#1F2937]">Review and pay</p>
-          <div className="mt-2 grid gap-1 text-sm text-slate-600">
+          <p className="text-sm font-semibold text-grey-800">Review and pay</p>
+          <div className="mt-2 grid gap-1 text-sm text-grey-600">
             <span>{zone ? HOMECARE_ZONES.find((item) => item.value === zone)?.label : "Location not selected"}</span>
             <span>{selectedService ? selectedService.name : "Service not selected"}</span>
             <span>{selectedNurse ? selectedNurse.display_name : "Nurse not selected"}</span>
@@ -659,8 +659,8 @@ export function HomeCareBookingClient() {
         ) : null}
 
         {!canSubmit ? (
-          <div className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] px-4 py-3 text-sm text-slate-700">
-            <p className="font-semibold text-[#1F2937]">Complete these details to continue:</p>
+          <div className="rounded-[8px] border border-primary-100 bg-grey-50 px-4 py-3 text-sm text-grey-700">
+            <p className="font-semibold text-grey-800">Complete these details to continue:</p>
             <ul className="mt-2 grid gap-1">
               {bookingValidation.reasons.map((reason) => (
                 <li key={reason}>{reason}</li>
@@ -714,7 +714,7 @@ export function HomeCareBookingClient() {
           <div className="grid gap-3 md:grid-cols-2">
             {[0, 1, 2, 3].map((item) => (
               <div key={item} className="ct-surface rounded-[22px] p-4">
-                <div className="h-32 animate-pulse rounded-[16px] bg-slate-100" />
+                <div className="h-32 animate-pulse rounded-[16px] bg-grey-100" />
               </div>
             ))}
           </div>
@@ -760,8 +760,8 @@ function EmptyHomeCareNurseState({ zoneLabel }: { zoneLabel?: string }) {
   return (
     <div className="ct-surface rounded-[24px] p-6 text-center">
       <Home className="mx-auto h-6 w-6 text-[var(--primary)]" />
-      <p className="mt-3 font-semibold text-[#1F2937]">No available nurse in this location right now.</p>
-      <p className="mt-1 text-sm text-slate-600">
+      <p className="mt-3 font-semibold text-grey-800">No available nurse in this location right now.</p>
+      <p className="mt-1 text-sm text-grey-600">
         {zoneLabel ? `Caretekk will only show nurses assigned to ${zoneLabel}.` : "Select a location to see matching nurses."}
       </p>
     </div>

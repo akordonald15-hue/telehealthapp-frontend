@@ -31,13 +31,13 @@ export function RepricingConsent({
 
   return (
     <div
-      className="grid gap-3 rounded-[8px] border border-amber-200 bg-amber-50 p-4"
+      className="grid gap-3 rounded-[8px] border border-warning-200 bg-warning-50 p-4"
       role="alert"
       aria-live="polite"
     >
       <div>
-        <p className="text-sm font-semibold text-amber-900">Your previous reward is no longer applied</p>
-        <p className="mt-1 text-sm text-amber-800">
+        <p className="text-sm font-semibold text-warning-900">Your previous reward is no longer applied</p>
+        <p className="mt-1 text-sm text-warning-800">
           The reward was released when the earlier payment did not go through. It is back in Refer &amp; Earn and you
           can use it on another booking.
         </p>
@@ -46,13 +46,13 @@ export function RepricingConsent({
       <dl className="grid gap-1 rounded-[6px] bg-white/70 p-3 text-sm">
         {payment.previous_amount ? (
           <div className="flex items-center justify-between">
-            <dt className="text-slate-600">Previous amount</dt>
-            <dd className="text-slate-500 line-through">{money(payment.previous_amount)}</dd>
+            <dt className="text-grey-600">Previous amount</dt>
+            <dd className="text-grey-500 line-through">{money(payment.previous_amount)}</dd>
           </div>
         ) : null}
         <div className="flex items-center justify-between">
-          <dt className="font-semibold text-slate-900">New amount</dt>
-          <dd className="text-base font-bold text-slate-900">{money(payment.amount)}</dd>
+          <dt className="font-semibold text-grey-900">New amount</dt>
+          <dd className="text-base font-bold text-grey-900">{money(payment.amount)}</dd>
         </div>
       </dl>
 

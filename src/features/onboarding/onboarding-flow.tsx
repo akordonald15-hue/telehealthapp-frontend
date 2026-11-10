@@ -325,15 +325,15 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
       >
         <div className="grid justify-items-center gap-5 py-4 text-center">
           <div className="relative h-24 w-24 animate-pulse">
-            <span className="absolute left-1/2 top-0 h-10 w-10 -translate-x-1/2 rounded-full bg-[#DBEAFE]" />
-            <span className="absolute bottom-0 left-1/2 h-10 w-10 -translate-x-1/2 rounded-full bg-[#DBEAFE]" />
-            <span className="absolute left-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-[#EFF6FF]" />
-            <span className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-[#EFF6FF]" />
-            <span className="absolute left-1/2 top-1/2 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-[#2563EB] text-white shadow-[0_18px_42px_-26px_rgba(37,99,235,0.55)]">
+            <span className="absolute left-1/2 top-0 h-10 w-10 -translate-x-1/2 rounded-full bg-primary-100" />
+            <span className="absolute bottom-0 left-1/2 h-10 w-10 -translate-x-1/2 rounded-full bg-primary-100" />
+            <span className="absolute left-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-primary-50" />
+            <span className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-primary-50" />
+            <span className="absolute left-1/2 top-1/2 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-primary-500 text-white shadow-[0_18px_42px_-26px_rgba(57,97,169,0.55)]">
               <Check className="h-6 w-6" />
             </span>
           </div>
-          <p className="max-w-sm text-sm leading-6 text-slate-600">
+          <p className="max-w-sm text-sm leading-6 text-grey-600">
             Your care profile is ready. We are taking you to your dashboard now.
           </p>
         </div>
