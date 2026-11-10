@@ -26,7 +26,7 @@ export function StepProgress({ current, total, labels }: StepProgressProps) {
         <span className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
           Step {current} of {total}
         </span>
-        <span className="text-xs font-semibold text-ash-500" aria-hidden="true">
+        <span className="text-xs font-semibold text-grey-500" aria-hidden="true">
           {current}/{total}
         </span>
       </div>
@@ -42,7 +42,7 @@ export function StepProgress({ current, total, labels }: StepProgressProps) {
                   "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors duration-300",
                   isComplete && "bg-primary text-white",
                   isActive && "bg-primary text-white ring-4 ring-primary/15",
-                  !isComplete && !isActive && "bg-ash-100 text-ash-500",
+                  !isComplete && !isActive && "bg-grey-100 text-grey-500",
                 )}
                 aria-current={isActive ? "step" : undefined}
               >
@@ -52,7 +52,7 @@ export function StepProgress({ current, total, labels }: StepProgressProps) {
                 <span
                   className={cn(
                     "h-1 flex-1 rounded-full transition-colors duration-300",
-                    step < current ? "bg-primary" : "bg-ash-100",
+                    step < current ? "bg-primary" : "bg-grey-100",
                   )}
                 />
               ) : null}
@@ -62,7 +62,7 @@ export function StepProgress({ current, total, labels }: StepProgressProps) {
       </div>
 
       {currentLabel ? (
-        <span className="text-sm font-semibold text-ash-700">{currentLabel}</span>
+        <span className="text-sm font-semibold text-grey-700">{currentLabel}</span>
       ) : null}
     </div>
   );

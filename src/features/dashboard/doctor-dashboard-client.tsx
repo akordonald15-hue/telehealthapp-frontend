@@ -78,10 +78,10 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="ct-hover-lift rounded-[8px] border border-grey-200 bg-grey-50 p-4 hover:border-success-100 hover:bg-white hover:shadow-[0_18px_44px_-34px_rgba(31,104,76,0.24)]"
+      className="ct-hover-lift rounded-[8px] border border-grey-200 bg-grey-50 p-4 hover:border-success-100 hover:bg-white hover:shadow-300"
     >
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-white text-success-700 shadow-sm">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-white text-success-700 shadow-100">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
@@ -211,14 +211,14 @@ export function DoctorDashboardClient() {
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#1F684C_0%,#3961A9_58%,#6181BA_100%)] p-5 text-white shadow-[0_24px_64px_-42px_rgba(31,104,76,0.4)] sm:p-6">
+        <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#1F684C_0%,#3961A9_58%,#6181BA_100%)] p-5 text-white shadow-300 sm:p-6">
           <p className="ct-caption text-success-50">Doctor workspace</p>
           <h2 className="mt-3 font-heading text-2xl font-semibold leading-tight text-white sm:text-[2rem]">
             {todayAppointments.length ? `${todayAppointments.length} consultation${todayAppointments.length === 1 ? "" : "s"} today` : "No consultations scheduled for today"}
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-success-50/90">Open consultations and continue care.</p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/appointments" className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-white px-4 text-sm font-semibold text-success-700 shadow-lg shadow-grey-900/20 transition hover:-translate-y-0.5">
+            <Link href="/appointments" className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-white px-4 text-sm font-semibold text-success-700 shadow-400 shadow-grey-900/20 transition hover:-translate-y-0.5">
               View consultations
             </Link>
             <Link href="/messages" className="inline-flex min-h-10 items-center justify-center rounded-[8px] border border-white/25 bg-white/10 px-4 text-sm font-semibold text-white transition hover:bg-white/16">

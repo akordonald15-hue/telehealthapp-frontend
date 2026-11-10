@@ -5,7 +5,7 @@ import { BrandLockup } from "@/components/brand/brand-lockup";
 export default function OfflinePage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(136,160,203,0.18),_transparent_28%),linear-gradient(180deg,#F9FAFB_0%,#F9FAFB_42%,#FFFFFF_100%)] px-4 py-10">
-      <div className="w-full max-w-lg rounded-[28px] border border-white/80 bg-white/95 p-8 text-center shadow-[0_24px_72px_-44px_rgba(19,25,39,0.34)] backdrop-blur">
+      <div className="w-full max-w-lg rounded-[28px] border border-white/80 bg-white/95 p-8 text-center shadow-300 backdrop-blur">
         <div className="mx-auto flex justify-center">
           <BrandLockup href="/" wordmark="image" wordmarkClassName="h-8 max-w-[190px]" />
         </div>

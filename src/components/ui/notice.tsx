@@ -17,21 +17,21 @@ export function Notice({
       role={isWarning ? "alert" : "status"}
       className={
         isSuccess
-          ? "rounded-[8px] border border-success-200 bg-success-soft p-4 shadow-[0_14px_32px_-24px_rgba(51,174,127,0.18)]"
+          ? "rounded-[8px] border border-success-200 bg-success-50 p-4 shadow-300"
           : isWarning
-            ? "rounded-[8px] border border-warning-200 bg-warning-soft p-4 shadow-[0_14px_32px_-24px_rgba(245,158,11,0.18)]"
-            : "rounded-[8px] border border-primary/15 bg-primary-soft p-4 shadow-[0_14px_32px_-24px_rgba(57,97,169,0.14)]"
+            ? "rounded-[8px] border border-warning-200 bg-warning-50 p-4 shadow-300"
+            : "rounded-[8px] border border-primary/15 bg-primary-soft p-4 shadow-300"
       }
     >
       <div className="flex gap-3">
         {isSuccess ? (
-          <CheckCircle2 className="mt-0.5 h-5 w-5 text-success" />
+          <CheckCircle2 className="mt-0.5 h-5 w-5 text-success-700" />
         ) : (
-          <AlertCircle className={`mt-0.5 h-5 w-5 ${isWarning ? "text-warning" : "text-primary"}`} />
+          <AlertCircle className={`mt-0.5 h-5 w-5 ${isWarning ? "text-warning-800" : "text-primary"}`} />
         )}
         <div>
-          <p className="font-heading text-sm font-semibold text-ash-800 sm:text-base">{title}</p>
-          {children ? <div className="mt-1 text-sm leading-6 text-ash-600">{children}</div> : null}
+          <p className="font-heading text-sm font-semibold text-grey-800 sm:text-base">{title}</p>
+          {children ? <div className="mt-1 text-sm leading-6 text-grey-600">{children}</div> : null}
         </div>
       </div>
     </div>

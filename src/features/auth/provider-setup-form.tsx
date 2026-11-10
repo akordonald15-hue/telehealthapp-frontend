@@ -62,11 +62,11 @@ export function ProviderSetupForm() {
 
   if (verifySetup.isPending) {
     return (
-      <div className="grid gap-5 rounded-[22px] border border-ash-200 bg-ash-50/80 p-5 text-center sm:p-6">
+      <div className="grid gap-5 rounded-[22px] border border-grey-200 bg-grey-50/80 p-5 text-center sm:p-6">
         <div className="mx-auto h-10 w-10 animate-pulse rounded-full border border-primary/30 bg-primary/10" />
         <div>
-          <p className="font-heading text-xl font-semibold text-ash-900">Checking your setup link</p>
-          <p className="mt-1 text-sm text-ash-600">Securing your provider account setup.</p>
+          <p className="font-heading text-xl font-semibold text-grey-900">Checking your setup link</p>
+          <p className="mt-1 text-sm text-grey-600">Securing your provider account setup.</p>
         </div>
       </div>
     );
@@ -82,21 +82,21 @@ export function ProviderSetupForm() {
 
   return (
     <div className="grid gap-6">
-      <div className="rounded-[22px] border border-ash-200 bg-ash-50/80 px-4 py-3 text-sm text-ash-700">
-        <p className="font-medium text-ash-900">Provider account setup</p>
-        <p className="mt-1 text-xs text-ash-600">
+      <div className="rounded-[22px] border border-grey-200 bg-grey-50/80 px-4 py-3 text-sm text-grey-700">
+        <p className="font-medium text-grey-900">Provider account setup</p>
+        <p className="mt-1 text-xs text-grey-600">
           {verifySetup.data?.name || "Caretekk provider"} &middot; {verifySetup.data?.role === "nurse" ? "Nurse" : "Doctor"} &middot;{" "}
           {verifySetup.data?.email}
         </p>
       </div>
 
       <form
-        className="grid gap-4 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(19,25,39,0.45)] sm:p-6"
+        className="grid gap-4 rounded-[22px] border border-grey-200 bg-surface p-5 shadow-300 sm:p-6"
         onSubmit={form.handleSubmit((values) => completeSetup.mutate(values))}
       >
         <div>
-          <p className="font-heading text-xl font-semibold text-ash-900">Choose your password</p>
-          <p className="mt-1 text-sm text-ash-600">This activates your provider account for Caretekk.</p>
+          <p className="font-heading text-xl font-semibold text-grey-900">Choose your password</p>
+          <p className="mt-1 text-sm text-grey-600">This activates your provider account for Caretekk.</p>
         </div>
         <ErrorMessage error={completeSetup.error} context="auth" />
         <input type="hidden" {...form.register("token")} />
@@ -111,7 +111,7 @@ export function ProviderSetupForm() {
         </Button>
       </form>
 
-      <p className="text-center text-sm text-ash-600">
+      <p className="text-center text-sm text-grey-600">
         Already completed setup?{" "}
         <Link className="font-semibold text-primary hover:text-primary-strong" href="/login">
           Sign in

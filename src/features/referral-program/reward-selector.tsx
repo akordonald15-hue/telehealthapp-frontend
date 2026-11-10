@@ -8,6 +8,7 @@ import type { CheckoutPricing, MyReferralReward } from "@/lib/types/backend";
 
 import { formatReferralDate } from "./format";
 import { isProgrammeUnavailable, useRedeemableRewards, useRewardPreview } from "./use-referral-program";
+import { radioInputClassName } from "@/components/ui/choice";
 
 /**
  * Lets a patient apply one earned reward to the booking they are about to make.
@@ -82,7 +83,7 @@ export function RewardSelector({
             <input
               type="radio"
               name="referral-reward"
-              className="mt-1 h-4 w-4"
+              className={radioInputClassName}
               value={reward.public_id}
               checked={selectedRewardId === reward.public_id}
               onChange={() => onSelect(reward.public_id)}
@@ -97,7 +98,7 @@ export function RewardSelector({
           <input
             type="radio"
             name="referral-reward"
-            className="h-4 w-4"
+            className={radioInputClassName}
             value=""
             checked={selectedRewardId === null}
             onChange={() => onSelect(null)}

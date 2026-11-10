@@ -113,7 +113,7 @@ export function ProfileClient() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="flex min-h-20 items-center gap-3 rounded-[8px] border border-grey-100 bg-white px-4 py-3 text-sm font-semibold text-grey-800 shadow-[0_14px_42px_-36px_rgba(19,25,39,0.35)] transition hover:border-primary-100 hover:bg-grey-50"
+                    className="flex min-h-20 items-center gap-3 rounded-[8px] border border-grey-100 bg-white px-4 py-3 text-sm font-semibold text-grey-800 shadow-300 transition hover:border-primary-100 hover:bg-grey-50"
                   >
                     <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
                       <Icon className="h-5 w-5" />
@@ -126,7 +126,7 @@ export function ProfileClient() {
                 type="button"
                 onClick={() => logout.mutate()}
                 disabled={logout.isPending}
-                className="flex min-h-20 items-center gap-3 rounded-[8px] border border-grey-100 bg-white px-4 py-3 text-left text-sm font-semibold text-grey-800 shadow-[0_14px_42px_-36px_rgba(19,25,39,0.35)] transition hover:border-primary-100 hover:bg-grey-50 disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex min-h-20 items-center gap-3 rounded-[8px] border border-grey-100 bg-white px-4 py-3 text-left text-sm font-semibold text-grey-800 shadow-300 transition hover:border-primary-100 hover:bg-grey-50 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
                   <LogOut className="h-5 w-5" />

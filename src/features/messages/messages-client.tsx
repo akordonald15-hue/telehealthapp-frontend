@@ -26,6 +26,7 @@ import { beginFilePickerGrace } from "@/lib/pwa/file-picker-guard";
 import { useThreadRealtime } from "./use-thread-realtime";
 import type { Message, Thread, UserRole } from "@/lib/types/backend";
 import { cn } from "@/lib/utils";
+import { Select } from "@/components/ui/input";
 
 type AttachmentPreview = {
   file: File;
@@ -542,7 +543,7 @@ export function MessagesClient() {
 
   return (
     <Section title={sectionTitle} description={sectionDescription}>
-      <div className="overflow-hidden rounded-[8px] border border-white/80 bg-white shadow-[0_24px_64px_-48px_rgba(19,25,39,0.28)]">
+      <div className="overflow-hidden rounded-[8px] border border-white/80 bg-white shadow-300">
         <div className="grid min-h-[calc(100vh-15rem)] bg-grey-50 lg:grid-cols-[22rem_minmax(0,1fr)]">
           <aside
             className={cn(
@@ -822,8 +823,8 @@ function ConsultationLifecycleBanner({
           <form className="grid gap-3 border-t border-primary-100 pt-3" onSubmit={onSubmit}>
             <div>
               <label className="text-xs font-bold uppercase tracking-wide text-grey-500">Dispute reason</label>
-              <select
-                className="mt-1 min-h-11 w-full rounded-[8px] border border-grey-200 bg-white px-3 text-sm text-grey-800 outline-none focus:border-primary-400"
+              <Select fieldSize="md"
+                className="mt-1 w-full"
                 value={disputeReason}
                 onChange={(event) => onReasonChange(event.target.value)}
               >
@@ -832,7 +833,7 @@ function ConsultationLifecycleBanner({
                 <option value="need_clarification">I need clarification</option>
                 <option value="technical_issue">Technical issue</option>
                 <option value="other">Other</option>
-              </select>
+              </Select>
             </div>
             <div>
               <label className="text-xs font-bold uppercase tracking-wide text-grey-500">Optional explanation</label>
@@ -908,8 +909,8 @@ function ConsultationListItem({
       className={cn(
         "group flex w-full gap-3 rounded-[8px] border p-3 text-left transition duration-150",
         isActive
-          ? "border-primary-200 bg-primary-50 shadow-[0_16px_42px_-34px_rgba(57,97,169,0.28)]"
-          : "border-transparent bg-white hover:-translate-y-0.5 hover:border-grey-200 hover:shadow-[0_16px_42px_-34px_rgba(19,25,39,0.18)]",
+          ? "border-primary-200 bg-primary-50 shadow-300"
+          : "border-transparent bg-white hover:-translate-y-0.5 hover:border-grey-200 hover:shadow-300",
       )}
       onClick={onClick}
     >
@@ -1040,7 +1041,7 @@ function ChatMessageBubble({
       {!isMine ? <Avatar label={currentUserRole === "doctor" ? "Pt" : "Dr"} tone="green" size="sm" /> : null}
       <div
         className={cn(
-          "max-w-[86%] rounded-[8px] px-3.5 py-2.5 shadow-[0_12px_34px_-30px_rgba(19,25,39,0.24)] sm:max-w-[68%]",
+          "max-w-[86%] rounded-[8px] px-3.5 py-2.5 shadow-300 sm:max-w-[68%]",
           isMine
             ? "bg-[linear-gradient(135deg,#3961A9,#6181BA)] text-white"
             : "border border-white bg-white text-grey-800",
@@ -1187,7 +1188,7 @@ function ChatComposer({
       <div className="flex items-end gap-2 rounded-[8px] border border-grey-200 bg-grey-50 p-2.5 focus-within:border-primary-400 focus-within:bg-white">
         <button
           type="button"
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-primary-500 shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-50"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-primary-500 shadow-100 transition hover:-translate-y-0.5 hover:bg-primary-50"
           disabled={disabled || isSending}
           onClick={(event) => {
             event.preventDefault();
@@ -1201,7 +1202,7 @@ function ChatComposer({
           <button
             type="button"
             className={cn(
-              "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-sm transition hover:-translate-y-0.5",
+              "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-100 transition hover:-translate-y-0.5",
               isRecordingVoice ? "bg-danger-600 text-white hover:bg-danger-700" : "bg-white text-primary-500 hover:bg-primary-50",
             )}
             disabled={disabled || isSending}
@@ -1221,7 +1222,7 @@ function ChatComposer({
         />
         <Button
           type="submit"
-          className="h-11 min-h-11 w-11 shrink-0 rounded-full px-0"
+          className="w-12 shrink-0 px-0!"
           disabled={disabled || isSending || (!value.trim() && !attachment)}
           aria-label="Send message"
         >

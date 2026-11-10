@@ -24,7 +24,7 @@ function LoaderPulseMark({ className }: { className?: string }) {
   return (
     <div className={cn("relative flex h-16 w-16 items-center justify-center", className)}>
       <span className="absolute inset-0 rounded-full bg-[rgba(57,97,169,0.12)] animate-[caretekk-ring_1.8s_ease-out_infinite]" />
-      <span className="absolute inset-[10px] rounded-full border border-[rgba(57,97,169,0.18)] bg-white/90 shadow-[0_12px_30px_-20px_rgba(57,97,169,0.35)]" />
+      <span className="absolute inset-[10px] rounded-full border border-[rgba(57,97,169,0.18)] bg-white/90 shadow-300" />
       <span className="relative z-10">
         <BrandLockup wordmark="none" logoClassName="h-10 w-10" />
       </span>
@@ -56,7 +56,7 @@ export function FullPageLoader({
       aria-busy="true"
       aria-live="polite"
     >
-      <div className="w-full max-w-lg rounded-[8px] border border-white/80 bg-white/95 px-6 py-10 text-center shadow-[0_24px_72px_-44px_rgba(19,25,39,0.34)] backdrop-blur">
+      <div className="w-full max-w-lg rounded-[8px] border border-white/80 bg-white/95 px-6 py-10 text-center shadow-300 backdrop-blur">
         <div className="flex justify-center">
           <LoaderPulseMark />
         </div>
@@ -80,7 +80,7 @@ export function InlineLoader({
   return (
     <div
       className={cn(
-        "rounded-[8px] border border-[rgba(215,223,238,0.92)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(249,250,251,0.98)_100%)] px-4 py-4 shadow-[0_18px_50px_-40px_rgba(19,25,39,0.24)]",
+        "rounded-[8px] border border-[rgba(215,223,238,0.92)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(249,250,251,0.98)_100%)] px-4 py-4 shadow-300",
         compact ? "px-4 py-3" : "px-5 py-5",
         className,
       )}
@@ -109,7 +109,7 @@ export function PageTransitionLoader({
       aria-busy="true"
       aria-live="polite"
     >
-      <div className="rounded-[8px] border border-white/80 bg-white/92 px-6 py-6 shadow-[0_20px_60px_-42px_rgba(19,25,39,0.28)] backdrop-blur">
+      <div className="rounded-[8px] border border-white/80 bg-white/92 px-6 py-6 shadow-300 backdrop-blur">
         <div className="flex items-center gap-4">
           <LoaderPulseMark className="h-14 w-14" />
           <div>

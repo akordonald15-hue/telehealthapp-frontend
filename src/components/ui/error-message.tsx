@@ -28,7 +28,7 @@ export function ErrorMessage({
   }
 
   return (
-    <div className="rounded-[8px] border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-800 shadow-[0_10px_30px_rgba(225,29,72,0.08)]">
+    <div className="rounded-[8px] border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-800 shadow-400">
       {error instanceof ApiError || error instanceof Error
         ? getFriendlyErrorMessage(error, context)
         : "Something went wrong. Please try again."}

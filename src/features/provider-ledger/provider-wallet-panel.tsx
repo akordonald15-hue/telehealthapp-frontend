@@ -63,7 +63,7 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
 
   if (walletQuery.isLoading) {
     return (
-      <div className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)] sm:p-6">
+      <div className="rounded-[8px] border border-white/70 bg-white p-5 shadow-300 sm:p-6">
         <InlineLoader compact label="Preparing your wallet summary" />
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {[0, 1, 2, 3].map((item) => (
@@ -97,7 +97,7 @@ export function ProviderWalletPanel({ role }: { role: "doctor" | "nurse" }) {
   const transactions = transactionsQuery.data?.results ?? [];
 
   return (
-    <div className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)] sm:p-6">
+    <div className="rounded-[8px] border border-white/70 bg-white p-5 shadow-300 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[var(--primary-soft)] text-[var(--primary)]">

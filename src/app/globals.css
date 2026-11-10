@@ -21,8 +21,8 @@
   --surface: #ffffff;
   --surface-muted: #F9FAFB;
   --muted: #6D717F;
-  --shadow-soft: 0 24px 72px -48px rgba(19, 25, 39, 0.34);
-  --shadow-card: 0 18px 50px -40px rgba(19, 25, 39, 0.26);
+  --shadow-soft: var(--shadow-400);
+  --shadow-card: var(--shadow-200);
   --shadow-trust-card: -3px 21px 46px rgba(222, 222, 222, 0.102), -12px 83px 84px rgba(222, 222, 222, 0.09), -28px 187px 114px rgba(222, 222, 222, 0.051), -49px 333px 135px rgba(222, 222, 222, 0.012);
   --shadow-trust-photo: 0 11px 24px rgba(159, 142, 142, 0.102), 0 43px 43px rgba(159, 142, 142, 0.09), 0 97px 58px rgba(159, 142, 142, 0.051), 0 173px 69px rgba(159, 142, 142, 0.012);
 }
@@ -57,6 +57,25 @@
 
 .theme-landing :is(.font-heading, .ct-hero-title, .ct-section-title, .ct-dashboard-title, .ct-card-title) {
   font-family: var(--font-lexend), ui-sans-serif, system-ui, sans-serif;
+}
+
+.theme-landing .ct-card-title {
+  font-family: var(--font-lexend), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.022em;
+}
+
+.theme-landing .ct-caption {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.theme-landing .font-heading {
+  letter-spacing: -0.03em;
 }
 
 @theme inline {
@@ -181,6 +200,9 @@
   --color-info-200: #C4D7EE;
   --color-info-100: #E1EBF6;
   --color-info-50: #F0F5FB;
+
+  /* Focus ring (Figma: 3px #AEB6FB around focused buttons, checkboxes, toggles) */
+  --color-focus: #AEB6FB;
 
   /* Shadow 100–800 */
   --shadow-100: 0 4px 4px -2px rgb(19 25 39 / 0.08), 0 2px 4px -2px rgb(19 25 39 / 0.12);
@@ -362,6 +384,19 @@
   letter-spacing: -0.13px;
 }
 
+/* Dropdown chevron for <Select> (Figma → Dropdown). Chevron colour is grey-500. */
+.ds-select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236D717F' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 18px center;
+  background-repeat: no-repeat;
+  background-size: 20px;
+}
+
+.ds-select-chevron.min-h-10 {
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
 html {
   min-height: 100%;
   overflow-x: hidden;
@@ -407,7 +442,7 @@ textarea {
 
 .font-heading {
   font-family: var(--ds-font-manrope), ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.01em;
 }
 
 @media (min-width: 1024px) {
@@ -420,41 +455,56 @@ textarea {
 }
 
 .ct-hero-title {
+  /* Figma "Page tittle" on phones, "Headings 4" from md up */
   font-family: var(--ds-font-manrope), ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(2.25rem, 4vw, 3.5rem);
-  font-weight: 600;
-  line-height: 1.02;
-  letter-spacing: -0.045em;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.75rem;
+  letter-spacing: -0.24px;
+}
+
+@media (min-width: 768px) {
+  .ct-hero-title {
+    font-size: 2rem;
+    line-height: 2.5rem;
+    letter-spacing: -0.32px;
+  }
 }
 
 .ct-section-title {
+  /* Figma "Section headings" */
   font-family: var(--ds-font-manrope), ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 600;
-  line-height: 1.14;
-  letter-spacing: -0.032em;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.375rem;
+  letter-spacing: -0.18px;
 }
 
 .ct-dashboard-title {
+  /* Figma "Page tittle" */
   font-family: var(--ds-font-manrope), ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(1.625rem, 2.6vw, 2.25rem);
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.03em;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.75rem;
+  letter-spacing: -0.24px;
 }
 
 .ct-card-title {
+  /* Figma "Card tittle" */
   font-family: var(--ds-font-manrope), ui-sans-serif, system-ui, sans-serif;
-  font-size: 1.125rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.022em;
+  line-height: 1.125rem;
+  letter-spacing: -0.15px;
 }
 
 .ct-caption {
-  font-size: 0.78rem;
+  /* Figma "Status tags" */
+  font-family: var(--ds-font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  line-height: 0.875rem;
+  letter-spacing: -0.11px;
   text-transform: uppercase;
 }
 
@@ -483,7 +533,7 @@ textarea {
 .ct-panel {
   border: 1px solid rgba(215, 223, 238, 0.92);
   background: #ffffff;
-  box-shadow: 0 22px 58px -44px rgba(19, 25, 39, 0.3);
+  box-shadow: var(--shadow-300);
 }
 
 .ct-soft-panel {

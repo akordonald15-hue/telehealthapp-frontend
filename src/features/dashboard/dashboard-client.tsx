@@ -37,7 +37,7 @@ function Metric({ label, value, href, icon: Icon, description }: { label: string
   return (
     <Link
       href={href}
-      className="ct-hover-lift ct-surface group rounded-[8px] p-4 hover:shadow-[0_24px_56px_-38px_rgba(57,97,169,0.18)]"
+      className="ct-hover-lift ct-surface group rounded-[8px] p-4 hover:shadow-300"
     >
       <div className="flex items-start justify-between gap-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
@@ -128,10 +128,10 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className={`ct-rise-in group flex min-h-[128px] flex-col justify-between rounded-[8px] border border-grey-100 p-4 shadow-[0_18px_48px_-42px_rgba(19,25,39,0.34)] transition duration-200 hover:-translate-y-0.5 ${className}`}
+      className={`ct-rise-in group flex min-h-[128px] flex-col justify-between rounded-[8px] border border-grey-100 p-4 shadow-300 transition duration-200 hover:-translate-y-0.5 ${className}`}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-white/72 text-primary-500 shadow-sm">
+      <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-white/72 text-primary-500 shadow-100">
         <Icon className="h-5 w-5" />
       </span>
       <span>
@@ -229,12 +229,12 @@ export function DashboardClient() {
 
               <Link
                 href="/appointments"
-                className="ct-rise-in group overflow-hidden rounded-[8px] border border-primary-100 bg-[linear-gradient(135deg,#EBEFF6_0%,#F9FAFB_100%)] p-4 shadow-[0_24px_70px_-52px_rgba(57,97,169,0.42)] transition duration-200 hover:-translate-y-0.5 sm:p-6"
+                className="ct-rise-in group overflow-hidden rounded-[8px] border border-primary-100 bg-[linear-gradient(135deg,#EBEFF6_0%,#F9FAFB_100%)] p-4 shadow-300 transition duration-200 hover:-translate-y-0.5 sm:p-6"
               >
                 <div className="grid grid-cols-[94px_minmax(0,1fr)] items-center gap-3 sm:grid-cols-[128px_minmax(0,1fr)] sm:gap-5">
                   <div className="ct-float-gentle relative flex h-24 w-24 items-center justify-center sm:h-28 sm:w-28">
                     <span className="absolute h-20 w-20 rounded-full bg-primary-100" />
-                    <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary-500 shadow-[0_18px_42px_-30px_rgba(57,97,169,0.48)]">
+                    <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary-500 shadow-300">
                       <Bot className="h-9 w-9" />
                     </span>
                     <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary-300" />
@@ -250,7 +250,7 @@ export function DashboardClient() {
                     </p>
                   </div>
                 </div>
-                <span className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-[8px] bg-primary-500 px-5 text-sm font-semibold text-white shadow-[0_18px_42px_-28px_rgba(57,97,169,0.65)] transition-transform duration-150 group-active:scale-[0.98]">
+                <span className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-[8px] bg-primary-500 px-5 text-sm font-semibold text-white shadow-300 transition-transform duration-150 group-active:scale-[0.98]">
                   Book a Doctor
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary-500">
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
@@ -258,7 +258,7 @@ export function DashboardClient() {
                 </span>
               </Link>
 
-              <section className="ct-rise-in rounded-[8px] border border-grey-100 bg-white p-4 shadow-[0_20px_60px_-48px_rgba(19,25,39,0.36)] sm:p-5" style={{ animationDelay: "80ms" }}>
+              <section className="ct-rise-in rounded-[8px] border border-grey-100 bg-white p-4 shadow-300 sm:p-5" style={{ animationDelay: "80ms" }}>
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
@@ -312,7 +312,7 @@ export function DashboardClient() {
               </section>
 
               {appointmentToRate || ownReviews.length ? (
-                <section className="ct-rise-in rounded-[8px] border border-grey-100 bg-white p-4 shadow-[0_20px_60px_-48px_rgba(19,25,39,0.36)] sm:p-5" style={{ animationDelay: "100ms" }}>
+                <section className="ct-rise-in rounded-[8px] border border-grey-100 bg-white p-4 shadow-300 sm:p-5" style={{ animationDelay: "100ms" }}>
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
@@ -383,10 +383,10 @@ export function DashboardClient() {
               */}
               <Link
                 href="/refer"
-                className="ct-rise-in group flex items-center gap-4 rounded-[8px] border border-primary-100 bg-[linear-gradient(120deg,#EBEFF6_0%,#F9FAFB_60%,#FFFFFF_100%)] p-4 shadow-[0_18px_48px_-42px_rgba(19,25,39,0.34)] transition duration-200 hover:-translate-y-0.5 sm:p-5"
+                className="ct-rise-in group flex items-center gap-4 rounded-[8px] border border-primary-100 bg-[linear-gradient(120deg,#EBEFF6_0%,#F9FAFB_60%,#FFFFFF_100%)] p-4 shadow-300 transition duration-200 hover:-translate-y-0.5 sm:p-5"
                 style={{ animationDelay: "260ms" }}
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-white text-primary-500 shadow-sm">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-white text-primary-500 shadow-100">
                   <Gift className="h-5 w-5" />
                 </span>
                 <span className="min-w-0 flex-1">
@@ -408,7 +408,7 @@ export function DashboardClient() {
                 ) : recentThread ? (
                   <Link
                     href="/messages"
-                    className="flex items-center gap-3 rounded-[8px] border border-grey-100 bg-white p-3.5 shadow-[0_18px_50px_-44px_rgba(19,25,39,0.34)]"
+                    className="flex items-center gap-3 rounded-[8px] border border-grey-100 bg-white p-3.5 shadow-300"
                   >
                     <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-50 text-sm font-semibold text-primary-500">
                       {(recentThread.doctor_profile?.display_name || recentThread.patient_profile?.display_name || "Ct").slice(0, 2)}
@@ -470,14 +470,14 @@ export function DashboardClient() {
       ) : (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-            <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#3961A9_0%,#6181BA_45%,#6181BA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(57,97,169,0.48)] sm:p-8">
+            <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#3961A9_0%,#6181BA_45%,#6181BA_100%)] p-6 text-white shadow-300 sm:p-8">
               <p className="ct-caption text-primary-100">Caretekk workspace</p>
               <h2 className="ct-dashboard-title mt-4 text-white">Care updates at a glance.</h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-primary-50/90">
                 Visits, conversations, records, and referrals in one place.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-white px-5 text-sm font-semibold text-primary-500 shadow-lg shadow-primary-700/20 transition hover:-translate-y-0.5">
+                <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-white px-5 text-sm font-semibold text-primary-500 shadow-400 shadow-primary-700/20 transition hover:-translate-y-0.5">
                   Book or review visits
                 </Link>
                 <Link href="/messages" className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-white/25 bg-white/10 px-5 text-sm font-semibold text-white transition hover:bg-white/16">

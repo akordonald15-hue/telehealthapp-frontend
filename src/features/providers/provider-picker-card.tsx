@@ -38,13 +38,13 @@ export function ProviderPickerCard({
       className={cn(
         "group grid w-full gap-3 rounded-[20px] border p-4 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/15",
         selected
-          ? "border-primary-500 bg-primary-50 shadow-[0_18px_44px_-34px_rgba(57,97,169,0.5)]"
+          ? "border-primary-500 bg-primary-50 shadow-300"
           : "border-grey-200 bg-grey-50 hover:border-primary-100 hover:bg-white",
         disabled && "cursor-not-allowed opacity-60",
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-[16px] bg-white text-sm font-extrabold text-[var(--primary)] shadow-sm">
+        <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-[16px] bg-white text-sm font-extrabold text-[var(--primary)] shadow-100">
           {imageUrl ? (
             <Image src={imageUrl} alt="" width={48} height={48} className="h-full w-full object-cover" unoptimized />
           ) : (

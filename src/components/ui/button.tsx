@@ -2,8 +2,11 @@ import type { ButtonHTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
+// Figma "DESIGN SYSTEM" → Button. Styles: primary = Filled, secondary = Outline, ghost = Clear.
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "dark";
-type ButtonSize = "sm" | "md" | "lg";
+// Figma sizes: xs = Tiny (24px), sm = Small (32px), md = Large (48px), lg = Giant (56px).
+// `compact` is Figma's Medium (40px).
+type ButtonSize = "xs" | "sm" | "compact" | "md" | "lg";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -11,22 +14,24 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: "min-h-9 rounded-[8px] px-3 text-sm",
-  md: "min-h-11 rounded-[8px] px-4 text-[15px]",
-  lg: "min-h-13 rounded-[8px] px-6 text-base",
+  xs: "min-h-6 rounded-[8px] px-2 text-[10px] leading-3 [&_svg]:size-3",
+  sm: "min-h-8 rounded-[8px] px-3 text-xs leading-4 [&_svg]:size-4",
+  compact: "min-h-10 rounded-[12px] px-4 text-sm leading-4 [&_svg]:size-4",
+  md: "min-h-12 rounded-[12px] px-5 text-base leading-5 [&_svg]:size-5",
+  lg: "min-h-14 rounded-[12px] px-6 text-lg leading-6 [&_svg]:size-5",
 };
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--primary)] text-white shadow-[0_1px_2px_rgba(19,25,39,0.08),0_8px_20px_-10px_rgba(57,97,169,0.45)] hover:bg-[var(--primary-strong)] hover:shadow-[0_2px_4px_rgba(19,25,39,0.1),0_12px_28px_-10px_rgba(57,97,169,0.55)]",
+    "bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 disabled:bg-grey-200 disabled:text-grey-400",
   secondary:
-    "border border-ash-300 bg-surface text-ash-800 shadow-[0_1px_2px_rgba(19,25,39,0.04)] hover:border-[var(--primary)] hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]",
-  dark:
-    "bg-ash-900 text-white hover:bg-[var(--primary-strong)]",
-  danger:
-    "bg-danger-600 text-white hover:opacity-95",
+    "border-[1.5px] border-primary-500 bg-white text-primary-500 hover:bg-primary-50 active:bg-primary-200 disabled:border-grey-200 disabled:bg-white disabled:text-grey-400",
   ghost:
-    "text-ash-700 hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]",
+    "text-primary-500 hover:bg-primary-50 active:bg-primary-200 disabled:bg-transparent disabled:text-grey-400",
+  danger:
+    "bg-danger-500 text-white hover:bg-danger-600 active:bg-danger-700 disabled:bg-grey-200 disabled:text-grey-400",
+  dark:
+    "bg-grey-900 text-white hover:bg-grey-800 active:bg-black-900 disabled:bg-grey-200 disabled:text-grey-400",
 };
 
 export function Button({
@@ -38,7 +43,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(57,97,169,0.25)] disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 font-inter-tight font-medium transition duration-150 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus disabled:cursor-not-allowed",
         sizeStyles[size],
         variantStyles[variant],
         className,

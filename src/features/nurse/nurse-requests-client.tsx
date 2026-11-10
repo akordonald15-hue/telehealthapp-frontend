@@ -68,7 +68,7 @@ export function NurseRequestsClient() {
           {[0, 1, 2].map((item) => (
             <div
               key={item}
-              className="rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)] sm:p-6"
+              className="rounded-[28px] border border-white/70 bg-white p-5 shadow-300 sm:p-6"
             >
               <div className="h-5 w-48 animate-pulse rounded-full bg-grey-100" />
               <div className="mt-4 h-4 w-4/5 animate-pulse rounded-full bg-grey-100" />
@@ -89,7 +89,7 @@ export function NurseRequestsClient() {
             return (
               <div
                 key={request.id}
-                className="rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)] sm:p-6"
+                className="rounded-[28px] border border-white/70 bg-white p-5 shadow-300 sm:p-6"
               >
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">

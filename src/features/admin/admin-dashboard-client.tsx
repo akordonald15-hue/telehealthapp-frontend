@@ -27,6 +27,8 @@ import { useCurrentUser } from "@/lib/auth/use-auth";
 import type { AdminDashboardResponse, AdminDoctorReview, AdminProvider, AdminProviderCreateResponse, AdminUser, HomeCareZone, Payment, ProviderAvailabilityStatus, ReferralStatus, UserRole } from "@/lib/types/backend";
 import { paymentSummary } from "@/lib/ui/humanize";
 import { formatDateTime, formatMoney } from "@/lib/utils";
+import { Select } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/choice";
 
 const HOMECARE_ZONES: Array<{ value: HomeCareZone; label: string }> = [
   { value: "eket", label: "Eket" },
@@ -389,14 +391,14 @@ function ProviderCreatePanel() {
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-grey-600">
             Role
-            <select
+            <Select fieldSize="md"
               value={form.role}
               onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as "doctor" | "nurse" }))}
-              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
+              
             >
               <option value="doctor">Doctor</option>
               <option value="nurse">Nurse</option>
-            </select>
+            </Select>
           </label>
           <label className="grid gap-1 text-sm font-semibold text-grey-600">
             Name
@@ -451,18 +453,18 @@ function ProviderCreatePanel() {
             <>
               <label className="grid gap-1 text-sm font-semibold text-grey-600">
                 Service zone
-                <select
+                <Select fieldSize="md"
                   required
                   value={form.service_zone}
                   onChange={(event) => setForm((current) => ({ ...current, service_zone: event.target.value as HomeCareZone }))}
-                  className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
+                  
                 >
                   {HOMECARE_ZONES.map((item) => (
                     <option key={item.value} value={item.value}>
                       {item.label}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className="grid gap-1 text-sm font-semibold text-grey-600">
                 Base address
@@ -477,41 +479,32 @@ function ProviderCreatePanel() {
           ) : null}
           <label className="grid gap-1 text-sm font-semibold text-grey-600">
             Availability
-            <select
+            <Select fieldSize="md"
               value={form.availability_status}
               onChange={(event) => setForm((current) => ({ ...current, availability_status: event.target.value as ProviderAvailabilityStatus }))}
-              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800"
+              
             >
               <option value="offline">Offline</option>
               <option value="available">Available</option>
               <option value="on_break">On break</option>
-            </select>
+            </Select>
           </label>
         </div>
         <div className="flex flex-wrap gap-3 rounded-[16px] border border-grey-200 bg-grey-50 p-3 text-sm font-semibold text-grey-600">
-          <label className="inline-flex items-center gap-2">
-            <input type="checkbox" checked={form.is_active} onChange={(event) => setForm((current) => ({ ...current, is_active: event.target.checked }))} />
-            Active
-          </label>
-          <label className="inline-flex items-center gap-2">
-            <input type="checkbox" checked={form.is_email_verified} onChange={(event) => setForm((current) => ({ ...current, is_email_verified: event.target.checked }))} />
-            Verified
-          </label>
+          <Checkbox label="Active" checked={form.is_active} onChange={(event) => setForm((current) => ({ ...current, is_active: event.target.checked }))} className="text-sm font-semibold" />
+          <Checkbox label="Verified" checked={form.is_email_verified} onChange={(event) => setForm((current) => ({ ...current, is_email_verified: event.target.checked }))} className="text-sm font-semibold" />
           {form.role === "nurse" ? (
             <>
-              <label className="inline-flex items-center gap-2">
-                <input type="checkbox" checked={form.active_for_dispatch} onChange={(event) => setForm((current) => ({ ...current, active_for_dispatch: event.target.checked }))} />
-                Dispatch active
-              </label>
-              <select
+              <Checkbox label="Dispatch active" checked={form.active_for_dispatch} onChange={(event) => setForm((current) => ({ ...current, active_for_dispatch: event.target.checked }))} className="text-sm font-semibold" />
+              <Select fieldSize="md"
                 value={form.provider_status}
                 onChange={(event) => setForm((current) => ({ ...current, provider_status: event.target.value as "pending" | "approved" | "suspended" }))}
-                className="min-h-9 rounded-[10px] border border-grey-200 bg-white px-2"
+                
               >
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
                 <option value="suspended">Suspended</option>
-              </select>
+              </Select>
             </>
           ) : null}
         </div>
@@ -772,18 +765,18 @@ export function AdminDashboardClient() {
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <StatusBadge value={referral.status} />
-                  <select
+                  <Select fieldSize="md"
                     value={referral.status}
                     disabled={updateReferral.isPending}
                     onChange={(event) => updateReferral.mutate({ id: referral.id, status: event.target.value as ReferralStatus })}
-                    className="min-h-10 rounded-[12px] border border-grey-200 bg-white px-3 text-sm font-semibold text-grey-700"
+                    
                   >
                     <option value="pending">Pending</option>
                     <option value="reviewed">Reviewed</option>
                     <option value="contacted">Contacted</option>
                     <option value="completed">Completed</option>
                     <option value="cancelled">Cancelled</option>
-                  </select>
+                  </Select>
                 </div>
               </div>
             </article>
@@ -927,16 +920,16 @@ export function AdminDashboardClient() {
 
 function RoleFilter({ value, onChange }: { value: UserRole | ""; onChange: (value: UserRole | "") => void }) {
   return (
-    <select
+    <Select fieldSize="md"
       value={value}
       onChange={(event) => onChange(event.target.value as UserRole | "")}
-      className="min-h-10 rounded-[12px] border border-grey-200 bg-white px-3 text-sm font-semibold text-grey-700"
+      
     >
       <option value="">All roles</option>
       <option value="patient">Patients</option>
       <option value="doctor">Doctors</option>
       <option value="nurse">Nurses</option>
       <option value="admin">Admins</option>
-    </select>
+    </Select>
   );
 }

@@ -81,8 +81,31 @@ For responsive sizes, combine them: `type-heading-4 md:type-heading-2`.
 </div>
 ```
 
-## Still to do
+## Components
 
-- Components from Figma (Button, Input, Badge & Chip, Checkbox, Radio, Toggle, Dropdown, …)
-  will be built in `src/components/ui/` using these tokens.
-- Existing pages will be moved from hardcoded colours to these tokens page by page.
+All in `src/components/ui/`, built to the Figma component frames. See them live at **`/design-system`**.
+
+| Component | Import | Notes |
+|---|---|---|
+| `Button` | `@/components/ui/button` | `variant`: `primary` (Filled), `secondary` (Outline), `ghost` (Clear), `danger`, `dark`. `size`: `xs` 24px, `sm` 32px, `compact` 40px, `md` 48px (default), `lg` 56px. |
+| `Input`, `PasswordInput`, `Textarea`, `Select` | `@/components/ui/input` | Figma "Filled" field. `fieldSize="lg"` 56px (default) or `"md"` 40px for compact spots (filters, toolbars). Errors come from `Field`. |
+| `Field` | `@/components/ui/field` | Label + control + helper/error text. Wrap every form control in it. |
+| `Badge` / `StatusBadge` | `@/components/ui/badge`, `status-badge` | Status tags. `tone`: `blue`, `green`, `amber`, `rose`, `cyan`, `neutral`. |
+| `Checkbox`, `Radio`, `Toggle` | `@/components/ui/choice` | `radioInputClassName` styles a bare radio inside a custom card. |
+| `ProgressBar` | `@/components/ui/progress-bar` | Segmented bar; pass `value` (0–100) and an accessible `label`. |
+| `Breadcrumbs` | `@/components/ui/breadcrumbs` | Last item is the current page. |
+
+Don't restyle components with `className` (e.g. `rounded-full`, `px-0`): `cn()` doesn't resolve class
+conflicts, so the result is unpredictable. If a variant is missing, add it to the component.
+
+## Landing page
+
+The Figma **landing** design uses a different look (bright royal blue, Lexend) from the app design system.
+`src/components/marketing` keeps its own colours, scoped by the `theme-landing` class on the home page.
+Everything else (login, dashboards, booking, messages, admin, …) uses this design system.
+
+## Deliberate differences from Figma
+
+- Helper text uses `grey-500` and badge text the `-700/-800` shade instead of Figma's lighter colours, for readable contrast.
+- Figma's outline-button hover border (`#4E61F6`) isn't in the palette; it stays `primary-500`.
+

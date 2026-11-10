@@ -31,7 +31,7 @@ export function AuditClient() {
           emptyTitle="No activity yet"
           empty="There is no recent activity to show."
           renderItem={(event) => (
-            <article key={event.id} className="rounded-[22px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(19,25,39,0.45)]">
+            <article key={event.id} className="rounded-[22px] border border-white/70 bg-white p-5 shadow-300">
               <p className="font-semibold text-grey-800">{humanizeAuditAction(event.action)}</p>
               <p className="mt-1 text-sm text-grey-600">{humanizeAuditSubtitle(event)}</p>
               <p className="mt-1 text-xs text-grey-500">{formatDateTime(event.created_at)}</p>

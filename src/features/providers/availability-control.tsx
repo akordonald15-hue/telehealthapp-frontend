@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { providersApi } from "@/lib/api/endpoints";
 import type { ProviderAvailabilityStatus } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
+import { Select } from "@/components/ui/input";
 
 const OPTIONS: Array<{ value: ProviderAvailabilityStatus; label: string; description: string }> = [
   { value: "available", label: "Available", description: "Ready for new consultations or assignments." },
@@ -44,7 +45,7 @@ export function AvailabilityControl({
   if (compact) {
     const canUpdate = Boolean(data?.can_self_update);
     return (
-      <div className="flex w-full flex-col gap-2 rounded-[12px] border border-grey-200 bg-white px-3 py-2 shadow-sm sm:w-auto sm:min-w-[260px]">
+      <div className="flex w-full flex-col gap-2 rounded-[12px] border border-grey-200 bg-white px-3 py-2 shadow-100 sm:w-auto sm:min-w-[260px]">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-grey-500">Availability</p>
@@ -53,8 +54,8 @@ export function AvailabilityControl({
               {data?.active_job_label ? <span className="text-xs font-semibold text-grey-500">{data.active_job_label}</span> : null}
             </div>
           </div>
-          <select
-            className="min-h-9 rounded-[8px] border border-grey-200 bg-grey-50 px-2 text-sm font-semibold text-grey-800 outline-none focus:border-[var(--primary)]"
+          <Select fieldSize="md"
+            
             value={selectedStatus}
             disabled={mutation.isPending || availabilityQuery.isLoading || !canUpdate}
             onChange={(event) => mutation.mutate({ availability_status: event.target.value as ProviderAvailabilityStatus })}
@@ -69,7 +70,7 @@ export function AvailabilityControl({
                 {option.label}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         {!data?.can_self_update && disabledReason ? <p className="text-xs font-semibold text-warning-700">{disabledReason}</p> : null}
         {mutation.isError || availabilityQuery.isError ? (
@@ -106,7 +107,7 @@ export function AvailabilityControl({
             <div
               key={option.value}
               className={`rounded-[16px] border p-3 transition ${
-                isSelected ? "border-[var(--primary)] bg-white shadow-[0_10px_30px_-22px_rgba(57,97,169,0.4)]" : "border-grey-200 bg-white"
+                isSelected ? "border-[var(--primary)] bg-white shadow-300" : "border-grey-200 bg-white"
               }`}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

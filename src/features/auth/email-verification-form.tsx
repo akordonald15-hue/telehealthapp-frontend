@@ -77,7 +77,7 @@ export function EmailVerificationForm() {
       </Notice>
 
       <form
-        className="grid gap-5 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(19,25,39,0.45)] sm:p-6"
+        className="grid gap-5 rounded-[22px] border border-grey-200 bg-surface p-5 shadow-300 sm:p-6"
         onSubmit={confirmForm.handleSubmit((values) =>
           confirmVerification.mutate(values, {
             onSuccess: () => {
@@ -88,27 +88,27 @@ export function EmailVerificationForm() {
         )}
       >
         <div>
-          <p className="font-heading text-xl font-semibold text-ash-900">Enter your verification code</p>
-          <p className="mt-1 text-sm text-ash-600">The code expires in 10 minutes.</p>
+          <p className="font-heading text-xl font-semibold text-grey-900">Enter your verification code</p>
+          <p className="mt-1 text-sm text-grey-600">The code expires in 10 minutes.</p>
         </div>
 
         {currentEmail ? (
-          <div className="rounded-[16px] border border-ash-200 bg-ash-50 px-4 py-3 text-sm text-ash-700">
-            <span className="font-semibold text-ash-900">Email:</span> {currentEmail}
+          <div className="rounded-[16px] border border-grey-200 bg-grey-50 px-4 py-3 text-sm text-grey-700">
+            <span className="font-semibold text-grey-900">Email:</span> {currentEmail}
           </div>
         ) : null}
 
         {confirmVerification.isSuccess ? (
           <div className="grid gap-3">
             <Notice title="Email confirmed" tone="success" />
-            <p className="text-sm text-ash-600">Taking you to the final account step...</p>
+            <p className="text-sm text-grey-600">Taking you to the final account step...</p>
           </div>
         ) : null}
 
         <ErrorMessage error={confirmVerification.error} context="verification" />
 
         <div className="grid gap-2">
-          <span className="text-sm font-bold text-ash-700">
+          <span className="text-sm font-bold text-grey-700">
             Verification code <span className="ml-1 text-danger-600" aria-hidden="true">*</span>
           </span>
           <Controller
@@ -126,7 +126,7 @@ export function EmailVerificationForm() {
           {confirmForm.formState.errors.code?.message ? (
             <span className="text-xs font-semibold text-danger-700">{confirmForm.formState.errors.code.message}</span>
           ) : (
-            <span className="text-xs text-ash-500">Paste the 6-digit code from your email.</span>
+            <span className="text-xs text-grey-500">Paste the 6-digit code from your email.</span>
           )}
         </div>
 
@@ -134,18 +134,18 @@ export function EmailVerificationForm() {
           {confirmVerification.isPending ? "Confirming..." : "Confirm email"}
         </Button>
 
-        <div className="rounded-[16px] bg-ash-50 p-4 text-sm text-ash-600">
+        <div className="rounded-[16px] bg-grey-50 p-4 text-sm text-grey-600">
           <p>Didn&apos;t get it?</p>
           <button
-            className="mt-2 font-semibold text-primary transition hover:text-primary-strong disabled:cursor-not-allowed disabled:text-ash-400"
+            className="mt-2 font-semibold text-primary transition hover:text-primary-strong disabled:cursor-not-allowed disabled:text-grey-400"
             type="button"
             disabled={requestVerification.isPending || resendWait > 0}
             onClick={resendCode}
           >
             {requestVerification.isPending ? "Sending..." : resendWait > 0 ? `Resend code in ${resendWait}s` : "Resend code"}
           </button>
-          <p className="mt-3 text-xs text-ash-500">Need a different email? Go back to sign up and request a new code.</p>
-          {requestVerification.isSuccess ? <p className="mt-2 text-success">A fresh code has been sent.</p> : null}
+          <p className="mt-3 text-xs text-grey-500">Need a different email? Go back to sign up and request a new code.</p>
+          {requestVerification.isSuccess ? <p className="mt-2 text-success-700">A fresh code has been sent.</p> : null}
           <ErrorMessage error={requestVerification.error} context="verification" />
         </div>
       </form>

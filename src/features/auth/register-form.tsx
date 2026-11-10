@@ -107,10 +107,10 @@ export function RegisterForm() {
   return (
     <div className="grid gap-5">
       <GoogleAuthButton mode="signup" />
-      <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ash-400">
-        <span className="h-px flex-1 bg-ash-200" />
+      <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-grey-400">
+        <span className="h-px flex-1 bg-grey-200" />
         <span>{isCompletingAccount ? "Finish creating your account" : "Or continue with email"}</span>
-        <span className="h-px flex-1 bg-ash-200" />
+        <span className="h-px flex-1 bg-grey-200" />
       </div>
 
       {!isCompletingAccount ? (
@@ -209,7 +209,7 @@ export function RegisterForm() {
         </div>
       ) : null}
 
-      <p className="text-center text-sm text-ash-600">
+      <p className="text-center text-sm text-grey-600">
         Already have an account?{" "}
         <Link className="font-semibold text-primary hover:text-primary-strong" href="/login">
           Sign in

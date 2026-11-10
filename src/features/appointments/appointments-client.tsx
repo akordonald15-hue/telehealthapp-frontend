@@ -183,14 +183,14 @@ function AssistantBubble({ speaker, children }: { speaker: "assistant" | "user";
   return (
     <div className={cn("ct-rise-in flex items-end gap-2", speaker === "user" ? "justify-end" : "justify-start")}>
       {speaker === "assistant" ? (
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-primary-500 shadow-[0_10px_28px_-20px_rgba(57,97,169,0.5)] ring-1 ring-primary-100">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-primary-500 shadow-300 ring-1 ring-primary-100">
           <Bot className="h-5 w-5" />
         </span>
       ) : null}
       <div className={cn("grid max-w-[82%] gap-1 sm:max-w-[70%]", speaker === "user" && "justify-items-end")}>
         <div
           className={cn(
-            "rounded-[18px] px-4 py-3 text-sm leading-6 shadow-sm",
+            "rounded-[18px] px-4 py-3 text-sm leading-6 shadow-100",
             speaker === "user"
               ? "rounded-br-[6px] bg-primary-500 text-white"
               : "rounded-bl-[6px] border border-primary-100 bg-primary-50 text-grey-700",
@@ -208,7 +208,7 @@ function PatientAppointmentCard({ appointment }: { appointment: Appointment }) {
   const doctorName = appointment.doctor_profile?.display_name || "Caretekk doctor";
 
   return (
-    <article className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(19,25,39,0.38)]">
+    <article className="rounded-[8px] border border-white/70 bg-white p-5 shadow-300">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <p className="font-heading text-lg font-semibold text-grey-800">{doctorName}</p>
@@ -745,7 +745,7 @@ export function AppointmentsClient() {
                   </div>
                   <span className="ct-float-gentle relative flex h-28 w-28 items-center justify-center justify-self-end sm:h-36 sm:w-36">
                     <span className="absolute h-24 w-24 rounded-full bg-primary-100 sm:h-32 sm:w-32" />
-                    <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary-500 shadow-[0_18px_42px_-30px_rgba(57,97,169,0.48)] sm:h-20 sm:w-20">
+                    <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary-500 shadow-300 sm:h-20 sm:w-20">
                       <Bot className="h-9 w-9 sm:h-11 sm:w-11" />
                     </span>
                   </span>
@@ -760,7 +760,7 @@ export function AppointmentsClient() {
                     Let&apos;s Get Started
                   </Button>
                 ) : null}
-                <div className="grid gap-3 rounded-[8px] border border-grey-100 bg-white p-4 shadow-[0_18px_44px_-38px_rgba(19,25,39,0.28)]">
+                <div className="grid gap-3 rounded-[8px] border border-grey-100 bg-white p-4 shadow-300">
                   <p className="text-sm font-semibold text-grey-800">Here&apos;s how it works:</p>
                   {[
                     { icon: MessageCircle, title: "You tell me how you're feeling", text: "Share your symptoms in your own words." },
@@ -826,7 +826,7 @@ export function AppointmentsClient() {
                           ))}
                         </div>
                       </div>
-                      <form className="sticky bottom-0 flex min-h-14 items-center gap-2 rounded-full border border-grey-200 bg-white px-3 py-2 shadow-[0_18px_42px_-32px_rgba(19,25,39,0.35)]" onSubmit={handleAiSymptomSubmit}>
+                      <form className="sticky bottom-0 flex min-h-14 items-center gap-2 rounded-full border border-grey-200 bg-white px-3 py-2 shadow-300" onSubmit={handleAiSymptomSubmit}>
                         <input
                           value={aiSymptomText}
                           onChange={(event) => setAiSymptomText(event.target.value)}
@@ -1009,7 +1009,7 @@ export function AppointmentsClient() {
           onNext={appointments.data?.next ? () => setPage((current) => current + 1) : undefined}
           onPrevious={appointments.data?.previous ? () => setPage((current) => Math.max(1, current - 1)) : undefined}
           renderItem={(item) => (
-            <article key={item.id} className="rounded-[8px] border border-white/70 bg-white p-5 shadow-[0_20px_54px_-40px_rgba(19,25,39,0.38)]">
+            <article key={item.id} className="rounded-[8px] border border-white/70 bg-white p-5 shadow-300">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <p className="font-heading text-xl font-semibold text-grey-800">{formatAppointmentTime(item.scheduled_at)}</p>
@@ -1080,7 +1080,7 @@ export function AppointmentsClient() {
                   <article
                     key={doctor.id}
                     className={cn(
-                      "ct-rise-in grid gap-4 rounded-[8px] border bg-white p-4 shadow-[0_22px_56px_-46px_rgba(19,25,39,0.42)] transition duration-200",
+                      "ct-rise-in grid gap-4 rounded-[8px] border bg-white p-4 shadow-300 transition duration-200",
                       selected ? "border-primary-500 ring-2 ring-primary-100" : "border-grey-100",
                       index === 0 && !selectedDoctor ? "border-primary-300 bg-grey-50" : "",
                       dimmed && "opacity-55",
@@ -1313,7 +1313,7 @@ export function AppointmentsClient() {
                         }}
                         className={cn(
                           "min-h-10 rounded-[8px] px-2 text-sm font-semibold transition active:scale-[0.98]",
-                          scheduleDay === item.value ? "bg-white text-primary-500 shadow-sm" : "text-grey-800",
+                          scheduleDay === item.value ? "bg-white text-primary-500 shadow-100" : "text-grey-800",
                         )}
                       >
                         {item.label}

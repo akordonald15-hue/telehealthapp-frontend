@@ -149,7 +149,7 @@ function ResultPanel({
   return (
     <div className="ct-soft-panel min-w-0 rounded-[22px] p-4">
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white text-primary-500 shadow-sm">
+        <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white text-primary-500 shadow-100">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0 break-words">
@@ -239,7 +239,7 @@ function AssistantBubble({
     <div className={cn("flex", speaker === "user" ? "justify-end" : "justify-start")}>
       <div
         className={cn(
-          "max-w-[88%] rounded-[24px] px-4 py-3 text-sm leading-7 shadow-sm sm:max-w-[80%]",
+          "max-w-[88%] rounded-[24px] px-4 py-3 text-sm leading-7 shadow-100 sm:max-w-[80%]",
           speaker === "user"
             ? "bg-[linear-gradient(135deg,#3961A9,#6181BA)] text-white"
             : "border border-grey-200 bg-white text-grey-700",
@@ -449,7 +449,7 @@ export function TriageClient() {
                         value={symptomText}
                         onChange={(event) => setSymptomText(event.target.value)}
                         placeholder="Describe what you are feeling in your own words"
-                        className="min-h-32 w-full rounded-[18px] border border-grey-200 bg-white px-4 py-4 text-sm text-grey-800 outline-none transition shadow-[0_6px_20px_rgba(33,41,54,0.03)] placeholder:text-grey-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                        className="min-h-32 w-full rounded-[18px] border border-grey-200 bg-white px-4 py-4 text-sm text-grey-800 outline-none transition shadow-300 placeholder:text-grey-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
                       />
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
                         <button
@@ -461,7 +461,7 @@ export function TriageClient() {
                         >
                           <Mic className="h-4 w-4" />
                         </button>
-                        <Button type="submit" disabled={!canSubmitSymptomText} className="min-h-10 w-full rounded-full px-4 sm:w-auto">
+                        <Button type="submit" size="compact" disabled={!canSubmitSymptomText} className="w-full sm:w-auto">
                           <SendHorizonal className="mr-2 h-4 w-4" />
                           Continue
                         </Button>
@@ -500,17 +500,17 @@ export function TriageClient() {
                       <p className="mt-2 text-sm leading-7 text-grey-600">
                         Your care summary is ready for the doctor, so you can continue the conversation with the right context already in place.
                       </p>
-                      <div className="mt-4 flex flex-col gap-3 rounded-[18px] border border-grey-200 bg-white/96 p-3 shadow-[0_18px_40px_-34px_rgba(19,25,39,0.18)] sm:flex-row sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+                      <div className="mt-4 flex flex-col gap-3 rounded-[18px] border border-grey-200 bg-white/96 p-3 shadow-300 sm:flex-row sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
                         <Link
                           href={nextStepHref}
                           onClick={triageDraft.clearDraft}
-                          className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#3961A9,#6181BA)] px-4 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(57,97,169,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(57,97,169,0.3)]"
+                          className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#3961A9,#6181BA)] px-4 text-sm font-extrabold text-white shadow-400 transition duration-200 hover:-translate-y-0.5 hover:shadow-500"
                         >
                           {nextStepLabel}
                         </Link>
                         <Link
                           href="/appointments"
-                          className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-grey-200 bg-white px-4 text-sm font-extrabold text-grey-800 shadow-[0_8px_24px_rgba(33,41,54,0.05)] transition duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:bg-grey-50"
+                          className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-grey-200 bg-white px-4 text-sm font-extrabold text-grey-800 shadow-400 transition duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:bg-grey-50"
                         >
                           Review appointments
                         </Link>
@@ -562,7 +562,7 @@ export function TriageClient() {
             </Button>
             <Link
               href="/appointments"
-              className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-grey-200 bg-white px-4 text-sm font-extrabold text-grey-800 shadow-[0_8px_24px_rgba(33,41,54,0.05)] transition duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:bg-grey-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-grey-200 bg-white px-4 text-sm font-extrabold text-grey-800 shadow-400 transition duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:bg-grey-50"
             >
               Back to appointments
             </Link>

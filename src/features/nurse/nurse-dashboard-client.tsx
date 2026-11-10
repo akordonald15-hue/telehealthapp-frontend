@@ -88,7 +88,7 @@ export function NurseDashboardClient() {
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,var(--primary-strong)_0%,var(--primary)_55%,var(--accent)_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(57,97,169,0.46)] sm:p-8">
+        <div className="rounded-[30px] border border-white/70 bg-[linear-gradient(135deg,var(--primary-strong)_0%,var(--primary)_55%,var(--accent)_100%)] p-6 text-white shadow-300 sm:p-8">
           <p className="ct-caption text-primary-100">Today</p>
           <h2 className="ct-dashboard-title mt-4 text-white sm:text-[2.3rem]">
             {activeRequest ? `Next visit: ${homeCareStatusLabel(activeRequest.status)}` : "You're ready for the next request"}
@@ -99,7 +99,7 @@ export function NurseDashboardClient() {
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href={activeRequest ? `/nurse/request/${activeRequest.id}` : "/nurse/requests"}
-              className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[var(--primary)] shadow-lg shadow-primary-700/20 transition hover:-translate-y-0.5"
+              className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-white px-5 text-sm font-extrabold text-[var(--primary)] shadow-400 shadow-primary-700/20 transition hover:-translate-y-0.5"
             >
               {activeRequest ? "Open active request" : "View assigned requests"}
             </Link>

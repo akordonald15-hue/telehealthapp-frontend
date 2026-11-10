@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
-import { Input, Textarea } from "@/components/ui/input";
+import { Input, Textarea, Select } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
@@ -441,7 +441,7 @@ export function HomeCareBookingClient() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Location" required>
-            <select
+            <Select fieldSize="md"
               value={zone}
               onChange={(event) => {
                 setZone(event.target.value as HomeCareZone | "");
@@ -449,7 +449,7 @@ export function HomeCareBookingClient() {
                 setSelectedNurse(null);
                 setPreferredTime("");
               }}
-              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800 outline-none transition focus:border-[var(--primary)]"
+              className="transition"
               required
             >
               <option value="">Select location</option>
@@ -458,17 +458,17 @@ export function HomeCareBookingClient() {
                   {item.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
           <Field label="Service" required>
-            <select
+            <Select fieldSize="md"
               value={selectedServiceId}
               onChange={(event) => {
                 setSelectedServiceId(event.target.value ? Number(event.target.value) : "");
                 setSelectedNurse(null);
                 setPreferredTime("");
               }}
-              className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-800 outline-none transition focus:border-[var(--primary)]"
+              className="transition"
               disabled={!zone || servicesQuery.isLoading}
               required
             >
@@ -478,7 +478,7 @@ export function HomeCareBookingClient() {
                   {service.name} - {formatMoney(service.price)}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
         </div>
 

@@ -190,7 +190,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <Link
                     href="/messages"
                     aria-label="Open notifications"
-                    className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-grey-800 shadow-[0_14px_34px_-28px_rgba(19,25,39,0.7)] ring-1 ring-grey-200 transition hover:-translate-y-0.5 hover:text-primary-500"
+                    className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-grey-800 shadow-300 ring-1 ring-grey-200 transition hover:-translate-y-0.5 hover:text-primary-500"
                   >
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 ? (
@@ -221,7 +221,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {user ? (
             <nav
               className={cn(
-                "fixed inset-x-0 bottom-0 z-40 border-t border-grey-200 bg-white/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-18px_54px_-42px_rgba(19,25,39,0.5)] backdrop-blur lg:hidden",
+                "fixed inset-x-0 bottom-0 z-40 border-t border-grey-200 bg-white/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-300 backdrop-blur lg:hidden",
                 // gap-x keeps "Book Doctor" and "Appointments" from touching at 375px, where
                 // each label fills its column exactly.
                 user.role === "patient"
@@ -248,7 +248,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       className={cn(
                         "flex h-9 w-9 items-center justify-center rounded-[8px] bg-grey-50 transition-all duration-200",
                         active && "scale-105 bg-primary-100",
-                        item.primary && "h-[52px] w-[52px] rounded-full bg-white text-primary-500 shadow-[0_18px_38px_-22px_rgba(57,97,169,0.45)] ring-2 ring-primary-100",
+                        item.primary && "h-[52px] w-[52px] rounded-full bg-white text-primary-500 shadow-300 ring-2 ring-primary-100",
                       )}
                     >
                       <Icon className={item.primary ? "h-6 w-6" : "h-5 w-5"} />

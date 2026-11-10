@@ -156,7 +156,7 @@ export function PwaRegister() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[70] flex justify-center px-4">
-      <div className="pointer-events-auto w-full max-w-sm rounded-[20px] border border-white/80 bg-white/95 p-3 shadow-[0_24px_72px_-40px_rgba(19,25,39,0.34)] backdrop-blur sm:max-w-md sm:p-4">
+      <div className="pointer-events-auto w-full max-w-sm rounded-[20px] border border-white/80 bg-white/95 p-3 shadow-300 backdrop-blur sm:max-w-md sm:p-4">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[var(--primary-soft)] text-[var(--primary)]">
             {showIosHint ? <Smartphone className="h-5 w-5" /> : <Download className="h-5 w-5" />}

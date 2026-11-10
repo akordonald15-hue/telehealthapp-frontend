@@ -154,7 +154,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
       ) : request ? (
         <div className={`grid gap-4 ${HOMECARE_BOTTOM_SAFE_PADDING}`}>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.86fr)]">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-heading text-2xl font-semibold text-grey-800">{homeCareStatusLabel(request.status)}</h2>
                 <Badge tone="blue">{bookingSourceLabel(request.booking_source)}</Badge>
@@ -187,7 +187,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
               <h2 className="font-heading text-xl font-semibold text-grey-800">Status timeline</h2>
               <div className="mt-5 grid gap-3">
                 {homeCareTimeline.map((step) => {
@@ -297,7 +297,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.86fr)]">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
               <h2 className="font-heading text-xl font-semibold text-grey-800">Request activity</h2>
               {eventsQuery.isLoading ? (
                 <InlineLoader className="mt-5" compact label="Loading request activity" />
@@ -318,7 +318,7 @@ export function HomeCareRequestDetailClient({ requestId }: { requestId: number }
               )}
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <MapPinned className="h-5 w-5" />
@@ -408,7 +408,7 @@ function ActionPanel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid content-start gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)] sm:p-6">
+    <div className="grid content-start gap-4 rounded-[28px] border border-white/70 bg-white p-5 shadow-300 sm:p-6">
       <div>
         <h2 className="font-heading text-xl font-semibold text-grey-800">{title}</h2>
         <p className="mt-1 text-sm leading-6 text-grey-600">{description}</p>

@@ -70,7 +70,7 @@ export function ReferralLandingClient({ code }: { code: string }) {
         <div className="grid gap-2">
           <Link
             href="/dashboard"
-            className="inline-flex min-h-13 items-center justify-center rounded-[8px] bg-[var(--primary)] px-6 text-base font-semibold text-white shadow-[0_1px_2px_rgba(19,25,39,0.08),0_8px_20px_-10px_rgba(57,97,169,0.45)] transition hover:bg-[var(--primary-strong)]"
+            className="inline-flex min-h-13 items-center justify-center rounded-[8px] bg-[var(--primary)] px-6 text-base font-semibold text-white shadow-300 transition hover:bg-[var(--primary-strong)]"
           >
             Go to Caretekk
           </Link>
@@ -132,7 +132,7 @@ export function ReferralLandingClient({ code }: { code: string }) {
       <div className="grid gap-2">
         <Link
           href={signupHref}
-          className="inline-flex min-h-13 items-center justify-center rounded-[8px] bg-[var(--primary)] px-6 text-base font-semibold text-white shadow-[0_1px_2px_rgba(19,25,39,0.08),0_8px_20px_-10px_rgba(57,97,169,0.45)] transition hover:bg-[var(--primary-strong)]"
+          className="inline-flex min-h-13 items-center justify-center rounded-[8px] bg-[var(--primary)] px-6 text-base font-semibold text-white shadow-300 transition hover:bg-[var(--primary-strong)]"
         >
           Get Started
         </Link>

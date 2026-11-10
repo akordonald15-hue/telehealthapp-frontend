@@ -136,7 +136,7 @@ export function Modal({
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
         className={cn(
-          "flex h-[100dvh] max-h-[100dvh] w-screen flex-col overflow-hidden border-0 bg-white shadow-[0_30px_90px_-42px_rgba(19,25,39,0.55)] outline-none sm:h-auto sm:max-h-[85dvh] sm:w-[94vw] sm:rounded-[8px] sm:border sm:border-white/75",
+          "flex h-[100dvh] max-h-[100dvh] w-screen flex-col overflow-hidden border-0 bg-white shadow-300 outline-none sm:h-auto sm:max-h-[85dvh] sm:w-[94vw] sm:rounded-[8px] sm:border sm:border-white/75",
           sizeClasses[size],
           className,
         )}

@@ -16,6 +16,7 @@ import { useCurrentUser } from "@/lib/auth/use-auth";
 import { buildWebSocketUrl } from "@/lib/realtime";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { formatDateTime } from "@/lib/utils";
+import { Select } from "@/components/ui/input";
 import {
   activeAssignmentForRequest,
   bookingSourceLabel,
@@ -243,7 +244,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
       ) : request ? (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
               <div className="flex flex-wrap items-center gap-3">
                 <h2 className="font-heading text-2xl font-semibold text-grey-800">{request.contact_name_snapshot || "Patient request"}</h2>
                 <span className="rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
@@ -281,7 +282,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <ShieldCheck className="h-5 w-5" />
@@ -324,7 +325,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
           </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <Phone className="h-5 w-5" />
@@ -336,17 +337,17 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
               <div className="mt-6 grid gap-3">
                 <label className="grid gap-2 text-sm font-semibold text-grey-800">
                   Verification outcome
-                  <select
+                  <Select fieldSize="md"
                     value={verificationChoice}
                     onChange={(event) => setVerificationChoice(event.target.value as VerificationOutcomeOption)}
-                    className="min-h-11 rounded-[12px] border border-grey-200 bg-white px-3 text-sm font-medium text-grey-800 outline-none transition focus:border-[var(--primary)]"
+                    className="transition"
                   >
                     {verificationOutcomeOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </label>
                 <p className="text-sm text-grey-500">
                   {verificationOutcomeOptions.find((option) => option.value === verificationChoice)?.description}
@@ -371,7 +372,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <Navigation className="h-5 w-5" />
@@ -410,7 +411,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.95fr)]">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <Timer className="h-5 w-5" />
@@ -455,7 +456,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
               <h2 className="font-heading text-xl font-semibold text-grey-800">Request timeline</h2>
               <p className="mt-1 text-sm text-grey-500">A clear record of what has happened so far.</p>
               {eventsQuery.isLoading ? (
@@ -478,7 +479,7 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(19,25,39,0.45)]">
+          <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
             <h2 className="font-heading text-xl font-semibold text-grey-800">Travel tracking</h2>
             <p className="mt-1 text-sm text-grey-500">Recent shared tracking points for this request.</p>
             {trackingQuery.isLoading ? (

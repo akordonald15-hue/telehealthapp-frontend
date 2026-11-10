@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Section } from "@/components/ui/section";
 import { formatMoney } from "@/lib/utils";
 import { dashboardNames } from "./dashboard-names";
+import { Select } from "@/components/ui/input";
 
 // Training fixtures only. These accounts and events are not fetched from production.
 const users = dashboardNames.map((name, index) => ({
@@ -179,7 +180,7 @@ export function TrainingDashboard() {
 
     <div className="grid gap-4 xl:grid-cols-2">
       <Panel title="User management">
-        <div className="mb-3 flex flex-wrap gap-2"><label className="text-sm font-semibold text-grey-500">Role <select aria-label="Filter users by role" value={filter} onChange={(event) => { setFilter(event.target.value); setPage(1); }} className="ml-2 min-h-10 rounded-[12px] border border-grey-200 bg-white px-3 text-grey-700">{["All roles", "Patient", "Doctor", "Nurse"].map((role) => <option key={role}>{role}</option>)}</select></label><input aria-label="Search accounts" placeholder="Search email" value={search} onChange={(event) => { setSearch(event.target.value.toLowerCase()); setPage(1); }} className="min-h-10 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-700" /></div>
+        <div className="mb-3 flex flex-wrap gap-2"><label className="text-sm font-semibold text-grey-500">Role <Select fieldSize="md" aria-label="Filter users by role" value={filter} onChange={(event) => { setFilter(event.target.value); setPage(1); }} className="ml-2 inline-block w-auto!">{["All roles", "Patient", "Doctor", "Nurse"].map((role) => <option key={role}>{role}</option>)}</Select></label><input aria-label="Search accounts" placeholder="Search email" value={search} onChange={(event) => { setSearch(event.target.value.toLowerCase()); setPage(1); }} className="min-h-10 rounded-[12px] border border-grey-200 bg-white px-3 text-sm text-grey-700" /></div>
         <div className="grid gap-3">{pagedUsers.map((item) => <article key={item.email} className="rounded-[20px] border border-grey-200 bg-grey-50 p-4"><p className="break-all text-sm font-bold text-grey-800">{item.email}</p><div className="mt-2 flex gap-2"><Badge tone="blue">{item.role}</Badge><Badge tone={item.status === "Pending" ? "amber" : "green"}>{item.status}</Badge></div></article>)}</div>
         <div className="mt-3 flex items-center justify-between gap-3 text-xs text-grey-500"><span>{visibleUsers.length} of {users.length} users · Page {page} of {pageCount}</span><div className="flex gap-2"><button type="button" disabled={page === 1} onClick={() => setPage(page - 1)} className="rounded-lg border border-grey-200 px-3 py-2 disabled:opacity-40">Previous</button><button type="button" disabled={page === pageCount} onClick={() => setPage(page + 1)} className="rounded-lg border border-grey-200 px-3 py-2 disabled:opacity-40">Next</button></div></div>
       </Panel>

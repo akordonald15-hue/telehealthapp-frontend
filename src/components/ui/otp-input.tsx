@@ -115,7 +115,7 @@ export function OtpInput({
           aria-label={`Digit ${index + 1} of ${length}`}
           aria-invalid={ariaInvalid || undefined}
           className={cn(
-            "h-14 w-12 rounded-[14px] border border-ash-200 bg-surface text-center font-heading text-2xl font-semibold text-ash-900 shadow-[0_8px_24px_rgba(33,41,54,0.035)] outline-none transition placeholder:text-ash-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-50 sm:h-16 sm:w-14",
+            "h-14 w-12 rounded-[14px] border border-grey-200 bg-surface text-center font-heading text-2xl font-semibold text-grey-900 shadow-400 outline-none transition placeholder:text-grey-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-50 sm:h-16 sm:w-14",
             ariaInvalid && "border-danger-300 focus:ring-danger-100",
           )}
         />

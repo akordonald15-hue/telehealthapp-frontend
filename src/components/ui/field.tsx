@@ -1,6 +1,7 @@
 import { cloneElement, isValidElement, useId } from "react";
 import type { ReactElement, ReactNode } from "react";
 
+// Figma "DESIGN SYSTEM" → Input: label (Inter Tight 16/20, 500), 8px gap, helper / error text (Manrope 14/20).
 export function Field({
   label,
   error,
@@ -27,14 +28,14 @@ export function Field({
     : children;
 
   return (
-    <label className="grid gap-2">
-      <span className="text-sm font-bold text-ash-700">
+    <label className="grid content-start gap-2">
+      <span className="font-inter-tight text-base font-medium leading-5 text-black-500">
         {label}
-        {required ? <span className="ml-1 text-danger-600" aria-hidden="true">*</span> : null}
+        {required ? <span className="ml-1 text-danger-500" aria-hidden="true">*</span> : null}
       </span>
       {control}
-      {hint && !error ? <span id={hintId} className="text-xs text-ash-500">{hint}</span> : null}
-      {error ? <span id={errorId} className="text-xs font-semibold text-danger-700">{error}</span> : null}
+      {hint && !error ? <span id={hintId} className="type-helper-text text-grey-500">{hint}</span> : null}
+      {error ? <span id={errorId} className="type-helper-text text-danger-600">{error}</span> : null}
     </label>
   );
 }
