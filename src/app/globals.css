@@ -547,59 +547,64 @@ textarea {
   color: var(--primary-strong);
 }
 
+/* Same look as <Button size="md"> (Figma Button, Size=Large): prefer the Button component in new code. */
 .lf-btn {
   display: inline-flex;
-  min-height: 52px;
+  min-height: 48px;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  padding-inline: 22px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  line-height: 1;
+  gap: 8px;
+  border-radius: 12px;
+  padding-inline: 20px;
+  font-family: var(--ds-font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.25rem;
   transition:
-    transform 120ms ease,
-    box-shadow 120ms ease,
-    background-color 120ms ease,
-    border-color 120ms ease,
-    color 120ms ease,
-    opacity 120ms ease;
-}
-
-.lf-btn:hover {
-  transform: translateY(-1px);
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
 }
 
 .lf-btn:focus-visible {
-  outline: 3px solid rgba(57, 97, 169, 0.18);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus);
 }
 
 .lf-btn-primary {
-  background: linear-gradient(135deg, var(--primary-strong) 0%, var(--primary) 58%, var(--accent) 100%);
+  background: var(--color-primary-500);
   color: #fff;
-  box-shadow: 0 16px 34px rgba(57, 97, 169, 0.22);
 }
 
 .lf-btn-primary:hover {
-  box-shadow: 0 20px 40px rgba(57, 97, 169, 0.26);
+  background: var(--color-primary-600);
+}
+
+.lf-btn-primary:active {
+  background: var(--color-primary-700);
 }
 
 .lf-btn-secondary {
-  border: 1px solid rgba(57, 97, 169, 0.12);
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--primary-strong);
-  box-shadow: 0 10px 26px rgba(19, 25, 39, 0.06);
+  border: 1.5px solid var(--color-primary-500);
+  background: #fff;
+  color: var(--color-primary-500);
 }
 
 .lf-btn-secondary:hover {
-  background: var(--primary-soft);
+  background: var(--color-primary-50);
+}
+
+.lf-btn-secondary:active {
+  background: var(--color-primary-200);
 }
 
 .lf-btn-dark {
-  background: #131927;
+  background: var(--color-grey-900);
   color: #fff;
-  box-shadow: 0 14px 28px rgba(20, 34, 58, 0.18);
+}
+
+.lf-btn-dark:hover {
+  background: var(--color-grey-800);
 }
 
 .lf-btn-ghost-light {
