@@ -35,6 +35,285 @@
   --font-sans: var(--font-lexend), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* ==========================================================================
+   Caretekk design system — Figma "CARETEKK TECHNOLOGIES" → page "DESIGN SYSTEM".
+   Use these tokens for all new UI. Usage and naming: docs/design-system.md.
+   The older tokens above (bg-primary, text-muted, …) stay until pages are migrated.
+   ========================================================================== */
+
+@theme inline {
+  --font-manrope: var(--ds-font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-inter-tight: var(--ds-font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+  /* Colour scales, 900 (darkest) → 50 (lightest). 500 is the swatch Figma labels "Primary"
+     (for Grey, "500"). White with opacity: use bg-white/80 etc. */
+
+  /* Primary */
+  --color-primary-900: #0B1322;
+  --color-primary-800: #172744;
+  --color-primary-700: #223A65;
+  --color-primary-600: #2E4E87;
+  --color-primary-500: #3961A9;
+  --color-primary-400: #6181BA;
+  --color-primary-300: #88A0CB;
+  --color-primary-200: #B0C0DD;
+  --color-primary-100: #D7DFEE;
+  --color-primary-50: #EBEFF6;
+
+  /* Grey */
+  --color-grey-900: #131927;
+  --color-grey-800: #212936;
+  --color-grey-700: #394050;
+  --color-grey-600: #4D5461;
+  --color-grey-500: #6D717F;
+  --color-grey-400: #9EA2AE;
+  --color-grey-300: #D2D5DB;
+  --color-grey-200: #E5E7EA;
+  --color-grey-100: #F3F4F6;
+  --color-grey-50: #F9FAFB;
+
+  /* Black */
+  --color-black-900: #06080B;
+  --color-black-800: #0C1015;
+  --color-black-700: #111920;
+  --color-black-600: #17212A;
+  --color-black-500: #1D2935;
+  --color-black-400: #4A545D;
+  --color-black-300: #777F86;
+  --color-black-200: #A5A9AE;
+  --color-black-100: #D2D4D7;
+  --color-black-50: #E8EAEB;
+
+  /* Green / Success */
+  --color-success-900: #0A2319;
+  --color-success-800: #144633;
+  --color-success-700: #1F684C;
+  --color-success-600: #298B66;
+  --color-success-500: #33AE7F;
+  --color-success-400: #5CBE99;
+  --color-success-300: #85CEB2;
+  --color-success-200: #ADDFCC;
+  --color-success-100: #D6EFE5;
+  --color-success-50: #EBF7F2;
+
+  /* Red / Danger */
+  --color-danger-900: #641D1A;
+  --color-danger-800: #832523;
+  --color-danger-700: #A9302D;
+  --color-danger-600: #D93E39;
+  --color-danger-500: #EE443F;
+  --color-danger-400: #F16965;
+  --color-danger-300: #F4827E;
+  --color-danger-200: #F7A9A7;
+  --color-danger-100: #FAC5C3;
+  --color-danger-50: #FDECEC;
+
+  /* Yellow / Warning */
+  --color-warning-900: #6B4700;
+  --color-warning-800: #8C5E00;
+  --color-warning-700: #B57900;
+  --color-warning-600: #E89B00;
+  --color-warning-500: #FFAA00;
+  --color-warning-400: #FFBB33;
+  --color-warning-300: #FFC654;
+  --color-warning-200: #FFD88A;
+  --color-warning-100: #FFE5B0;
+  --color-warning-50: #FFF7E6;
+
+  /* Blue / Info */
+  --color-info-900: #151F2A;
+  --color-info-800: #2B3E55;
+  --color-info-700: #405E7F;
+  --color-info-600: #567DAA;
+  --color-info-500: #6B9CD4;
+  --color-info-400: #89B0DD;
+  --color-info-300: #A6C4E5;
+  --color-info-200: #C4D7EE;
+  --color-info-100: #E1EBF6;
+  --color-info-50: #F0F5FB;
+
+  /* Shadow 100–800 */
+  --shadow-100: 0 4px 4px -2px rgb(19 25 39 / 0.08), 0 2px 4px -2px rgb(19 25 39 / 0.12);
+  --shadow-200: 0 8px 8px -4px rgb(19 25 39 / 0.08), 0 4px 6px -4px rgb(19 25 39 / 0.12);
+  --shadow-300: 0 8px 16px -6px rgb(19 25 39 / 0.08), 0 6px 8px -6px rgb(19 25 39 / 0.12);
+  --shadow-400: 0 8px 24px -4px rgb(19 25 39 / 0.08), 0 6px 12px -6px rgb(19 25 39 / 0.12);
+  --shadow-500: 0 10px 32px -4px rgb(19 25 39 / 0.1), 0 6px 14px -6px rgb(19 25 39 / 0.12);
+  --shadow-600: 0 12px 42px -4px rgb(19 25 39 / 0.12), 0 8px 18px -6px rgb(19 25 39 / 0.12);
+  --shadow-700: 0 14px 64px -4px rgb(19 25 39 / 0.12), 0 8px 22px -6px rgb(19 25 39 / 0.12);
+  --shadow-800: 0 18px 88px -4px rgb(19 25 39 / 0.14), 0 8px 28px -6px rgb(19 25 39 / 0.12);
+}
+
+/* Text styles: one class sets font, size, weight, line height and letter spacing. */
+@utility type-heading-1 {
+  font-family: var(--font-manrope);
+  font-size: 60px;
+  font-weight: 700;
+  line-height: 72px;
+  letter-spacing: -0.6px;
+}
+
+@utility type-heading-2 {
+  font-family: var(--font-manrope);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 56px;
+  letter-spacing: -0.48px;
+}
+
+@utility type-heading-3 {
+  font-family: var(--font-manrope);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 48px;
+  letter-spacing: -0.4px;
+}
+
+@utility type-heading-4 {
+  font-family: var(--font-manrope);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 40px;
+  letter-spacing: -0.32px;
+}
+
+@utility type-page-title {
+  font-family: var(--font-manrope);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: -0.24px;
+}
+
+@utility type-section-heading {
+  font-family: var(--font-manrope);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+  letter-spacing: -0.18px;
+}
+
+@utility type-card-title {
+  font-family: var(--font-manrope);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 18px;
+  letter-spacing: -0.15px;
+}
+
+@utility type-modal-title {
+  font-family: var(--font-manrope);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 18px;
+  letter-spacing: -0.15px;
+}
+
+@utility type-body-giant {
+  font-family: var(--font-inter-tight);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0;
+}
+
+@utility type-body-lg {
+  font-family: var(--font-inter-tight);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+
+@utility type-body-md {
+  font-family: var(--font-inter-tight);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0;
+}
+
+@utility type-body-sm {
+  font-family: var(--font-inter-tight);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0;
+}
+
+@utility type-body-tiny {
+  font-family: var(--font-inter-tight);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 12px;
+  letter-spacing: 0;
+}
+
+@utility type-input-label {
+  font-family: var(--font-inter-tight);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 14px;
+  letter-spacing: -0.12px;
+}
+
+@utility type-input-text {
+  font-family: var(--font-manrope);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+
+@utility type-helper-text {
+  font-family: var(--font-manrope);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+
+@utility type-table-data {
+  font-family: var(--font-inter-tight);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 14px;
+  letter-spacing: -0.12px;
+}
+
+@utility type-status-tag {
+  font-family: var(--font-inter-tight);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 14px;
+  letter-spacing: -0.11px;
+}
+
+@utility type-muted-label {
+  font-family: var(--font-inter-tight);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 14px;
+  letter-spacing: -0.11px;
+}
+
+@utility type-cta-button {
+  font-family: var(--font-inter-tight);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: -0.13px;
+}
+
+@utility type-nav-item {
+  font-family: var(--font-inter-tight);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: -0.13px;
+}
+
 html {
   min-height: 100%;
   overflow-x: hidden;
