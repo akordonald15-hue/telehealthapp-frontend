@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Lexend } from "next/font/google";
+import { Inter_Tight, Lexend, Manrope } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/app/providers";
@@ -9,6 +9,21 @@ const lexend = Lexend({
   subsets: ["latin"],
   weight: ["200", "300", "400", "500", "600", "700", "800"],
   variable: "--font-lexend",
+});
+
+// Design-system fonts (Figma "DESIGN SYSTEM" page). Not preloaded until pages adopt them.
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--ds-font-manrope",
+  preload: false,
+});
+
+const interTight = Inter_Tight({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--ds-font-inter-tight",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -48,7 +63,7 @@ export default function RootLayout({
 }>) {
   return (
     // Browser extensions (e.g. QuillBot) add attributes to <html> before hydration; this only silences that element.
-    <html lang="en" className={`h-full ${lexend.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`h-full ${lexend.variable} ${manrope.variable} ${interTight.variable}`} suppressHydrationWarning>
       <body className="min-h-full bg-[#F9FAFB] text-[#1F2937] antialiased">
         <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
         <Providers>{children}</Providers>
