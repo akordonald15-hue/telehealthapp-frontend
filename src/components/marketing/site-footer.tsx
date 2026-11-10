@@ -26,8 +26,8 @@ export function SiteFooter() {
       className="relative overflow-hidden rounded-[30px] text-white lg:mx-[10px] lg:mb-[9px]"
       // Inline so the white text never ends up on the page background if the utility CSS is missing.
       style={{
-        backgroundColor: "#3961A9",
-        backgroundImage: "linear-gradient(180deg, #3961A9 0%, #3961A9 85%, #6181BA 100%)",
+        backgroundColor: "#2563eb",
+        backgroundImage: "linear-gradient(180deg, #2563eb 0%, #2563eb 85%, #60a5fa 100%)",
       }}
     >
       {/* Keep the Figma dot/grid geometry; quieter patterns preserve white text contrast. */}
@@ -82,7 +82,7 @@ export function SiteFooter() {
             <div className="mt-8 flex gap-2.5 md:mt-[47px] md:gap-[14px]">
               {socialLinks.map(({ label, href, icon, w, h }) => {
                 const circle =
-                  "flex aspect-square min-w-0 max-w-14 flex-1 items-center justify-center rounded-full border border-primary-600 bg-primary-50 md:max-w-[75px]";
+                  "flex aspect-square min-w-0 max-w-14 flex-1 items-center justify-center rounded-full border border-[#1e40af] bg-[#eff6ff] md:max-w-[75px]";
                 const glyph = (
                   // Each icon keeps its Figma size relative to the 75px Figma circle, so it scales with the circle.
                   <Image
@@ -173,13 +173,13 @@ function NewsletterForm() {
           disabled
           aria-describedby="newsletter-unavailable"
           placeholder="Sign-up coming soon"
-          className={`h-12 min-w-0 flex-[402] rounded-[14px] bg-primary-50 px-4 text-sm! font-extralight! leading-[1.2]! text-black outline-none placeholder:text-black focus:ring-2 focus:ring-white/70 md:h-16 md:w-[320px] md:flex-none md:rounded-2xl md:px-7 md:text-lg! ${formShadow}`}
+          className={`h-12 min-w-0 flex-[402] rounded-[14px] bg-[#eff6ff] px-4 text-sm! font-extralight! leading-[1.2]! text-black outline-none placeholder:text-black focus:ring-2 focus:ring-white/70 md:h-16 md:w-[320px] md:flex-none md:rounded-2xl md:px-7 md:text-lg! ${formShadow}`}
         />
         <button
           type="button"
           disabled
           aria-describedby="newsletter-unavailable"
-          className={`inline-flex h-12 min-w-0 shrink-0 items-center justify-center gap-2.5 rounded-[50px] bg-primary-600 px-4 transition disabled:cursor-not-allowed disabled:opacity-70 md:h-16 md:w-[200px] md:flex-none md:gap-3.5 md:px-2.5 ${formShadow}`}
+          className={`inline-flex h-12 min-w-0 shrink-0 items-center justify-center gap-2.5 rounded-[50px] bg-[#1e40af] px-4 transition disabled:cursor-not-allowed disabled:opacity-70 md:h-16 md:w-[200px] md:flex-none md:gap-3.5 md:px-2.5 ${formShadow}`}
         >
           <span className="text-sm font-normal leading-[1.2] md:text-lg">Subscribe</span>
           {/* Vuesax arrow exported from Figma */}

@@ -1,9 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Inter_Tight, Manrope } from "next/font/google";
+import { Inter_Tight, Lexend, Manrope } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/app/providers";
 import { BRAND_NAME } from "@/lib/brand";
+
+// Landing page font (Figma landing design).
+const lexend = Lexend({
+  subsets: ["latin"],
+  variable: "--font-lexend",
+});
 
 // Design-system fonts (Figma "DESIGN SYSTEM" page): Inter Tight for body text, Manrope for headings.
 // Variable fonts: every weight the UI uses (200–800) is available.
@@ -54,7 +60,7 @@ export default function RootLayout({
 }>) {
   return (
     // Browser extensions (e.g. QuillBot) add attributes to <html> before hydration; this only silences that element.
-    <html lang="en" className={`h-full ${manrope.variable} ${interTight.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`h-full ${lexend.variable} ${manrope.variable} ${interTight.variable}`} suppressHydrationWarning>
       <body className="min-h-full bg-grey-50 text-grey-800 antialiased">
         <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
         <Providers>{children}</Providers>

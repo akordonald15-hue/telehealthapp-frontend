@@ -30,7 +30,7 @@ export function ServiceCard({
                     viewBox="0 0 174 247"
                     preserveAspectRatio="none"
                     fill="none"
-                    stroke="#B0C0DD"
+                    stroke="#C3CEF3"
                     className="absolute left-0 top-0 h-full w-[38%]"
                 >
                     <path d="M0 34H174M0 155H174M82 0 8 155" vectorEffect="non-scaling-stroke" />
@@ -47,11 +47,11 @@ export function ServiceCard({
             </div>
 
             <div className="px-[47px] pt-[83px] max-sm:px-[28px]">
-                <h3 className="max-w-[250px] text-[25px] font-semibold leading-[32px] text-grey-900">{title}</h3>
-                <p className="mt-[16px] max-w-[360px] text-[15.5px] leading-[25.5px] text-grey-700">{text}</p>
+                <h3 className="max-w-[250px] text-[25px] font-semibold leading-[32px] text-[#0B1C30]">{title}</h3>
+                <p className="mt-[16px] max-w-[360px] text-[15.5px] leading-[25.5px] text-[#434655]">{text}</p>
                 <Link
                     href={href}
-                    className="group mt-[21px] inline-flex items-center gap-[14px] rounded-md text-[16px] font-medium text-primary-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/20"
+                    className="group mt-[21px] inline-flex items-center gap-[14px] rounded-md text-[16px] font-medium text-[#1E40AF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/20"
                 >
                     {cta}
                     <ArrowLongRightIcon className="h-[14px] w-[20px] transition-transform duration-300 group-hover:translate-x-1" />

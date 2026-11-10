@@ -121,7 +121,7 @@ export function MarketingHeader() {
                 onPointerLeave={(event) => !event.currentTarget.matches(":focus-visible") && clearUnderline(event.currentTarget)}
                 onFocus={(event) => event.currentTarget.matches(":focus-visible") && drawUnderline(event.currentTarget)}
                 onBlur={(event) => !event.currentTarget.matches(":hover") && clearUnderline(event.currentTarget)}
-                className={`relative rounded-md text-[15.25px] leading-none transition-colors hover:text-primary-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/15 ${item.href === ACTIVE_HREF ? "font-medium text-primary-600" : "text-grey-800"
+                className={`relative rounded-md text-[15.25px] leading-none transition-colors hover:text-[#1E40AF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${item.href === ACTIVE_HREF ? "font-medium text-[#1E40AF]" : "text-[#243345]"
                   }`}
               >
                 {item.label}
@@ -129,7 +129,7 @@ export function MarketingHeader() {
                   data-underline
                   aria-hidden="true"
                   style={{ transform: "scaleX(0)" }}
-                  className="pointer-events-none absolute inset-x-0 -bottom-[7px] h-[1.25px] origin-left rounded-full bg-primary-600"
+                  className="pointer-events-none absolute inset-x-0 -bottom-[7px] h-[1.25px] origin-left rounded-full bg-[#1E40AF]"
                 />
               </a>
             ))}
@@ -138,7 +138,7 @@ export function MarketingHeader() {
           <Link
             href="#contact"
             data-intro="cta"
-            className="ml-auto inline-flex h-[49.7px] w-[184.1px] items-center justify-center gap-[18.3px] rounded-full bg-primary-600 text-[15.75px] font-medium leading-none text-white hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/25 max-lg:h-11 max-lg:w-auto max-lg:gap-4 max-lg:rounded-full max-lg:px-6 max-sm:hidden"
+            className="ml-auto inline-flex h-[49.7px] w-[184.1px] items-center justify-center gap-[18.3px] rounded-full bg-[#1E40AF] text-[15.75px] font-medium leading-none text-white hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 max-lg:h-11 max-lg:w-auto max-lg:gap-4 max-lg:rounded-full max-lg:px-6 max-sm:hidden"
           >
             Contact Us
             <ArrowLongRightIcon className="h-[17px] w-[23.4px]" />
@@ -150,7 +150,7 @@ export function MarketingHeader() {
             aria-expanded={open}
             aria-controls="mobile-nav"
             onClick={() => setOpen((value) => !value)}
-            className="ml-3 inline-flex h-11 w-11 items-center justify-center rounded-[12px] text-grey-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/15 max-sm:ml-auto lg:hidden"
+            className="ml-3 inline-flex h-11 w-11 items-center justify-center rounded-[12px] text-[#1F2937] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 max-sm:ml-auto lg:hidden"
           >
             <span className="sr-only">Toggle navigation</span>
             <span aria-hidden="true" className="relative h-[16px] w-[20px]">
@@ -162,14 +162,14 @@ export function MarketingHeader() {
         </div>
 
         <div id="mobile-nav" data-menu-panel aria-hidden={!open} inert={!open} className="invisible h-0 overflow-hidden lg:hidden">
-          <div className="grid gap-1 border-t border-grey-200 px-3 pb-4 pt-3">
+          <div className="grid gap-1 border-t border-[#E5E7EB] px-3 pb-4 pt-3">
             {marketingNavItems.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
                 data-menu-item
                 onClick={() => setOpen(false)}
-                className={`rounded-[10px] px-3 py-3 text-base transition-colors hover:bg-primary-50 hover:text-primary-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/15 ${item.href === ACTIVE_HREF ? "font-medium text-primary-600" : "text-grey-800"
+                className={`rounded-[10px] px-3 py-3 text-base transition-colors hover:bg-[#EFF4FF] hover:text-[#1E40AF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15 ${item.href === ACTIVE_HREF ? "font-medium text-[#1E40AF]" : "text-[#243345]"
                   }`}
               >
                 {item.label}
@@ -179,7 +179,7 @@ export function MarketingHeader() {
               href="#contact"
               data-menu-item
               onClick={() => setOpen(false)}
-              className="mt-2 inline-flex h-[50px] items-center justify-center gap-3 rounded-[12px] bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/25 sm:hidden"
+              className="mt-2 inline-flex h-[50px] items-center justify-center gap-3 rounded-[12px] bg-[#1E40AF] text-base font-medium text-white hover:bg-[#1E3A8A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 sm:hidden"
             >
               Contact Us
               <ArrowLongRightIcon className="h-[15px] w-[21px]" />

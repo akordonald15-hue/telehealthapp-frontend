@@ -28,26 +28,26 @@ export function LandingPage() {
   const [doctorVisits, homeNursing, elderlyCare, maternalCare] = serviceOffers;
 
   return (
-    <main id="home" className="min-h-screen overflow-x-hidden bg-grey-50 text-grey-900">
+    <main id="home" className="theme-landing min-h-screen overflow-x-hidden bg-[#f8f9ff] text-[#0b1c30]">
       <div className="@container">
         {/* Hero */}
         <section className="lp-scale bg-white px-[7px] pb-[3px] pt-[7px]">
-          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#6181BA_0%,#2E4E87_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
+          <div className="relative overflow-hidden rounded-[18.5px] bg-[linear-gradient(180deg,#3B82F6_0%,#1E40AF_100%)] pt-[163.5px] text-center max-lg:px-4 max-lg:pt-[104px]">
             <MarketingHeader />
             <h1 className="sr-only">Caretekk: online doctor consultations and in-home care</h1>
             <HeroSlideshow />
           </div>
         </section>
 
-        <section aria-label={`${BRAND_NAME} service overview`} className={`lp-scale bg-grey-50 px-4 py-[46px] ${LIGHT_DOTS}`}>
+        <section aria-label={`${BRAND_NAME} service overview`} className={`lp-scale bg-[#FAFBFF] px-4 py-[46px] ${LIGHT_DOTS}`}>
           <PlatformStats />
         </section>
 
-        <section id="solution" className={`lp-scale bg-primary-50 px-4 pb-[104px] pt-[72px] ${LIGHT_DOTS}`}>
+        <section id="solution" className={`lp-scale bg-[#F2F5FE] px-4 pb-[104px] pt-[72px] ${LIGHT_DOTS}`}>
           <RevealLines className="text-center">
-            <p className="text-[14px] font-medium uppercase tracking-[0.2em] text-primary-600">Solution</p>
-            <h2 className="mt-[16px] text-[40.25px] font-bold leading-[48.2px] text-grey-900 max-sm:text-[30px] max-sm:leading-[1.2]">
-              One <span className="text-primary-400">Platform.</span> Two
+            <p className="text-[14px] font-medium uppercase tracking-[0.2em] text-[#1E40AF]">Solution</p>
+            <h2 className="mt-[16px] text-[40.25px] font-bold leading-[48.2px] text-[#131A2F] max-sm:text-[30px] max-sm:leading-[1.2]">
+              One <span className="text-[#3B82F6]">Platform.</span> Two
               <br /> Ways to Get Real Care.
             </h2>
           </RevealLines>
@@ -65,8 +65,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section id="services" className="lp-scale bg-primary-50 px-[7px] pb-[7px]">
-          <div className={`rounded-[18.5px] bg-primary-600 px-[24px] pb-[104px] pt-[80px] max-sm:px-4 max-sm:pb-16 max-sm:pt-14 ${PANEL_DOTS}`}>
+        <section id="services" className="lp-scale bg-[#F2F5FE] px-[7px] pb-[7px]">
+          <div className={`rounded-[18.5px] bg-[#1E40AF] px-[24px] pb-[104px] pt-[80px] max-sm:px-4 max-sm:pb-16 max-sm:pt-14 ${PANEL_DOTS}`}>
             <RevealLines className="pl-[12px] text-white max-sm:pl-1">
               <p className="text-[15px] font-light uppercase tracking-[0.04em] text-white/85">Our Services</p>
               <h2 className="mt-[18px] text-[40.25px] font-bold leading-[48.2px] max-sm:text-[30px] max-sm:leading-[1.2]">
@@ -96,11 +96,11 @@ export function LandingPage() {
       <GetStartedSection />
 
       {/* Doctor showcase — dark */}
-      <section id="doctors" className="overflow-hidden bg-grey-900 py-24 text-white sm:py-28 lg:py-32">
+      <section id="doctors" className="overflow-hidden bg-[#0b1c30] py-24 text-white sm:py-28 lg:py-32">
         <div className="mx-auto max-w-[1440px] px-4 md:px-10">
           <div className="mb-14 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
             <div className="max-w-xl">
-              <p className="ct-caption mb-4 block text-primary-300">Doctors</p>
+              <p className="ct-caption mb-4 block text-[#b7c4ff]">Doctors</p>
               <h2 className="font-heading text-3xl font-semibold leading-tight text-white sm:text-4xl">
                 Meet the doctors behind Caretekk.
               </h2>
@@ -128,9 +128,9 @@ export function LandingPage() {
                   sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                   className="object-cover object-top grayscale transition duration-700 group-hover:scale-105 group-hover:grayscale-0"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-grey-900 via-grey-900/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0b1c30] via-[#0b1c30]/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 w-full translate-y-2 p-6 transition-transform duration-500 group-hover:translate-y-0">
-                  <p className="ct-caption mb-1 text-primary-300">Caretekk specialist</p>
+                  <p className="ct-caption mb-1 text-[#b7c4ff]">Caretekk specialist</p>
                   <h4 className="font-heading text-lg font-bold leading-tight text-white">{doctor.name}</h4>
                 </div>
               </article>
@@ -142,7 +142,7 @@ export function LandingPage() {
       {/* ₦2,000 consultation banner */}
       <section className="px-4 py-20 md:px-10 lg:py-24">
         <div className="mx-auto max-w-[1440px]">
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-[linear-gradient(135deg,#2E4E87_0%,#3961A9_58%,#88A0CB_100%)] p-10 text-white shadow-[0_28px_72px_-44px_rgba(46,78,135,0.55)] sm:p-12 lg:p-16">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-[linear-gradient(135deg,#1e40af_0%,#2563EB_58%,#7ca4d7_100%)] p-10 text-white shadow-[0_28px_72px_-44px_rgba(29,78,216,0.55)] sm:p-12 lg:p-16">
             <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
             <div className="relative z-10">
               <p className="ct-caption text-white/75">Doctor consultations</p>
@@ -155,7 +155,7 @@ export function LandingPage() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/register"
-                  className="inline-flex items-center justify-center rounded-3xl bg-white px-8 py-4 font-bold text-primary-600 shadow-[0_18px_38px_-18px_rgba(255,255,255,0.4)] transition hover:-translate-y-0.5"
+                  className="inline-flex items-center justify-center rounded-3xl bg-white px-8 py-4 font-bold text-[#1e40af] shadow-[0_18px_38px_-18px_rgba(255,255,255,0.4)] transition hover:-translate-y-0.5"
                 >
                   Book consultation
                 </Link>
@@ -173,9 +173,9 @@ export function LandingPage() {
       </section>
 
       {/* Home care */}
-      <section id="home-care" className="bg-[linear-gradient(180deg,#ffffff_0%,#F9FAFB_100%)] px-4 py-24 md:px-10 lg:py-32">
+      <section id="home-care" className="bg-[linear-gradient(180deg,#ffffff_0%,#f5f9ff_100%)] px-4 py-24 md:px-10 lg:py-32">
         <div className="mx-auto grid max-w-[1440px] items-center gap-12 lg:grid-cols-[minmax(320px,0.96fr)_minmax(0,1.04fr)] lg:gap-16">
-          <div className="overflow-hidden rounded-[2.5rem] border border-white/80 bg-white shadow-[0_26px_64px_-44px_rgba(19,25,39,0.28)]">
+          <div className="overflow-hidden rounded-[2.5rem] border border-white/80 bg-white shadow-[0_26px_64px_-44px_rgba(15,23,42,0.28)]">
             <Image
               src="/img/Nurses.png"
               alt="Trusted home-care nurse supporting a patient"
@@ -185,16 +185,16 @@ export function LandingPage() {
             />
           </div>
           <div>
-            <p className="ct-caption text-primary-500">Homecare support</p>
-            <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight text-grey-900 sm:text-4xl">
+            <p className="ct-caption text-[#2563EB]">Homecare support</p>
+            <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight text-[#0b1c30] sm:text-4xl">
               Care at home for recovery, routine support, and family needs.
             </h2>
-            <p className="mt-5 text-base leading-8 text-grey-700 sm:text-lg">
+            <p className="mt-5 text-base leading-8 text-[#434655] sm:text-lg">
               Caretekk connects you with trusted home-care nurses for mother and baby care, elderly care, postnatal support, and general homecare follow-up. Home visits are currently available in Akwa Ibom State, Nigeria.
             </p>
             <div className="mt-6 flex flex-wrap gap-3 text-sm font-medium">
               {homeCareChips.map((chip) => (
-                <span key={chip} className="rounded-full bg-primary-100 px-4 py-2 text-primary-600">
+                <span key={chip} className="rounded-full bg-[#dce9ff] px-4 py-2 text-[#1e40af]">
                   {chip}
                 </span>
               ))}
@@ -202,13 +202,13 @@ export function LandingPage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center rounded-3xl bg-primary-500 px-8 py-4 font-bold text-white shadow-[0_18px_38px_-18px_rgba(46,78,135,0.55)] transition hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center rounded-3xl bg-[#2563EB] px-8 py-4 font-bold text-white shadow-[0_18px_38px_-18px_rgba(29,78,216,0.55)] transition hover:-translate-y-0.5"
               >
                 Book a nurse
               </Link>
               <Link
                 href="/login"
-                className="ct-glass inline-flex items-center justify-center rounded-3xl px-8 py-4 font-semibold text-grey-900 transition hover:bg-primary-50"
+                className="ct-glass inline-flex items-center justify-center rounded-3xl px-8 py-4 font-semibold text-[#0b1c30] transition hover:bg-[#eff4ff]"
               >
                 Request home care
               </Link>
@@ -219,9 +219,9 @@ export function LandingPage() {
 
       {/* Final CTA */}
       <section className="mx-auto max-w-[1440px] px-4 pb-24 md:px-10">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-grey-900 px-6 py-16 text-center sm:px-10 sm:py-20 lg:px-16 lg:py-24">
-          <div className="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-primary-500/30 blur-[100px]" />
-          <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-success-700/25 blur-[100px]" />
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-[#0b1c30] px-6 py-16 text-center sm:px-10 sm:py-20 lg:px-16 lg:py-24">
+          <div className="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-[#2563EB]/30 blur-[100px]" />
+          <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-[#00687a]/25 blur-[100px]" />
 
           <div className="relative z-10 mx-auto max-w-2xl">
             <div className="mb-6 flex justify-center">
@@ -237,7 +237,7 @@ export function LandingPage() {
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center rounded-3xl bg-white px-8 py-4 font-bold text-primary-600 shadow-[0_18px_38px_-18px_rgba(255,255,255,0.35)] transition hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center rounded-3xl bg-white px-8 py-4 font-bold text-[#1e40af] shadow-[0_18px_38px_-18px_rgba(255,255,255,0.35)] transition hover:-translate-y-0.5"
               >
                 Create account
               </Link>
