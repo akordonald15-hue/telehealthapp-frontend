@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, Smartphone } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 const SW_PATH = "/sw.js";
@@ -37,6 +38,7 @@ function isStandaloneMode() {
 
 export function PwaRegister() {
   const mounted = useSyncExternalStore(subscribeToClientMount, getClientMountSnapshot, getServerMountSnapshot);
+  const pathname = usePathname();
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showManualHint, setShowManualHint] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -155,7 +157,8 @@ export function PwaRegister() {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[70] flex justify-center px-4">
+    // On the landing page the prompt takes the landing colours (bright blue, Lexend) so it matches the page.
+    <div className={`pointer-events-none fixed inset-x-0 bottom-4 z-[70] flex justify-center px-4 ${pathname === "/" ? "theme-landing" : ""}`}>
       <div className="pointer-events-auto w-full max-w-sm rounded-[20px] border border-white/80 bg-white/95 p-3 shadow-300 backdrop-blur sm:max-w-md sm:p-4">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[var(--primary-soft)] text-[var(--primary)]">
