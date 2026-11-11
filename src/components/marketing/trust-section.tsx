@@ -20,7 +20,7 @@ export function TrustSection() {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle,#EBEBEB_0.125rem,transparent_0.125rem)] bg-[length:1.5rem_1.5rem] bg-[position:-0.34375rem_-0.78125rem]"
+        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle,#E5E7EA_0.125rem,transparent_0.125rem)] bg-[length:1.5rem_1.5rem] bg-[position:-0.34375rem_-0.78125rem]"
       />
       <div className="fluid-canvas relative z-10 mx-auto px-4 md:px-10">
         <header className="flex flex-col items-center gap-3.5 text-center">

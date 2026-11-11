@@ -55,14 +55,14 @@ export function ReferralLandingClient({ code }: { code: string }) {
             <HeartPulse className="h-3.5 w-3.5" aria-hidden />
             Caretekk invite
           </span>
-          <h1 className="text-2xl font-bold leading-tight text-grey-900 sm:text-3xl">
+          <h1 className="text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
             You&apos;re already signed in
           </h1>
-          <p className="text-[15px] leading-relaxed text-grey-600">
+          <p className="text-[15px] leading-relaxed text-slate-600">
             Referral codes can only be applied when creating a new Caretekk account, so this
             invite won&apos;t change anything on your account.
           </p>
-          <p className="text-[15px] leading-relaxed text-grey-600">
+          <p className="text-[15px] leading-relaxed text-slate-600">
             You can still invite your own friends and earn rewards.
           </p>
         </header>
@@ -70,7 +70,7 @@ export function ReferralLandingClient({ code }: { code: string }) {
         <div className="grid gap-2">
           <Link
             href="/dashboard"
-            className="inline-flex min-h-13 items-center justify-center rounded-[8px] bg-[var(--primary)] px-6 text-base font-semibold text-white shadow-300 transition hover:bg-[var(--primary-strong)]"
+            className="inline-flex min-h-13 items-center justify-center rounded-[8px] bg-[var(--primary)] px-6 text-base font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.08),0_8px_20px_-10px_rgba(37,99,235,0.45)] transition hover:bg-[var(--primary-strong)]"
           >
             Go to Caretekk
           </Link>
@@ -93,10 +93,10 @@ export function ReferralLandingClient({ code }: { code: string }) {
           <HeartPulse className="h-3.5 w-3.5" aria-hidden />
           Caretekk invite
         </span>
-        <h1 className="text-2xl font-bold leading-tight text-grey-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
           You&apos;ve been invited to Caretekk
         </h1>
-        <p className="text-[15px] leading-relaxed text-grey-600">
+        <p className="text-[15px] leading-relaxed text-slate-600">
           Access online healthcare consultations from wherever you are. Online consultations are subject to practitioner eligibility, applicable regulations, and appointment availability.
         </p>
       </header>
@@ -109,21 +109,21 @@ export function ReferralLandingClient({ code }: { code: string }) {
           <li key={item.title} className="ct-surface flex items-start gap-3 rounded-[8px] p-4">
             <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]" aria-hidden />
             <div>
-              <p className="text-sm font-semibold text-grey-900">{item.title}</p>
-              <p className="text-sm text-grey-600">{item.body}</p>
+              <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+              <p className="text-sm text-slate-600">{item.body}</p>
             </div>
           </li>
         ))}
       </ul>
 
       {usable ? (
-        <p className="text-sm text-grey-600">
+        <p className="text-sm text-slate-600">
           Your invite code{" "}
-          <span className="select-all font-mono font-semibold tracking-[0.12em] text-grey-900">{normalized}</span>{" "}
+          <span className="select-all font-mono font-semibold tracking-[0.12em] text-slate-900">{normalized}</span>{" "}
           will be applied when you create your account.
         </p>
       ) : (
-        <p className="text-sm text-grey-600">
+        <p className="text-sm text-slate-600">
           That invite link looks incomplete. You can still create your account, and enter the
           referral code yourself on the signup form.
         </p>
@@ -132,13 +132,13 @@ export function ReferralLandingClient({ code }: { code: string }) {
       <div className="grid gap-2">
         <Link
           href={signupHref}
-          className="inline-flex min-h-13 items-center justify-center rounded-[8px] bg-[var(--primary)] px-6 text-base font-semibold text-white shadow-300 transition hover:bg-[var(--primary-strong)]"
+          className="inline-flex min-h-13 items-center justify-center rounded-[8px] bg-[var(--primary)] px-6 text-base font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.08),0_8px_20px_-10px_rgba(37,99,235,0.45)] transition hover:bg-[var(--primary-strong)]"
         >
           Get Started
         </Link>
         <Link
           href="/login"
-          className="inline-flex min-h-11 items-center justify-center rounded-[8px] text-sm font-semibold text-grey-600 transition hover:text-[var(--primary)]"
+          className="inline-flex min-h-11 items-center justify-center rounded-[8px] text-sm font-semibold text-slate-600 transition hover:text-[var(--primary)]"
         >
           I already have an account
         </Link>

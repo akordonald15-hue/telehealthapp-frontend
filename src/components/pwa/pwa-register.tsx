@@ -157,16 +157,16 @@ export function PwaRegister() {
   }
 
   return (
-    // On the landing page the prompt takes the landing colours (bright blue, Lexend) so it matches the page.
-    <div className={`pointer-events-none fixed inset-x-0 bottom-4 z-[70] flex justify-center px-4 ${pathname === "/" ? "theme-landing" : ""}`}>
-      <div className="pointer-events-auto w-full max-w-sm rounded-[20px] border border-white/80 bg-white/95 p-3 shadow-300 backdrop-blur sm:max-w-md sm:p-4">
+    // Over the landing page the prompt uses the landing (design-system) look.
+    <div className={`pointer-events-none fixed inset-x-0 bottom-4 z-[70] flex justify-center px-4 ${pathname === "/" ? "ds-landing" : ""}`}>
+      <div className="pointer-events-auto w-full max-w-sm rounded-[20px] border border-white/80 bg-white/95 p-3 shadow-[0_24px_72px_-40px_rgba(15,23,42,0.34)] backdrop-blur sm:max-w-md sm:p-4">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[var(--primary-soft)] text-[var(--primary)]">
             {showIosHint ? <Smartphone className="h-5 w-5" /> : <Download className="h-5 w-5" />}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold leading-5 text-grey-800">Install Caretekk</p>
-            <p className="mt-0.5 text-xs leading-5 text-grey-600 sm:text-sm">
+            <p className="text-sm font-semibold leading-5 text-[#1F2937]">Install Caretekk</p>
+            <p className="mt-0.5 text-xs leading-5 text-slate-600 sm:text-sm">
               {showIosHint ? iosInstallCopy : showManualHint ? "Use your browser menu to install." : "Add Caretekk to your device."}
             </p>
           </div>

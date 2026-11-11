@@ -37,17 +37,17 @@ function Metric({ label, value, href, icon: Icon, description }: { label: string
   return (
     <Link
       href={href}
-      className="ct-hover-lift ct-surface group rounded-[8px] p-4 hover:shadow-300"
+      className="ct-hover-lift ct-surface group rounded-[8px] p-4 hover:shadow-[0_24px_56px_-38px_rgba(37,99,235,0.18)]"
     >
       <div className="flex items-start justify-between gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
+        <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
           <Icon className="h-5 w-5" />
         </span>
       </div>
-      <span className="mt-4 block text-sm font-semibold text-grey-500">{label}</span>
-      <strong className="mt-1 block font-heading text-[1.65rem] font-semibold tracking-tight text-grey-800">{value}</strong>
-      <p className="mt-2 text-sm leading-6 text-grey-600">{description}</p>
-      <span className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary-500">
+      <span className="mt-4 block text-sm font-semibold text-slate-500">{label}</span>
+      <strong className="mt-1 block font-heading text-[1.65rem] font-semibold tracking-tight text-[#1F2937]">{value}</strong>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+      <span className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB]">
         Open
         <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
       </span>
@@ -107,7 +107,7 @@ function shortTime(value?: string | null) {
 }
 
 function DashboardSkeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-[8px] bg-grey-100 ${className}`} />;
+  return <div className={`animate-pulse rounded-[8px] bg-slate-100 ${className}`} />;
 }
 
 function QuickAction({
@@ -128,15 +128,15 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className={`ct-rise-in group flex min-h-[128px] flex-col justify-between rounded-[8px] border border-grey-100 p-4 shadow-300 transition duration-200 hover:-translate-y-0.5 ${className}`}
+      className={`ct-rise-in group flex min-h-[128px] flex-col justify-between rounded-[8px] border border-slate-100 p-4 shadow-[0_18px_48px_-42px_rgba(15,23,42,0.34)] transition duration-200 hover:-translate-y-0.5 ${className}`}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-white/72 text-primary-500 shadow-100">
+      <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-white/72 text-[#2563EB] shadow-sm">
         <Icon className="h-5 w-5" />
       </span>
       <span>
-        <span className="block text-sm font-semibold text-grey-800">{title}</span>
-        <span className="mt-1 block text-xs leading-5 text-grey-600">{description}</span>
+        <span className="block text-sm font-semibold text-[#1F2937]">{title}</span>
+        <span className="mt-1 block text-xs leading-5 text-slate-600">{description}</span>
       </span>
     </Link>
   );
@@ -221,50 +221,50 @@ export function DashboardClient() {
           <div className="grid gap-4">
             <div className="grid gap-4">
               <div className="ct-rise-in">
-                <h2 className="font-heading text-[1.65rem] font-semibold leading-tight tracking-[-0.02em] text-grey-800 sm:text-3xl">
+                <h2 className="font-heading text-[1.65rem] font-semibold leading-tight tracking-[-0.02em] text-[#1F2937] sm:text-3xl">
                   {greeting()}, {patientName}
                 </h2>
-                <p className="mt-1 text-sm leading-6 text-grey-600">How can we help you today?</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">How can we help you today?</p>
               </div>
 
               <Link
                 href="/appointments"
-                className="ct-rise-in group overflow-hidden rounded-[8px] border border-primary-100 bg-[linear-gradient(135deg,#EBEFF6_0%,#F9FAFB_100%)] p-4 shadow-300 transition duration-200 hover:-translate-y-0.5 sm:p-6"
+                className="ct-rise-in group overflow-hidden rounded-[8px] border border-[#DBEAFE] bg-[linear-gradient(135deg,#EFF6FF_0%,#F8FBFF_100%)] p-4 shadow-[0_24px_70px_-52px_rgba(37,99,235,0.42)] transition duration-200 hover:-translate-y-0.5 sm:p-6"
               >
                 <div className="grid grid-cols-[94px_minmax(0,1fr)] items-center gap-3 sm:grid-cols-[128px_minmax(0,1fr)] sm:gap-5">
                   <div className="ct-float-gentle relative flex h-24 w-24 items-center justify-center sm:h-28 sm:w-28">
-                    <span className="absolute h-20 w-20 rounded-full bg-primary-100" />
-                    <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary-500 shadow-300">
+                    <span className="absolute h-20 w-20 rounded-full bg-[#DBEAFE]" />
+                    <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-[0_18px_42px_-30px_rgba(37,99,235,0.48)]">
                       <Bot className="h-9 w-9" />
                     </span>
-                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary-300" />
-                    <span className="absolute bottom-4 left-2 h-2.5 w-2.5 rounded-full bg-primary-100 ring-2 ring-white" />
+                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#7CA4D7]" />
+                    <span className="absolute bottom-4 left-2 h-2.5 w-2.5 rounded-full bg-[#DBEAFE] ring-2 ring-white" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-primary-500">AI Health Assistant</p>
-                    <h3 className="mt-1 font-heading text-[1.45rem] font-semibold leading-tight text-grey-800 sm:text-2xl">
+                    <p className="text-sm font-semibold text-[#2563EB]">AI Health Assistant</p>
+                    <h3 className="mt-1 font-heading text-[1.45rem] font-semibold leading-tight text-[#1F2937] sm:text-2xl">
                       How are you feeling today?
                     </h3>
-                    <p className="mt-2 max-w-2xl text-[13px] leading-6 text-grey-600 sm:text-sm">
+                    <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-600 sm:text-sm">
                       Tell me how you feel and I&apos;ll recommend the right doctor for you.
                     </p>
                   </div>
                 </div>
-                <span className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-[8px] bg-primary-500 px-5 text-sm font-semibold text-white shadow-300 transition-transform duration-150 group-active:scale-[0.98]">
+                <span className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-[8px] bg-[#2563EB] px-5 text-sm font-semibold text-white shadow-[0_18px_42px_-28px_rgba(37,99,235,0.65)] transition-transform duration-150 group-active:scale-[0.98]">
                   Book a Doctor
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary-500">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#2563EB]">
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                   </span>
                 </span>
               </Link>
 
-              <section className="ct-rise-in rounded-[8px] border border-grey-100 bg-white p-4 shadow-300 sm:p-5" style={{ animationDelay: "80ms" }}>
+              <section className="ct-rise-in rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_20px_60px_-48px_rgba(15,23,42,0.36)] sm:p-5" style={{ animationDelay: "80ms" }}>
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
                       <CalendarClock className="h-4 w-4" />
                     </span>
-                    <h3 className="font-semibold text-grey-800">Upcoming Appointment</h3>
+                    <h3 className="font-semibold text-[#1F2937]">Upcoming Appointment</h3>
                   </div>
                   {nextAppointment ? <StatusBadge value={nextAppointment.status} /> : null}
                 </div>
@@ -275,14 +275,14 @@ export function DashboardClient() {
                   </div>
                 ) : nextAppointment ? (
                   <div className="flex items-center gap-3">
-                    <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[8px] bg-primary-50 text-lg font-semibold text-primary-500 shadow-inner">
+                    <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[8px] bg-[#EFF6FF] text-lg font-semibold text-[#2563EB] shadow-inner">
                         {nextAppointment.doctor_profile?.display_name?.slice(0, 2) || "Dr"}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-grey-800">{nextAppointment.doctor_profile?.display_name || "Doctor"}</p>
-                      <p className="mt-0.5 truncate text-xs text-grey-600">Doctor consultation</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-grey-600">
-                        <span className="inline-flex items-center gap-1 text-primary-500">
+                      <p className="truncate text-sm font-semibold text-[#1F2937]">{nextAppointment.doctor_profile?.display_name || "Doctor"}</p>
+                      <p className="mt-0.5 truncate text-xs text-slate-600">Doctor consultation</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
+                        <span className="inline-flex items-center gap-1 text-[#2563EB]">
                           <CalendarClock className="h-3.5 w-3.5" />
                           {formatDateTime(nextAppointment.scheduled_at)}
                         </span>
@@ -294,17 +294,17 @@ export function DashboardClient() {
                     </div>
                     <Link
                       href={`/appointments/${nextAppointment.id}`}
-                      className="hidden min-h-10 shrink-0 items-center justify-center rounded-[8px] border border-primary-500/30 px-4 text-sm font-semibold text-primary-500 sm:inline-flex"
+                      className="hidden min-h-10 shrink-0 items-center justify-center rounded-[8px] border border-[#2563EB]/30 px-4 text-sm font-semibold text-[#2563EB] sm:inline-flex"
                     >
                       View Details
                     </Link>
-                    <ArrowRight className="h-5 w-5 shrink-0 text-grey-500 sm:hidden" />
+                    <ArrowRight className="h-5 w-5 shrink-0 text-slate-500 sm:hidden" />
                   </div>
                 ) : (
-                  <div className="rounded-[8px] bg-grey-50 px-4 py-5">
-                    <p className="font-semibold text-grey-800">No upcoming appointment</p>
-                    <p className="mt-1 text-sm leading-6 text-grey-600">Book a doctor when you need care.</p>
-                    <Link href="/appointments" className="mt-3 inline-flex text-sm font-semibold text-primary-500">
+                  <div className="rounded-[8px] bg-slate-50 px-4 py-5">
+                    <p className="font-semibold text-[#1F2937]">No upcoming appointment</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">Book a doctor when you need care.</p>
+                    <Link href="/appointments" className="mt-3 inline-flex text-sm font-semibold text-[#2563EB]">
                       Book a Doctor
                     </Link>
                   </div>
@@ -312,20 +312,20 @@ export function DashboardClient() {
               </section>
 
               {appointmentToRate || ownReviews.length ? (
-                <section className="ct-rise-in rounded-[8px] border border-grey-100 bg-white p-4 shadow-300 sm:p-5" style={{ animationDelay: "100ms" }}>
+                <section className="ct-rise-in rounded-[8px] border border-slate-100 bg-white p-4 shadow-[0_20px_60px_-48px_rgba(15,23,42,0.36)] sm:p-5" style={{ animationDelay: "100ms" }}>
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
                         <Star className="h-4 w-4" />
                       </span>
-                      <h3 className="font-semibold text-grey-800">Your Feedback</h3>
+                      <h3 className="font-semibold text-[#1F2937]">Your Feedback</h3>
                     </div>
-                    <Link href="/appointments" className="text-sm font-semibold text-primary-500">View all</Link>
+                    <Link href="/appointments" className="text-sm font-semibold text-[#2563EB]">View all</Link>
                   </div>
                   <div className="grid gap-3">
                     {appointmentToRate ? (
                       <div>
-                        <p className="mb-2 text-sm text-grey-600">
+                        <p className="mb-2 text-sm text-slate-600">
                           {appointmentToRate.doctor_profile?.display_name || "Caretekk doctor"} &middot; {formatDateTime(appointmentToRate.scheduled_at)}
                         </p>
                         <ConsultationReviewForm key={appointmentToRate.id} appointmentId={appointmentToRate.id} />
@@ -333,7 +333,7 @@ export function DashboardClient() {
                     ) : null}
                     {ownReviews.map((item) => (
                       <div key={item.id}>
-                        <p className="mb-2 text-sm text-grey-600">
+                        <p className="mb-2 text-sm text-slate-600">
                           {item.doctor_profile?.display_name || "Caretekk doctor"} &middot; {formatDateTime(item.scheduled_at)}
                         </p>
                         <ConsultationReviewSummary rating={item.rating!} />
@@ -345,8 +345,8 @@ export function DashboardClient() {
 
               <section>
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="font-semibold text-grey-800">Quick Actions</h3>
-                  <Link href="/profile" className="text-sm font-semibold text-primary-500">View all</Link>
+                  <h3 className="font-semibold text-[#1F2937]">Quick Actions</h3>
+                  <Link href="/profile" className="text-sm font-semibold text-[#2563EB]">View all</Link>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <QuickAction
@@ -354,7 +354,7 @@ export function DashboardClient() {
                     title="Home Care"
                     description="Home visits in Akwa Ibom State, Nigeria"
                     icon={Home}
-                    className="bg-primary-50"
+                    className="bg-[#EFF6FF]"
                     delay={120}
                   />
                   <QuickAction
@@ -370,7 +370,7 @@ export function DashboardClient() {
                     title="Medical Records"
                     description="Access your health records"
                     icon={FileText}
-                    className="bg-grey-50"
+                    className="bg-[#F8FBFF]"
                     delay={240}
                   />
                 </div>
@@ -383,54 +383,54 @@ export function DashboardClient() {
               */}
               <Link
                 href="/refer"
-                className="ct-rise-in group flex items-center gap-4 rounded-[8px] border border-primary-100 bg-[linear-gradient(120deg,#EBEFF6_0%,#F9FAFB_60%,#FFFFFF_100%)] p-4 shadow-300 transition duration-200 hover:-translate-y-0.5 sm:p-5"
+                className="ct-rise-in group flex items-center gap-4 rounded-[8px] border border-[#DBEAFE] bg-[linear-gradient(120deg,#EFF6FF_0%,#F8FBFF_60%,#FFFFFF_100%)] p-4 shadow-[0_18px_48px_-42px_rgba(15,23,42,0.34)] transition duration-200 hover:-translate-y-0.5 sm:p-5"
                 style={{ animationDelay: "260ms" }}
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-white text-primary-500 shadow-100">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-white text-[#2563EB] shadow-sm">
                   <Gift className="h-5 w-5" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-grey-800">Refer &amp; Earn</span>
-                  <span className="mt-1 block text-xs leading-5 text-grey-600">
+                  <span className="block text-sm font-semibold text-[#1F2937]">Refer &amp; Earn</span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-600">
                     Invite friends and earn Caretekk rewards.
                   </span>
                 </span>
-                <ArrowRight className="h-5 w-5 shrink-0 text-primary-500 transition group-hover:translate-x-0.5" />
+                <ArrowRight className="h-5 w-5 shrink-0 text-[#2563EB] transition group-hover:translate-x-0.5" />
               </Link>
 
               <section className="ct-rise-in" style={{ animationDelay: "280ms" }}>
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="font-semibold text-grey-800">Recent Messages</h3>
-                  <Link href="/messages" className="text-sm font-semibold text-primary-500">View all</Link>
+                  <h3 className="font-semibold text-[#1F2937]">Recent Messages</h3>
+                  <Link href="/messages" className="text-sm font-semibold text-[#2563EB]">View all</Link>
                 </div>
                 {threads.isLoading ? (
                   <DashboardSkeleton className="h-20" />
                 ) : recentThread ? (
                   <Link
                     href="/messages"
-                    className="flex items-center gap-3 rounded-[8px] border border-grey-100 bg-white p-3.5 shadow-300"
+                    className="flex items-center gap-3 rounded-[8px] border border-slate-100 bg-white p-3.5 shadow-[0_18px_50px_-44px_rgba(15,23,42,0.34)]"
                   >
-                    <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-50 text-sm font-semibold text-primary-500">
+                    <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-semibold text-[#2563EB]">
                       {(recentThread.doctor_profile?.display_name || recentThread.patient_profile?.display_name || "Ct").slice(0, 2)}
-                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-primary-500" />
+                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-[#2563EB]" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-grey-800">
+                      <p className="truncate text-sm font-semibold text-[#1F2937]">
                         {recentThread.doctor_profile?.display_name || recentThread.patient_profile?.display_name || "Caretekk"}
                       </p>
-                      <p className="mt-1 truncate text-sm text-grey-600">{recentThread.last_message?.body || "Open consultation thread"}</p>
+                      <p className="mt-1 truncate text-sm text-slate-600">{recentThread.last_message?.body || "Open consultation thread"}</p>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-xs text-grey-500">{shortTime(recentThread.last_message?.created_at)}</p>
+                      <p className="text-xs text-slate-500">{shortTime(recentThread.last_message?.created_at)}</p>
                       {recentThread.unread_count ? (
-                        <span className="mt-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-primary-500 px-2 text-xs font-semibold text-white">
+                        <span className="mt-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#2563EB] px-2 text-xs font-semibold text-white">
                           {recentThread.unread_count}
                         </span>
                       ) : null}
                     </div>
                   </Link>
                 ) : (
-                  <div className="rounded-[8px] border border-grey-100 bg-white p-4 text-sm text-grey-600">
+                  <div className="rounded-[8px] border border-slate-100 bg-white p-4 text-sm text-slate-600">
                     Your doctor messages will appear here.
                   </div>
                 )}
@@ -445,7 +445,7 @@ export function DashboardClient() {
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
-                  className="inline-flex min-h-10 items-center justify-center rounded-[8px] border border-warning-200 bg-white px-4 text-sm font-semibold text-warning-800 transition hover:bg-warning-50"
+                  className="inline-flex min-h-10 items-center justify-center rounded-[8px] border border-amber-200 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-50"
                 >
                   Try again
                 </button>
@@ -459,7 +459,7 @@ export function DashboardClient() {
                 <span>Doctors need your name, phone, age range, gender, state, and LGA before consultation.</span>
                 <Link
                   href="/onboarding"
-                  className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-white px-4 text-sm font-semibold text-warning-800"
+                  className="inline-flex min-h-10 items-center justify-center rounded-[8px] bg-white px-4 text-sm font-semibold text-amber-800"
                 >
                   Complete profile
                 </Link>
@@ -470,14 +470,14 @@ export function DashboardClient() {
       ) : (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-            <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#3961A9_0%,#6181BA_45%,#6181BA_100%)] p-6 text-white shadow-300 sm:p-8">
-              <p className="ct-caption text-primary-100">Caretekk workspace</p>
+            <div className="rounded-[8px] border border-white/70 bg-[linear-gradient(135deg,#2563EB_0%,#3B82F6_45%,#60A5FA_100%)] p-6 text-white shadow-[0_30px_80px_-40px_rgba(37,99,235,0.48)] sm:p-8">
+              <p className="ct-caption text-blue-100">Caretekk workspace</p>
               <h2 className="ct-dashboard-title mt-4 text-white">Care updates at a glance.</h2>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-primary-50/90">
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-blue-50/90">
                 Visits, conversations, records, and referrals in one place.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-white px-5 text-sm font-semibold text-primary-500 shadow-400 shadow-primary-700/20 transition hover:-translate-y-0.5">
+                <Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-white px-5 text-sm font-semibold text-[#2563EB] shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5">
                   Book or review visits
                 </Link>
                 <Link href="/messages" className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-white/25 bg-white/10 px-5 text-sm font-semibold text-white transition hover:bg-white/16">
@@ -488,25 +488,25 @@ export function DashboardClient() {
 
             <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
                   <Sparkles className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="ct-card-title text-grey-800">Today at a glance</p>
-                  <p className="mt-1 text-sm leading-6 text-grey-600">What needs attention next.</p>
+                  <p className="ct-card-title text-[#1F2937]">Today at a glance</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">What needs attention next.</p>
                 </div>
               </div>
-              <div className="mt-6 grid gap-3 text-sm text-grey-600">
+              <div className="mt-6 grid gap-3 text-sm text-slate-600">
                 <div className="ct-soft-panel rounded-[8px] px-4 py-3">
-                  <p className="font-semibold text-grey-800">Appointments</p>
+                  <p className="font-semibold text-[#1F2937]">Appointments</p>
                   <p className="mt-1 leading-6">{appointments.isLoading ? "Loading your upcoming visits..." : `${listMetric(appointments)} appointment${listMetric(appointments) === 1 ? "" : "s"} to review.`}</p>
                 </div>
                 <div className="ct-soft-panel rounded-[8px] px-4 py-3">
-                  <p className="font-semibold text-grey-800">Messages</p>
+                  <p className="font-semibold text-[#1F2937]">Messages</p>
                   <p className="mt-1 leading-6">{threads.isLoading ? "Loading your conversations..." : `${listMetric(threads)} conversation${listMetric(threads) === 1 ? "" : "s"} available.`}</p>
                 </div>
                 <div className="ct-soft-panel rounded-[8px] px-4 py-3">
-                  <p className="font-semibold text-grey-800">Billing history</p>
+                  <p className="font-semibold text-[#1F2937]">Billing history</p>
                   <p className="mt-1 leading-6">{`${paymentMetric} payment update${paymentMetric === 1 ? "" : "s"} available.`}</p>
                 </div>
               </div>
@@ -520,7 +520,7 @@ export function DashboardClient() {
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
-                  className="inline-flex min-h-10 items-center justify-center rounded-[8px] border border-warning-200 bg-white px-4 text-sm font-semibold text-warning-800 transition hover:bg-warning-50"
+                  className="inline-flex min-h-10 items-center justify-center rounded-[8px] border border-amber-200 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-50"
                 >
                   Try again
                 </button>
@@ -539,28 +539,28 @@ export function DashboardClient() {
             <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="ct-card-title text-grey-800">Next appointments</h2>
-                  <p className="mt-1 text-sm text-grey-500">Your upcoming visits at a glance.</p>
+                  <h2 className="ct-card-title text-[#1F2937]">Next appointments</h2>
+                  <p className="mt-1 text-sm text-slate-500">Your upcoming visits at a glance.</p>
                 </div>
-                {user ? <span className="text-sm font-medium text-grey-500">{user.email}</span> : null}
+                {user ? <span className="text-sm font-medium text-slate-500">{user.email}</span> : null}
               </div>
               <div className="grid gap-3">
                 {appointments.isLoading ? (
                   <InlineLoader compact label="Loading your care dashboard" />
                 ) : appointments.isError ? (
-                  <div className="rounded-[8px] border border-danger-100 bg-danger-50 px-4 py-5 text-sm text-danger-700">{getFriendlyErrorMessage(appointments.error, "appointments")}</div>
+                  <div className="rounded-[8px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(appointments.error, "appointments")}</div>
                 ) : appointments.data?.results.length ? (
                   appointments.data.results.map((item) => (
-                    <div key={item.id} className="flex flex-col gap-3 rounded-[8px] border border-grey-200 bg-grey-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div key={item.id} className="flex flex-col gap-3 rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-grey-800">{formatDateTime(item.scheduled_at)}</p>
-                        <p className="mt-1 text-sm text-grey-600">{appointmentCompanionLabel(user?.role)}</p>
+                        <p className="text-sm font-semibold text-[#1F2937]">{formatDateTime(item.scheduled_at)}</p>
+                        <p className="mt-1 text-sm text-slate-600">{appointmentCompanionLabel(user?.role)}</p>
                       </div>
                       <StatusBadge value={item.status} />
                     </div>
                   ))
                 ) : (
-                  <EmptyState title="No appointments yet" description="Your upcoming visits will appear here." action={<Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-primary-500 px-4 text-sm font-semibold text-white">Go to appointments</Link>} />
+                  <EmptyState title="No appointments yet" description="Your upcoming visits will appear here." action={<Link href="/appointments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white">Go to appointments</Link>} />
                 )}
               </div>
             </div>
@@ -568,10 +568,10 @@ export function DashboardClient() {
             <div className="ct-panel rounded-[8px] p-5 sm:p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="ct-card-title text-grey-800">Recent billing</h2>
-                  <p className="mt-1 text-sm text-grey-500">Recent checkout activity.</p>
+                  <h2 className="ct-card-title text-[#1F2937]">Recent billing</h2>
+                  <p className="mt-1 text-sm text-slate-500">Recent checkout activity.</p>
                 </div>
-                <Link className="text-sm font-semibold text-primary-500" href="/payments">
+                <Link className="text-sm font-semibold text-[#2563EB]" href="/payments">
                   Open
                 </Link>
               </div>
@@ -579,19 +579,19 @@ export function DashboardClient() {
                 {userQuery.isLoading || payments.isLoading ? (
                   <InlineLoader compact label="Loading your billing history" />
                 ) : payments.isError ? (
-                  <div className="rounded-[8px] border border-danger-100 bg-danger-50 px-4 py-5 text-sm text-danger-700">{getFriendlyErrorMessage(payments.error, "payments")}</div>
+                  <div className="rounded-[8px] border border-red-100 bg-red-50 px-4 py-5 text-sm text-red-700">{getFriendlyErrorMessage(payments.error, "payments")}</div>
                 ) : payments.data?.results.length ? (
                   payments.data.results.map((item) => (
-                    <div key={item.id} className="flex flex-col gap-3 rounded-[8px] border border-grey-200 bg-grey-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div key={item.id} className="flex flex-col gap-3 rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-grey-800">{formatMoney(item.amount, item.currency)}</p>
-                        <p className="mt-1 text-sm text-grey-600">{paymentSummary(item.provider, user?.role)}</p>
+                        <p className="text-sm font-semibold text-[#1F2937]">{formatMoney(item.amount, item.currency)}</p>
+                        <p className="mt-1 text-sm text-slate-600">{paymentSummary(item.provider, user?.role)}</p>
                       </div>
                       <StatusBadge value={item.status} />
                     </div>
                   ))
                 ) : (
-                  <EmptyState title="No billing history yet" description="Booked service payments will appear here." action={<Link href="/payments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-primary-500 px-4 text-sm font-semibold text-white">Open billing history</Link>} />
+                  <EmptyState title="No billing history yet" description="Booked service payments will appear here." action={<Link href="/payments" className="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#2563EB] px-4 text-sm font-semibold text-white">Open billing history</Link>} />
                 )}
               </div>
             </div>

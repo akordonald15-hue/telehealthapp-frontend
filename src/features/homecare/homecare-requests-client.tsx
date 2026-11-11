@@ -53,12 +53,12 @@ export function HomeCareRequestsClient() {
       {requestsQuery.isLoading ? (
         <div className={`grid gap-4 ${HOMECARE_BOTTOM_SAFE_PADDING}`} aria-busy="true" aria-label="Loading homecare requests">
           {[0, 1, 2].map((item) => (
-            <div key={item} className="rounded-[28px] border border-white/70 bg-white p-5 shadow-300 sm:p-6">
-              <div className="h-5 w-48 animate-pulse rounded-full bg-grey-100" />
-              <div className="mt-4 h-4 w-4/5 animate-pulse rounded-full bg-grey-100" />
+            <div key={item} className="rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] sm:p-6">
+              <div className="h-5 w-48 animate-pulse rounded-full bg-slate-100" />
+              <div className="mt-4 h-4 w-4/5 animate-pulse rounded-full bg-slate-100" />
               <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[0, 1, 2, 3].map((tile) => (
-                  <div key={tile} className="h-20 animate-pulse rounded-[18px] bg-grey-50" />
+                  <div key={tile} className="h-20 animate-pulse rounded-[18px] bg-slate-50" />
                 ))}
               </div>
             </div>
@@ -72,35 +72,35 @@ export function HomeCareRequestsClient() {
               <Link
                 key={request.id}
                 href={`/home-care/requests/${request.id}`}
-                className="group rounded-[28px] border border-white/70 bg-white p-5 shadow-300 transition hover:-translate-y-0.5 sm:p-6"
+                className="group rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 sm:p-6"
               >
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-heading text-xl font-semibold text-grey-800">
+                      <h2 className="font-heading text-xl font-semibold text-[#1F2937]">
                         {request.service_name_snapshot || "Home nurse request"}
                       </h2>
                       <Badge tone="blue">{homeCareStatusLabel(request.status)}</Badge>
                       <Badge>{bookingSourceLabel(request.booking_source)}</Badge>
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-grey-600">
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
                       {request.service_address_snapshot || "Address details will appear here."}
                     </p>
-                    <div className="mt-4 grid gap-3 text-sm text-grey-600 sm:grid-cols-2 xl:grid-cols-4">
-                      <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                        <p className="font-semibold text-grey-800">Assigned nurse</p>
+                    <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2 xl:grid-cols-4">
+                      <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                        <p className="font-semibold text-[#1F2937]">Assigned nurse</p>
                         <p className="mt-1">{nurse ? nurse.display_name : "Waiting for assignment"}</p>
                       </div>
-                      <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                        <p className="font-semibold text-grey-800">Preferred time</p>
+                      <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                        <p className="font-semibold text-[#1F2937]">Preferred time</p>
                         <p className="mt-1">{preferredTimeLabel(request)}</p>
                       </div>
-                      <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                        <p className="font-semibold text-grey-800">Price</p>
+                      <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                        <p className="font-semibold text-[#1F2937]">Price</p>
                         <p className="mt-1">{request.service_price_snapshot ? formatMoney(request.service_price_snapshot) : "Pending"}</p>
                       </div>
-                      <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                        <p className="font-semibold text-grey-800">Created</p>
+                      <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                        <p className="font-semibold text-[#1F2937]">Created</p>
                         <p className="mt-1">{formatDateTime(request.created_at)}</p>
                       </div>
                     </div>

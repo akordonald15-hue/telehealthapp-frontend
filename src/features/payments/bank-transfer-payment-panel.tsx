@@ -22,7 +22,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
         setCopied(true);
         window.setTimeout(() => setCopied(false), 1600);
       }}
-      className="inline-flex min-h-9 items-center justify-center gap-2 rounded-[8px] border border-grey-200 bg-white px-3 text-xs font-semibold text-grey-700 transition hover:bg-grey-50"
+      className="inline-flex min-h-9 items-center justify-center gap-2 rounded-[8px] border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
     >
       <Copy className="h-3.5 w-3.5" />
       {copied ? "Copied" : label}
@@ -77,7 +77,7 @@ export function BankTransferPaymentPanel({
   }
 
   return (
-    <div className={`grid gap-4 rounded-[8px] border border-primary-100 bg-grey-50 p-4 ${PAYMENT_PANEL_BOTTOM_SAFE_PADDING}`}>
+    <div className={`grid gap-4 rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4 ${PAYMENT_PANEL_BOTTOM_SAFE_PADDING}`}>
       <Notice title="Bank transfer payment" tone="warning">
         Complete payment by bank transfer. Caretekk will open the service after your transfer is verified.
       </Notice>
@@ -85,13 +85,13 @@ export function BankTransferPaymentPanel({
       <div className="rounded-[8px] border border-white bg-white p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
               <Landmark className="h-5 w-5" />
             </span>
             <div>
-              <p className="text-sm font-semibold text-grey-800">Bank transfer selected</p>
-              <p className="mt-1 text-sm text-grey-600">{amountLabel}</p>
-              <p className="mt-1 break-words text-xs text-grey-500">Reference: {payment.external_ref || details.reference}</p>
+              <p className="text-sm font-semibold text-[#1F2937]">Bank transfer selected</p>
+              <p className="mt-1 text-sm text-slate-600">{amountLabel}</p>
+              <p className="mt-1 break-words text-xs text-slate-500">Reference: {payment.external_ref || details.reference}</p>
             </div>
           </div>
           <Button type="button" variant="secondary" className="w-full sm:w-fit" onClick={() => setDetailsOpen(true)}>
@@ -105,21 +105,21 @@ export function BankTransferPaymentPanel({
           We have received your payment proof. Our team is verifying your transfer. This usually takes only a few minutes during working hours.
         </Notice>
       ) : (
-        <div className="grid gap-3 rounded-[8px] border border-dashed border-primary-200 bg-white p-4">
+        <div className="grid gap-3 rounded-[8px] border border-dashed border-[#BFDBFE] bg-white p-4">
           <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-primary-50 text-primary-500">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[#EFF6FF] text-[#2563EB]">
               <UploadCloud className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-grey-800">Upload payment proof</p>
-              <p className="mt-1 text-sm leading-6 text-grey-600">
+              <p className="text-sm font-semibold text-[#1F2937]">Upload payment proof</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
                 Add a transfer screenshot, receipt image, or PDF so admin can verify your payment.
               </p>
             </div>
           </div>
-          <label className="grid cursor-pointer gap-2 rounded-[8px] border border-grey-200 bg-grey-50 px-4 py-3 text-sm text-grey-700 transition hover:bg-grey-100">
-            <span className="font-semibold text-grey-800">{proofFile ? "Change payment proof" : "Choose payment proof"}</span>
-            <span className="break-words text-xs text-grey-500">
+          <label className="grid cursor-pointer gap-2 rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition hover:bg-slate-100">
+            <span className="font-semibold text-[#1F2937]">{proofFile ? "Change payment proof" : "Choose payment proof"}</span>
+            <span className="break-words text-xs text-slate-500">
               {proofFile ? proofFile.name : "JPG, PNG, WebP, or PDF. Maximum 5 MB."}
             </span>
             <input
@@ -130,7 +130,7 @@ export function BankTransferPaymentPanel({
               onChange={(event) => handleProofFile(event.target.files?.[0] ?? null)}
             />
           </label>
-          {proofError ? <p className="text-sm font-semibold text-warning-700">{proofError}</p> : null}
+          {proofError ? <p className="text-sm font-semibold text-amber-700">{proofError}</p> : null}
           <Button
             type="button"
             className="w-full sm:w-fit"
@@ -179,7 +179,7 @@ export function BankTransferPaymentPanel({
           </>
         }
       >
-        <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-success-50 text-success-700">
+        <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-emerald-50 text-emerald-700">
           <CheckCircle2 className="h-5 w-5" />
         </span>
       </Modal>
@@ -215,10 +215,10 @@ export function BankTransferPaymentPanel({
         }
       >
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
             <Landmark className="h-5 w-5" />
           </span>
-          <p className="text-sm leading-6 text-grey-600">Copy the account details exactly before making your transfer.</p>
+          <p className="text-sm leading-6 text-slate-600">Copy the account details exactly before making your transfer.</p>
         </div>
 
         <div className="mt-5 grid gap-3 text-sm">
@@ -229,7 +229,7 @@ export function BankTransferPaymentPanel({
           <PaymentLine label="Payment reference" value={payment.external_ref || details.reference} copyValue={payment.external_ref || details.reference} copyLabel="Copy reference" />
         </div>
 
-        <p className="mt-4 text-sm leading-6 text-grey-600">
+        <p className="mt-4 text-sm leading-6 text-slate-600">
           {details.instructions || "Please include this reference as your transfer narration whenever possible."}
         </p>
       </Modal>
@@ -241,8 +241,8 @@ function PaymentLine({ label, value, copyValue, copyLabel }: { label: string; va
   return (
     <div className="flex flex-col gap-2 rounded-[8px] border border-white bg-white px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-0 text-grey-500">{label}</p>
-        <p className="mt-1 break-words text-base font-semibold text-grey-800">{value}</p>
+        <p className="text-xs font-semibold uppercase tracking-0 text-slate-500">{label}</p>
+        <p className="mt-1 break-words text-base font-semibold text-[#1F2937]">{value}</p>
       </div>
       {copyValue ? <CopyButton value={copyValue} label={copyLabel || "Copy"} /> : null}
     </div>

@@ -55,7 +55,7 @@ export function PromotionCheckout({
       aria-busy={p.busy}
       className="min-w-0 space-y-3 rounded-[8px] border border-primary/20 bg-primary-soft/40 p-4"
     >
-      <p className="font-semibold text-grey-900">Have a promo code?</p>
+      <p className="font-semibold text-ash-900">Have a promo code?</p>
       {!p.ready ? (
         <p role="status" className="text-sm">
           {p.error ? "Promotion status is unavailable. You can retry the status check." : "Checking your promotion status…"}
@@ -88,7 +88,7 @@ export function PromotionCheckout({
       ) : null}
       {p.free && price ? (
         <>
-          <div role="status" className="text-sm font-semibold text-success-800">
+          <div role="status" className="text-sm font-semibold text-emerald-800">
             Founder50 applied. Your consultation is free.
           </div>
           <dl className="space-y-2 text-sm">
@@ -105,7 +105,7 @@ export function PromotionCheckout({
               <dd>{money(price.amount_due, price.currency)}</dd>
             </div>
           </dl>
-          <p className="text-sm text-grey-700">
+          <p className="text-sm text-ash-700">
             Reserve until {new Date(claim!.expires_at).toLocaleString()}.{" "}
             {now
               ? minutes > 0
@@ -179,7 +179,7 @@ export function PromotionCheckout({
               {p.busy ? "Please wait…" : "Apply"}
             </Button>
           </div>
-          <p id={`${id}-help`} className="text-xs text-grey-600">
+          <p id={`${id}-help`} className="text-xs text-ash-600">
             {rewardSelected
               ? "Remove the selected referral reward to apply a promotion."
               : "Apply checks eligibility and reserves an available entitlement. It does not reserve a doctor slot."}
@@ -187,7 +187,7 @@ export function PromotionCheckout({
         </>
       ) : null}
       {p.error ? (
-        <p id={`${id}-error`} role="alert" className="text-sm text-danger-800">
+        <p id={`${id}-error`} role="alert" className="text-sm text-red-800">
           {p.error}
         </p>
       ) : null}

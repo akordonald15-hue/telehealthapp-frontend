@@ -67,7 +67,7 @@ export function OfflineStatusBanner() {
   }
 
   return (
-    <div className="mb-4 flex items-start gap-3 rounded-[18px] border border-[rgba(57,97,169,0.14)] bg-[rgba(236,243,255,0.96)] px-4 py-3 text-sm text-grey-700 shadow-300">
+    <div className="mb-4 flex items-start gap-3 rounded-[18px] border border-[rgba(66,107,179,0.14)] bg-[rgba(236,243,255,0.96)] px-4 py-3 text-sm text-slate-700 shadow-[0_12px_30px_-28px_rgba(15,23,42,0.2)]">
       <WifiOff className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" />
       <p className="leading-6">You&apos;re offline. Secure Caretekk features require internet access.</p>
     </div>

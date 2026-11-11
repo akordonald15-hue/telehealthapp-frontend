@@ -8,7 +8,6 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { providersApi } from "@/lib/api/endpoints";
 import type { ProviderAvailabilityStatus } from "@/lib/types/backend";
 import { formatDateTime } from "@/lib/utils";
-import { Select } from "@/components/ui/input";
 
 const OPTIONS: Array<{ value: ProviderAvailabilityStatus; label: string; description: string }> = [
   { value: "available", label: "Available", description: "Ready for new consultations or assignments." },
@@ -45,17 +44,17 @@ export function AvailabilityControl({
   if (compact) {
     const canUpdate = Boolean(data?.can_self_update);
     return (
-      <div className="flex w-full flex-col gap-2 rounded-[12px] border border-grey-200 bg-white px-3 py-2 shadow-100 sm:w-auto sm:min-w-[260px]">
+      <div className="flex w-full flex-col gap-2 rounded-[12px] border border-slate-200 bg-white px-3 py-2 shadow-sm sm:w-auto sm:min-w-[260px]">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-grey-500">Availability</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Availability</p>
             <div className="mt-1 flex items-center gap-2">
               <StatusBadge value={data?.availability_status ?? "offline"} />
-              {data?.active_job_label ? <span className="text-xs font-semibold text-grey-500">{data.active_job_label}</span> : null}
+              {data?.active_job_label ? <span className="text-xs font-semibold text-slate-500">{data.active_job_label}</span> : null}
             </div>
           </div>
-          <Select fieldSize="md"
-            
+          <select
+            className="min-h-9 rounded-[8px] border border-slate-200 bg-slate-50 px-2 text-sm font-semibold text-[#1F2937] outline-none focus:border-[var(--primary)]"
             value={selectedStatus}
             disabled={mutation.isPending || availabilityQuery.isLoading || !canUpdate}
             onChange={(event) => mutation.mutate({ availability_status: event.target.value as ProviderAvailabilityStatus })}
@@ -70,27 +69,27 @@ export function AvailabilityControl({
                 {option.label}
               </option>
             ))}
-          </Select>
+          </select>
         </div>
-        {!data?.can_self_update && disabledReason ? <p className="text-xs font-semibold text-warning-700">{disabledReason}</p> : null}
+        {!data?.can_self_update && disabledReason ? <p className="text-xs font-semibold text-amber-700">{disabledReason}</p> : null}
         {mutation.isError || availabilityQuery.isError ? (
-          <p className="text-xs font-semibold text-danger-700">Availability could not be updated.</p>
+          <p className="text-xs font-semibold text-rose-700">Availability could not be updated.</p>
         ) : null}
       </div>
     );
   }
 
   return (
-    <div className="rounded-[20px] border border-grey-200 bg-grey-50 p-4">
+    <div className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-semibold text-grey-800">Availability</p>
+          <p className="font-semibold text-[#1F2937]">Availability</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <StatusBadge value={data?.availability_status ?? "offline"} />
-            {data?.active_job_label ? <span className="text-xs font-semibold text-grey-500">{data.active_job_label}</span> : null}
+            {data?.active_job_label ? <span className="text-xs font-semibold text-slate-500">{data.active_job_label}</span> : null}
           </div>
           {data?.last_active_at ? (
-            <p className="mt-2 text-xs leading-5 text-grey-500">Last active {formatDateTime(data.last_active_at)}</p>
+            <p className="mt-2 text-xs leading-5 text-slate-500">Last active {formatDateTime(data.last_active_at)}</p>
           ) : null}
         </div>
       </div>
@@ -107,13 +106,13 @@ export function AvailabilityControl({
             <div
               key={option.value}
               className={`rounded-[16px] border p-3 transition ${
-                isSelected ? "border-[var(--primary)] bg-white shadow-300" : "border-grey-200 bg-white"
+                isSelected ? "border-[var(--primary)] bg-white shadow-[0_10px_30px_-22px_rgba(66,107,179,0.4)]" : "border-slate-200 bg-white"
               }`}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="font-semibold text-grey-800">{option.label}</p>
-                  <p className="mt-1 text-sm leading-6 text-grey-600">{option.description}</p>
+                  <p className="font-semibold text-[#1F2937]">{option.label}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">{option.description}</p>
                 </div>
                 <Button
                   type="button"

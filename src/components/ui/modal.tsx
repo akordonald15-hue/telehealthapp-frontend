@@ -122,7 +122,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-stretch justify-center bg-grey-900/42 p-0 backdrop-blur-sm sm:items-center sm:px-6 sm:py-5"
+      className="fixed inset-0 z-[120] flex items-stretch justify-center bg-slate-950/42 p-0 backdrop-blur-sm sm:items-center sm:px-6 sm:py-5"
       role="presentation"
       onMouseDown={(event) => {
         if (closeOnOverlayClick && event.target === event.currentTarget) onClose();
@@ -136,18 +136,18 @@ export function Modal({
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
         className={cn(
-          "flex h-[100dvh] max-h-[100dvh] w-screen flex-col overflow-hidden border-0 bg-white shadow-300 outline-none sm:h-auto sm:max-h-[85dvh] sm:w-[94vw] sm:rounded-[8px] sm:border sm:border-white/75",
+          "flex h-[100dvh] max-h-[100dvh] w-screen flex-col overflow-hidden border-0 bg-white shadow-[0_30px_90px_-42px_rgba(15,23,42,0.55)] outline-none sm:h-auto sm:max-h-[85dvh] sm:w-[94vw] sm:rounded-[8px] sm:border sm:border-white/75",
           sizeClasses[size],
           className,
         )}
       >
-        <div className="sticky top-0 z-10 flex shrink-0 items-start justify-between gap-4 border-b border-grey-100 bg-white px-5 py-4 sm:px-6">
+        <div className="sticky top-0 z-10 flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 bg-white px-5 py-4 sm:px-6">
           <div className="min-w-0">
-            <h2 id={titleId} className="font-heading text-lg font-semibold leading-7 text-grey-800 sm:text-xl">
+            <h2 id={titleId} className="font-heading text-lg font-semibold leading-7 text-[#1F2937] sm:text-xl">
               {title}
             </h2>
             {description ? (
-              <p id={descriptionId} className="mt-1 text-sm leading-6 text-grey-600">
+              <p id={descriptionId} className="mt-1 text-sm leading-6 text-slate-600">
                 {description}
               </p>
             ) : null}
@@ -156,7 +156,7 @@ export function Modal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-grey-500 transition hover:bg-grey-100 hover:text-grey-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/15"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/15"
               aria-label={closeLabel}
             >
               <X className="h-5 w-5" />
@@ -167,7 +167,7 @@ export function Modal({
         {children ? <div className={cn("min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5 sm:px-6", bodyClassName)}>{children}</div> : null}
 
         {footer ? (
-          <div className="sticky bottom-0 z-10 shrink-0 border-t border-grey-100 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6">
+          <div className="sticky bottom-0 z-10 shrink-0 border-t border-slate-100 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6">
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">{footer}</div>
           </div>
         ) : null}

@@ -62,7 +62,7 @@ export function BrandLockup({
       {wordmark === "text" ? (
         <span
           className={cn(
-            "font-heading text-[1.08rem] font-extrabold tracking-[-0.03em] text-grey-800",
+            "font-heading text-[1.08rem] font-extrabold tracking-[-0.03em] text-[#1F2937]",
             inverse && "text-white",
             textClassName,
           )}

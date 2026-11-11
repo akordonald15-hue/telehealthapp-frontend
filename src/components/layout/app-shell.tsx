@@ -128,7 +128,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const unreadCount = notificationQuery.data?.results.reduce((sum, thread) => sum + (thread.unread_count ?? 0), 0) ?? 0;
 
   return (
-    <div className="ct-safe-area min-h-[100dvh] bg-[radial-gradient(circle_at_top_left,_rgba(136,160,203,0.15),_transparent_28%),linear-gradient(180deg,#F9FAFB_0%,#F9FAFB_40%,#FFFFFF_100%)]">
+    <div className="ct-safe-area min-h-[100dvh] bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.15),_transparent_28%),linear-gradient(180deg,#F5F8FC_0%,#F7FAFE_40%,#FFFFFF_100%)]">
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1600px]">
         {user ? (
           <nav
@@ -147,8 +147,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-semibold text-grey-600 transition hover:bg-white hover:text-primary-500",
-                    active && "bg-primary-100 text-primary-500",
+                    "flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-white hover:text-[#2563EB]",
+                    active && "bg-[#DBEAFE] text-[#2563EB]",
                   )}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
@@ -156,9 +156,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
               );
             })}
-            <div className="mt-auto border-t border-grey-200 px-2 pt-4">
-              <p className="truncate text-sm font-semibold text-grey-800">{user.full_name || "Caretekk user"}</p>
-              <p className="truncate text-xs text-grey-500">{user.email || "Signed in securely"}</p>
+            <div className="mt-auto border-t border-slate-200 px-2 pt-4">
+              <p className="truncate text-sm font-semibold text-[#1F2937]">{user.full_name || "Caretekk user"}</p>
+              <p className="truncate text-xs text-slate-500">{user.email || "Signed in securely"}</p>
             </div>
           </nav>
         ) : null}
@@ -173,7 +173,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   </div>
                   <h1
                     className={cn(
-                      "mt-1 truncate font-heading text-lg font-semibold tracking-[-0.025em] text-grey-800 sm:text-xl",
+                      "mt-1 truncate font-heading text-lg font-semibold tracking-[-0.025em] text-[#1F2937] sm:text-xl",
                       user?.role === "patient" && "mt-0 hidden lg:block",
                     )}
                   >
@@ -183,18 +183,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
               <div className="flex items-center gap-3">
                 <div className="hidden text-right md:block lg:hidden">
-                  <p className="text-sm font-semibold text-grey-800">{user?.full_name || "Caretekk user"}</p>
-                  <p className="text-xs text-grey-500">{user?.email || "Signed in securely"}</p>
+                  <p className="text-sm font-semibold text-[#1F2937]">{user?.full_name || "Caretekk user"}</p>
+                  <p className="text-xs text-slate-500">{user?.email || "Signed in securely"}</p>
                 </div>
                 {user?.role === "patient" ? (
                   <Link
                     href="/messages"
                     aria-label="Open notifications"
-                    className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-grey-800 shadow-300 ring-1 ring-grey-200 transition hover:-translate-y-0.5 hover:text-primary-500"
+                    className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#1F2937] shadow-[0_14px_34px_-28px_rgba(15,23,42,0.7)] ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:text-[#2563EB]"
                   >
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 ? (
-                      <span className="ct-pop-in absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-danger-600 px-1 text-[10px] font-bold leading-none text-white">
+                      <span className="ct-pop-in absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#DC2626] px-1 text-[10px] font-bold leading-none text-white">
                         {unreadCount > 9 ? "9+" : unreadCount}
                       </span>
                     ) : null}
@@ -221,7 +221,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {user ? (
             <nav
               className={cn(
-                "fixed inset-x-0 bottom-0 z-40 border-t border-grey-200 bg-white/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-300 backdrop-blur lg:hidden",
+                "fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-18px_54px_-42px_rgba(15,23,42,0.5)] backdrop-blur lg:hidden",
                 // gap-x keeps "Book Doctor" and "Appointments" from touching at 375px, where
                 // each label fills its column exactly.
                 user.role === "patient"
@@ -238,17 +238,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     key={`${item.href}-${item.label}`}
                     href={item.href}
                     className={cn(
-                      "flex min-w-0 flex-col items-center gap-1 rounded-[8px] px-1 py-2 text-[11px] font-semibold text-grey-500 transition-all duration-200 active:scale-[0.97]",
+                      "flex min-w-0 flex-col items-center gap-1 rounded-[8px] px-1 py-2 text-[11px] font-semibold text-slate-500 transition-all duration-200 active:scale-[0.97]",
                       user.role !== "patient" && "min-w-[92px]",
-                      active && "text-primary-500",
-                      item.primary && "-mt-5 text-primary-500",
+                      active && "text-[#2563EB]",
+                      item.primary && "-mt-5 text-[#2563EB]",
                     )}
                   >
                     <span
                       className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-[8px] bg-grey-50 transition-all duration-200",
-                        active && "scale-105 bg-primary-100",
-                        item.primary && "h-[52px] w-[52px] rounded-full bg-white text-primary-500 shadow-300 ring-2 ring-primary-100",
+                        "flex h-9 w-9 items-center justify-center rounded-[8px] bg-slate-50 transition-all duration-200",
+                        active && "scale-105 bg-[#DBEAFE]",
+                        item.primary && "h-[52px] w-[52px] rounded-full bg-white text-[#2563EB] shadow-[0_18px_38px_-22px_rgba(37,99,235,0.45)] ring-2 ring-[#DBEAFE]",
                       )}
                     >
                       <Icon className={item.primary ? "h-6 w-6" : "h-5 w-5"} />

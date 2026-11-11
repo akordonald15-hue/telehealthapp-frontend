@@ -140,9 +140,9 @@ export function PaymentsClient() {
             <article key={payment.id} className="ct-surface rounded-[24px] p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <p className="font-heading text-xl font-semibold text-grey-800">{formatMoney(payment.amount, payment.currency)}</p>
-                  <p className="mt-2 text-sm text-grey-600">{paymentSummary(payment.provider, userQuery.data?.role)}</p>
-                  <p className="mt-1 text-xs font-semibold text-grey-500">
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">{formatMoney(payment.amount, payment.currency)}</p>
+                  <p className="mt-2 text-sm text-slate-600">{paymentSummary(payment.provider, userQuery.data?.role)}</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
                     {payment.appointment
                       ? `Consultation #${payment.appointment}`
                       : payment.homecare_request
@@ -153,15 +153,15 @@ export function PaymentsClient() {
                 <div className="flex flex-col items-start gap-3 sm:items-end">
                   <StatusBadge value={payment.status} />
                   {payment.provider === "bank_transfer" && payment.status === "awaiting_manual_verification" ? (
-                    <p className="max-w-xs text-left text-xs leading-5 text-grey-500 sm:text-right">
+                    <p className="max-w-xs text-left text-xs leading-5 text-slate-500 sm:text-right">
                       Your payment notification has been received. We&apos;re verifying your transfer.
                     </p>
                   ) : payment.provider === "bank_transfer" && payment.status === "success" ? (
-                    <p className="max-w-xs text-left text-xs font-semibold leading-5 text-success-700 sm:text-right">
+                    <p className="max-w-xs text-left text-xs font-semibold leading-5 text-emerald-700 sm:text-right">
                       Payment confirmed. Your consultation is now active.
                     </p>
                   ) : payment.provider === "bank_transfer" && payment.status === "rejected" ? (
-                    <p className="max-w-xs text-left text-xs leading-5 text-danger-700 sm:text-right">
+                    <p className="max-w-xs text-left text-xs leading-5 text-rose-700 sm:text-right">
                       We could not verify your payment. Please contact Caretekk support or resubmit your payment confirmation.
                     </p>
                   ) : null}

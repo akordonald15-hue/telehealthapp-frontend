@@ -66,9 +66,9 @@ const rewardStatusCopy: Record<string, string> = {
 
 function StatusPill({ label, tone }: { label: string; tone: "neutral" | "success" | "warning" }) {
   const tones = {
-    neutral: "bg-grey-100 text-grey-700",
-    success: "bg-success-50 text-success-700",
-    warning: "bg-warning-50 text-warning-700",
+    neutral: "bg-slate-100 text-slate-700",
+    success: "bg-emerald-50 text-emerald-700",
+    warning: "bg-amber-50 text-amber-700",
   } as const;
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${tones[tone]}`}>
@@ -92,7 +92,7 @@ function CopyButton({ value, label, copiedLabel }: { value: string; label: strin
           setCopied(false);
         }
       }}
-      className="inline-flex min-h-11 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center gap-2 whitespace-nowrap rounded-[8px] border border-grey-200 bg-white px-4 text-sm font-semibold text-grey-700 transition hover:bg-grey-50 sm:flex-none sm:basis-auto"
+      className="inline-flex min-h-11 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center gap-2 whitespace-nowrap rounded-[8px] border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:flex-none sm:basis-auto"
       aria-live="polite"
     >
       {copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
@@ -123,7 +123,7 @@ function ShareButtons({ shareUrl, shareText }: { shareUrl: string; shareText: st
                 setShareError("");
               }
             }}
-            className="inline-flex min-h-11 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center gap-2 whitespace-nowrap rounded-[8px] bg-grey-900 px-4 text-sm font-semibold text-white transition hover:bg-grey-800 sm:flex-none sm:basis-auto"
+            className="inline-flex min-h-11 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center gap-2 whitespace-nowrap rounded-[8px] bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 sm:flex-none sm:basis-auto"
           >
             <Share2 className="h-4 w-4" aria-hidden />
             Share
@@ -133,12 +133,12 @@ function ShareButtons({ shareUrl, shareText }: { shareUrl: string; shareText: st
           href={whatsappHref}
           target="_blank"
           rel="noreferrer noopener"
-          className="inline-flex min-h-11 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center gap-2 whitespace-nowrap rounded-[8px] border border-success-200 bg-success-50 px-4 text-sm font-semibold text-success-700 transition hover:bg-success-100 sm:flex-none sm:basis-auto"
+          className="inline-flex min-h-11 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center gap-2 whitespace-nowrap rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 sm:flex-none sm:basis-auto"
         >
           Share on WhatsApp
         </a>
       </div>
-      {shareError ? <p className="text-xs text-grey-500">{shareError}</p> : null}
+      {shareError ? <p className="text-xs text-slate-500">{shareError}</p> : null}
     </div>
   );
 }
@@ -168,10 +168,10 @@ function ReferralCodeCard() {
     <div className="grid gap-4">
       {programme ? (
         <div className="ct-surface rounded-[8px] p-5">
-          <h2 className="text-base font-semibold text-grey-900">
+          <h2 className="text-base font-semibold text-slate-900">
             Get {rewardHeadline(programme)} when a friend completes their first paid service
           </h2>
-          <ul className="mt-3 grid gap-1.5 text-sm text-grey-600">
+          <ul className="mt-3 grid gap-1.5 text-sm text-slate-600">
             {programme.max_reward_amount ? (
               <li>Maximum discount {formatNaira(programme.max_reward_amount)}.</li>
             ) : null}
@@ -188,15 +188,15 @@ function ReferralCodeCard() {
       ) : null}
 
       <div className="ct-surface rounded-[8px] p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-grey-500">Your referral code</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">Your referral code</h2>
         <p
-          className="mt-2 select-all break-all font-mono text-2xl font-bold tracking-[0.18em] text-grey-900"
+          className="mt-2 select-all break-all font-mono text-2xl font-bold tracking-[0.18em] text-slate-900"
           // Selectable so a patient can long-press to copy on mobile.
           data-testid="referral-code"
         >
           {code}
         </p>
-        <p className="mt-1 break-all text-xs text-grey-500">{shareUrl}</p>
+        <p className="mt-1 break-all text-xs text-slate-500">{shareUrl}</p>
         <div className="mt-4 grid gap-2">
           <ShareButtons shareUrl={shareUrl} shareText={shareText} />
           <CopyButton value={code} label="Copy code" copiedLabel="Code copied" />
@@ -212,8 +212,8 @@ function ReferralRow({ referral }: { referral: MyReferral }) {
     <li className="ct-surface flex flex-col gap-2 rounded-[8px] p-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         {/* Deliberately anonymous: the backend never reveals who was referred. */}
-        <p className="text-sm font-semibold text-grey-900">Invite sent {formatReferralDate(referral.attached_at)}</p>
-        <p className="text-xs text-grey-500">
+        <p className="text-sm font-semibold text-slate-900">Invite sent {formatReferralDate(referral.attached_at)}</p>
+        <p className="text-xs text-slate-500">
           {referral.status === "successful"
             ? "Reward earned"
             : referral.status === "qualifying"
@@ -270,8 +270,8 @@ function MyReferralsSection({ onShare }: { onShare: () => void }) {
           { label: "Pending", value: pending },
         ].map((stat) => (
           <div key={stat.label} className="ct-surface rounded-[8px] p-3 text-center">
-            <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-grey-500">{stat.label}</dt>
-            <dd className="mt-1 text-xl font-bold text-grey-900">{stat.value}</dd>
+            <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">{stat.label}</dt>
+            <dd className="mt-1 text-xl font-bold text-slate-900">{stat.value}</dd>
           </div>
         ))}
       </dl>
@@ -306,9 +306,9 @@ function RewardCard({ reward }: { reward: MyReferralReward }) {
     <li className="ct-surface grid gap-2 rounded-[8px] p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-lg font-bold text-grey-900">{headline}</p>
+          <p className="text-lg font-bold text-slate-900">{headline}</p>
           {reward.max_reward_amount ? (
-            <p className="text-xs text-grey-500">Up to {formatNaira(reward.max_reward_amount)}</p>
+            <p className="text-xs text-slate-500">Up to {formatNaira(reward.max_reward_amount)}</p>
           ) : null}
         </div>
         <StatusPill
@@ -316,7 +316,7 @@ function RewardCard({ reward }: { reward: MyReferralReward }) {
           tone={reward.is_redeemable ? "success" : reward.status === "reserved" ? "warning" : "neutral"}
         />
       </div>
-      <p className="text-xs text-grey-500">
+      <p className="text-xs text-slate-500">
         {reward.status === "used" && reward.used_at
           ? `Used ${formatReferralDate(reward.used_at)}`
           : reward.status === "expired"
@@ -324,7 +324,7 @@ function RewardCard({ reward }: { reward: MyReferralReward }) {
             : `Expires ${formatReferralDate(reward.expires_at)}`}
       </p>
       {reward.status === "reserved" ? (
-        <p className="rounded-[6px] bg-warning-50 p-3 text-xs text-warning-800">
+        <p className="rounded-[6px] bg-amber-50 p-3 text-xs text-amber-800">
           This reward is reserved for a pending booking. Cancel that booking if you want to release the reward.
         </p>
       ) : null}
@@ -379,7 +379,7 @@ export function ReferralProgramClient() {
         {!programmeUnavailable ? (
           <>
             <div className="grid gap-3">
-              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-grey-500">
+              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
                 <Users className="h-4 w-4" aria-hidden />
                 Your referrals
               </h2>
@@ -396,7 +396,7 @@ export function ReferralProgramClient() {
             </div>
 
             <div className="grid gap-3">
-              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-grey-500">
+              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
                 <Ticket className="h-4 w-4" aria-hidden />
                 Your rewards
               </h2>

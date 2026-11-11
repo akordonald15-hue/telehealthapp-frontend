@@ -26,7 +26,6 @@ import { beginFilePickerGrace } from "@/lib/pwa/file-picker-guard";
 import { useThreadRealtime } from "./use-thread-realtime";
 import type { Message, Thread, UserRole } from "@/lib/types/backend";
 import { cn } from "@/lib/utils";
-import { Select } from "@/components/ui/input";
 
 type AttachmentPreview = {
   file: File;
@@ -543,11 +542,11 @@ export function MessagesClient() {
 
   return (
     <Section title={sectionTitle} description={sectionDescription}>
-      <div className="overflow-hidden rounded-[8px] border border-white/80 bg-white shadow-300">
-        <div className="grid min-h-[calc(100vh-15rem)] bg-grey-50 lg:grid-cols-[22rem_minmax(0,1fr)]">
+      <div className="overflow-hidden rounded-[8px] border border-white/80 bg-white shadow-[0_24px_64px_-48px_rgba(15,23,42,0.28)]">
+        <div className="grid min-h-[calc(100vh-15rem)] bg-[#F8FAFC] lg:grid-cols-[22rem_minmax(0,1fr)]">
           <aside
             className={cn(
-              "border-r border-grey-200 bg-white",
+              "border-r border-[#E5E7EB] bg-white",
               isMobileChatOpen ? "hidden lg:block" : "block",
             )}
           >
@@ -584,7 +583,7 @@ export function MessagesClient() {
 
           <main
             className={cn(
-              "flex min-h-[calc(100vh-15rem)] flex-col bg-[linear-gradient(180deg,#F9FAFB,#F9FAFB)]",
+              "flex min-h-[calc(100vh-15rem)] flex-col bg-[linear-gradient(180deg,#F8FBFF,#F9FAFB)]",
               !isMobileChatOpen && activeThread ? "hidden lg:flex" : "flex",
             )}
           >
@@ -600,12 +599,12 @@ export function MessagesClient() {
               onBack={() => setIsMobileChatOpen(false)}
             />
             {endConsultation.error ? (
-              <div className="border-b border-danger-100 bg-danger-50 px-4 py-2 text-xs font-semibold text-danger-700 sm:px-6">
+              <div className="border-b border-rose-100 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 sm:px-6">
                 Consultation could not be ended. Please try again.
               </div>
             ) : null}
             {activeThread && realtimeUnavailable ? (
-              <div className="border-b border-warning-100 bg-warning-50/70 px-4 py-2 text-xs font-medium text-warning-800 sm:px-6">
+              <div className="border-b border-amber-100 bg-amber-50/70 px-4 py-2 text-xs font-medium text-amber-800 sm:px-6">
                 Live connection interrupted. Reconnecting; messages refresh automatically when connected to the internet.
               </div>
             ) : null}
@@ -627,7 +626,7 @@ export function MessagesClient() {
 
             <div
               ref={scrollAreaRef}
-              className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_20%_0%,rgba(97,129,186,0.14),transparent_28%),radial-gradient(circle_at_90%_10%,rgba(51,174,127,0.12),transparent_24%)] px-4 py-5 sm:px-6"
+              className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_20%_0%,rgba(96,165,250,0.14),transparent_28%),radial-gradient(circle_at_90%_10%,rgba(16,185,129,0.12),transparent_24%)] px-4 py-5 sm:px-6"
             >
               {!activeThread ? (
                 <div className="flex min-h-full items-center justify-center">
@@ -716,65 +715,65 @@ function TriageSummaryPanel({ thread, role }: { thread: Thread; role?: UserRole 
   const title = role === "doctor" ? "Patient triage summary" : "Your triage summary";
 
   return (
-    <details className="border-b border-primary-100 bg-grey-50 px-4 py-3 text-sm sm:px-6" open={role === "doctor"}>
-      <summary className="cursor-pointer list-none font-semibold text-grey-800">
+    <details className="border-b border-[#DDEBFF] bg-[#F8FBFF] px-4 py-3 text-sm sm:px-6" open={role === "doctor"}>
+      <summary className="cursor-pointer list-none font-semibold text-[#1F2937]">
         {title}
-        <span className="ml-2 rounded-full bg-white px-2 py-1 text-[11px] font-semibold text-primary-500">
+        <span className="ml-2 rounded-full bg-white px-2 py-1 text-[11px] font-semibold text-[#2563EB]">
           {formatStatus(summary.risk_level || summary.severity) || "Check-in"}
         </span>
       </summary>
-      <div className="mt-3 grid gap-2 text-grey-600 sm:grid-cols-2">
+      <div className="mt-3 grid gap-2 text-slate-600 sm:grid-cols-2">
         {symptoms.length ? (
           <p className="rounded-[8px] bg-white px-3 py-2">
-            <span className="font-semibold text-grey-800">Symptoms:</span> {symptoms.join(", ")}
+            <span className="font-semibold text-[#1F2937]">Symptoms:</span> {symptoms.join(", ")}
           </p>
         ) : null}
         {summary.duration ? (
           <p className="rounded-[8px] bg-white px-3 py-2">
-            <span className="font-semibold text-grey-800">Duration:</span> {summary.duration}
+            <span className="font-semibold text-[#1F2937]">Duration:</span> {summary.duration}
           </p>
         ) : null}
         {summary.department ? (
           <p className="rounded-[8px] bg-white px-3 py-2">
-            <span className="font-semibold text-grey-800">Specialty:</span> {summary.department}
+            <span className="font-semibold text-[#1F2937]">Specialty:</span> {summary.department}
           </p>
         ) : null}
         {summary.severity ? (
           <p className="rounded-[8px] bg-white px-3 py-2">
-            <span className="font-semibold text-grey-800">Severity:</span> {formatStatus(summary.severity)}
+            <span className="font-semibold text-[#1F2937]">Severity:</span> {formatStatus(summary.severity)}
           </p>
         ) : null}
         {summary.created_at ? (
           <p className="rounded-[8px] bg-white px-3 py-2">
-            <span className="font-semibold text-grey-800">Captured:</span> {relativeThreadTime(summary.created_at)}
+            <span className="font-semibold text-[#1F2937]">Captured:</span> {relativeThreadTime(summary.created_at)}
           </p>
         ) : null}
       </div>
       {summary.recommendation ? (
-        <p className="mt-3 rounded-[8px] border border-primary-100 bg-white px-3 py-2 leading-6 text-grey-700">{summary.recommendation}</p>
+        <p className="mt-3 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 leading-6 text-slate-700">{summary.recommendation}</p>
       ) : null}
       {redFlags.length ? (
-        <p className="mt-2 rounded-[8px] border border-danger-100 bg-danger-50 px-3 py-2 text-danger-700">
+        <p className="mt-2 rounded-[8px] border border-rose-100 bg-rose-50 px-3 py-2 text-rose-700">
           <span className="font-semibold">Red flags:</span> {redFlags.join(", ")}
         </p>
       ) : null}
       {urgencyGuidance.length ? (
-        <p className="mt-2 rounded-[8px] border border-warning-100 bg-warning-50 px-3 py-2 text-warning-800">
+        <p className="mt-2 rounded-[8px] border border-amber-100 bg-amber-50 px-3 py-2 text-amber-800">
           <span className="font-semibold">Urgency guidance:</span> {urgencyGuidance.join(" ")}
         </p>
       ) : null}
       {possibleCauses.length ? (
-        <p className="mt-2 rounded-[8px] border border-primary-100 bg-white px-3 py-2 text-grey-700">
-          <span className="font-semibold text-grey-800">Possible causes:</span> {possibleCauses.join(", ")}
+        <p className="mt-2 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 text-slate-700">
+          <span className="font-semibold text-[#1F2937]">Possible causes:</span> {possibleCauses.join(", ")}
         </p>
       ) : null}
       {selfCareGuidance.length ? (
-        <details className="mt-2 rounded-[8px] border border-primary-100 bg-white px-3 py-2 text-grey-700">
-          <summary className="cursor-pointer list-none text-sm font-semibold text-grey-800">Self-care guidance</summary>
+        <details className="mt-2 rounded-[8px] border border-[#DDEBFF] bg-white px-3 py-2 text-slate-700">
+          <summary className="cursor-pointer list-none text-sm font-semibold text-[#1F2937]">Self-care guidance</summary>
           <p className="mt-2 leading-6">{selfCareGuidance.join(", ")}</p>
         </details>
       ) : null}
-      <p className="mt-3 text-xs leading-5 text-grey-500">{summary.disclaimer}</p>
+      <p className="mt-3 text-xs leading-5 text-slate-500">{summary.disclaimer}</p>
     </details>
   );
 }
@@ -807,12 +806,12 @@ function ConsultationLifecycleBanner({
     : formatStatus(thread.consultation_lifecycle_status || thread.consultation_status);
 
   return (
-    <div className="border-b border-primary-100 bg-white px-4 py-3 sm:px-6">
-      <div className="flex flex-col gap-3 rounded-[8px] border border-primary-100 bg-grey-50 p-3 text-sm text-grey-700">
+    <div className="border-b border-[#DDEBFF] bg-white px-4 py-3 sm:px-6">
+      <div className="flex flex-col gap-3 rounded-[8px] border border-[#DDEBFF] bg-[#F8FBFF] p-3 text-sm text-slate-700">
         <div className="flex items-start gap-2">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary-500" />
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
           <div>
-            <p className="font-bold text-grey-800">Consultation status: {statusLabel}</p>
+            <p className="font-bold text-[#1F2937]">Consultation status: {statusLabel}</p>
             <p className="mt-1 leading-6">
               You can view the conversation history.
             </p>
@@ -820,11 +819,11 @@ function ConsultationLifecycleBanner({
         </div>
 
         {thread.can_raise_dispute ? (
-          <form className="grid gap-3 border-t border-primary-100 pt-3" onSubmit={onSubmit}>
+          <form className="grid gap-3 border-t border-[#DDEBFF] pt-3" onSubmit={onSubmit}>
             <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-grey-500">Dispute reason</label>
-              <Select fieldSize="md"
-                className="mt-1 w-full"
+              <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Dispute reason</label>
+              <select
+                className="mt-1 min-h-11 w-full rounded-[8px] border border-slate-200 bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#60A5FA]"
                 value={disputeReason}
                 onChange={(event) => onReasonChange(event.target.value)}
               >
@@ -833,12 +832,12 @@ function ConsultationLifecycleBanner({
                 <option value="need_clarification">I need clarification</option>
                 <option value="technical_issue">Technical issue</option>
                 <option value="other">Other</option>
-              </Select>
+              </select>
             </div>
             <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-grey-500">Optional explanation</label>
+              <label className="text-xs font-bold uppercase tracking-wide text-slate-500">Optional explanation</label>
               <textarea
-                className="mt-1 min-h-20 w-full rounded-[8px] border border-grey-200 bg-white px-3 py-2 text-sm leading-6 text-grey-800 outline-none focus:border-primary-400"
+                className="mt-1 min-h-20 w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-[#1F2937] outline-none focus:border-[#60A5FA]"
                 value={disputeExplanation}
                 placeholder="Share what the review team should know."
                 onChange={(event) => onExplanationChange(event.target.value)}
@@ -863,18 +862,18 @@ function ConsultationListHeader({
   onSearchChange: (value: string) => void;
 }) {
   return (
-      <div className="border-b border-grey-200 p-4 sm:p-5">
+      <div className="border-b border-[#E5E7EB] p-4 sm:p-5">
       <div className="flex items-center gap-3">
         <Avatar label="CT" tone="blue" />
         <div>
-          <p className="ct-card-title text-grey-800">Consultation</p>
+          <p className="ct-card-title text-[#1F2937]">Consultation</p>
         </div>
       </div>
 
-      <label className="mt-4 flex min-h-11 items-center gap-2 rounded-[8px] border border-grey-200 bg-grey-50 px-3 text-sm text-grey-500 focus-within:border-primary-400 focus-within:bg-white">
+      <label className="mt-4 flex min-h-11 items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm text-slate-500 focus-within:border-[#60A5FA] focus-within:bg-white">
         <Search className="h-4 w-4" />
         <input
-          className="w-full bg-transparent text-grey-800 outline-none placeholder:text-grey-400"
+          className="w-full bg-transparent text-[#1F2937] outline-none placeholder:text-slate-400"
           value={search}
           placeholder="Search conversations"
           onChange={(event) => onSearchChange(event.target.value)}
@@ -909,29 +908,29 @@ function ConsultationListItem({
       className={cn(
         "group flex w-full gap-3 rounded-[8px] border p-3 text-left transition duration-150",
         isActive
-          ? "border-primary-200 bg-primary-50 shadow-300"
-          : "border-transparent bg-white hover:-translate-y-0.5 hover:border-grey-200 hover:shadow-300",
+          ? "border-[#BFDBFE] bg-[#EFF6FF] shadow-[0_16px_42px_-34px_rgba(37,99,235,0.28)]"
+          : "border-transparent bg-white hover:-translate-y-0.5 hover:border-[#E5E7EB] hover:shadow-[0_16px_42px_-34px_rgba(15,23,42,0.18)]",
       )}
       onClick={onClick}
     >
       <Avatar label={role === "patient" ? "Dr" : "Pt"} tone={isActive ? "blue" : "green"} />
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-2">
-          <span className="truncate font-semibold text-grey-800">{displayName}</span>
-          <span className="shrink-0 text-[11px] font-medium text-grey-400">
+          <span className="truncate font-semibold text-[#1F2937]">{displayName}</span>
+          <span className="shrink-0 text-[11px] font-medium text-slate-400">
             {relativeThreadTime(updatedAt)}
           </span>
         </span>
-        <span className="mt-0.5 flex items-center gap-2 text-xs font-semibold text-grey-500">
+        <span className="mt-0.5 flex items-center gap-2 text-xs font-semibold text-slate-500">
           <span>{roleLabel}</span>
-          {status ? <span className="rounded-full bg-primary-50 px-2 py-0.5 text-primary-500">{status}</span> : null}
-          {unreadCount > 0 ? <span className="rounded-full bg-primary-100 px-2 py-0.5 text-primary-600">{unreadCount} unread</span> : null}
+          {status ? <span className="rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[#2563EB]">{status}</span> : null}
+          {unreadCount > 0 ? <span className="rounded-full bg-[#DBEAFE] px-2 py-0.5 text-[#1D4ED8]">{unreadCount} unread</span> : null}
         </span>
-        <span className="mt-1 line-clamp-1 text-sm text-grey-500">
+        <span className="mt-1 line-clamp-1 text-sm text-slate-500">
           {threadPreview(thread, role, latestMessage)}
         </span>
         {thread.can_send_messages === false ? (
-          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[11px] font-semibold text-grey-500">
+          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[11px] font-semibold text-slate-500">
             Closed
           </span>
         ) : null}
@@ -967,11 +966,11 @@ function ConsultationHeader({
   const windowLabel = consultationWindowLabel(thread, nowMs);
 
   return (
-    <div className="border-b border-grey-200 bg-white px-4 py-4 sm:px-6">
+    <div className="border-b border-[#E5E7EB] bg-white px-4 py-4 sm:px-6">
       <div className="flex min-w-0 items-start gap-3">
         <button
           type="button"
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-grey-500 hover:bg-primary-50 hover:text-primary-500 lg:hidden"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-[#EFF6FF] hover:text-[#2563EB] lg:hidden"
           onClick={onBack}
           aria-label="Back to consultations"
         >
@@ -979,30 +978,30 @@ function ConsultationHeader({
         </button>
         <Avatar label={role === "patient" ? "Dr" : "Pt"} tone="blue" size="lg" />
         <div className="min-w-0 flex-1 pt-0.5">
-          <h2 className="break-words font-heading text-lg font-semibold leading-6 text-grey-800 sm:text-xl">
+          <h2 className="break-words font-heading text-lg font-semibold leading-6 text-[#1F2937] sm:text-xl">
             {title}
           </h2>
-          <p className="mt-1 flex min-w-0 items-start gap-2 text-sm leading-5 text-grey-500">
-            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-success-500" />
+          <p className="mt-1 flex min-w-0 items-start gap-2 text-sm leading-5 text-slate-500">
+            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#10B981]" />
             <span className="min-w-0 break-words">{status ? `${subtitle} · ${status}` : subtitle}</span>
           </p>
-          <p className="mt-1 text-xs font-semibold leading-5 text-primary-500 sm:hidden">{windowLabel}</p>
+          <p className="mt-1 text-xs font-semibold leading-5 text-[#2563EB] sm:hidden">{windowLabel}</p>
         </div>
         <div className="hidden shrink-0 items-center gap-2 sm:flex">
-          <p className="mr-1 text-xs font-semibold text-primary-500">{windowLabel}</p>
+          <p className="mr-1 text-xs font-semibold text-[#2563EB]">{windowLabel}</p>
           {canEndConsultation ? (
             <Button type="button" variant="secondary" size="sm" disabled={isEnding} onClick={onEndConsultation}>
               {isEnding ? "Ending..." : "End Consultation"}
             </Button>
           ) : null}
-          <div className="hidden items-center gap-2 rounded-full bg-success-50 px-3 py-2 text-xs font-semibold text-success-700 md:inline-flex">
+          <div className="hidden items-center gap-2 rounded-full bg-[#ECFDF5] px-3 py-2 text-xs font-semibold text-[#047857] md:inline-flex">
             <Stethoscope className="h-4 w-4" />
             {liveConnected ? "Live chat" : realtimeUnavailable ? "Reconnecting" : "Secure chat"}
           </div>
         </div>
       </div>
       {canEndConsultation ? (
-        <div className="mt-3 flex justify-end border-t border-grey-100 pt-3 sm:hidden">
+        <div className="mt-3 flex justify-end border-t border-slate-100 pt-3 sm:hidden">
           <Button
             type="button"
             variant="secondary"
@@ -1041,10 +1040,10 @@ function ChatMessageBubble({
       {!isMine ? <Avatar label={currentUserRole === "doctor" ? "Pt" : "Dr"} tone="green" size="sm" /> : null}
       <div
         className={cn(
-          "max-w-[86%] rounded-[8px] px-3.5 py-2.5 shadow-300 sm:max-w-[68%]",
+          "max-w-[86%] rounded-[8px] px-3.5 py-2.5 shadow-[0_12px_34px_-30px_rgba(15,23,42,0.24)] sm:max-w-[68%]",
           isMine
-            ? "bg-[linear-gradient(135deg,#3961A9,#6181BA)] text-white"
-            : "border border-white bg-white text-grey-800",
+            ? "bg-[linear-gradient(135deg,#2563EB,#60A5FA)] text-white"
+            : "border border-white bg-white text-[#1F2937]",
         )}
       >
         {message.body && !shouldHideGeneratedVoiceLabel ? <p className="whitespace-pre-line text-sm leading-6">{message.body}</p> : null}
@@ -1054,7 +1053,7 @@ function ChatMessageBubble({
           <a
             className={cn(
               "mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold",
-              isMine ? "bg-white/15 text-white" : "bg-primary-50 text-primary-500",
+              isMine ? "bg-white/15 text-white" : "bg-[#EFF6FF] text-[#2563EB]",
             )}
             href={message.attachment_url}
             target="_blank"
@@ -1064,7 +1063,7 @@ function ChatMessageBubble({
             Open attachment
           </a>
         ) : null}
-        <p className={cn("mt-2 text-[11px]", isMine ? "text-right text-white/75" : "text-grey-400")}>
+        <p className={cn("mt-2 text-[11px]", isMine ? "text-right text-white/75" : "text-slate-400")}>
           {isMine ? messageTime(message.created_at) : `${senderName} · ${messageTime(message.created_at)}`}
         </p>
       </div>
@@ -1080,7 +1079,7 @@ function VoiceNotePlayer({ message, isMine }: { message: Message; isMine: boolea
     <div
       className={cn(
         "mt-2 flex min-w-[13rem] max-w-full items-center gap-2 rounded-[8px] px-2.5 py-2",
-        isMine ? "bg-white/15 text-white" : "border border-primary-100 bg-grey-50 text-grey-800",
+        isMine ? "bg-white/15 text-white" : "border border-[#DDEBFF] bg-[#F8FBFF] text-[#1F2937]",
       )}
     >
       {audioUrl ? (
@@ -1088,9 +1087,9 @@ function VoiceNotePlayer({ message, isMine }: { message: Message; isMine: boolea
           Voice note playback is not available in this browser.
         </audio>
       ) : (
-        <p className={cn("min-w-0 flex-1 text-xs", isMine ? "text-white/75" : "text-grey-500")}>Audio unavailable</p>
+        <p className={cn("min-w-0 flex-1 text-xs", isMine ? "text-white/75" : "text-slate-500")}>Audio unavailable</p>
       )}
-      <span className={cn("shrink-0 text-[11px] font-medium", isMine ? "text-white/80" : "text-grey-500")}>
+      <span className={cn("shrink-0 text-[11px] font-medium", isMine ? "text-white/80" : "text-slate-500")}>
         {formatDuration(message.attachment_duration_seconds)}
       </span>
     </div>
@@ -1131,18 +1130,18 @@ function ChatComposer({
   onClearAttachment: () => void;
 }) {
   return (
-    <form className="border-t border-grey-200 bg-white p-3 sm:p-4" onSubmit={onSubmit}>
+    <form className="border-t border-[#E5E7EB] bg-white p-3 sm:p-4" onSubmit={onSubmit}>
       {error ? <ErrorMessage error={error} context="messageSend" /> : null}
       {disabled && disabledReason ? (
-        <p className="mb-3 rounded-[8px] bg-grey-100 px-3 py-2 text-xs font-semibold text-grey-600">
+        <p className="mb-3 rounded-[8px] bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">
           {disabledReason}
         </p>
       ) : null}
 
       {attachment ? (
-        <div className="mb-3 flex items-center gap-3 rounded-[8px] border border-primary-100 bg-grey-50 p-3">
+        <div className="mb-3 flex items-center gap-3 rounded-[8px] border border-[#DDEBFF] bg-[#F8FBFF] p-3">
           {attachment.kind === "voice" && attachment.previewUrl ? (
-            <span className="flex h-14 w-14 items-center justify-center rounded-[8px] bg-white text-primary-500">
+            <span className="flex h-14 w-14 items-center justify-center rounded-[8px] bg-white text-[#2563EB]">
               <Mic className="h-5 w-5" />
             </span>
           ) : attachment.previewUrl ? (
@@ -1153,7 +1152,7 @@ function ChatComposer({
               className="h-14 w-14 rounded-[8px] object-cover"
             />
           ) : (
-            <span className="flex h-14 w-14 items-center justify-center rounded-[8px] bg-white text-primary-500">
+            <span className="flex h-14 w-14 items-center justify-center rounded-[8px] bg-white text-[#2563EB]">
               <Paperclip className="h-5 w-5" />
             </span>
           )}
@@ -1163,20 +1162,20 @@ function ChatComposer({
                 <audio className="h-8 min-w-0 flex-1" controls preload="metadata" src={attachment.previewUrl}>
                   Voice note playback is not available in this browser.
                 </audio>
-                <span className="shrink-0 text-[11px] font-medium text-grey-500">
+                <span className="shrink-0 text-[11px] font-medium text-slate-500">
                   {formatDuration(attachment.durationSeconds)}
                 </span>
               </div>
             ) : (
               <>
-                <p className="truncate text-sm font-semibold text-grey-800">{attachment.file.name}</p>
-                <p className="text-xs text-grey-500">{formatFileSize(attachment.file.size)}</p>
+                <p className="truncate text-sm font-semibold text-[#1F2937]">{attachment.file.name}</p>
+                <p className="text-xs text-slate-500">{formatFileSize(attachment.file.size)}</p>
               </>
             )}
           </div>
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-grey-500 hover:bg-white hover:text-danger-600"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-white hover:text-rose-600"
             onClick={onClearAttachment}
             aria-label="Remove attachment"
           >
@@ -1185,10 +1184,10 @@ function ChatComposer({
         </div>
       ) : null}
 
-      <div className="flex items-end gap-2 rounded-[8px] border border-grey-200 bg-grey-50 p-2.5 focus-within:border-primary-400 focus-within:bg-white">
+      <div className="flex items-end gap-2 rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] p-2.5 focus-within:border-[#60A5FA] focus-within:bg-white">
         <button
           type="button"
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-primary-500 shadow-100 transition hover:-translate-y-0.5 hover:bg-primary-50"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#2563EB] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#EFF6FF]"
           disabled={disabled || isSending}
           onClick={(event) => {
             event.preventDefault();
@@ -1202,8 +1201,8 @@ function ChatComposer({
           <button
             type="button"
             className={cn(
-              "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-100 transition hover:-translate-y-0.5",
-              isRecordingVoice ? "bg-danger-600 text-white hover:bg-danger-700" : "bg-white text-primary-500 hover:bg-primary-50",
+              "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-sm transition hover:-translate-y-0.5",
+              isRecordingVoice ? "bg-rose-600 text-white hover:bg-rose-700" : "bg-white text-[#2563EB] hover:bg-[#EFF6FF]",
             )}
             disabled={disabled || isSending}
             onClick={isRecordingVoice ? onStopVoiceRecording : onStartVoiceRecording}
@@ -1213,7 +1212,7 @@ function ChatComposer({
           </button>
         ) : null}
         <textarea
-          className="max-h-32 min-h-11 flex-1 resize-none bg-transparent px-1 py-3 text-sm leading-6 text-grey-800 outline-none placeholder:text-grey-400"
+          className="max-h-32 min-h-11 flex-1 resize-none bg-transparent px-1 py-3 text-sm leading-6 text-[#1F2937] outline-none placeholder:text-slate-400"
           value={value}
           rows={1}
           placeholder={disabled ? "Choose a consultation first" : "Type a message"}
@@ -1222,7 +1221,7 @@ function ChatComposer({
         />
         <Button
           type="submit"
-          className="w-12 shrink-0 px-0!"
+          className="h-11 min-h-11 w-11 shrink-0 rounded-full px-0"
           disabled={disabled || isSending || (!value.trim() && !attachment)}
           aria-label="Send message"
         >
@@ -1233,10 +1232,10 @@ function ChatComposer({
           )}
         </Button>
       </div>
-      <p className="mt-2 flex items-center gap-2 px-2 text-xs text-grey-500">
+      <p className="mt-2 flex items-center gap-2 px-2 text-xs text-slate-500">
         {isRecordingVoice ? (
           <>
-            <Mic className="h-3.5 w-3.5 text-danger-600" />
+            <Mic className="h-3.5 w-3.5 text-rose-600" />
             Recording {formatDuration(recordingSeconds)} / {formatDuration(VOICE_NOTE_MAX_SECONDS)}
           </>
         ) : (
@@ -1266,8 +1265,8 @@ function Avatar({
         size === "sm" && "h-8 w-8 text-xs",
         size === "md" && "h-12 w-12 text-sm",
         size === "lg" && "h-14 w-14 text-base",
-        tone === "blue" && "bg-primary-100 text-primary-500",
-        tone === "green" && "bg-success-100 text-success-700",
+        tone === "blue" && "bg-[#DBEAFE] text-[#2563EB]",
+        tone === "green" && "bg-[#D1FAE5] text-[#047857]",
       )}
     >
       {label}
@@ -1279,7 +1278,7 @@ function ConversationSkeleton() {
   return (
     <div className="space-y-2">
       {[0, 1, 2].map((item) => (
-        <div key={item} className="h-24 animate-pulse rounded-[8px] bg-grey-100" />
+        <div key={item} className="h-24 animate-pulse rounded-[8px] bg-slate-100" />
       ))}
     </div>
   );

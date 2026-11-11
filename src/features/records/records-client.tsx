@@ -65,12 +65,12 @@ export function RecordsClient() {
         {userQuery.data?.role === "patient" ? (
           <section className="ct-panel grid gap-4 rounded-[8px] p-5 sm:p-6">
             <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-primary-100 text-primary-500">
+              <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#DBEAFE] text-[#2563EB]">
                 <BrainCircuit className="h-5 w-5" />
               </span>
               <div>
-                <p className="ct-card-title text-grey-800">Care Check-in Records</p>
-                <p className="mt-1 text-sm leading-6 text-grey-600">
+                <p className="ct-card-title text-[#1F2937]">Care Check-in Records</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
                   AI summaries are saved with the consultation they supported.
                 </p>
               </div>
@@ -78,7 +78,7 @@ export function RecordsClient() {
             {appointments.isLoading ? (
               <div className="grid gap-3">
                 {[0, 1].map((item) => (
-                  <div key={item} className="h-20 animate-pulse rounded-[8px] bg-grey-100" />
+                  <div key={item} className="h-20 animate-pulse rounded-[8px] bg-slate-100" />
                 ))}
               </div>
             ) : appointments.isError ? (
@@ -92,28 +92,28 @@ export function RecordsClient() {
                     Boolean(appointment.triage_summary),
                   )
                   .map((appointment) => (
-                    <article key={appointment.id} className="rounded-[8px] border border-primary-100 bg-grey-50 p-4">
+                    <article key={appointment.id} className="rounded-[8px] border border-[#DBEAFE] bg-[#F8FBFF] p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-grey-800">
+                          <p className="truncate text-sm font-semibold text-[#1F2937]">
                             {appointment.doctor_profile?.display_name || "Doctor consultation"}
                           </p>
-                          <p className="mt-1 flex items-center gap-1 text-xs text-grey-500">
-                            <CalendarClock className="h-3.5 w-3.5 text-primary-500" />
+                          <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+                            <CalendarClock className="h-3.5 w-3.5 text-[#2563EB]" />
                             {formatDateTime(appointment.scheduled_at)}
                           </p>
                         </div>
-                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary-500">
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#2563EB]">
                           {appointment.triage_summary.risk_level || appointment.triage_summary.severity || "Reviewed"}
                         </span>
                       </div>
-                      <p className="mt-3 text-sm leading-6 text-grey-600">
+                      <p className="mt-3 text-sm leading-6 text-slate-600">
                         {appointment.triage_summary.symptoms?.length
                           ? appointment.triage_summary.symptoms.join(", ")
                           : appointment.triage_summary.recommendation || "Care check-in summary attached."}
                       </p>
                       {appointment.triage_summary.department ? (
-                        <p className="mt-2 text-xs font-semibold text-grey-800">
+                        <p className="mt-2 text-xs font-semibold text-[#1F2937]">
                           Suggested specialty: {appointment.triage_summary.department}
                         </p>
                       ) : null}
@@ -121,7 +121,7 @@ export function RecordsClient() {
                   ))}
               </div>
             ) : (
-              <div className="rounded-[8px] border border-grey-100 bg-white px-4 py-5 text-sm text-grey-600">
+              <div className="rounded-[8px] border border-slate-100 bg-white px-4 py-5 text-sm text-slate-600">
                 Your care check-in records will appear here after you complete a doctor consultation booking.
               </div>
             )}
@@ -136,12 +136,12 @@ export function RecordsClient() {
           }}
         >
           <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-primary-100 text-primary-500">
+            <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
               <ShieldPlus className="h-5 w-5" />
             </span>
             <div>
-              <p className="ct-card-title text-grey-800">Upload Supporting File</p>
-              <p className="mt-1 text-sm leading-6 text-grey-600">Add file from device.</p>
+              <p className="ct-card-title text-[#1F2937]">Upload Supporting File</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">Add file from device.</p>
             </div>
           </div>
           <ErrorMessage error={upload.error} context="recordUpload" />
@@ -179,7 +179,7 @@ export function RecordsClient() {
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-primary-500 px-4 text-sm font-extrabold text-white"
+            className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[#2563EB] px-4 text-sm font-extrabold text-white"
           >
             Return to upload tools
           </button>
@@ -190,13 +190,13 @@ export function RecordsClient() {
           <article key={record.id} className="ct-surface rounded-[24px] p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:justify-between">
               <div>
-                <p className="font-heading text-xl font-semibold text-grey-800">{medicalRecordTitle(record)}</p>
-                <p className="mt-2 text-sm text-grey-600">
+                <p className="font-heading text-xl font-semibold text-[#1F2937]">{medicalRecordTitle(record)}</p>
+                <p className="mt-2 text-sm text-slate-600">
                   {medicalRecordSummary(record, userQuery.data?.role)} · {formatDateTime(record.created_at)}
                 </p>
-                {record.notes ? <p className="mt-3 text-sm leading-7 text-grey-600">{record.notes}</p> : null}
+                {record.notes ? <p className="mt-3 text-sm leading-7 text-slate-600">{record.notes}</p> : null}
               </div>
-              <span className="rounded-full border border-grey-200 bg-grey-50 px-4 py-2 text-sm font-semibold text-grey-600">
+              <span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-600">
                 {record.files.length} file{record.files.length === 1 ? "" : "s"}
               </span>
             </div>
@@ -206,7 +206,7 @@ export function RecordsClient() {
                   <button
                     key={fileItem.id}
                     type="button"
-                    className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-grey-200 bg-grey-50 px-4 text-sm font-semibold text-primary-500 transition hover:border-primary-200 hover:bg-primary-50"
+                    className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-[#2563EB] transition hover:border-blue-200 hover:bg-[#EFF6FF]"
                     onClick={async () => {
                       const data = await profilesApi.medicalFileDownload(fileItem.id);
                       window.open(data.download_url, "_blank", "noopener,noreferrer");

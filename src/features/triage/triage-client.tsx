@@ -149,12 +149,12 @@ function ResultPanel({
   return (
     <div className="ct-soft-panel min-w-0 rounded-[22px] p-4">
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white text-primary-500 shadow-100">
+        <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white text-[#2563EB] shadow-sm">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0 break-words">
-          <p className="ct-card-title text-[1rem] text-grey-800">{title}</p>
-          <div className="mt-2 text-sm leading-7 text-grey-600">{children}</div>
+          <p className="ct-card-title text-[1rem] text-[#1F2937]">{title}</p>
+          <div className="mt-2 text-sm leading-7 text-slate-600">{children}</div>
         </div>
       </div>
     </div>
@@ -215,7 +215,7 @@ function ResultCard({ data }: { data: TriageResultData }) {
         <ResultPanel icon={ShieldAlert} title="Recommended action">
           <div className="space-y-2">
             <p>{recommendedAction(data)}</p>
-            {nextQuestion ? <p className="font-medium text-grey-800">Next question: {nextQuestion}</p> : null}
+            {nextQuestion ? <p className="font-medium text-[#1F2937]">Next question: {nextQuestion}</p> : null}
           </div>
         </ResultPanel>
       </div>
@@ -239,10 +239,10 @@ function AssistantBubble({
     <div className={cn("flex", speaker === "user" ? "justify-end" : "justify-start")}>
       <div
         className={cn(
-          "max-w-[88%] rounded-[24px] px-4 py-3 text-sm leading-7 shadow-100 sm:max-w-[80%]",
+          "max-w-[88%] rounded-[24px] px-4 py-3 text-sm leading-7 shadow-sm sm:max-w-[80%]",
           speaker === "user"
-            ? "bg-[linear-gradient(135deg,#3961A9,#6181BA)] text-white"
-            : "border border-grey-200 bg-white text-grey-700",
+            ? "bg-[linear-gradient(135deg,#2563EB,#60A5FA)] text-white"
+            : "border border-slate-200 bg-white text-slate-700",
         )}
       >
         {children}
@@ -387,12 +387,12 @@ export function TriageClient() {
                   </Notice>
                 ) : null}
                 <div className="flex items-start gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-primary-100 text-primary-500">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
                     <BrainCircuit className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="ct-card-title text-grey-800">Caretekk Assistant</p>
-                    <p className="mt-1 text-sm leading-6 text-grey-600">A quick, guided intake before we connect you with care.</p>
+                    <p className="ct-card-title text-[#1F2937]">Caretekk Assistant</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">A quick, guided intake before we connect you with care.</p>
                   </div>
                 </div>
 
@@ -400,7 +400,7 @@ export function TriageClient() {
 
                 <div className="grid gap-3">
                   <AssistantBubble speaker="assistant">
-                    <p className="font-semibold text-grey-800">Hi</p>
+                    <p className="font-semibold text-[#1F2937]">Hi</p>
                     <p>How are you feeling today?</p>
                   </AssistantBubble>
 
@@ -449,19 +449,19 @@ export function TriageClient() {
                         value={symptomText}
                         onChange={(event) => setSymptomText(event.target.value)}
                         placeholder="Describe what you are feeling in your own words"
-                        className="min-h-32 w-full rounded-[18px] border border-grey-200 bg-white px-4 py-4 text-sm text-grey-800 outline-none transition shadow-300 placeholder:text-grey-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                        className="min-h-32 w-full rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 text-sm text-[#1F2937] outline-none transition shadow-[0_6px_20px_rgba(31,41,55,0.03)] placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                       />
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
                         <button
                           type="button"
                           disabled
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-grey-200 bg-grey-50 text-grey-400"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-400"
                           aria-label="Voice support coming soon"
                           title="Voice support coming soon"
                         >
                           <Mic className="h-4 w-4" />
                         </button>
-                        <Button type="submit" size="compact" disabled={!canSubmitSymptomText} className="w-full sm:w-auto">
+                        <Button type="submit" disabled={!canSubmitSymptomText} className="min-h-10 w-full rounded-full px-4 sm:w-auto">
                           <SendHorizonal className="mr-2 h-4 w-4" />
                           Continue
                         </Button>
@@ -477,7 +477,7 @@ export function TriageClient() {
                         key={option.value}
                         type="button"
                         onClick={() => handleSeveritySelect(option.value)}
-                        className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-grey-300 bg-white px-5 text-sm font-bold text-grey-800 transition hover:border-primary-300 hover:bg-primary-50 hover:text-primary-500 sm:w-auto"
+                        className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-[#D1D5DB] bg-white px-5 text-sm font-bold text-[#1F2937] transition hover:border-[#93C5FD] hover:bg-[#EFF6FF] hover:text-[#2563EB] sm:w-auto"
                       >
                         {option.label}
                       </button>
@@ -488,29 +488,29 @@ export function TriageClient() {
 
             <div className="ct-panel grid min-w-0 gap-4 rounded-[22px] p-4 sm:rounded-[28px] sm:p-6">
               <div>
-                <p className="ct-card-title text-grey-800">Your guidance</p>
-                <p className="mt-1 text-sm leading-6 text-grey-600">Your care summary will appear here.</p>
+                <p className="ct-card-title text-[#1F2937]">Your guidance</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">Your care summary will appear here.</p>
               </div>
 
                 {finishedResult && resultData ? (
                   <div className="grid gap-4">
                     <ResultCard data={resultData} />
                     <div className="ct-soft-panel rounded-[22px] p-4 sm:p-5">
-                      <p className="ct-card-title text-grey-800">Next step</p>
-                      <p className="mt-2 text-sm leading-7 text-grey-600">
+                      <p className="ct-card-title text-[#1F2937]">Next step</p>
+                      <p className="mt-2 text-sm leading-7 text-slate-600">
                         Your care summary is ready for the doctor, so you can continue the conversation with the right context already in place.
                       </p>
-                      <div className="mt-4 flex flex-col gap-3 rounded-[18px] border border-grey-200 bg-white/96 p-3 shadow-300 sm:flex-row sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+                      <div className="mt-4 flex flex-col gap-3 rounded-[18px] border border-slate-200 bg-white/96 p-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] sm:flex-row sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
                         <Link
                           href={nextStepHref}
                           onClick={triageDraft.clearDraft}
-                          className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#3961A9,#6181BA)] px-4 text-sm font-extrabold text-white shadow-400 transition duration-200 hover:-translate-y-0.5 hover:shadow-500"
+                          className="inline-flex min-h-11 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,#2563EB,#60A5FA)] px-4 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(37,99,235,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(37,99,235,0.3)]"
                         >
                           {nextStepLabel}
                         </Link>
                         <Link
                           href="/appointments"
-                          className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-grey-200 bg-white px-4 text-sm font-extrabold text-grey-800 shadow-400 transition duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:bg-grey-50"
+                          className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white px-4 text-sm font-extrabold text-[#1F2937] shadow-[0_8px_24px_rgba(31,41,55,0.05)] transition duration-200 hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:bg-[#F8FBFF]"
                         >
                           Review appointments
                         </Link>
@@ -520,14 +520,14 @@ export function TriageClient() {
                 ) : (
                   <div className="grid gap-3">
                     <div className="ct-soft-panel rounded-[20px] p-4">
-                      <p className="text-sm font-semibold text-grey-800">Summary</p>
-                      <p className="mt-2 text-sm leading-7 text-grey-600">
+                      <p className="text-sm font-semibold text-[#1F2937]">Summary</p>
+                      <p className="mt-2 text-sm leading-7 text-slate-600">
                         Tell us how you feel and we&apos;ll prepare a summary.
                       </p>
                     </div>
                     <div className="ct-soft-panel rounded-[20px] p-4">
-                      <p className="text-sm font-semibold text-grey-800">Recommended action</p>
-                      <p className="mt-2 text-sm leading-7 text-grey-600">
+                      <p className="text-sm font-semibold text-[#1F2937]">Recommended action</p>
+                      <p className="mt-2 text-sm leading-7 text-slate-600">
                         We&apos;ll guide you to the next step.
                       </p>
                     </div>
@@ -539,14 +539,14 @@ export function TriageClient() {
       ) : (
         <div className="ct-panel grid gap-4 rounded-[8px] p-6">
           <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-primary-100 text-primary-500">
+            <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[#DBEAFE] text-[#2563EB]">
               <HeartPulse className="h-5 w-5" />
             </span>
             <div>
-              <p className="ct-card-title text-grey-800">
+              <p className="ct-card-title text-[#1F2937]">
                 {bookingMode ? "Prepare your consultation" : "Start a new care check-in"}
               </p>
-              <p className="mt-1 text-sm leading-6 text-grey-600">
+              <p className="mt-1 text-sm leading-6 text-slate-600">
                 Each consultation gets its own symptom summary. Previous check-ins remain attached to their original consultations.
               </p>
             </div>
@@ -562,7 +562,7 @@ export function TriageClient() {
             </Button>
             <Link
               href="/appointments"
-              className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-grey-200 bg-white px-4 text-sm font-extrabold text-grey-800 shadow-400 transition duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:bg-grey-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white px-4 text-sm font-extrabold text-[#1F2937] shadow-[0_8px_24px_rgba(31,41,55,0.05)] transition duration-200 hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:bg-[#F8FBFF]"
             >
               Back to appointments
             </Link>

@@ -102,29 +102,29 @@ export function PasswordResetForm() {
 
   return (
     <div className="grid gap-6">
-      <div className="flex items-center gap-3 rounded-[22px] border border-grey-200 bg-grey-50/80 px-4 py-3 text-sm text-grey-700">
+      <div className="flex items-center gap-3 rounded-[22px] border border-ash-200 bg-ash-50/80 px-4 py-3 text-sm text-ash-700">
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
           {stepIndex}
         </span>
         <div>
-          <p className="font-medium text-grey-900">
+          <p className="font-medium text-ash-900">
             {step === "email" && "Step 1 of 3: Request reset code"}
             {step === "otp" && "Step 2 of 3: Verify reset code"}
             {step === "password" && "Step 3 of 3: Set new password"}
             {step === "success" && "Password updated"}
           </p>
-          <p className="text-xs text-grey-600">Caretekk uses a secure reset code for this flow.</p>
+          <p className="text-xs text-ash-600">Caretekk uses a secure reset code for this flow.</p>
         </div>
       </div>
 
       {step === "email" ? (
         <form
-          className="grid gap-4 rounded-[22px] border border-grey-200 bg-grey-50/80 p-5 sm:p-6"
+          className="grid gap-4 rounded-[22px] border border-ash-200 bg-ash-50/80 p-5 sm:p-6"
           onSubmit={requestForm.handleSubmit((values) => requestReset.mutate(values))}
         >
           <div>
-            <p className="font-heading text-xl font-semibold text-grey-900">Request reset code</p>
-            <p className="mt-1 text-sm text-grey-600">
+            <p className="font-heading text-xl font-semibold text-ash-900">Request reset code</p>
+            <p className="mt-1 text-sm text-ash-600">
               Enter the email on your Caretekk account. If it exists, we’ll send a secure reset code.
             </p>
           </div>
@@ -141,13 +141,13 @@ export function PasswordResetForm() {
 
       {step === "otp" ? (
         <form
-          className="grid gap-4 rounded-[22px] border border-grey-200 bg-surface p-5 shadow-300 sm:p-6"
+          className="grid gap-4 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.45)] sm:p-6"
           onSubmit={otpForm.handleSubmit((values) => verifyReset.mutate(values))}
         >
           <div>
-            <p className="font-heading text-xl font-semibold text-grey-900">Verify reset code</p>
-            <p className="mt-1 text-sm text-grey-600">
-              Enter the 6-digit code sent to <span className="font-medium text-grey-900">{email}</span>.
+            <p className="font-heading text-xl font-semibold text-ash-900">Verify reset code</p>
+            <p className="mt-1 text-sm text-ash-600">
+              Enter the 6-digit code sent to <span className="font-medium text-ash-900">{email}</span>.
             </p>
           </div>
           <ErrorMessage error={verifyReset.error} context="verification" />
@@ -173,13 +173,13 @@ export function PasswordResetForm() {
 
       {step === "password" ? (
         <form
-          className="grid gap-4 rounded-[22px] border border-grey-200 bg-surface p-5 shadow-300 sm:p-6"
+          className="grid gap-4 rounded-[22px] border border-ash-200 bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.45)] sm:p-6"
           onSubmit={passwordForm.handleSubmit((values) => confirmReset.mutate(values))}
         >
           <div>
-            <p className="font-heading text-xl font-semibold text-grey-900">Set a new password</p>
-            <p className="mt-1 text-sm text-grey-600">
-              Choose a new password for <span className="font-medium text-grey-900">{email}</span>.
+            <p className="font-heading text-xl font-semibold text-ash-900">Set a new password</p>
+            <p className="mt-1 text-sm text-ash-600">
+              Choose a new password for <span className="font-medium text-ash-900">{email}</span>.
             </p>
           </div>
           <ErrorMessage error={confirmReset.error} context="auth" />
@@ -207,7 +207,7 @@ export function PasswordResetForm() {
         </Notice>
       ) : null}
 
-      <p className="text-center text-sm text-grey-600">
+      <p className="text-center text-sm text-ash-600">
         Remembered your password?{" "}
         <Link className="font-semibold text-primary hover:text-primary-strong" href="/login">
           Back to sign in

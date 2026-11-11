@@ -16,7 +16,6 @@ import { useCurrentUser } from "@/lib/auth/use-auth";
 import { buildWebSocketUrl } from "@/lib/realtime";
 import { getFriendlyErrorMessage } from "@/lib/ui/error-copy";
 import { formatDateTime } from "@/lib/utils";
-import { Select } from "@/components/ui/input";
 import {
   activeAssignmentForRequest,
   bookingSourceLabel,
@@ -55,15 +54,15 @@ function WorkflowStep({ step, status }: { step: (typeof workflowSteps)[number]; 
       className={[
         "rounded-[18px] border px-4 py-3",
         current
-          ? "border-[rgba(57,97,169,0.2)] bg-[var(--primary-soft)]"
+          ? "border-[rgba(66,107,179,0.2)] bg-[var(--primary-soft)]"
           : completed
-            ? "border-success-100 bg-success-50"
-            : "border-grey-200 bg-grey-50",
+            ? "border-emerald-100 bg-emerald-50"
+            : "border-slate-200 bg-slate-50",
       ].join(" ")}
     >
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-grey-800">{step.label}</p>
-        <span className="text-xs font-bold uppercase tracking-[0.08em] text-grey-500">
+        <p className="text-sm font-semibold text-[#1F2937]">{step.label}</p>
+        <span className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">
           {current ? "Now" : completed ? "Done" : "Locked"}
         </span>
       </div>
@@ -244,77 +243,77 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
       ) : request ? (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="flex flex-wrap items-center gap-3">
-                <h2 className="font-heading text-2xl font-semibold text-grey-800">{request.contact_name_snapshot || "Patient request"}</h2>
+                <h2 className="font-heading text-2xl font-semibold text-[#1F2937]">{request.contact_name_snapshot || "Patient request"}</h2>
                 <span className="rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
                   {homeCareStatusLabel(request.status)}
                 </span>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                  <p className="text-sm font-semibold text-grey-800">Patient phone</p>
-                  <p className="mt-1 text-sm text-grey-600">{request.contact_phone_snapshot || "Not provided"}</p>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-[#1F2937]">Patient phone</p>
+                  <p className="mt-1 text-sm text-slate-600">{request.contact_phone_snapshot || "Not provided"}</p>
                 </div>
-                <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                  <p className="text-sm font-semibold text-grey-800">Alternate phone</p>
-                  <p className="mt-1 text-sm text-grey-600">{alternatePhone || "Not provided"}</p>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-[#1F2937]">Alternate phone</p>
+                  <p className="mt-1 text-sm text-slate-600">{alternatePhone || "Not provided"}</p>
                 </div>
-                <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                  <p className="text-sm font-semibold text-grey-800">Booking source</p>
-                  <p className="mt-1 text-sm text-grey-600">{bookingSourceLabel(request.booking_source)}</p>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-[#1F2937]">Booking source</p>
+                  <p className="mt-1 text-sm text-slate-600">{bookingSourceLabel(request.booking_source)}</p>
                 </div>
-                <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                  <p className="text-sm font-semibold text-grey-800">Preferred time</p>
-                  <p className="mt-1 text-sm text-grey-600">{preferredTimeLabel(request)}</p>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-[#1F2937]">Preferred time</p>
+                  <p className="mt-1 text-sm text-slate-600">{preferredTimeLabel(request)}</p>
                 </div>
               </div>
 
-              <div className="mt-4 rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-4">
-                <p className="text-sm font-semibold text-grey-800">Address and landmark</p>
-                <p className="mt-2 text-sm leading-6 text-grey-600">{request.service_address_snapshot || "Address not provided yet."}</p>
-                {request.service_location_notes ? <p className="mt-2 text-sm text-grey-600">{request.service_location_notes}</p> : null}
+              <div className="mt-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+                <p className="text-sm font-semibold text-[#1F2937]">Address and landmark</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{request.service_address_snapshot || "Address not provided yet."}</p>
+                {request.service_location_notes ? <p className="mt-2 text-sm text-slate-600">{request.service_location_notes}</p> : null}
               </div>
 
-              <div className="mt-4 rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-4">
-                <p className="text-sm font-semibold text-grey-800">Doctor referral or care notes</p>
-                <p className="mt-2 text-sm leading-6 text-grey-600">{request.care_notes || "No extra notes have been shared for this request yet."}</p>
+              <div className="mt-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+                <p className="text-sm font-semibold text-[#1F2937]">Doctor referral or care notes</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{request.care_notes || "No extra notes have been shared for this request yet."}</p>
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <ShieldCheck className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="font-heading text-xl font-semibold text-grey-800">Current workflow</p>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Current workflow</p>
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-3 text-sm text-grey-600">
-                <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                  <p className="font-semibold text-grey-800">Assignment</p>
+              <div className="mt-6 grid gap-3 text-sm text-slate-600">
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">Assignment</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     {assignment ? <StatusBadge value={assignment.status} /> : null}
                     <span>{assignment ? homeCareStatusLabel(assignment.status) : "No active assignment available."}</span>
                   </div>
                 </div>
-                <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                  <p className="font-semibold text-grey-800">Trip status</p>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">Trip status</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <StatusBadge value={request.status} />
                     <span>{homeCareStatusLabel(request.status)}</span>
                   </div>
                 </div>
-                <div className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-3">
-                  <p className="font-semibold text-grey-800">Last update</p>
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="font-semibold text-[#1F2937]">Last update</p>
                   <p className="mt-1">{formatDateTime(request.updated_at)}</p>
                 </div>
               </div>
 
               <div className="mt-6">
-                <p className="font-heading text-lg font-semibold text-grey-800">State-machine progress</p>
+                <p className="font-heading text-lg font-semibold text-[#1F2937]">State-machine progress</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {workflowSteps.map((step) => (
                     <WorkflowStep key={step.key} step={step} status={request.status} />
@@ -325,41 +324,41 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
           </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <Phone className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="font-heading text-xl font-semibold text-grey-800">Pre-visit verification</p>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Pre-visit verification</p>
                 </div>
               </div>
               <div className="mt-6 grid gap-3">
-                <label className="grid gap-2 text-sm font-semibold text-grey-800">
+                <label className="grid gap-2 text-sm font-semibold text-[#1F2937]">
                   Verification outcome
-                  <Select fieldSize="md"
+                  <select
                     value={verificationChoice}
                     onChange={(event) => setVerificationChoice(event.target.value as VerificationOutcomeOption)}
-                    className="transition"
+                    className="min-h-11 rounded-[12px] border border-slate-200 bg-white px-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
                   >
                     {verificationOutcomeOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
                     ))}
-                  </Select>
+                  </select>
                 </label>
-                <p className="text-sm text-grey-500">
+                <p className="text-sm text-slate-500">
                   {verificationOutcomeOptions.find((option) => option.value === verificationChoice)?.description}
                 </p>
-                <label className="grid gap-2 text-sm font-semibold text-grey-800">
+                <label className="grid gap-2 text-sm font-semibold text-[#1F2937]">
                   Notes
                   <textarea
                     value={verificationNotes}
                     onChange={(event) => setVerificationNotes(event.target.value)}
                     rows={4}
                     placeholder="Add any details the care team should know before travel."
-                    className="rounded-[14px] border border-grey-200 bg-white px-3 py-3 text-sm text-grey-800 outline-none transition focus:border-[var(--primary)]"
+                    className="rounded-[14px] border border-slate-200 bg-white px-3 py-3 text-sm text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
                   />
                 </label>
                 <Button
@@ -372,13 +371,13 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <Navigation className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="font-heading text-xl font-semibold text-grey-800">Trip and tracking</p>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Trip and tracking</p>
                 </div>
               </div>
               <div className="mt-6 flex flex-col gap-3">
@@ -405,19 +404,19 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                   {arriveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Arrived
                 </Button>
-                {locationMessage ? <p className="text-sm text-grey-600">{locationMessage}</p> : null}
+                {locationMessage ? <p className="text-sm text-slate-600">{locationMessage}</p> : null}
               </div>
             </div>
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.95fr)]">
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
               <div className="flex items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <Timer className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="font-heading text-xl font-semibold text-grey-800">Care workflow</p>
+                  <p className="font-heading text-xl font-semibold text-[#1F2937]">Care workflow</p>
                 </div>
               </div>
 
@@ -429,17 +428,17 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
                   {careStartMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Start care
                 </Button>
-                <label className="grid gap-2 text-sm font-semibold text-grey-800">
+                <label className="grid gap-2 text-sm font-semibold text-[#1F2937]">
                   Visit note draft
                   <textarea
                     value={visitNoteDraft}
                     onChange={(event) => setVisitNoteDraft(event.target.value)}
                     rows={4}
                     placeholder="Capture a short summary for your own workflow."
-                    className="rounded-[14px] border border-grey-200 bg-white px-3 py-3 text-sm text-grey-800 outline-none transition focus:border-[var(--primary)]"
+                    className="rounded-[14px] border border-slate-200 bg-white px-3 py-3 text-sm text-[#1F2937] outline-none transition focus:border-[var(--primary)]"
                   />
                 </label>
-                <p className="text-sm text-grey-500">
+                <p className="text-sm text-slate-500">
                   This note is a private draft for your visit workflow.
                 </p>
                 <Button
@@ -456,20 +455,20 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
-              <h2 className="font-heading text-xl font-semibold text-grey-800">Request timeline</h2>
-              <p className="mt-1 text-sm text-grey-500">A clear record of what has happened so far.</p>
+            <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+              <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Request timeline</h2>
+              <p className="mt-1 text-sm text-slate-500">A clear record of what has happened so far.</p>
               {eventsQuery.isLoading ? (
                 <InlineLoader className="mt-5" compact label="Loading request timeline" />
               ) : eventsQuery.data?.results.length ? (
                 <div className="mt-5 grid gap-3">
                   {eventsQuery.data.results.map((event) => (
-                    <div key={event.id} className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-4">
+                    <div key={event.id} className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-grey-800">{homeCareStatusLabel(event.to_status || event.event_type)}</p>
-                        <p className="text-xs text-grey-500">{formatDateTime(event.created_at)}</p>
+                        <p className="text-sm font-semibold text-[#1F2937]">{homeCareStatusLabel(event.to_status || event.event_type)}</p>
+                        <p className="text-xs text-slate-500">{formatDateTime(event.created_at)}</p>
                       </div>
-                      {event.actor_email ? <p className="mt-1 text-sm text-grey-600">{event.actor_email}</p> : null}
+                      {event.actor_email ? <p className="mt-1 text-sm text-slate-600">{event.actor_email}</p> : null}
                     </div>
                   ))}
                 </div>
@@ -479,20 +478,20 @@ export function NurseRequestDetailClient({ requestId }: { requestId: number }) {
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-300">
-            <h2 className="font-heading text-xl font-semibold text-grey-800">Travel tracking</h2>
-            <p className="mt-1 text-sm text-grey-500">Recent shared tracking points for this request.</p>
+          <div className="rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_24px_64px_-42px_rgba(15,23,42,0.45)]">
+            <h2 className="font-heading text-xl font-semibold text-[#1F2937]">Travel tracking</h2>
+            <p className="mt-1 text-sm text-slate-500">Recent shared tracking points for this request.</p>
             {trackingQuery.isLoading ? (
               <InlineLoader className="mt-5" compact label="Loading travel updates" />
             ) : trackingQuery.data?.results.length ? (
               <div className="mt-5 grid gap-3 md:grid-cols-2">
                 {trackingQuery.data.results.map((point) => (
-                  <div key={point.id} className="rounded-[18px] border border-grey-200 bg-grey-50 px-4 py-4">
-                    <p className="text-sm font-semibold text-grey-800">
+                  <div key={point.id} className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+                    <p className="text-sm font-semibold text-[#1F2937]">
                       {point.latitude}, {point.longitude}
                     </p>
-                    <p className="mt-1 text-sm text-grey-600">{point.accuracy_meters}m accuracy - {point.source}</p>
-                    <p className="mt-1 text-xs text-grey-500">{formatDateTime(point.created_at)}</p>
+                    <p className="mt-1 text-sm text-slate-600">{point.accuracy_meters}m accuracy - {point.source}</p>
+                    <p className="mt-1 text-xs text-slate-500">{formatDateTime(point.created_at)}</p>
                   </div>
                 ))}
               </div>

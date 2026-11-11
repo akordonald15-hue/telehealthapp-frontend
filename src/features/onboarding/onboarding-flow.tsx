@@ -325,15 +325,15 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
       >
         <div className="grid justify-items-center gap-5 py-4 text-center">
           <div className="relative h-24 w-24 animate-pulse">
-            <span className="absolute left-1/2 top-0 h-10 w-10 -translate-x-1/2 rounded-full bg-primary-100" />
-            <span className="absolute bottom-0 left-1/2 h-10 w-10 -translate-x-1/2 rounded-full bg-primary-100" />
-            <span className="absolute left-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-primary-50" />
-            <span className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-primary-50" />
-            <span className="absolute left-1/2 top-1/2 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-primary-500 text-white shadow-300">
+            <span className="absolute left-1/2 top-0 h-10 w-10 -translate-x-1/2 rounded-full bg-[#DBEAFE]" />
+            <span className="absolute bottom-0 left-1/2 h-10 w-10 -translate-x-1/2 rounded-full bg-[#DBEAFE]" />
+            <span className="absolute left-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-[#EFF6FF]" />
+            <span className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-[#EFF6FF]" />
+            <span className="absolute left-1/2 top-1/2 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-[#2563EB] text-white shadow-[0_18px_42px_-26px_rgba(37,99,235,0.55)]">
               <Check className="h-6 w-6" />
             </span>
           </div>
-          <p className="max-w-sm text-sm leading-6 text-grey-600">
+          <p className="max-w-sm text-sm leading-6 text-slate-600">
             Your care profile is ready. We are taking you to your dashboard now.
           </p>
         </div>
@@ -355,7 +355,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
             <StepOneRequirements fullNameComplete={fullNameComplete} phoneComplete={phoneComplete} />
           ) : null}
           {step === 0 && stepOneDisabled ? (
-            <p className="text-center text-xs font-semibold text-grey-500">Complete all required fields to continue.</p>
+            <p className="text-center text-xs font-semibold text-ash-500">Complete all required fields to continue.</p>
           ) : null}
           <div className="flex items-center gap-3">
             {step > 0 ? (
@@ -366,7 +366,7 @@ export function OnboardingFlow({ open = true, onComplete, onClose, dismissible =
             ) : null}
             <Button
               type="button"
-              className={step === 0 && stepOneDisabled ? "flex-1 bg-grey-200 text-grey-500 shadow-none hover:bg-grey-200" : "flex-1"}
+              className={step === 0 && stepOneDisabled ? "flex-1 bg-ash-200 text-ash-500 shadow-none hover:bg-ash-200" : "flex-1"}
               onClick={(event) => {
                 event.preventDefault();
                 void goNext();
@@ -441,9 +441,9 @@ function StepOneRequirements({
   phoneComplete: boolean;
 }) {
   return (
-    <div className="rounded-[8px] border border-grey-200 bg-grey-50 px-4 py-3 text-sm">
-      <p className="font-semibold text-grey-800">Complete the following to continue:</p>
-      <div className="mt-2 grid gap-1.5 text-grey-600">
+    <div className="rounded-[8px] border border-ash-200 bg-ash-50 px-4 py-3 text-sm">
+      <p className="font-semibold text-ash-800">Complete the following to continue:</p>
+      <div className="mt-2 grid gap-1.5 text-ash-600">
         <RequirementItem complete={fullNameComplete} completeText="Enter your first and last name" pendingText="Enter your first and last name" />
         <RequirementItem complete={phoneComplete} completeText="Valid phone number" pendingText="Enter a valid phone number" />
       </div>
@@ -461,7 +461,7 @@ function RequirementItem({
   pendingText: string;
 }) {
   return (
-    <p className={complete ? "font-semibold text-primary" : "text-grey-600"}>
+    <p className={complete ? "font-semibold text-primary" : "text-ash-600"}>
       <span aria-hidden="true">{complete ? "[x]" : "[ ]"}</span> {complete ? completeText : pendingText}
     </p>
   );
