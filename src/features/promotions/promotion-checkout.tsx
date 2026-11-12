@@ -148,6 +148,15 @@ export function PromotionCheckout({
           {p.availability?.code === "campaign_unavailable" ? (
             <p className="text-sm">Founder50 is currently unavailable.</p>
           ) : null}
+          {p.ready && p.availability?.can_reserve &&
+          p.availability.accepting_reservations &&
+          p.availability.remaining_capacity > 0 && !rewardSelected ? (
+            <p className="text-sm text-ash-700">
+              Use code <strong>FOUNDER50</strong> at checkout for a free online
+              consultation while places remain. Once reserved, complete your
+              booking within 24 hours.
+            </p>
+          ) : null}
           <label htmlFor={id} className="block text-sm font-medium">
             Promo code
           </label>

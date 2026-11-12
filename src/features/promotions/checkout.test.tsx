@@ -420,6 +420,18 @@ const controller = (changes: Partial<Founder50Controller> = {}) =>
     ...changes,
   }) as unknown as Founder50Controller;
 describe("accessible promotion display", () => {
+  it("shows the canonical checkout code only when the server confirms places are available", () => {
+    render(<PromotionCheckout promotion={controller({ availability: available })} />);
+    expect(screen.getByText("FOUNDER50", { selector: "strong" })).toBeVisible();
+    expect(screen.getByText(/complete your booking within 24 hours/)).toBeVisible();
+  });
+  it.each(["campaign_unavailable", "capacity_exhausted"])("does not advertise a usable code when %s", (code) => {
+    render(<PromotionCheckout promotion={controller({ availability: {
+      ...available, code, can_reserve: false, accepting_reservations: false,
+    } })} />);
+    expect(screen.queryByText("FOUNDER50", { selector: "strong" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Promo code")).toBeVisible();
+  });
   it("hides all campaign UI when disabled", () => {
     const { container } = render(
       <PromotionCheckout promotion={controller({ enabled: false })} />,
