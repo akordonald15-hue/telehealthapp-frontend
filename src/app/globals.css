@@ -150,6 +150,9 @@
   --color-info-100: #E1EBF6;
   --color-info-50: #F0F5FB;
 
+  /* Focus ring (Figma: 3px #AEB6FB around focused buttons, checkboxes, toggles) */
+  --color-focus: #AEB6FB;
+
   /* Shadow 100–800 */
   --shadow-100: 0 4px 4px -2px rgb(19 25 39 / 0.08), 0 2px 4px -2px rgb(19 25 39 / 0.12);
   --shadow-200: 0 8px 8px -4px rgb(19 25 39 / 0.08), 0 4px 6px -4px rgb(19 25 39 / 0.12);
@@ -328,6 +331,19 @@
   font-weight: 600;
   line-height: 16px;
   letter-spacing: -0.13px;
+}
+
+/* Dropdown chevron for the design-system <Select> (src/components/ds). Chevron colour is grey-500. */
+.ds-select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236D717F' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 18px center;
+  background-repeat: no-repeat;
+  background-size: 20px;
+}
+
+.ds-select-chevron.min-h-10 {
+  background-position: right 12px center;
+  background-size: 16px;
 }
 
 html {
