@@ -81,8 +81,34 @@ For responsive sizes, combine them: `type-heading-4 md:type-heading-2`.
 </div>
 ```
 
+## Components
+
+Design-system components live in **`src/components/ds/`**, built to the Figma component frames.
+See them all, in every state, at **`/design-system`** (run `npm run dev`, open http://localhost:3000/design-system).
+
+```tsx
+import { Button, Field, Input } from "@/components/ds";
+```
+
+| Component | Notes |
+|---|---|
+| `Button` | `variant`: `primary` (Filled), `secondary` (Outline), `ghost` (Clear), `danger`, `dark`. `size`: `xs` 24px, `sm` 32px, `compact` 40px, `md` 48px (default), `lg` 56px. |
+| `Input`, `PasswordInput`, `Textarea`, `Select` | Figma "Filled" field. `fieldSize="lg"` 56px (default) or `"md"` 40px for compact spots. |
+| `Field` | Label + control + helper / error text. Wrap every form control in it. |
+| `Badge` | Status tags. `tone`: `blue`, `green`, `amber`, `rose`, `cyan`, `neutral`. |
+| `Checkbox`, `Radio`, `Toggle` | `radioInputClassName` styles a bare radio inside a custom card. |
+| `ProgressBar` | Segmented bar; pass `value` (0–100) and an accessible `label`. |
+| `Breadcrumbs` | Last item is the current page. |
+
+**Which components to use:**
+- **New or redesigned pages** → `@/components/ds` and the design-system classes.
+- **Existing pages** still use `src/components/ui` and keep their current look until they are redesigned.
+  Don't mix the two on one page.
+
+Don't restyle components with `className` (e.g. `rounded-full`): `cn()` doesn't resolve class conflicts.
+If a variant is missing, add it to the component.
+
 ## Still to do
 
-- Components from Figma (Button, Input, Badge & Chip, Checkbox, Radio, Toggle, Dropdown, …)
-  will be built in `src/components/ui/` using these tokens.
-- Existing pages will be moved from hardcoded colours to these tokens page by page.
+- Navbar, List and Button Group from Figma aren't built yet.
+- Pages move to the design system as they are redesigned (the new landing page first).
