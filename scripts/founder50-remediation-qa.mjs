@@ -66,6 +66,10 @@ async function probe(mode,width=390,zone='Africa/Lagos') {
   }
   await route.fulfill({status,contentType:'application/json',body:JSON.stringify(body)});
  });
+ // A synthetic provider destination, not Next's animated 404 page. No payment is processed.
+ await context.route(`${base}/qa-paystack`, route => route.fulfill({
+  status: 200, contentType: 'text/html', body: '<!doctype html><title>Synthetic checkout</title><h1>Synthetic paid checkout</h1>'
+ }));
  await page.goto(`${base}/appointments?triage_session=${fixture?.triage||5}`);
  await page.getByRole('button',{name:'View recommended doctors',exact:true}).click();
  const select=page.getByRole('article').filter({hasText:'Dr Ada'}).getByRole('button',{name:'Select Doctor',exact:true});
