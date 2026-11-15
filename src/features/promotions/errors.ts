@@ -27,14 +27,15 @@ export function promotionCode(error: unknown): string {
   const payload = error.payload as Record<string, unknown> | null;
   return typeof payload?.code === "string" ? payload.code : "";
 }
-export function promotionError(error: unknown) {
+export function promotionError(error: unknown, publicCode?: string) {
   if (error instanceof ApiError) {
     if (error.status === 401)
       return "Your session expired. Sign in again, then recover your reservation.";
     if (error.status === 403) return messages.ineligible_account;
     if (error.status === 429)
       return "Too many requests. Please wait before trying again.";
-    if (messages[promotionCode(error)]) return messages[promotionCode(error)];
+    if (messages[promotionCode(error)])
+      return messages[promotionCode(error)].replaceAll("Founder50", publicCode === "CARE50" ? "50 Free Consultations" : "Founder50");
     if (error.status === 400) return messages.invalid_request;
   }
   return "We could not confirm the result. Check your connection and retry the same request; do not start another payment.";
