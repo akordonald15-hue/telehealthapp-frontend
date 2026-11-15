@@ -24,6 +24,7 @@ sudo unshare --net --fork bash -euo pipefail -c '
     APP_DIR="$5" EVIDENCE_DIR="$6" CONTROL_DIR="$7" \
     PLAYWRIGHT_BROWSERS_PATH="$8" \
     NEXT_PUBLIC_FOUNDER50_ENABLED=true \
+    QA_PUBLIC_CODE=CARE50 \
     NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:9/api/v1 \
     BACKEND_API_BASE_URL=http://127.0.0.1:9/api/v1 \
     NEXT_PUBLIC_WS_BASE_URL=ws://127.0.0.1:9 \

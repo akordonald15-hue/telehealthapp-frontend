@@ -30,7 +30,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 1f450cbe731f7d5c974c076ed9be830c49c6f25b
+          ref: d1ad699b8cb9971a3a28900ed38b7f53ac15d9f4
           path: app
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -39,8 +39,8 @@ jobs:
       - name: Verify exact application and no private environment files
         working-directory: app
         run: |
-          test "$(git rev-parse HEAD)" = 1f450cbe731f7d5c974c076ed9be830c49c6f25b
-          test "$(git rev-parse HEAD^{tree})" = a4a4047206413c5825395f8adc752b5bd6bb8d5c
+          test "$(git rev-parse HEAD)" = d1ad699b8cb9971a3a28900ed38b7f53ac15d9f4
+          test "$(git rev-parse HEAD^{tree})" = 1249af2c04165e58d55525c29152edf467045171
           test -z "$(git status --porcelain --untracked-files=no)"
           for f in .env .env.local .env.production .env.production.local .vercel/project.json; do
             test ! -e "$f"

@@ -2,6 +2,7 @@
 set -euo pipefail
 cd "$APP_DIR"
 test "${NEXT_PUBLIC_FOUNDER50_ENABLED}" = true
+test "${QA_PUBLIC_CODE}" = CARE50
 test -z "${QA_LOCAL_BACKEND_FIXTURE-}"
 test -z "${VERCEL_TOKEN-}"
 test -z "${GITHUB_TOKEN-}"
