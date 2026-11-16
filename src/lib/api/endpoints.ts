@@ -183,6 +183,8 @@ export const appointmentsApi = {
 };
 
 export const messagingApi = {
+  sessionAction: (threadId: number, action: "ready" | "request-early" | "agree-early" | "start") =>
+    apiRequest<Thread>(`/messages/threads/${threadId}/session/${action}/`, { method: "POST", body: {} }),
   realtimeTicket: (threadId: number, signal?: AbortSignal) =>
     apiRequest<{ ticket: string; expires_in: number; websocket_url: string }>(`/messages/threads/${threadId}/realtime-ticket/`, {
       method: "POST", body: {}, signal,
