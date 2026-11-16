@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
     ];
 
     return [
+      { source: "/", headers: [{ key: "Referrer-Policy", value: "no-referrer" }] },
       { source: "/dashboard", headers: protectedHeaders },
       { source: "/dasbooard/:path*", headers: protectedHeaders },
       { source: "/appointments", headers: protectedHeaders },

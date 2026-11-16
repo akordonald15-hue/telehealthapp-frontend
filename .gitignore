@@ -35,6 +35,7 @@ yarn-error.log*
 .next-dev.log
 .next-dev.err.log
 qa-shots/
+/artifacts/meta-pixel-browser-20261116/
 
 # env files (can opt-in for committing if needed)
 .env*
