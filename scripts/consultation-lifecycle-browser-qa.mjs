@@ -22,6 +22,7 @@ try {
    if(p.includes('/promotions/') || p.includes('/payments/') || p.includes('/appointments/book'))throw Error('Lifecycle UI must not change financial or voucher state');
    let json=empty;
    if(p.includes('/auth/me'))json={id:role==='doctor'?902:901,role,full_name:'Synthetic QA',email:'synthetic@example.test',is_email_verified:true};
+   else if(p.endsWith('/providers/me/heartbeat/'))json={provider_type:'doctor',availability_status:'available',preferred_availability_status:'available',active_workload_count:0,can_self_update:true,allowed_statuses:['available','offline','on_break']};
    else if(p.includes('/profiles/me'))json={id:901,profile_complete:true};
    else if(p.endsWith('/messages/threads/'))json={...empty,count:1,results:[t]};
    else if(p.includes('/session/')){
