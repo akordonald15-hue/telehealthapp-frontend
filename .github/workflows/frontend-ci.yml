@@ -76,6 +76,9 @@ jobs:
         id: sanitize
         if: always()
         run: python3 control/ci/sanitize-evidence.py evidence evidence-sanitized
+      - name: Report sanitized acceptance summary
+        if: always() && steps.sanitize.outcome == 'success'
+        run: tail -n 60 evidence-sanitized/isolation-and-test.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always() && steps.sanitize.outcome == 'success'
         with:

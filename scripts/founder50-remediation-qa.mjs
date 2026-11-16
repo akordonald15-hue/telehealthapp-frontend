@@ -150,6 +150,10 @@ async function probe(mode,width=390,zone='Africa/Lagos') {
   }
  }
  await page.waitForLoadState('domcontentloaded');
+ // All functional/frozen-time assertions above are complete. Resume mocked RAF
+ // solely for evidence capture in Chromium; no clinical assertion time changes.
+ await page.clock.resume();
+ await page.clock.runFor(32);
  await page.screenshot({path:`${output}/${mode}.png`,fullPage:true,animations:'disabled',caret:'hide'});await context.close();
 }
 try{
