@@ -56,7 +56,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default function DocumentShell({
   children,
 }: Readonly<{
   children: React.ReactNode;

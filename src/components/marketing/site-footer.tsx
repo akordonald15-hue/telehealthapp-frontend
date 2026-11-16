@@ -117,6 +117,8 @@ export function SiteFooter() {
           </div>
         </div>
 
+        <p className="mt-8 text-sm"><Link href="/privacy/advertising" prefetch={false} className="underline underline-offset-4">Advertising privacy and preferences</Link></p>
+
         {/* Wordmark (exported from Figma) */}
         <Image
           src="/img/footer/wordmark.svg"

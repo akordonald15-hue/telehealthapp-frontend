@@ -119,6 +119,8 @@ self.addEventListener("fetch", (event) => {
   }
 
   const url = new URL(request.url);
+  // Never cache or replay advertising SDK requests or tracking beacons.
+  if (["connect.facebook.net", "www.facebook.com", "facebook.com"].includes(url.hostname)) return;
 
   if (!isSameOrigin(url)) {
     if (request.destination === "image" || request.destination === "font") {
