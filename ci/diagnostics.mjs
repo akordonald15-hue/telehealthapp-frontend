@@ -103,7 +103,7 @@ chromium.launch=async options=>{
         for(const [index,page] of context.pages().entries()){
           if(page.isClosed())continue;
           record({kind:'final-page',url:page.url(),text:await page.locator('body').innerText({timeout:5000}).catch(()=>'<unavailable>')});
-          await page.screenshot({path:path.join(dir,`page-${index}.png`),fullPage:true,timeout:5000}).catch(error=>record({kind:'screenshot-error',message:error.message}));
+          await page.screenshot({path:path.join(dir,`page-${index}.png`),fullPage:true,animations:'disabled',caret:'hide',timeout:5000}).catch(error=>record({kind:'screenshot-error',message:error.message}));
         }
         await context.tracing.stop({path:path.join(dir,'trace.zip')});
       }finally{active.delete(context);await close();}

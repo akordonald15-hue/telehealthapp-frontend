@@ -55,7 +55,7 @@ try {
   }else{
    await page.getByRole('button',{name:'I am ready for my consultation'}).click();await expect.poll(()=>actions).toEqual(['ready']);
   }
-  results.push({mode,actions,financialRequests:0,pass:true});await page.screenshot({path:`${out}/${mode}.png`});await context.close();
+  results.push({mode,actions,financialRequests:0,pass:true});await page.waitForLoadState('domcontentloaded');await page.screenshot({path:`${out}/${mode}.png`,animations:'disabled',caret:'hide'});await context.close();
  }
  fs.writeFileSync(`${out}/results.json`,JSON.stringify(results,null,2));console.log('PASS lifecycle UI contracts',results.length);
 }finally{await browser.close();}
