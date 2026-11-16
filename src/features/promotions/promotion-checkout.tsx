@@ -65,8 +65,8 @@ export function PromotionCheckout({
         <Notice
           title={
             claim.status === "redeemed"
-              ? "Your Founder50 consultation has been used."
-              : "Your Founder50 consultation is already booked."
+              ? `Your ${p.publicCode} consultation has been used.`
+              : `Your ${p.publicCode} consultation is already booked.`
           }
         >
           Your appointment is not subject to the reservation countdown.{" "}
@@ -89,7 +89,7 @@ export function PromotionCheckout({
       {p.free && price ? (
         <>
           <div role="status" className="text-sm font-semibold text-emerald-800">
-            Founder50 applied. Your consultation is free.
+            {p.campaignName} applied. Your consultation is free.
           </div>
           <dl className="space-y-2 text-sm">
             <div className="flex flex-wrap justify-between gap-2">
@@ -97,7 +97,7 @@ export function PromotionCheckout({
               <dd>{money(price.service_value, price.currency)}</dd>
             </div>
             <div className="flex flex-wrap justify-between gap-2">
-              <dt>Founder50 discount</dt>
+              <dt>{p.campaignName} discount</dt>
               <dd>−{money(price.discount, price.currency)}</dd>
             </div>
             <div className="flex flex-wrap justify-between gap-2 border-t pt-2 font-semibold">
@@ -142,11 +142,20 @@ export function PromotionCheckout({
           ) : null}
           {p.availability?.code === "capacity_exhausted" ? (
             <p role="status" className="text-sm">
-              All 50 Founder50 consultations are currently claimed.
+              All 50 free online consultations are currently claimed.
             </p>
           ) : null}
           {p.availability?.code === "campaign_unavailable" ? (
-            <p className="text-sm">Founder50 is currently unavailable.</p>
+            <p className="text-sm">{p.campaignName} is currently unavailable.</p>
+          ) : null}
+          {p.ready && p.availability?.can_reserve &&
+          p.availability.accepting_reservations &&
+          p.availability.remaining_capacity > 0 && !rewardSelected ? (
+            <p className="text-sm text-ash-700">
+              Use code <strong>{p.publicCode}</strong> at checkout for a free online
+              consultation while places remain. Once reserved, complete your
+              booking within 24 hours.
+            </p>
           ) : null}
           <label htmlFor={id} className="block text-sm font-medium">
             Promo code
@@ -224,7 +233,7 @@ export function PromotionConfirmation({
   const a = p.result.appointment;
   return (
     <Notice title="Your free consultation is confirmed." tone="success">
-      <p>Founder50 applied · Amount paid: ₦0.</p>
+      <p>{p.campaignName} applied · Amount paid: ₦0.</p>
       <p>
         {a.doctor_profile?.display_name || "Your selected doctor"} ·{" "}
         {formatAppointmentTime(a.scheduled_at)}

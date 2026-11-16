@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/lib/api/client";
 import { promotionsApi } from "./api";
+import { campaignBrand } from "./branding";
 import {
   founder50Visible,
   isConfirmed,
@@ -37,9 +38,11 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
     localReady?: boolean;
     failedApply?: boolean;
   }>({ busy: false, error: "", ready: false });
+  const brandCode = useRef<string | undefined>(undefined);
   const currentUser = useRef(userId);
   useEffect(() => {
     currentUser.current = userId;
+    brandCode.current = undefined;
   }, [userId]);
   const running = useRef(false);
   const update = useCallback(
@@ -66,6 +69,7 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
       failedApply: recovery.applyRejected,
     });
     const availability = await promotionsApi.availability();
+    if (currentUser.current === userId) brandCode.current = availability.promotion_code;
     const reservation = availability.claim
       ? await promotionsApi.status(availability.claim.public_id)
       : undefined;
@@ -90,7 +94,7 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
     const reconcile = () => {
       if (active)
         void refresh().catch((e) =>
-          update({ error: promotionError(e), ready: false }),
+          update({ error: promotionError(e, brandCode.current), ready: false }),
         );
     };
     reconcile();
@@ -111,7 +115,7 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
     try {
       return await accountOperation(userId, operation);
     } catch (e) {
-      update({ error: promotionError(e) });
+      update({ error: promotionError(e, brandCode.current) });
     } finally {
       running.current = false;
       update({ busy: false });
@@ -277,6 +281,7 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
     claim?.status === "forfeited";
   const expiredNeedsChoice = claim?.status === "expired" && !state.paidChosen;
   return {
+    ...campaignBrand(own ? state.availability?.promotion_code ?? state.reservation?.pricing?.promotion_code : undefined),
     enabled: enabled && Boolean(userId),
     ...state,
     ...(own
@@ -322,7 +327,7 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
         return own && Boolean(state.localReady) && !state.pending && !state.intent &&
           !(occupied && !state.paidChosen) && !expiredNeedsChoice;
       } catch (e) {
-        update({ error: promotionError(e) });
+        update({ error: promotionError(e, brandCode.current) });
         return false;
       }
     },
@@ -340,7 +345,7 @@ export function useFounder50(userId?: number, enabled = founder50Visible) {
       try {
         await refresh();
       } catch (e) {
-        update({ error: promotionError(e), ready: false });
+        update({ error: promotionError(e, brandCode.current), ready: false });
       }
     },
   };

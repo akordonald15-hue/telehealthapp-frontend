@@ -620,7 +620,7 @@ export function AppointmentsClient() {
       return;
     }
     if (promotion.active && !promotion.free) {
-      setCheckoutError("Recover your existing Founder50 booking before starting another checkout.");
+      setCheckoutError(`Recover your existing ${promotion.campaignName} booking before starting another checkout.`);
       return;
     }
     const missingFields = [
@@ -1281,9 +1281,9 @@ export function AppointmentsClient() {
               </fieldset>
 
               {promotionalTiming && timingMode === "now" ? (
-                <Notice title="Choose a future time for Founder50" tone="neutral">
+                <Notice title={`Choose a future time for ${promotion.campaignName}`} tone="neutral">
                   Your selected doctor and Consult now choice have not changed.
-                  Founder50 requires a future appointment. Select Earliest appointment
+                  {promotion.campaignName} requires a future appointment. Select Earliest appointment
                   or Schedule for later before confirming your free consultation.
                   To use ordinary paid checkout, explicitly remove the promotion first.
                 </Notice>

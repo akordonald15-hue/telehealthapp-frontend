@@ -407,6 +407,8 @@ describe("reservation and booking controller", () => {
 });
 const controller = (changes: Partial<Founder50Controller> = {}) =>
   ({
+    publicCode: "FOUNDER50",
+    campaignName: "Founder50",
     enabled: true,
     ready: true,
     busy: false,
@@ -420,6 +422,18 @@ const controller = (changes: Partial<Founder50Controller> = {}) =>
     ...changes,
   }) as unknown as Founder50Controller;
 describe("accessible promotion display", () => {
+  it("shows the canonical checkout code only when the server confirms places are available", () => {
+    render(<PromotionCheckout promotion={controller({ availability: available })} />);
+    expect(screen.getByText("FOUNDER50", { selector: "strong" })).toBeVisible();
+    expect(screen.getByText(/complete your booking within 24 hours/)).toBeVisible();
+  });
+  it.each(["campaign_unavailable", "capacity_exhausted"])("does not advertise a usable code when %s", (code) => {
+    render(<PromotionCheckout promotion={controller({ availability: {
+      ...available, code, can_reserve: false, accepting_reservations: false,
+    } })} />);
+    expect(screen.queryByText("FOUNDER50", { selector: "strong" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Promo code")).toBeVisible();
+  });
   it("hides all campaign UI when disabled", () => {
     const { container } = render(
       <PromotionCheckout promotion={controller({ enabled: false })} />,
@@ -514,5 +528,32 @@ describe("accessible promotion display", () => {
     expect(
       promotionError(new ApiError(status, { detail: "SECRET SQL" })),
     ).not.toContain("SECRET");
+  });
+});
+
+
+describe("CARE50 cutover compatibility", () => {
+  it("advertises CARE50 only from server branding without changing recovery identity", async () => {
+    vi.mocked(promotionsApi.availability).mockResolvedValue({ ...available, promotion_code: "CARE50" });
+    const { result } = renderHook(() => useFounder50(1, true), { wrapper });
+    await waitFor(() => expect(result.current.ready).toBe(true));
+    expect(result.current.publicCode).toBe("CARE50");
+    expect(result.current.campaignName).toBe("50 Free Consultations");
+    const key = "00000000-0000-4000-8000-000000000099";
+    saveRecovery(1, { applyKey: key });
+    await act(async () => { await result.current.apply("care50"); });
+    expect(promotionsApi.reserve).toHaveBeenCalledWith("CARE50", key);
+  });
+  it("renders the new name/code with original checkout controls", () => {
+    render(<PromotionCheckout promotion={controller({ publicCode: "CARE50", campaignName: "50 Free Consultations", availability: { ...available, promotion_code: "CARE50" } })} />);
+    expect(screen.getByText("CARE50", { selector: "strong" })).toBeVisible();
+    expect(screen.queryByText("FOUNDER50", { selector: "strong" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Promo code")).toBeEnabled();
+  });
+  it("keeps zero payment confirmation and safe error branding", () => {
+    render(<PromotionConfirmation promotion={controller({ publicCode: "CARE50", campaignName: "50 Free Consultations", result: confirmed })} />);
+    expect(screen.getByText(/50 Free Consultations applied/)).toBeVisible();
+    expect(isConfirmed(confirmed)).toBe(true);
+    expect(promotionError(new ApiError(409, { code: "reservation_expired" }), "CARE50")).toContain("50 Free Consultations");
   });
 });

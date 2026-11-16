@@ -31,6 +31,7 @@ export type Reservation = {
   replayed?: boolean;
 };
 export type Availability = {
+  promotion_code?: string;
   accepting_reservations: boolean;
   eligible: boolean;
   can_reserve: boolean;
