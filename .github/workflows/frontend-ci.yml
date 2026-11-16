@@ -24,27 +24,62 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - name: Disabled checkout browser regression
+  isolated-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: true
+      matrix:
+        enabled: ['true', 'false']
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: app
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: control
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+      - name: Assert reviewed source and absence of private configuration
+        working-directory: app
         env:
-          QA_DISABLED: "true"
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          npm run start -- --hostname 127.0.0.1 --port 3104 > /tmp/caretekk-frontend.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl --silent --fail http://127.0.0.1:3104/login > /dev/null; then break; fi
-            sleep 2
-          done
-          node scripts/founder50-browser-qa.mjs
-      - name: Enabled checkout and recovery regressions
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          for f in .env .env.local .env.production .env.production.local .vercel/project.json; do test ! -e "$f"; done
+      - name: Install locked dependencies and build optimized synthetic application
+        working-directory: app
         env:
-          NEXT_PUBLIC_FOUNDER50_ENABLED: "true"
-          QA_BASE_URL: http://127.0.0.1:3105
-          QA_OUTPUT_DIR: artifacts/founder50-enabled-qa
+          NEXT_PUBLIC_FOUNDER50_ENABLED: ${{ matrix.enabled }}
+          NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:9/api/v1
+          BACKEND_API_BASE_URL: http://127.0.0.1:9/api/v1
+          NEXT_PUBLIC_WS_BASE_URL: ws://127.0.0.1:9
+          NEXT_TELEMETRY_DISABLED: '1'
         run: |
-          npm run dev -- --hostname 127.0.0.1 --port 3105 > /tmp/caretekk-enabled-frontend.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl --silent --fail http://127.0.0.1:3105/login > /dev/null; then break; fi
-            sleep 2
-          done
-          node scripts/founder50-remediation-qa.mjs
-          QA_TIMEZONE_MATRIX=true node scripts/founder50-remediation-qa.mjs
+          mkdir -p ../evidence
+          npm ci
+          npm audit --omit=dev
+          npx --no-install playwright install --with-deps chromium
+          npm run build > ../evidence/build.log 2>&1
+          git rev-parse HEAD HEAD^{tree} > ../evidence/source.txt
+          sha256sum package-lock.json >> ../evidence/source.txt
+      - name: Verify kernel isolation then run optimized browser acceptance
+        env:
+          QA_ENABLED_MODE: ${{ matrix.enabled }}
+        run: bash control/ci/launch-isolated-acceptance.sh
+      - name: Sanitize synthetic evidence
+        id: sanitize
+        if: always()
+        run: python3 control/ci/sanitize-evidence.py evidence evidence-sanitized
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && steps.sanitize.outcome == 'success'
+        with:
+          name: consultation-isolated-${{ matrix.enabled }}-${{ github.run_id }}
+          path: evidence-sanitized/
+          if-no-files-found: error
+          retention-days: 7

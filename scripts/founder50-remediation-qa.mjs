@@ -73,7 +73,7 @@ async function probe(mode,width=390,zone='Africa/Lagos') {
  await page.goto(`${base}/appointments?triage_session=${fixture?.triage||5}`);
  await page.getByRole('button',{name:'View recommended doctors',exact:true}).click();
  const select=page.getByRole('article').filter({hasText:'Dr Ada'}).getByRole('button',{name:'Select Doctor',exact:true});
- if(mode==='unavailable') {await expect(select).toBeDisabled();results.push({mode,blocked:true});await context.close();return;}
+ if(mode==='unavailable') {await expect(select).toHaveCount(0);expect(posts).toHaveLength(0);expect(reserves).toBe(0);results.push({mode,blocked:true,excluded:true});await context.close();return;}
  await select.click();
  let dialog=page.getByRole('dialog',{name:'Confirm doctor and time'});
  await dialog.getByRole('button',{name:/Consult now/}).click();
