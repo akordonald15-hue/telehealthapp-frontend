@@ -13,11 +13,13 @@ vi.mock("next/navigation", () => ({
 const mocks = vi.hoisted(() => ({
   me: vi.fn(),
   threads: vi.fn(),
+  profile: vi.fn(),
 }));
 
 vi.mock("@/lib/api/endpoints", () => ({
   authApi: { me: mocks.me },
   messagingApi: { threads: mocks.threads },
+  profilesApi: { me: mocks.profile },
 }));
 
 // Not under test, and each reaches for browser APIs jsdom does not provide.
@@ -47,6 +49,7 @@ function signInAs(role: string) {
 beforeEach(() => {
   pathname.value = "/dashboard";
   mocks.threads.mockResolvedValue({ count: 0, next: null, previous: null, results: [] });
+  mocks.profile.mockResolvedValue({ id: 1, state: "Akwa Ibom", lga: "Eket", profile_complete: true });
 });
 
 afterEach(() => {
@@ -64,11 +67,11 @@ describe("desktop navigation", () => {
     signInAs("patient");
     render(<AppShell>content</AppShell>, { wrapper });
 
-    const link = await within(await waitFor(sidebar)).findByRole("link", { name: /refer & earn/i });
+    const link = await within(await waitFor(sidebar)).findByRole("link", { name: /refer (&|and) earn/i });
     expect(link).toHaveAttribute("href", "/refer");
 
     const bottom = bottomNav();
-    expect(within(bottom).queryByRole("link", { name: /refer & earn/i })).not.toBeInTheDocument();
+    expect(within(bottom).queryByRole("link", { name: /refer (&|and) earn/i })).not.toBeInTheDocument();
     expect(within(bottom).getAllByRole("link")).toHaveLength(5);
   });
 
@@ -78,8 +81,8 @@ describe("desktop navigation", () => {
 
     const nav = await waitFor(sidebar);
     await within(nav).findByRole("link", { name: /profile/i });
-    expect(within(nav).queryByRole("link", { name: /refer & earn/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /refer & earn/i })).not.toBeInTheDocument();
+    expect(within(nav).queryByRole("link", { name: /refer (&|and) earn/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /refer (&|and) earn/i })).not.toBeInTheDocument();
   });
 
   it("orders Refer & Earn with the other patient links rather than first", async () => {
@@ -93,9 +96,12 @@ describe("desktop navigation", () => {
       .getAllByRole("link")
       .map((link) => link.textContent?.trim());
 
-    expect(labels[0]).toMatch(/care journey/i);
-    expect(labels.at(-1)).toMatch(/profile/i);
-    expect(labels.findIndex((l) => /refer & earn/i.test(l ?? ""))).toBeGreaterThan(0);
+    // The "Verified care only" card's link sits below the menu, so compare positions instead of
+    // assuming Profile is the very last link.
+    const refer = labels.findIndex((l) => /refer (&|and) earn/i.test(l ?? ""));
+    expect(labels[0]).toMatch(/^dashboard$/i);
+    expect(refer).toBeGreaterThan(0);
+    expect(labels.findIndex((l) => /profile/i.test(l ?? ""))).toBeGreaterThan(refer);
   });
 });
 

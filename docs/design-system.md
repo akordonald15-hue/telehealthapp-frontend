@@ -92,10 +92,11 @@ import { Button, Field, Input } from "@/components/ds";
 
 | Component | Notes |
 |---|---|
-| `Button` | `variant`: `primary` (Filled), `secondary` (Outline), `ghost` (Clear), `danger`, `dark`. `size`: `xs` 24px, `sm` 32px, `compact` 40px, `md` 48px (default), `lg` 56px. |
+| `Button`, `buttonClassName` | `variant`: `primary` (Filled), `secondary` (Outline), `neutral` (grey outline, e.g. "View details"), `inverse` (white outline on dark cards), `ghost` (Clear), `danger`, `dark`. `size`: `xs` 24px, `sm` 32px, `compact` 40px, `md` 48px (default), `lg` 56px. For links use `<Link className={buttonClassName({ variant, size })}>`. |
 | `Input`, `PasswordInput`, `Textarea`, `Select` | Figma "Filled" field. `fieldSize="lg"` 56px (default) or `"md"` 40px for compact spots. |
 | `Field` | Label + control + helper / error text. Wrap every form control in it. |
 | `Badge` | Status tags. `tone`: `blue`, `green`, `amber`, `rose`, `cyan`, `neutral`. |
+| `Pill` | Status pills from the app screens ("Confirmed", "Available"). `tone`: `success`, `warning`, `danger`, `info`, `primary`, `neutral`; `size`: `sm` 24px, `md` 32px. |
 | `Checkbox`, `Radio`, `Toggle` | `radioInputClassName` styles a bare radio inside a custom card. |
 | `ProgressBar` | Segmented bar; pass `value` (0–100) and an accessible `label`. |
 | `Breadcrumbs` | Last item is the current page. |
@@ -111,4 +112,4 @@ If a variant is missing, add it to the component.
 ## Still to do
 
 - Navbar, List and Button Group from Figma aren't built yet.
-- Pages move to the design system as they are redesigned (the new landing page first).
+- Pages move to the design system as they are redesigned. Done so far: patient dashboard + patient sidebar/top bar.

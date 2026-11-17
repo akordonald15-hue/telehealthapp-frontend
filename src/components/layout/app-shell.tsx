@@ -20,11 +20,13 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { BrandLockup } from "@/components/brand/brand-lockup";
+import { PatientSidebar, PatientTopBar } from "@/components/layout/patient-shell";
 import { OfflineStatusBanner } from "@/components/pwa/offline-status-banner";
 import { ProviderHeartbeat } from "@/components/providers/provider-heartbeat";
 import { Badge } from "@/components/ui/badge";
-import { messagingApi } from "@/lib/api/endpoints";
+import { messagingApi, profilesApi } from "@/lib/api/endpoints";
 import { useCurrentUser } from "@/lib/auth/use-auth";
+import type { PatientProfile } from "@/lib/types/backend";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -90,6 +92,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     enabled: user?.role === "patient",
     staleTime: 30000,
   });
+  const isPatient = user?.role === "patient";
+  // Same query key as the dashboard, so the profile is fetched once and shared.
+  const patientProfile = useQuery({
+    queryKey: ["profile", "me", "patient"],
+    queryFn: () => profilesApi.me<PatientProfile>(),
+    enabled: isPatient,
+    staleTime: 60000,
+  });
+  const patientLocation = [patientProfile.data?.lga, patientProfile.data?.state].filter(Boolean).join(", ");
 
   const visibleNav = useMemo(() => {
     const filtered = navItems.filter((item) => !user || (item.roles as readonly string[]).includes(user.role));
@@ -128,9 +139,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const unreadCount = notificationQuery.data?.results.reduce((sum, thread) => sum + (thread.unread_count ?? 0), 0) ?? 0;
 
   return (
-    <div className="ct-safe-area min-h-[100dvh] bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.15),_transparent_28%),linear-gradient(180deg,#F5F8FC_0%,#F7FAFE_40%,#FFFFFF_100%)]">
-      <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1600px]">
-        {user ? (
+    <div
+      className={cn(
+        "ct-safe-area min-h-[100dvh]",
+        // Patients get the Figma dashboard layout: grey-50 page, sidebar flush to the left edge.
+        isPatient ? "bg-grey-50" : "bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.15),_transparent_28%),linear-gradient(180deg,#F5F8FC_0%,#F7FAFE_40%,#FFFFFF_100%)]",
+      )}
+    >
+      <div className={cn("flex min-h-[100dvh] w-full", !isPatient && "mx-auto max-w-[1600px]")}>
+        {user && isPatient ? <PatientSidebar user={user} unreadCount={unreadCount} location={patientLocation} /> : null}
+        {user && !isPatient ? (
           <nav
             className="sticky top-0 hidden h-[100dvh] w-64 shrink-0 flex-col gap-1 overflow-y-auto border-r border-white/70 bg-white/70 px-3 py-6 backdrop-blur-xl lg:flex"
             aria-label="Main navigation"
@@ -163,7 +181,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
         ) : null}
         <div className="flex min-h-[100dvh] min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-white/65 bg-white/82 backdrop-blur-xl">
+          {isPatient ? <PatientTopBar unreadCount={unreadCount} /> : null}
+          {/* For patients this bar is the phone/tablet header; PatientTopBar replaces it from lg up. */}
+          <header className={cn("sticky top-0 z-30 border-b border-white/65 bg-white/82 backdrop-blur-xl", isPatient && "lg:hidden")}>
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="min-w-0">
@@ -212,7 +232,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             while the fixed nav is 91px tall -- the last ~59px of every page was unreachable.
             The nav only exists below `lg`, so that is the one breakpoint allowed to shrink it.
           */}
-          <main className="mx-auto w-full max-w-7xl flex-1 scroll-pb-44 px-4 pt-5 pb-[calc(11rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8 lg:scroll-pb-12 lg:px-8 lg:pb-12">
+          <main
+            className={cn(
+              "w-full flex-1 scroll-pb-44 px-4 pt-5 pb-[calc(11rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8 lg:scroll-pb-12 lg:pb-12",
+              // Figma dashboard: 50px side padding, 48px from the top bar.
+              isPatient ? "mx-auto max-w-[1346px] lg:px-[50px] lg:pt-12" : "mx-auto max-w-7xl lg:px-8",
+            )}
+          >
             <ProviderHeartbeat />
             <OfflineStatusBanner />
             {children}

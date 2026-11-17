@@ -11,6 +11,46 @@ const tones = {
   blue: "border-primary-500 bg-info-100 text-primary-500",
 };
 
+// Pills as drawn on the Figma app screens ("Confirmed", "Available now", "Received - waiting consultation"):
+// 12/16 Inter Tight 500, 8px radius, tinted fill with a soft border. Text uses the -700/-800 step
+// instead of Figma's -500 so it stays readable on the tint.
+const pillTones = {
+  success: "border-success-200 bg-success-50 text-success-700",
+  warning: "border-warning-200 bg-warning-50 text-warning-800",
+  danger: "border-danger-200 bg-danger-50 text-danger-700",
+  info: "border-info-200 bg-info-50 text-info-700",
+  primary: "border-grey-200 bg-white text-primary-500",
+  neutral: "border-grey-200 bg-grey-50 text-grey-600",
+};
+
+export type PillTone = keyof typeof pillTones;
+
+export function Pill({
+  children,
+  tone = "neutral",
+  size = "sm",
+  className,
+}: {
+  children: React.ReactNode;
+  tone?: PillTone;
+  /** sm = 24px, md = 32px */
+  size?: "sm" | "md";
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center whitespace-nowrap rounded-[8px] border font-inter-tight text-xs font-medium leading-4",
+        size === "sm" ? "min-h-6 px-2" : "min-h-8 px-3",
+        pillTones[tone],
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
 export function Badge({
   children,
   tone = "neutral",

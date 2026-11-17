@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   appointments: vi.fn(),
   payments: vi.fn(),
   referrals: vi.fn(),
+  homeCare: vi.fn(),
 }));
 
 const EMPTY = { count: 0, next: null, previous: null, results: [] };
@@ -27,6 +28,7 @@ vi.mock("@/lib/api/endpoints", () => ({
   appointmentsApi: { list: mocks.appointments },
   paymentsApi: { list: mocks.payments },
   referralsApi: { list: mocks.referrals },
+  homeCareApi: { requests: mocks.homeCare },
 }));
 
 // Other roles are delegated to entirely separate dashboards; they are not under test here.
@@ -68,6 +70,7 @@ beforeEach(() => {
   mocks.appointments.mockResolvedValue(EMPTY);
   mocks.payments.mockResolvedValue(EMPTY);
   mocks.referrals.mockResolvedValue(EMPTY);
+  mocks.homeCare.mockResolvedValue(EMPTY);
 });
 
 afterEach(() => {
