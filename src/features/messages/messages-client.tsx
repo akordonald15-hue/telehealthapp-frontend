@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { SessionControls } from "./session-controls";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -608,6 +609,7 @@ export function MessagesClient() {
                 Live connection interrupted. Reconnecting; messages refresh automatically when connected to the internet.
               </div>
             ) : null}
+            {activeThreadDetails ? <SessionControls thread={activeThreadDetails} role={currentUser?.role} /> : null}
             {activeThreadDetails?.triage_summary ? (
               <TriageSummaryPanel thread={activeThreadDetails} role={currentUser?.role} />
             ) : null}

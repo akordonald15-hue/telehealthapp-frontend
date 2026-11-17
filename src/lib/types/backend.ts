@@ -255,6 +255,7 @@ export type AvailabilitySlot = {
 };
 
 export type Thread = {
+  session_controls?: { early_requested: boolean; patient_ready: boolean } | null;
   id: number;
   thread_id?: number;
   patient: number;
@@ -343,6 +344,7 @@ export type Message = {
 };
 
 export type ProviderDoctor = DoctorProfile & {
+  upcoming_booking_count?: number;
   display_name: string;
   profile_image_url: string | null;
   rating: number | null;

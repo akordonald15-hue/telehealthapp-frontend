@@ -22,6 +22,7 @@ async function probe(mode,width=390,zone='Africa/Lagos') {
  const doctorId=fixture?.doctor||42;
  const pricing={service_value:'2000.00',discount:'2000.00',amount_due:'0.00',currency:'NGN',promotion_applied:true,reward_applied:false,promotion_code:publicCode};
  const doctors=[doctorId,43].map(id=>({id,display_name:id===doctorId?'Dr Ada':'Dr Ben',specialties:[],availability_status:mode==='unavailable'?'unavailable':'available',preferred_availability_status:'available',rating:4.8,review_count:3,active_workload:0,unavailable_consultation_slots:[]}));
+ if(mode==='recommendations')doctors[0].upcoming_booking_count=5;
  await context.route('**/api/**',async route=>{
   const path=new URL(route.request().url()).pathname;
   if(path.includes('/promotions/'))promotionRequests++;
@@ -73,7 +74,18 @@ async function probe(mode,width=390,zone='Africa/Lagos') {
  await page.goto(`${base}/appointments?triage_session=${fixture?.triage||5}`);
  await page.getByRole('button',{name:'View recommended doctors',exact:true}).click();
  const select=page.getByRole('article').filter({hasText:'Dr Ada'}).getByRole('button',{name:'Select Doctor',exact:true});
- if(mode==='unavailable') {await expect(select).toBeDisabled();results.push({mode,blocked:true});await context.close();return;}
+ if(mode==='recommendations') {
+  await expect(page.getByRole('article').first()).toContainText('Dr Ben');
+  await expect(select).toBeVisible();
+  await page.getByRole('article').filter({hasText:'Dr Ben'}).getByRole('button',{name:'Select Doctor',exact:true}).click();
+  const chosen=page.getByRole('dialog',{name:'Confirm doctor and time'});
+  await chosen.getByRole('button',{name:/Consult now/}).click();
+  await chosen.getByRole('button',{name:'Make Payment',exact:true}).first().click();
+  await expect.poll(()=>posts.length).toBe(1);expect(posts[0].doctor).toBe(43);expect(reserves).toBe(0);
+  await expect(page).toHaveURL(base+'/qa-paystack');
+  results.push({mode,selectedDoctor:43,preservedPatientChoice:true});await context.close();return;
+ }
+ if(mode==='unavailable') {await expect(select).toHaveCount(0);expect(posts).toHaveLength(0);expect(reserves).toBe(0);results.push({mode,blocked:true,excluded:true});await context.close();return;}
  await select.click();
  let dialog=page.getByRole('dialog',{name:'Confirm doctor and time'});
  await dialog.getByRole('button',{name:/Consult now/}).click();
@@ -137,13 +149,18 @@ async function probe(mode,width=390,zone='Africa/Lagos') {
    results.push({mode,commits:fixture?1:commits,posts:posts.length,original:posts[0],realBooking:realResult?{id:realResult.appointment.id,scheduled_at:realResult.appointment.scheduled_at,amount:realResult.payment.amount}:undefined});
   }
  }
- await page.screenshot({path:`${output}/${mode}.png`,fullPage:true});await context.close();
+ await page.waitForLoadState('domcontentloaded');
+ // All functional/frozen-time assertions above are complete. Resume mocked RAF
+ // solely for evidence capture in Chromium; no clinical assertion time changes.
+ await page.clock.resume();
+ await page.clock.runFor(32);
+ await page.screenshot({path:`${output}/${mode}.png`,fullPage:true,animations:'disabled',caret:'hide'});await context.close();
 }
 try{
  if(process.env.QA_TIMEZONE_MATRIX==='true') {
   for(const zone of ['Africa/Lagos','UTC','America/New_York','Europe/London'])for(const provider of ['paystack','bank'])await probe(`paid-future-${provider}`,390,zone);
   fs.writeFileSync(`${output}/timezone-results.json`,JSON.stringify(results,null,2));console.log('PASS timezone matrix',results.length);
- } else for(const mode of fixture?[process.env.QA_REAL_PAID==='true'?'paid-paystack':process.env.QA_REAL_RECOVERY||'realEarliest']:(process.env.QA_CASES?.split(',')||(process.env.QA_PAID_DISABLED==='true'?['paid-paystack','paid-bank']:['paid-paystack','paid-bank','typedOnly','released','expired','earliest','unavailable','outage-503-paystack','outage-500-bank','outage-403-paystack','outage-timeout-paystack','campaignDisabled','applyTimeout','lostBefore','lostAfter','lostHistory','lostTabs','double','skew']))){
+ } else for(const mode of fixture?[process.env.QA_REAL_PAID==='true'?'paid-paystack':process.env.QA_REAL_RECOVERY||'realEarliest']:(process.env.QA_CASES?.split(',')||(process.env.QA_PAID_DISABLED==='true'?['paid-paystack','paid-bank']:['recommendations','paid-paystack','paid-bank','typedOnly','released','expired','earliest','unavailable','outage-503-paystack','outage-500-bank','outage-403-paystack','outage-timeout-paystack','campaignDisabled','applyTimeout','lostBefore','lostAfter','lostHistory','lostTabs','double','skew']))){
   await probe(mode,mode==='lostBefore'?1440:390);fs.writeFileSync(`${output}/results.json`,JSON.stringify(results,null,2));console.log('PASS',mode);
  }
 }finally{await browser.close();}

@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { doctorMatchesSpecialty, sortRecommendedDoctors } from "./doctor-ranking";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -141,28 +142,6 @@ function addDays(date: Date, days: number) {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
   return next;
-}
-
-function doctorMatchesSpecialty(doctor: ProviderDoctor, specialty?: string | null) {
-  if (!specialty) return false;
-  const normalized = specialty.toLowerCase().replace(/[_-]+/g, " ");
-  return doctorSpecialtyLabel(doctor).toLowerCase().includes(normalized);
-}
-
-function sortRecommendedDoctors(doctors: ProviderDoctor[], specialty?: string | null) {
-  return [...doctors].sort((left, right) => {
-    const leftScore =
-      (doctorMatchesSpecialty(left, specialty) ? 100 : 0) +
-      (left.availability_status === "available" ? 40 : 0) +
-      (left.rating ?? 0) * 4 -
-      (left.active_workload ?? 0);
-    const rightScore =
-      (doctorMatchesSpecialty(right, specialty) ? 100 : 0) +
-      (right.availability_status === "available" ? 40 : 0) +
-      (right.rating ?? 0) * 4 -
-      (right.active_workload ?? 0);
-    return rightScore - leftScore;
-  });
 }
 
 function TypingDots() {
@@ -380,8 +359,8 @@ export function AppointmentsClient() {
   const suggestedSpecialty = isConversationResult(aiResultData) ? aiResultData.department : null;
   const triageSymptoms = isConversationResult(aiResultData) ? readableTriageList(aiResultData.extracted_symptoms) : [];
   const doctorItems = useMemo(
-    () => sortRecommendedDoctors((availableDoctors.data?.results ?? []).filter((doctor) => !shouldHideDoctorFromPatientRecommendations(doctor)), suggestedSpecialty),
-    [availableDoctors.data?.results, suggestedSpecialty],
+    () => sortRecommendedDoctors((availableDoctors.data?.results ?? []).filter((doctor) => !shouldHideDoctorFromPatientRecommendations(doctor)), suggestedSpecialty, effectiveTriageSessionId ?? 0),
+    [availableDoctors.data?.results, suggestedSpecialty, effectiveTriageSessionId],
   );
   const selectedDoctorLive = selectedDoctor
     ? doctorItems.find((doctor) => doctor.id === selectedDoctor.id) ?? (availableDoctors.isSuccess ? null : selectedDoctor)
@@ -1087,7 +1066,7 @@ export function AppointmentsClient() {
                     )}
                     style={{ animationDelay: `${index * 70}ms` }}
                   >
-                    {index === 0 ? (
+                    {index === 0 && doctorMatchesSpecialty(doctor, suggestedSpecialty) ? (
                       <span className="w-fit rounded-full bg-[#DBEAFE] px-3 py-1 text-xs font-semibold text-[#2563EB]">Best Match</span>
                     ) : null}
                     <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-4 sm:grid-cols-[88px_minmax(0,1fr)_auto] sm:items-center">
@@ -1104,7 +1083,7 @@ export function AppointmentsClient() {
                           <p className="truncate text-base font-semibold text-[#1F2937]">{doctor.display_name}</p>
                           {selected ? <span className="rounded-full bg-[#DBEAFE] px-2 py-0.5 text-xs font-semibold text-[#2563EB]">Selected</span> : null}
                         </div>
-                        <p className="mt-1 text-sm text-slate-600">General Physician</p>
+                        <p className="mt-1 text-sm text-slate-600">{doctorSpecialtyLabel(doctor)}</p>
                         <p className="mt-2 line-clamp-1 text-sm text-slate-600">{oneLineBio(doctor)}</p>
                         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
                           <span className="rounded-full bg-slate-50 px-3 py-1">★ {doctor.rating ?? "New"} ({doctor.review_count ?? 0} reviews)</span>
@@ -1216,7 +1195,7 @@ export function AppointmentsClient() {
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-base font-semibold text-[#1F2937]">{selectedDoctorLive.display_name}</p>
-                  <p className="mt-1 text-sm text-slate-600">General Physician</p>
+                  <p className="mt-1 text-sm text-slate-600">{doctorSpecialtyLabel(selectedDoctorLive)}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
                     <span className="rounded-full bg-white px-3 py-1">★ {selectedDoctorLive.rating ?? "New"} ({selectedDoctorLive.review_count ?? 0} reviews)</span>
                     <span className="rounded-full bg-white px-3 py-1">Chat</span>
