@@ -5,6 +5,11 @@ import { sortRecommendedDoctors, doctorMatchesSpecialty } from "./doctor-ranking
 const doctor = (id: number, extra: Partial<ProviderDoctor> = {}) => ({ id, specialties: [{id:1,name:"General Medicine"}], availability_status:"offline", active_workload:0, upcoming_booking_count:0, ...extra } as ProviderDoctor);
 
 describe("doctor recommendations", () => {
+  it("excludes all four test profile IDs even with genuine-looking renamed profiles", () => {
+    const rows=[3,6,7,11,20,21].map(id=>doctor(id,{display_name:"General practitioner",availability_status:"available"}));
+    expect(sortRecommendedDoctors(rows,"General Medicine").map(d=>d.id).sort()).toEqual([20,21]);
+    expect(rows).toHaveLength(6);
+  });
   it("puts clinical suitability before online status or workload", () => {
     const matched=doctor(21);const other=doctor(20,{specialties:[{id:2,name:"Dermatology"}],availability_status:"available"});
     expect(sortRecommendedDoctors([other,matched],"general_medicine",1)[0].id).toBe(21);

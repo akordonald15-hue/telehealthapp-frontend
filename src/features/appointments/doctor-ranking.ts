@@ -1,5 +1,11 @@
 import type { ProviderDoctor } from "@/lib/types/backend";
 
+// Owner-confirmed test profiles; retain historical appointment displays.
+const excludedDoctorIds = new Set([3, 6, 7, 11]);
+export function isExcludedDoctorId(id: number) {
+  return excludedDoctorIds.has(id);
+}
+
 function normalize(value: string) {
   return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -16,7 +22,7 @@ function tieKey(seed: number, id: number) {
 }
 
 export function sortRecommendedDoctors(doctors: ProviderDoctor[], specialty?: string | null, seed = 0) {
-  return doctors.filter((doctor) => doctor.availability_status !== "unavailable").sort((a, b) =>
+  return doctors.filter((doctor) => !isExcludedDoctorId(doctor.id) && doctor.availability_status !== "unavailable").sort((a, b) =>
     Number(doctorMatchesSpecialty(b, specialty)) - Number(doctorMatchesSpecialty(a, specialty)) ||
     Number(b.availability_status === "available") - Number(a.availability_status === "available") ||
     (a.active_workload ?? 0) - (b.active_workload ?? 0) ||
