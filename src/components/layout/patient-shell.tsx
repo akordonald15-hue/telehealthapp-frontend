@@ -1,31 +1,31 @@
 "use client";
 
-import {
-  ArrowRight,
-  Bell,
-  ChevronDown,
-  CircleHelp,
-  Gift,
-  HeartHandshake,
-  LayoutGrid,
-  MessageSquareText,
-  Search,
-  Settings,
-  ShieldCheck,
-  ShieldPlus,
-} from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { BrandLockup } from "@/components/brand/brand-lockup";
-import { buttonClassName } from "@/components/ds";
-import { BRAND_SUPPORT_EMAIL } from "@/lib/brand";
+import {
+  ArrowRightIcon,
+  BellNotificationIcon,
+  buttonClassName,
+  GiftIcon,
+  HealthcareIcon,
+  HealthShieldIcon,
+  HelpCircleIcon,
+  MessageTextIcon,
+  NavArrowDownIcon,
+  SettingsIcon,
+  StarIcon,
+  VerifiedUserIcon,
+  ViewGridIcon,
+} from "@/components/ds";
+import { BRAND_NAME, BRAND_SUPPORT_EMAIL } from "@/lib/brand";
 import type { User } from "@/lib/types/backend";
 import { cn } from "@/lib/utils";
 
-// Patient sidebar and top bar from the Figma "Dashboard- filled" screen (FINAL DESIGN page).
-// Desktop only (lg+); phones keep the app shell's top bar and bottom navigation.
+// Patient sidebar and top bar, built to the Figma "Dashboard- filled" screen (FINAL DESIGN page,
+// light background version). Desktop only (lg+); phones keep the app shell's top bar and bottom nav.
 
 type IconType = React.ComponentType<{ className?: string }>;
 
@@ -55,13 +55,9 @@ export function patientPageTitle(pathname: string) {
   return pageTitles.find(([href]) => isActive(pathname, href))?.[1] ?? "Dashboard";
 }
 
-function initials(name?: string | null) {
-  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean);
-  return (parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0]?.slice(0, 2) ?? "C").toUpperCase();
-}
-
+// Figma: 52px rows, 14px padding, 12px radius, 8px icon gap, Inter Tight 16/20 500; active = primary-50 / primary-500.
 const itemStyles =
-  "flex min-h-[52px] w-full items-center gap-2 rounded-[12px] px-3.5 font-inter-tight text-base font-medium leading-5 text-black-500 transition hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus";
+  "flex min-h-[52px] w-full items-center gap-2 rounded-[12px] p-3.5 font-inter-tight text-base font-medium leading-5 text-black-500 transition hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus";
 
 function NavItem({ href, label, icon: Icon, active, count }: { href: string; label: string; icon: IconType; active: boolean; count?: number }) {
   return (
@@ -96,14 +92,14 @@ export function PatientSidebar({ user, unreadCount, location }: { user: User; un
       aria-label="Main navigation"
       className="sticky top-0 hidden h-[100dvh] w-[266px] shrink-0 flex-col overflow-y-auto border-r border-grey-200 bg-white lg:flex"
     >
-      <div className="px-6 pb-6 pt-[34px]">
-        <BrandLockup wordmark="image" wordmarkClassName="h-8 max-w-[128px]" />
-      </div>
+      <Link href="/dashboard" className="ml-6 mt-[34px] w-fit rounded-[4px] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus">
+        <Image src="/img/logo-dashboard.png" alt={`${BRAND_NAME} home`} width={128} height={32} priority />
+      </Link>
 
-      <div className="grid gap-6 px-4">
+      <div className="mt-6 grid gap-6 px-4">
         <NavGroup title="Main menu">
-          <NavItem href="/dashboard" label="Dashboard" icon={LayoutGrid} active={isActive(pathname, "/dashboard")} />
-          <NavItem href="/home-care/book" label="Find Care" icon={ShieldPlus} active={isActive(pathname, "/home-care/book")} />
+          <NavItem href="/dashboard" label="Dashboard" icon={ViewGridIcon} active={isActive(pathname, "/dashboard")} />
+          <NavItem href="/home-care/book" label="Find Care" icon={HealthShieldIcon} active={isActive(pathname, "/home-care/book")} />
           <div>
             <button
               type="button"
@@ -112,9 +108,9 @@ export function PatientSidebar({ user, unreadCount, location }: { user: User; un
               onClick={() => setMyCareOpen((open) => !open)}
               className={cn(itemStyles, inMyCare && !myCareOpen && "bg-primary-50 text-primary-500")}
             >
-              <HeartHandshake className="size-6 shrink-0" />
+              <HealthcareIcon className="size-6 shrink-0" />
               <span className="flex-1 truncate text-left">My Care</span>
-              <ChevronDown className={cn("size-6 shrink-0 transition-transform", myCareOpen && "rotate-180")} />
+              <NavArrowDownIcon className={cn("size-6 shrink-0 transition-transform", myCareOpen && "rotate-180")} />
             </button>
             {myCareOpen ? (
               <div id="my-care-links" className="grid gap-0.5 pb-1 pl-8">
@@ -137,52 +133,52 @@ export function PatientSidebar({ user, unreadCount, location }: { user: User; un
               </div>
             ) : null}
           </div>
-          <NavItem href="/messages" label="Messages" icon={MessageSquareText} active={isActive(pathname, "/messages")} count={unreadCount} />
-          <NavItem href="/refer" label="Refer and Earn" icon={Gift} active={isActive(pathname, "/refer")} />
+          <NavItem href="/messages" label="Messages" icon={MessageTextIcon} active={isActive(pathname, "/messages")} count={unreadCount} />
+          <NavItem href="/refer" label="Refer and Earn" icon={GiftIcon} active={isActive(pathname, "/refer")} />
         </NavGroup>
 
         <NavGroup title="Support">
           {/* There is no help page yet; support is by email. */}
           <a href={`mailto:${BRAND_SUPPORT_EMAIL}`} className={itemStyles}>
-            <CircleHelp className="size-6 shrink-0" />
+            <HelpCircleIcon className="size-6 shrink-0" />
             <span className="flex-1 truncate">Help and Support</span>
           </a>
         </NavGroup>
 
         <NavGroup title="Account">
-          <NavItem href="/profile" label="Profile and Settings" icon={Settings} active={isActive(pathname, "/profile")} />
+          <NavItem href="/profile" label="Profile and Settings" icon={SettingsIcon} active={isActive(pathname, "/profile")} />
         </NavGroup>
       </div>
 
-      <div className="mt-auto grid gap-4 px-4 pb-4 pt-8">
+      <div className="mt-auto px-4 pb-4 pt-8">
         <div className="grid gap-5 rounded-[20px] border border-grey-200 bg-grey-50 p-4">
           <div className="grid gap-3">
             <p className="flex items-center gap-2 font-inter-tight text-base font-medium leading-5 text-black-500">
-              <ShieldCheck className="size-6 shrink-0" />
-              Verified care only
+              <VerifiedUserIcon className="size-6 shrink-0" />
+              Verify care only
             </p>
-            <p className="font-inter-tight text-[13px] font-medium leading-4 text-grey-500">
-              Every doctor and nurse on Caretekk is credential-checked.
+            <p className="font-inter-tight text-[13px] font-medium leading-4 tracking-[-0.13px] text-grey-500">
+              Every doctor and nurse in Caretekk is credentially checked
             </p>
           </div>
-          <Link href="/#trust" className={buttonClassName({ variant: "ghost", size: "md", className: "justify-start px-0 hover:bg-transparent hover:underline" })}>
-            How we verify
-            <ArrowRight />
+          <Link href="/#trust" className={buttonClassName({ variant: "ghost", size: "md", className: "w-fit whitespace-nowrap px-0 hover:bg-transparent hover:underline" })}>
+            How we verify you
+            <ArrowRightIcon className="size-6!" />
           </Link>
         </div>
       </div>
 
       <div className="flex items-center gap-2.5 border-t border-grey-200 p-4">
-        {user.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element -- avatar URLs come from the API's storage host
-          <img src={user.avatar_url} alt="" className="size-[50px] shrink-0 rounded-full object-cover" />
-        ) : (
-          <span className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-primary-100 font-manrope text-base font-bold text-primary-600" aria-hidden="true">
-            {initials(user.full_name)}
-          </span>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element -- avatar URLs come from the API's storage host */}
+        <img
+          src={user.avatar_url || "/img/avatar-default.png"}
+          alt=""
+          width={50}
+          height={50}
+          className="size-[50px] shrink-0 rounded-full object-cover"
+        />
         <span className="min-w-0">
-          <span className="block truncate font-inter-tight text-sm font-medium leading-4 text-black-500">{user.full_name || "Caretekk patient"}</span>
+          <span className="block truncate font-inter-tight text-sm font-medium leading-4 text-black-900">{user.full_name || "Caretekk patient"}</span>
           {location ? <span className="block truncate font-inter-tight text-xs font-medium leading-4 text-grey-500">{location}</span> : null}
         </span>
       </div>
@@ -200,18 +196,17 @@ export function PatientTopBar({ unreadCount }: { unreadCount: number }) {
         {/* No search page exists yet: this opens doctor booking, where patients choose a doctor. */}
         <Link
           href="/appointments"
-          className="flex min-h-[52px] w-[350px] items-center gap-3 rounded-[8px] border-[1.5px] border-grey-200 bg-grey-50 px-3 font-manrope text-sm leading-4 text-grey-400 transition hover:border-grey-400 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus"
+          className="flex min-h-[52px] w-[350px] items-center gap-3 rounded-[8px] border-[1.5px] border-grey-200 bg-grey-50 px-3 py-3.5 font-manrope text-sm leading-4 text-grey-400 transition hover:border-grey-400 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus"
         >
-          <Search className="size-6 shrink-0 text-grey-500" />
+          <StarIcon className="size-6 shrink-0" />
           Search doctors and nurses...
         </Link>
         <Link
           href="/messages"
           aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications"}
-          className="relative flex size-[52px] items-center justify-center rounded-[8px] bg-primary-50 text-black-500 transition hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus"
+          className="flex size-[52px] items-center justify-center rounded-[8px] bg-primary-50 text-primary-500 transition hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus"
         >
-          <Bell className="size-6" />
-          {unreadCount ? <span className="absolute right-3 top-3 size-2.5 rounded-full bg-danger-500 ring-2 ring-primary-50" /> : null}
+          <BellNotificationIcon className="size-6" />
         </Link>
       </div>
     </header>

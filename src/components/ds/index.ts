@@ -6,5 +6,6 @@ export { Breadcrumbs } from "./breadcrumbs";
 export { Button, buttonClassName } from "./button";
 export { Checkbox, Radio, Toggle, radioInputClassName } from "./choice";
 export { Field } from "./field";
+export * from "./icons";
 export { Input, PasswordInput, Select, Textarea } from "./input";
 export { ProgressBar } from "./progress-bar";

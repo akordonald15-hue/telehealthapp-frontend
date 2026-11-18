@@ -94,7 +94,9 @@ describe("desktop navigation", () => {
     const nav = await waitFor(sidebar);
     const labels = within(nav)
       .getAllByRole("link")
-      .map((link) => link.textContent?.trim());
+      .map((link) => link.textContent?.trim())
+      // The logo link is an image with no text; compare the menu entries.
+      .filter(Boolean);
 
     // The "Verified care only" card's link sits below the menu, so compare positions instead of
     // assuming Profile is the very last link.
