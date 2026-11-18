@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { doctorMatchesSpecialty, sortRecommendedDoctors } from "./doctor-ranking";
+import { doctorMatchesSpecialty, isExcludedDoctorId, sortRecommendedDoctors } from "./doctor-ranking";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -362,7 +362,7 @@ export function AppointmentsClient() {
     () => sortRecommendedDoctors((availableDoctors.data?.results ?? []).filter((doctor) => !shouldHideDoctorFromPatientRecommendations(doctor)), suggestedSpecialty, effectiveTriageSessionId ?? 0),
     [availableDoctors.data?.results, suggestedSpecialty, effectiveTriageSessionId],
   );
-  const selectedDoctorLive = selectedDoctor
+  const selectedDoctorLive = selectedDoctor && !isExcludedDoctorId(selectedDoctor.id)
     ? doctorItems.find((doctor) => doctor.id === selectedDoctor.id) ?? (availableDoctors.isSuccess ? null : selectedDoctor)
     : null;
   const promotionalTiming = promotion.enabled && promotion.active &&
@@ -507,7 +507,7 @@ export function AppointmentsClient() {
     enabled: user?.role === "patient" && !createAppointment.isSuccess,
     expiresInMs: 24 * 60 * 60 * 1000,
     onRestore: (draft) => {
-      if (draft.selectedDoctor) {
+      if (draft.selectedDoctor && !isExcludedDoctorId(draft.selectedDoctor.id)) {
         setSelectedDoctor(draft.selectedDoctor);
       }
       if (draft.triageSessionId) {
@@ -515,7 +515,7 @@ export function AppointmentsClient() {
         setAiSessionId(draft.triageSessionId);
       }
       form.reset({
-        doctor: draft.doctor || 0,
+        doctor: isExcludedDoctorId(Number(draft.doctor)) ? 0 : draft.doctor || 0,
         scheduled_at: draft.scheduled_at || "",
         reason: draft.reason || "",
         notes: "",
