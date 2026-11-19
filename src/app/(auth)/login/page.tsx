@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { AuthHeroPanel } from "@/components/layout/auth-hero-panel";
 import { AuthSplitLayout } from "@/components/layout/auth-split-layout";
 import { ProfileTickIcon } from "@/features/auth/auth-icons";
 import { AuthCard } from "@/features/auth/auth-ui";
@@ -7,7 +8,7 @@ import { LoginForm } from "@/features/auth/login-form";
 
 export default function LoginPage() {
   return (
-    <AuthSplitLayout>
+    <AuthSplitLayout panel={<AuthHeroPanel />}>
       <AuthCard
         icon={<ProfileTickIcon className="h-6 w-6" />}
         title="Welcome to Caretekk"

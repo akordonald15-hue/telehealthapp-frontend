@@ -11,24 +11,40 @@ export function AuthCard({
   icon,
   title,
   subtitle,
+  align = "center",
   children,
 }: {
-  icon: ReactNode;
+  icon?: ReactNode;
   title: string;
   subtitle?: ReactNode;
+  align?: "center" | "start";
   children: ReactNode;
 }) {
   return (
-    <div className="w-full max-w-[450px] rounded-2xl border-[10px] border-grey-200 bg-white px-5 pb-[74px] pt-10 sm:px-7.5">
-      <div className="mx-auto flex max-w-[286px] flex-col items-center gap-6 text-center">
-        <span className="flex h-15 w-15 items-center justify-center rounded-full border-4 border-[#DFE1E3] bg-white text-grey-800">
-          {icon}
-        </span>
+    <div
+      className={cn(
+        "w-full max-w-[450px] rounded-2xl border-[10px] border-grey-200 bg-white px-5 pt-10 sm:px-7.5",
+        align === "center" ? "pb-[74px]" : "pb-[99px]",
+      )}
+    >
+      {align === "center" ? (
+        <div className="mx-auto flex max-w-[286px] flex-col items-center gap-6 text-center">
+          {icon ? (
+            <span className="flex h-15 w-15 items-center justify-center rounded-full border-4 border-[#DFE1E3] bg-white text-[#292D32]">
+              {icon}
+            </span>
+          ) : null}
+          <div className="grid gap-1">
+            <h1 className="type-page-title text-black-500">{title}</h1>
+            {subtitle ? <p className="type-body-lg text-grey-500">{subtitle}</p> : null}
+          </div>
+        </div>
+      ) : (
         <div className="grid gap-1">
-          <h1 className="type-page-title text-black-500">{title}</h1>
+          <h1 className="type-page-title text-primary-500">{title}</h1>
           {subtitle ? <p className="type-body-lg text-grey-500">{subtitle}</p> : null}
         </div>
-      </div>
+      )}
       <div className="mt-6">{children}</div>
     </div>
   );
@@ -111,10 +127,12 @@ export function authButtonStyles({
   inactive = false,
 }: { variant?: AuthButtonVariant; inactive?: boolean } = {}) {
   return cn(
-    "type-body-giant! inline-flex h-[65px] w-full items-center justify-center gap-2 rounded-2xl px-4.5 transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary-200 disabled:cursor-not-allowed",
+    "inline-flex h-[65px] w-full items-center justify-center gap-2.5 transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary-200 disabled:cursor-not-allowed",
+    variant === "primary" && "type-body-giant! rounded-2xl px-4.5",
     variant === "primary" &&
       (inactive ? "bg-grey-200 text-grey-400" : "bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-70"),
-    variant === "secondary" && "border-[1.5px] border-grey-200 bg-white text-black-500 hover:bg-grey-50 disabled:opacity-60",
+    variant === "secondary" &&
+      "type-body-lg! rounded-[18px] bg-white px-6 text-[#1A1C1E] shadow-[inset_0_0_0_1px_#EFF0F6,inset_0_-3px_6px_rgb(244_245_250/0.6)] hover:bg-grey-50 disabled:opacity-60",
   );
 }
 
@@ -163,8 +181,8 @@ export function AuthAlert({ tone = "danger", children }: { tone?: "danger" | "su
     <div
       role={tone === "danger" ? "alert" : "status"}
       className={cn(
-        "type-body-md rounded-xl border px-4 py-3.5",
-        tone === "danger" ? "border-danger-100 bg-danger-50 text-danger-700" : "border-success-100 bg-success-50 text-success-700",
+        "type-helper-text rounded-2xl px-4.5 py-3.5",
+        tone === "danger" ? "bg-danger-50 text-danger-500" : "bg-success-50 text-success-700",
       )}
     >
       {children}
