@@ -17,19 +17,22 @@ export function AuthHeroPanel() {
 
   return (
     <aside className="group/hero relative hidden overflow-hidden rounded-lg bg-black-800 lg:sticky lg:top-3 lg:flex lg:h-[calc(100dvh-1.5rem)] lg:min-h-[560px] lg:flex-col lg:justify-between lg:self-start lg:p-12 xl:pb-[68px] xl:pl-[88px] xl:pr-12 xl:pt-[60px]">
-      {SLIDES.map((src, index) => (
-        <Image
-          key={src}
-          src={src}
-          alt=""
-          fill
-          sizes="50vw"
-          className={cn(
-            "object-cover object-[50%_20%] [transition:opacity_1.2s_ease-in-out,scale_7s_ease-out] motion-reduce:scale-100 motion-reduce:[transition:opacity_1.2s_ease-in-out]",
-            index === active ? "scale-100 opacity-100" : "scale-[1.08] opacity-0",
-          )}
-        />
-      ))}
+      <div aria-hidden="true" className="absolute inset-0">
+        {SLIDES.map((src, index) => (
+          <Image
+            key={src}
+            src={src}
+            alt=""
+            fill
+            sizes="(min-width: 1024px) 50vw, 1px"
+            loading={index === 0 ? "eager" : "lazy"}
+            className={cn(
+              "object-cover object-[50%_20%] [transition:opacity_1.2s_ease-in-out,scale_7s_ease-out] motion-reduce:scale-100 motion-reduce:[transition:opacity_1.2s_ease-in-out]",
+              index === active ? "scale-100 opacity-100" : "scale-[1.08] opacity-0",
+            )}
+          />
+        ))}
+      </div>
       <div aria-hidden="true" className="absolute inset-0 bg-black-900/40" />
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-black-900/85 to-transparent" />
 
