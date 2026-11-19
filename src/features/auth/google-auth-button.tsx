@@ -38,6 +38,8 @@ declare global {
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
+type GoogleIdentity = NonNullable<NonNullable<NonNullable<Window["google"]>["accounts"]>["id"]>;
+
 export function GoogleAuthButton({
   mode,
   variant = "framed",
@@ -59,6 +61,27 @@ export function GoogleAuthButton({
 
     let cancelled = false;
     let attempts = 0;
+    let renderedWidth = 0;
+    let resizeTimer: number | undefined;
+    let resizeObserver: ResizeObserver | undefined;
+
+    const renderGoogleButton = (google: GoogleIdentity, container: HTMLDivElement) => {
+      const width = Math.max(220, Math.min(container.clientWidth || 360, variant === "plain" ? 400 : 360));
+      if (width === renderedWidth) {
+        return;
+      }
+      renderedWidth = width;
+      container.innerHTML = "";
+      google.renderButton(container, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        shape: "rectangular",
+        logo_alignment: variant === "plain" ? "center" : "left",
+        text: mode === "login" ? "signin_with" : "signup_with",
+        width,
+      });
+    };
 
     const initializeButton = () => {
       if (cancelled) {
@@ -93,21 +116,23 @@ export function GoogleAuthButton({
           signInWithGoogle({ id_token: response.credential });
         },
       });
-      google.renderButton(container, {
-        type: "standard",
-        theme: "outline",
-        size: "large",
-        shape: "rectangular",
-        logo_alignment: variant === "plain" ? "center" : "left",
-        text: mode === "login" ? "signin_with" : "signup_with",
-        width: Math.max(220, Math.min(container.clientWidth || 360, 360)),
-      });
+      renderGoogleButton(google, container);
+
+      if (variant === "plain" && typeof ResizeObserver !== "undefined") {
+        resizeObserver = new ResizeObserver(() => {
+          window.clearTimeout(resizeTimer);
+          resizeTimer = window.setTimeout(() => renderGoogleButton(google, container), 150);
+        });
+        resizeObserver.observe(container);
+      }
     };
 
     initializeButton();
 
     return () => {
       cancelled = true;
+      window.clearTimeout(resizeTimer);
+      resizeObserver?.disconnect();
     };
   }, [signInWithGoogle, mode, variant]);
 
@@ -116,12 +141,12 @@ export function GoogleAuthButton({
 
     return (
       <div className="grid gap-3">
-        <div className={cn("relative flex justify-center", GOOGLE_CLIENT_ID && "min-h-10")}>
+        <div className={cn("relative flex items-center justify-center", GOOGLE_CLIENT_ID && "min-h-14")}>
           <div ref={buttonRef} className={cn("w-full max-w-full", signingIn && "invisible")} />
           {signingIn ? (
             <div
               aria-hidden="true"
-              className="absolute inset-x-0 top-0 flex h-10 items-center justify-center rounded-[4px] border border-grey-300 bg-white"
+              className="absolute inset-x-0 top-1/2 flex h-10 -translate-y-1/2 items-center justify-center rounded-[4px] border border-grey-300 bg-white"
             >
               <LoaderCircle className="h-5 w-5 animate-spin text-primary-500" />
             </div>

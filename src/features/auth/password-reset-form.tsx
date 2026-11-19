@@ -154,7 +154,7 @@ export function PasswordResetForm() {
             />
           ))}
         </div>
-        <p className="type-body-sm mt-2 text-grey-500">
+        <p className="type-body-md mt-2 text-grey-500">
           {step === "email" && "Step 1 of 3: Request reset code"}
           {step === "otp" && "Step 2 of 3: Verify reset code"}
           {step === "password" && "Step 3 of 3: Set new password"}
@@ -163,7 +163,7 @@ export function PasswordResetForm() {
       </div>
 
       {step === "email" ? (
-        <form className="grid gap-5" onSubmit={requestForm.handleSubmit((values) => requestReset.mutate(values))}>
+        <form className="grid gap-6" onSubmit={requestForm.handleSubmit((values) => requestReset.mutate(values))}>
           {requestReset.isSuccess ? <AuthAlert tone="success">{requestReset.data.detail}</AuthAlert> : null}
           <AuthErrorAlert error={requestReset.error} context="auth" />
           <AuthField label="Email" error={requestForm.formState.errors.email?.message} required>
@@ -176,7 +176,7 @@ export function PasswordResetForm() {
       ) : null}
 
       {step === "otp" ? (
-        <form className="grid gap-5" onSubmit={otpForm.handleSubmit((values) => verifyReset.mutate(values))}>
+        <form className="grid gap-6" onSubmit={otpForm.handleSubmit((values) => verifyReset.mutate(values))}>
           <AuthErrorAlert error={verifyReset.error} context="verification" />
           <AuthField label="Reset code" error={otpForm.formState.errors.code?.message} required>
             <AuthInput
@@ -200,15 +200,17 @@ export function PasswordResetForm() {
       ) : null}
 
       {step === "password" ? (
-        <form className="grid gap-5" onSubmit={passwordForm.handleSubmit((values) => confirmReset.mutate(values))}>
+        <form className="grid gap-6" onSubmit={passwordForm.handleSubmit((values) => confirmReset.mutate(values))}>
           <AuthErrorAlert error={confirmReset.error} context="auth" />
           <input type="hidden" {...passwordForm.register("reset_token")} />
-          <AuthField label="New password" error={passwordForm.formState.errors.new_password?.message} required>
-            <AuthPasswordInput autoComplete="new-password" placeholder="Enter new password" {...passwordForm.register("new_password")} />
-          </AuthField>
-          <AuthField label="Confirm password" error={passwordForm.formState.errors.confirm_password?.message} required>
-            <AuthPasswordInput autoComplete="new-password" placeholder="Confirm new password" {...passwordForm.register("confirm_password")} />
-          </AuthField>
+          <div className="grid gap-3">
+            <AuthField label="New password" error={passwordForm.formState.errors.new_password?.message} required>
+              <AuthPasswordInput autoComplete="new-password" placeholder="Enter new password" {...passwordForm.register("new_password")} />
+            </AuthField>
+            <AuthField label="Confirm password" error={passwordForm.formState.errors.confirm_password?.message} required>
+              <AuthPasswordInput autoComplete="new-password" placeholder="Confirm new password" {...passwordForm.register("confirm_password")} />
+            </AuthField>
+          </div>
           <div className="grid grid-cols-[auto_1fr] gap-3">
             <AuthButton type="button" variant="secondary" onClick={() => setStep("otp")} disabled={confirmReset.isPending}>
               Back
@@ -224,9 +226,9 @@ export function PasswordResetForm() {
         <AuthAlert tone="success">Your password has been updated. Redirecting you to sign in now.</AuthAlert>
       ) : null}
 
-      <p className="type-body-sm mt-6 text-center text-grey-600">
-        Remembered your password?{" "}
-        <Link className="text-primary-500 underline underline-offset-2 transition hover:text-primary-600" href="/login">
+      <p className="type-body-md mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-grey-500">
+        Remembered your password?
+        <Link className="text-primary-500 underline underline-offset-2 transition-colors hover:text-primary-600" href="/login">
           Back to sign in
         </Link>
       </p>

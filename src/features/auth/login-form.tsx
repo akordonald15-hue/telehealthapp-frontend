@@ -67,7 +67,7 @@ export function LoginForm() {
       })}
     >
       {login.error && !credentialsRejected ? (
-        <div className="mb-5 grid gap-3">
+        <div className="mb-6 grid gap-3">
           <AuthErrorAlert error={login.error} context="auth" />
           {login.error instanceof Error && login.error.message.toLowerCase().includes("email not verified") ? (
             <Link
@@ -86,7 +86,7 @@ export function LoginForm() {
         </div>
       ) : null}
 
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         <AuthField label="Email" error={form.formState.errors.email?.message} required>
           <AuthInput type="email" autoComplete="email" placeholder="Input your Email" {...form.register("email")} />
         </AuthField>
@@ -95,11 +95,11 @@ export function LoginForm() {
         </AuthField>
       </div>
 
-      <div className="mt-5 flex items-center justify-between gap-3">
+      <div className="mt-6 flex min-h-6 items-center justify-between gap-3">
         <AuthCheckbox label="Remember me" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} />
         <Link
           href="/password-reset"
-          className="type-body-sm text-grey-700 underline underline-offset-2 transition hover:text-primary-500"
+          className="type-body-md text-grey-500 underline underline-offset-2 transition-colors hover:text-primary-500"
         >
           Forgot password?
         </Link>
@@ -107,7 +107,7 @@ export function LoginForm() {
 
       <AuthButton
         type="submit"
-        className="mt-5"
+        className="mt-6"
         disabled={login.isPending}
         inactive={!emailValue || !passwordValue || showCredentialsError}
       >
@@ -118,13 +118,13 @@ export function LoginForm() {
         <AuthDivider label="Or login with" />
       </div>
 
-      <div className="mt-5">
+      <div className="mt-6">
         <GoogleAuthButton mode="login" variant="plain" />
       </div>
 
-      <p className="type-body-sm mt-6 text-center text-grey-600">
-        New here?{" "}
-        <Link href="/register" className="text-primary-500 underline underline-offset-2 transition hover:text-primary-600">
+      <p className="type-body-md mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-grey-500">
+        New here?
+        <Link href="/register" className="text-primary-500 underline underline-offset-2 transition-colors hover:text-primary-600">
           Create an Account
         </Link>
       </p>

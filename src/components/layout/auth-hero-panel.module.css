@@ -1,0 +1,20 @@
+.progress {
+  animation-name: slide-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes slide-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress {
+    animation-name: none;
+  }
+}

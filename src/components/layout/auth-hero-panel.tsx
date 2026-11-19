@@ -7,6 +7,8 @@ import { BrandLockup } from "@/components/brand/brand-lockup";
 import { BRAND_NAME } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
+import styles from "./auth-hero-panel.module.css";
+
 const SLIDES = ["/img/Dr michael Idam.jpg", "/img/Dr effiong Okon.jpg", "/img/Dr Paul Chinonso.jpg"];
 const SLIDE_DURATION_MS = 6000;
 
@@ -14,7 +16,7 @@ export function AuthHeroPanel() {
   const [active, setActive] = useState(0);
 
   return (
-    <aside className="group/hero relative hidden overflow-hidden rounded-lg bg-black-800 lg:sticky lg:top-2.5 lg:flex lg:h-[calc(100dvh-1.25rem)] lg:min-h-[560px] lg:flex-col lg:justify-between lg:self-start lg:p-12 xl:px-[72px] xl:pb-14 xl:pt-[52px]">
+    <aside className="group/hero relative hidden overflow-hidden rounded-lg bg-black-800 lg:sticky lg:top-3 lg:flex lg:h-[calc(100dvh-1.5rem)] lg:min-h-[560px] lg:flex-col lg:justify-between lg:self-start lg:p-12 xl:pb-[68px] xl:pl-[88px] xl:pr-12 xl:pt-[60px]">
       {SLIDES.map((src, index) => (
         <Image
           key={src}
@@ -41,10 +43,10 @@ export function AuthHeroPanel() {
         />
       </div>
 
-      <div className="relative z-10 max-w-[480px] text-white">
-        <p className="type-heading-4">A Better place to get care that puts your family first</p>
-        <p className="type-body-md mt-4 text-white/80">With {BRAND_NAME} you can find care solutions</p>
-        <div aria-hidden="true" className="mt-4 inline-flex items-center gap-1 rounded-full bg-white px-2 py-1.5">
+      <div className="relative z-10 max-w-[579px] text-white">
+        <p className="type-heading-4 xl:type-heading-3">A Better place to get care that puts your family first</p>
+        <p className="type-body-giant mt-4 text-white">With {BRAND_NAME} you can find care solutions</p>
+        <div aria-hidden="true" className="mt-3 inline-flex items-center gap-1 rounded-lg bg-white px-2.5 py-2">
           {SLIDES.map((src, index) => (
             <button
               key={src}
@@ -52,15 +54,18 @@ export function AuthHeroPanel() {
               tabIndex={-1}
               onClick={() => setActive(index)}
               className={cn(
-                "relative h-1.5 cursor-pointer overflow-hidden rounded-full bg-grey-300 transition-[width,background-color] duration-500 ease-out",
-                index === active ? "w-5" : "w-1.5 hover:bg-grey-400",
+                "relative h-2 cursor-pointer overflow-hidden rounded-full bg-primary-100 transition-[width,background-color] duration-500 ease-out",
+                index === active ? "w-6" : "w-2 hover:bg-primary-200",
               )}
             >
               {index === active ? (
                 <span
                   onAnimationEnd={() => setActive((current) => (current + 1) % SLIDES.length)}
                   style={{ animationDuration: `${SLIDE_DURATION_MS}ms` }}
-                  className="absolute inset-0 origin-left rounded-full bg-primary-500 [animation-fill-mode:forwards] [animation-name:ct-slide-progress] [animation-timing-function:linear] group-hover/hero:[animation-play-state:paused] motion-reduce:[animation-name:none]"
+                  className={cn(
+                    styles.progress,
+                    "absolute inset-0 origin-left rounded-full bg-primary-400 group-hover/hero:[animation-play-state:paused]",
+                  )}
                 />
               ) : null}
             </button>
