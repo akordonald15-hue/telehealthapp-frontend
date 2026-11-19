@@ -1,9 +1,12 @@
 "use client";
 
+import { LoaderCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { ErrorMessage } from "@/components/ui/error-message";
+import { AuthErrorAlert } from "@/features/auth/auth-ui";
 import { useGoogleLogin } from "@/lib/auth/use-auth";
+import { cn } from "@/lib/utils";
 
 declare global {
   interface Window {
@@ -35,8 +38,15 @@ declare global {
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
-export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
+export function GoogleAuthButton({
+  mode,
+  variant = "framed",
+}: {
+  mode: "login" | "signup";
+  variant?: "framed" | "plain";
+}) {
   const googleLogin = useGoogleLogin();
+  const signInWithGoogle = googleLogin.mutate;
   const [localError, setLocalError] = useState(
     GOOGLE_CLIENT_ID ? "" : "Google sign-in is not set up yet for this environment.",
   );
@@ -80,7 +90,7 @@ export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
             return;
           }
           setLocalError("");
-          googleLogin.mutate({ id_token: response.credential });
+          signInWithGoogle({ id_token: response.credential });
         },
       });
       google.renderButton(container, {
@@ -88,7 +98,7 @@ export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
         theme: "outline",
         size: "large",
         shape: "rectangular",
-        logo_alignment: "left",
+        logo_alignment: variant === "plain" ? "center" : "left",
         text: mode === "login" ? "signin_with" : "signup_with",
         width: Math.max(220, Math.min(container.clientWidth || 360, 360)),
       });
@@ -99,7 +109,32 @@ export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
     return () => {
       cancelled = true;
     };
-  }, [googleLogin, mode]);
+  }, [signInWithGoogle, mode, variant]);
+
+  if (variant === "plain") {
+    const signingIn = googleLogin.isPending || googleLogin.isSuccess;
+
+    return (
+      <div className="grid gap-3">
+        <div className={cn("relative flex justify-center", GOOGLE_CLIENT_ID && "min-h-10")}>
+          <div ref={buttonRef} className={cn("w-full max-w-full", signingIn && "invisible")} />
+          {signingIn ? (
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-0 top-0 flex h-10 items-center justify-center rounded-[4px] border border-grey-300 bg-white"
+            >
+              <LoaderCircle className="h-5 w-5 animate-spin text-primary-500" />
+            </div>
+          ) : null}
+        </div>
+        <span role="status" className="sr-only">
+          {signingIn ? "Signing in with Google..." : ""}
+        </span>
+        <AuthErrorAlert error={googleLogin.error} context="auth" />
+        {localError ? <p className="type-body-sm text-center text-warning-700">{localError}</p> : null}
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-3">

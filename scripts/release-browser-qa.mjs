@@ -171,8 +171,8 @@ try {
   const authPage = await browser.newPage({ viewport: { width: 390, height: 1000 }, serviceWorkers: 'block' });
   await mockApis(authPage, 'signed-in');
   await authPage.goto(`${base}/login`, { waitUntil: 'domcontentloaded' });
-  await authPage.getByPlaceholder('you@example.com').fill('qa@example.test');
-  await authPage.getByPlaceholder('Enter your password').fill('Synthetic-QA-password-123!');
+  await authPage.getByPlaceholder('Input your Email').fill('qa@example.test');
+  await authPage.getByPlaceholder('Input your password').fill('Synthetic-QA-password-123!');
   await authPage.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(authPage).toHaveURL(/\/dashboard/, { timeout: 30000 });
   await expect(authPage.getByRole('link', { name: /refer & earn/i }).first()).toBeVisible({ timeout: 30000 });
