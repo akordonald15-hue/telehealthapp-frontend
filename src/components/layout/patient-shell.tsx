@@ -8,7 +8,6 @@ import { useState } from "react";
 import {
   ArrowRightIcon,
   BellNotificationIcon,
-  buttonClassName,
   GiftIcon,
   HealthcareIcon,
   HealthShieldIcon,
@@ -161,9 +160,13 @@ export function PatientSidebar({ user, unreadCount, location }: { user: User; un
               Every doctor and nurse in Caretekk is credentially checked
             </p>
           </div>
-          <Link href="/#trust" className={buttonClassName({ variant: "ghost", size: "md", className: "w-fit whitespace-nowrap px-0 hover:bg-transparent hover:underline" })}>
-            How we verify you
-            <ArrowRightIcon className="size-6!" />
+          {/* Figma: 48px tall, text padded 8px, then the 24px arrow, left-aligned with the text above. */}
+          <Link
+            href="/#trust"
+            className="inline-flex min-h-12 w-fit items-center whitespace-nowrap rounded-[12px] font-inter-tight text-base font-medium leading-5 text-primary-500 transition hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus"
+          >
+            <span className="px-2">How we verify you</span>
+            <ArrowRightIcon className="size-6 shrink-0" />
           </Link>
         </div>
       </div>
