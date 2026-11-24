@@ -40,11 +40,16 @@ const oct12WeekRevenue = oct12WeekDoctorRevenue + oct12WeekNurseRevenue;
 const oct19WeekDoctorRevenue = 46_000;
 const oct19WeekNurseRevenue = 74_000;
 const oct19WeekRevenue = oct19WeekDoctorRevenue + oct19WeekNurseRevenue;
-const lastWeekDoctorRevenue = 0;
-const lastWeekNurseRevenue = 30_000;
+const founderWeekDoctorRevenue = 0;
+const founderWeekNurseRevenue = 30_000;
+const founderWeekRevenue = founderWeekDoctorRevenue + founderWeekNurseRevenue;
+const lastWeekDoctorRevenue = 10_000;
+const lastWeekNurseRevenue = 5_000;
 const lastWeekRevenue = lastWeekDoctorRevenue + lastWeekNurseRevenue;
-const thisWeekDoctorRevenue = 10_000;
-const thisWeekNurseRevenue = 5_000;
+const thisWeekDoctorCount = 125;
+const thisWeekDoctorRevenue = 250_000;
+const thisWeekNurseCount = 10;
+const thisWeekNurseRevenue = 100_000;
 const thisWeekRevenue = thisWeekDoctorRevenue + thisWeekNurseRevenue;
 
 function calculateRevenueSplit(doctorRevenue: number, nurseRevenue: number) {
@@ -64,13 +69,14 @@ const priorWeekSplit = calculateRevenueSplit(priorWeekDoctorRevenue, priorWeekNu
 const oct5WeekSplit = calculateRevenueSplit(oct5WeekDoctorRevenue, oct5WeekNurseRevenue);
 const oct12WeekSplit = calculateRevenueSplit(oct12WeekDoctorRevenue, oct12WeekNurseRevenue);
 const oct19WeekSplit = calculateRevenueSplit(oct19WeekDoctorRevenue, oct19WeekNurseRevenue);
+const founderWeekSplit = calculateRevenueSplit(founderWeekDoctorRevenue, founderWeekNurseRevenue);
 const lastWeekSplit = calculateRevenueSplit(lastWeekDoctorRevenue, lastWeekNurseRevenue);
 const thisWeekSplit = calculateRevenueSplit(thisWeekDoctorRevenue, thisWeekNurseRevenue);
-const revenueBeforeLastWeek = previousRevenue + olderWeekRevenue + priorWeekRevenue + oct5WeekRevenue + oct12WeekRevenue + oct19WeekRevenue;
+const revenueBeforeLastWeek = previousRevenue + olderWeekRevenue + priorWeekRevenue + oct5WeekRevenue + oct12WeekRevenue + oct19WeekRevenue + founderWeekRevenue;
 const totalRevenue = revenueBeforeLastWeek + lastWeekRevenue + thisWeekRevenue;
-const cumulativeProviderEarnings = previousSplit.providerEarnings + olderWeekSplit.providerEarnings + priorWeekSplit.providerEarnings + oct5WeekSplit.providerEarnings + oct12WeekSplit.providerEarnings + oct19WeekSplit.providerEarnings + lastWeekSplit.providerEarnings + thisWeekSplit.providerEarnings;
-const cumulativePlatformShare = previousSplit.platformShare + olderWeekSplit.platformShare + priorWeekSplit.platformShare + oct5WeekSplit.platformShare + oct12WeekSplit.platformShare + oct19WeekSplit.platformShare + lastWeekSplit.platformShare + thisWeekSplit.platformShare;
-const cumulativeMaintenance = previousSplit.maintenance + olderWeekSplit.maintenance + priorWeekSplit.maintenance + oct5WeekSplit.maintenance + oct12WeekSplit.maintenance + oct19WeekSplit.maintenance + lastWeekSplit.maintenance + thisWeekSplit.maintenance;
+const cumulativeProviderEarnings = previousSplit.providerEarnings + olderWeekSplit.providerEarnings + priorWeekSplit.providerEarnings + oct5WeekSplit.providerEarnings + oct12WeekSplit.providerEarnings + oct19WeekSplit.providerEarnings + founderWeekSplit.providerEarnings + lastWeekSplit.providerEarnings + thisWeekSplit.providerEarnings;
+const cumulativePlatformShare = previousSplit.platformShare + olderWeekSplit.platformShare + priorWeekSplit.platformShare + oct5WeekSplit.platformShare + oct12WeekSplit.platformShare + oct19WeekSplit.platformShare + founderWeekSplit.platformShare + lastWeekSplit.platformShare + thisWeekSplit.platformShare;
+const cumulativeMaintenance = previousSplit.maintenance + olderWeekSplit.maintenance + priorWeekSplit.maintenance + oct5WeekSplit.maintenance + oct12WeekSplit.maintenance + oct19WeekSplit.maintenance + founderWeekSplit.maintenance + lastWeekSplit.maintenance + thisWeekSplit.maintenance;
 const financialHistory = [
   { period: "Opening balance", activity: "Existing doctor and home-care revenue", revenue: previousRevenue, split: previousSplit, runningRevenue: previousRevenue },
   { period: "Sep 21–27", activity: "10 doctor consultations · 3 home-care visits", revenue: olderWeekRevenue, split: olderWeekSplit, runningRevenue: previousRevenue + olderWeekRevenue },
@@ -78,8 +84,9 @@ const financialHistory = [
   { period: "Oct 5–11", activity: "5 doctor consultations · 1 home-care visit", revenue: oct5WeekRevenue, split: oct5WeekSplit, runningRevenue: previousRevenue + olderWeekRevenue + priorWeekRevenue + oct5WeekRevenue },
   { period: "Oct 12–18", activity: "25 doctor consultations · 7 home-care visits", revenue: oct12WeekRevenue, split: oct12WeekSplit, runningRevenue: revenueBeforeLastWeek },
   { period: "Oct 19–25", activity: "Doctor consultations · 6 home-care visits", revenue: oct19WeekRevenue, split: oct19WeekSplit, runningRevenue: revenueBeforeLastWeek },
-  { period: "Oct 26–Nov 1", activity: "3 free doctor consultations · 3 home-care visits", revenue: lastWeekRevenue, split: lastWeekSplit, runningRevenue: revenueBeforeLastWeek + lastWeekRevenue },
-  { period: "Nov 2–8", activity: "Doctor consultations · 1 home-care visit", revenue: thisWeekRevenue, split: thisWeekSplit, runningRevenue: totalRevenue },
+  { period: "Oct 26–Nov 1", activity: "3 free doctor consultations · 3 home-care visits", revenue: founderWeekRevenue, split: founderWeekSplit, runningRevenue: revenueBeforeLastWeek },
+  { period: "Nov 2–8", activity: "Doctor consultations · 1 home-care visit", revenue: lastWeekRevenue, split: lastWeekSplit, runningRevenue: revenueBeforeLastWeek + lastWeekRevenue },
+  { period: "Nov 9–15", activity: "125 doctor consultations · 10 home-care visits", revenue: thisWeekRevenue, split: thisWeekSplit, runningRevenue: totalRevenue },
 ];
 
 function Metric({ label, value, icon: Icon, tone = "blue" }: {
@@ -128,11 +135,11 @@ export function TrainingDashboard() {
           <div className="mb-3 flex items-center justify-between gap-3"><h3 className="font-heading text-lg font-semibold text-[#1F2937]">Last week</h3><Badge tone="blue">{formatMoney(lastWeekRevenue)}</Badge></div>
           <div className="grid gap-3 sm:grid-cols-2">
             <article className="rounded-[18px] border border-cyan-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">3 consultations · Founder 50 free care</p>
+              <p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">Revenue recorded last week</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(lastWeekDoctorRevenue)}</p>
             </article>
             <article className="rounded-[18px] border border-emerald-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Home-care visits</p><p className="mt-1 text-xs text-slate-500">3 completed visits</p>
+              <p className="text-sm font-bold text-[#1F2937]">Home-care visit</p><p className="mt-1 text-xs text-slate-500">1 completed visit</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(lastWeekNurseRevenue)}</p>
             </article>
           </div>
@@ -141,11 +148,11 @@ export function TrainingDashboard() {
           <div className="mb-3 flex items-center justify-between gap-3"><h3 className="font-heading text-lg font-semibold text-[#1F2937]">This week</h3><Badge tone="green">{formatMoney(thisWeekRevenue)}</Badge></div>
           <div className="grid gap-3 sm:grid-cols-2">
             <article className="rounded-[18px] border border-cyan-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">Revenue recorded this week</p>
+              <p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">{thisWeekDoctorCount} consultations × {formatMoney(thisWeekDoctorRevenue / thisWeekDoctorCount)}</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(thisWeekDoctorRevenue)}</p>
             </article>
             <article className="rounded-[18px] border border-emerald-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Home-care visit</p><p className="mt-1 text-xs text-slate-500">1 completed visit</p>
+              <p className="text-sm font-bold text-[#1F2937]">Home-care visits</p><p className="mt-1 text-xs text-slate-500">{thisWeekNurseCount} bookings × {formatMoney(thisWeekNurseRevenue / thisWeekNurseCount)}</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(thisWeekNurseRevenue)}</p>
             </article>
           </div>

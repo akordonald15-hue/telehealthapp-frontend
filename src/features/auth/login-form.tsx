@@ -3,16 +3,23 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 
-import { Button } from "@/components/ui/button";
-import { ErrorMessage } from "@/components/ui/error-message";
-import { Field } from "@/components/ui/field";
-import { Input, PasswordInput } from "@/components/ui/input";
+import {
+  AuthButton,
+  AuthCheckbox,
+  AuthDivider,
+  AuthErrorAlert,
+  AuthField,
+  AuthInput,
+  AuthPasswordInput,
+  authButtonStyles,
+} from "@/features/auth/auth-ui";
 import { GoogleAuthButton } from "@/features/auth/google-auth-button";
 import { savePendingVerificationEmail } from "@/features/auth/email-flow-storage";
 import { useLogin } from "@/lib/auth/use-auth";
+import { getFriendlyErrorMessage, isInvalidCredentialsError } from "@/lib/ui/error-copy";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 
 export function LoginForm() {
@@ -21,6 +28,7 @@ export function LoginForm() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
+  const [rememberMe, setRememberMe] = useState(true);
 
   useEffect(() => {
     if (!searchParams.get("password")) {
@@ -41,9 +49,16 @@ export function LoginForm() {
     },
   });
 
+  const [emailValue, passwordValue] = useWatch({ control: form.control, name: ["email", "password"] });
+  const credentialsRejected = isInvalidCredentialsError(login.error);
+  const showCredentialsError =
+    credentialsRejected && login.variables?.email === emailValue && login.variables?.password === passwordValue;
+  const passwordError =
+    form.formState.errors.password?.message ??
+    (showCredentialsError ? getFriendlyErrorMessage(login.error, "auth") : undefined);
+
   return (
     <form
-      className="grid gap-5"
       onSubmit={form.handleSubmit((values) => {
         if (typeof window !== "undefined") {
           window.sessionStorage.setItem("caretekk:last-login-email", values.email);
@@ -51,18 +66,13 @@ export function LoginForm() {
         login.mutate(values);
       })}
     >
-      <GoogleAuthButton mode="login" />
-      <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ash-400">
-        <span className="h-px flex-1 bg-ash-200" />
-        <span>Or continue with email</span>
-        <span className="h-px flex-1 bg-ash-200" />
-      </div>
-      {login.error ? (
-        <div className="grid gap-3">
-          <ErrorMessage error={login.error} context="auth" />
+      {login.error && !credentialsRejected ? (
+        <div className="mb-6 grid gap-3">
+          <AuthErrorAlert error={login.error} context="auth" />
           {login.error instanceof Error && login.error.message.toLowerCase().includes("email not verified") ? (
             <Link
               href="/verify-email"
+              className={authButtonStyles({ variant: "secondary" })}
               onClick={() => {
                 const targetEmail = form.getValues("email");
                 if (targetEmail) {
@@ -70,33 +80,54 @@ export function LoginForm() {
                 }
               }}
             >
-              <Button type="button" variant="secondary" className="w-full">
-                Confirm email
-              </Button>
+              Confirm email
             </Link>
           ) : null}
         </div>
       ) : null}
-      <Field label="Email" error={form.formState.errors.email?.message} required>
-        <Input type="email" autoComplete="email" placeholder="you@example.com" {...form.register("email")} />
-      </Field>
-      <Field label="Password" error={form.formState.errors.password?.message} required>
-        <PasswordInput autoComplete="current-password" placeholder="Enter your password" {...form.register("password")} />
-      </Field>
-      <Button type="submit" disabled={login.isPending}>
-        {login.isPending ? "Signing in..." : "Sign in"}
-      </Button>
-      <div className="flex flex-col items-center gap-2 text-sm text-ash-600 sm:flex-row sm:justify-between">
-        <p>
-          New here?{" "}
-          <Link className="font-semibold text-primary hover:text-primary-strong" href="/register">
-            Create account
-          </Link>
-        </p>
-        <Link className="font-semibold text-primary hover:text-primary-strong" href="/password-reset">
-          Forgot password
+
+      <div className="grid gap-3">
+        <AuthField label="Email" error={form.formState.errors.email?.message} required>
+          <AuthInput type="email" autoComplete="email" placeholder="Input your Email" {...form.register("email")} />
+        </AuthField>
+        <AuthField label="Password" error={passwordError} required>
+          <AuthPasswordInput autoComplete="current-password" placeholder="Input your password" {...form.register("password")} />
+        </AuthField>
+      </div>
+
+      <div className="mt-6 flex min-h-6 items-center justify-between gap-3">
+        <AuthCheckbox label="Remember me" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} />
+        <Link
+          href="/password-reset"
+          className="type-body-md text-grey-500 underline underline-offset-2 transition-colors hover:text-primary-500"
+        >
+          Forgot password?
         </Link>
       </div>
+
+      <AuthButton
+        type="submit"
+        className="mt-6"
+        disabled={login.isPending}
+        inactive={!emailValue || !passwordValue || showCredentialsError}
+      >
+        {login.isPending ? "Signing in..." : "Sign in"}
+      </AuthButton>
+
+      <div className="mt-6">
+        <AuthDivider label="Or login with" />
+      </div>
+
+      <div className="mt-6">
+        <GoogleAuthButton mode="login" variant="plain" />
+      </div>
+
+      <p className="type-body-md mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-grey-500">
+        New here?
+        <Link href="/register" className="text-primary-500 underline underline-offset-2 transition-colors hover:text-primary-600">
+          Create an Account
+        </Link>
+      </p>
     </form>
   );
 }

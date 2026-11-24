@@ -32,8 +32,8 @@ try {
     await dismissInstall(page);
     await page.screenshot({ path: `${output}/after-referral-${width}.png`, fullPage: true });
     await page.goto(`${base}/login`);
-    await page.getByPlaceholder('you@example.com').fill('qa@example.test');
-    await page.getByPlaceholder('Enter your password').fill('Synthetic-QA-password-123!');
+    await page.getByPlaceholder('Input your Email').fill('qa@example.test');
+    await page.getByPlaceholder('Input your password').fill('Synthetic-QA-password-123!');
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 30000 });
     for (const [name, path] of [['homecare-booking', '/home-care/book'], ['homecare-requests', '/home-care/requests'], ['homecare-detail', '/home-care/requests/901']]) {

@@ -39,6 +39,12 @@ const CONTEXT_DEFAULTS: Record<ErrorContext, string> = {
   nurse: "We couldn't load your nurse workspace right now.",
 };
 
+const INVALID_CREDENTIALS_PATTERN = /no active account found with the given credentials|invalid credentials/i;
+
+export function isInvalidCredentialsError(error: unknown) {
+  return error instanceof Error && INVALID_CREDENTIALS_PATTERN.test(error.message);
+}
+
 const MESSAGE_OVERRIDES: Array<{ pattern: RegExp; replacement: string }> = [
   { pattern: /email not verified/i, replacement: "Please verify your email before signing in." },
   {
@@ -53,7 +59,7 @@ const MESSAGE_OVERRIDES: Array<{ pattern: RegExp; replacement: string }> = [
     pattern: /invalid or expired token/i,
     replacement: "That link or code is no longer valid. Request a new one and try again.",
   },
-  { pattern: /no active account found with the given credentials|invalid credentials/i, replacement: "Your email or password is incorrect." },
+  { pattern: INVALID_CREDENTIALS_PATTERN, replacement: "Your email or password is incorrect." },
   { pattern: /service_unavailable|bad gateway|gateway timeout/i, replacement: "We couldn't reach the sign-in service right now. Please try again in a moment." },
   { pattern: /failed to fetch/i, replacement: "We couldn't connect right now. Please try again in a moment." },
   { pattern: /network ?error/i, replacement: "We couldn't connect right now. Please check your connection and try again." },

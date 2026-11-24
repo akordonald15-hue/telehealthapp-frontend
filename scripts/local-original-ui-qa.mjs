@@ -14,8 +14,8 @@ try {
   for (const width of [390, 1440]) {
     const page = await browser.newPage({ viewport: { width, height: 1100 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
     await page.goto(`${base}/login`);
-    await page.getByPlaceholder('you@example.com').fill(email);
-    await page.getByPlaceholder('Enter your password').fill('Local-QA-Only-2026!');
+    await page.getByPlaceholder('Input your Email').fill(email);
+    await page.getByPlaceholder('Input your password').fill('Local-QA-Only-2026!');
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
     await expect(page).toHaveURL(/\/dashboard/);
     const started = page.waitForResponse(r => r.url().endsWith('/api/triage/start') && r.request().method() === 'POST');
