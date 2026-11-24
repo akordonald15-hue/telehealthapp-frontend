@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Check, CircleX } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, useSyncExternalStore } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { AuthPhotoPanel } from "@/components/layout/auth-photo-panel";
@@ -31,32 +31,41 @@ import {
 
 const RESET_EMAIL_STORAGE_KEY = "caretekk-password-reset-email";
 const RESET_TOKEN_STORAGE_KEY = "caretekk-password-reset-token";
-const PANEL_IMAGES = ["/img/Dr michael Idam.jpg", "/img/Dr effiong Okon.jpg"] as const;
 
 const backStyles =
   "type-body-lg! mx-auto flex h-10 w-fit items-center rounded-lg px-4 text-primary-500 underline-offset-2 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60";
 
 type ResetStep = "email" | "otp" | "password" | "success";
 
+// Read through useSyncExternalStore so hydration renders the email step before restoring progress.
+function subscribeToResetStorage() {
+  return () => undefined;
+}
+
+function readStoredEmail() {
+  return window.sessionStorage.getItem(RESET_EMAIL_STORAGE_KEY) || "";
+}
+
+function readStoredToken() {
+  return window.sessionStorage.getItem(RESET_TOKEN_STORAGE_KEY) || "";
+}
+
+function readNothingOnServer() {
+  return "";
+}
+
 export function PasswordResetForm() {
   const router = useRouter();
-  const [storedResetState] = useState(() => {
-    if (typeof window === "undefined") {
-      return { email: "", resetToken: "" };
-    }
-    return {
-      email: window.sessionStorage.getItem(RESET_EMAIL_STORAGE_KEY) || "",
-      resetToken: window.sessionStorage.getItem(RESET_TOKEN_STORAGE_KEY) || "",
-    };
-  });
-  const [step, setStep] = useState<ResetStep>(
-    storedResetState.resetToken ? "password" : storedResetState.email ? "otp" : "email",
-  );
-  const [email, setEmail] = useState(storedResetState.email);
+  const storedEmail = useSyncExternalStore(subscribeToResetStorage, readStoredEmail, readNothingOnServer);
+  const storedToken = useSyncExternalStore(subscribeToResetStorage, readStoredToken, readNothingOnServer);
+  const [chosenStep, setStep] = useState<ResetStep | null>(null);
+  const step = chosenStep ?? (storedToken ? "password" : storedEmail ? "otp" : "email");
+  const [chosenEmail, setEmail] = useState<string | null>(null);
+  const email = chosenEmail ?? storedEmail;
 
   const requestForm = useForm<EmailInput>({
     resolver: zodResolver(emailSchema),
-    defaultValues: { email: storedResetState.email },
+    defaultValues: { email: "" },
   });
   const otpForm = useForm<OtpCodeInput>({
     resolver: zodResolver(otpCodeSchema),
@@ -64,8 +73,20 @@ export function PasswordResetForm() {
   });
   const passwordForm = useForm<PasswordResetConfirmInput>({
     resolver: zodResolver(passwordResetConfirmSchema),
-    defaultValues: { reset_token: storedResetState.resetToken, new_password: "", confirm_password: "" },
+    defaultValues: { reset_token: "", new_password: "", confirm_password: "" },
   });
+
+  useEffect(() => {
+    if (storedEmail) {
+      requestForm.setValue("email", storedEmail);
+    }
+  }, [storedEmail, requestForm]);
+
+  useEffect(() => {
+    if (storedToken) {
+      passwordForm.setValue("reset_token", storedToken);
+    }
+  }, [storedToken, passwordForm]);
 
   const requestReset = useMutation({
     mutationFn: authApi.passwordResetRequest,
@@ -130,7 +151,7 @@ export function PasswordResetForm() {
     <>
       <AuthSplitLayout
         panelSide="right"
-        panel={<AuthPhotoPanel images={PANEL_IMAGES} active={step === "email" ? 0 : 1} />}
+        panel={<AuthPhotoPanel />}
         inert={step === "success"}
       >
         <AuthCard align="start" title="Forgot Password" subtitle={subtitle}>
