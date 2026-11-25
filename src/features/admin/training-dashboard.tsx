@@ -43,13 +43,13 @@ const oct19WeekRevenue = oct19WeekDoctorRevenue + oct19WeekNurseRevenue;
 const founderWeekDoctorRevenue = 0;
 const founderWeekNurseRevenue = 30_000;
 const founderWeekRevenue = founderWeekDoctorRevenue + founderWeekNurseRevenue;
-const lastWeekDoctorRevenue = 10_000;
-const lastWeekNurseRevenue = 5_000;
+const nov2WeekRevenue = 15_000;
+const nov9WeekRevenue = 350_000;
+const lastWeekDoctorRevenue = 0;
+const lastWeekNurseRevenue = 50_000;
 const lastWeekRevenue = lastWeekDoctorRevenue + lastWeekNurseRevenue;
-const thisWeekDoctorCount = 125;
-const thisWeekDoctorRevenue = 250_000;
-const thisWeekNurseCount = 10;
-const thisWeekNurseRevenue = 100_000;
+const thisWeekDoctorRevenue = 0;
+const thisWeekNurseRevenue = 70_000;
 const thisWeekRevenue = thisWeekDoctorRevenue + thisWeekNurseRevenue;
 
 function calculateRevenueSplit(doctorRevenue: number, nurseRevenue: number) {
@@ -70,23 +70,27 @@ const oct5WeekSplit = calculateRevenueSplit(oct5WeekDoctorRevenue, oct5WeekNurse
 const oct12WeekSplit = calculateRevenueSplit(oct12WeekDoctorRevenue, oct12WeekNurseRevenue);
 const oct19WeekSplit = calculateRevenueSplit(oct19WeekDoctorRevenue, oct19WeekNurseRevenue);
 const founderWeekSplit = calculateRevenueSplit(founderWeekDoctorRevenue, founderWeekNurseRevenue);
+const nov2WeekSplit = calculateRevenueSplit(10_000, 5_000);
+const nov9WeekSplit = calculateRevenueSplit(250_000, 100_000);
 const lastWeekSplit = calculateRevenueSplit(lastWeekDoctorRevenue, lastWeekNurseRevenue);
 const thisWeekSplit = calculateRevenueSplit(thisWeekDoctorRevenue, thisWeekNurseRevenue);
-const revenueBeforeLastWeek = previousRevenue + olderWeekRevenue + priorWeekRevenue + oct5WeekRevenue + oct12WeekRevenue + oct19WeekRevenue + founderWeekRevenue;
+const revenueBeforeLastWeek = previousRevenue + olderWeekRevenue + priorWeekRevenue + oct5WeekRevenue + oct12WeekRevenue + oct19WeekRevenue + founderWeekRevenue + nov2WeekRevenue + nov9WeekRevenue;
 const totalRevenue = revenueBeforeLastWeek + lastWeekRevenue + thisWeekRevenue;
-const cumulativeProviderEarnings = previousSplit.providerEarnings + olderWeekSplit.providerEarnings + priorWeekSplit.providerEarnings + oct5WeekSplit.providerEarnings + oct12WeekSplit.providerEarnings + oct19WeekSplit.providerEarnings + founderWeekSplit.providerEarnings + lastWeekSplit.providerEarnings + thisWeekSplit.providerEarnings;
-const cumulativePlatformShare = previousSplit.platformShare + olderWeekSplit.platformShare + priorWeekSplit.platformShare + oct5WeekSplit.platformShare + oct12WeekSplit.platformShare + oct19WeekSplit.platformShare + founderWeekSplit.platformShare + lastWeekSplit.platformShare + thisWeekSplit.platformShare;
-const cumulativeMaintenance = previousSplit.maintenance + olderWeekSplit.maintenance + priorWeekSplit.maintenance + oct5WeekSplit.maintenance + oct12WeekSplit.maintenance + oct19WeekSplit.maintenance + founderWeekSplit.maintenance + lastWeekSplit.maintenance + thisWeekSplit.maintenance;
+const cumulativeProviderEarnings = previousSplit.providerEarnings + olderWeekSplit.providerEarnings + priorWeekSplit.providerEarnings + oct5WeekSplit.providerEarnings + oct12WeekSplit.providerEarnings + oct19WeekSplit.providerEarnings + founderWeekSplit.providerEarnings + nov2WeekSplit.providerEarnings + nov9WeekSplit.providerEarnings + lastWeekSplit.providerEarnings + thisWeekSplit.providerEarnings;
+const cumulativePlatformShare = previousSplit.platformShare + olderWeekSplit.platformShare + priorWeekSplit.platformShare + oct5WeekSplit.platformShare + oct12WeekSplit.platformShare + oct19WeekSplit.platformShare + founderWeekSplit.platformShare + nov2WeekSplit.platformShare + nov9WeekSplit.platformShare + lastWeekSplit.platformShare + thisWeekSplit.platformShare;
+const cumulativeMaintenance = previousSplit.maintenance + olderWeekSplit.maintenance + priorWeekSplit.maintenance + oct5WeekSplit.maintenance + oct12WeekSplit.maintenance + oct19WeekSplit.maintenance + founderWeekSplit.maintenance + nov2WeekSplit.maintenance + nov9WeekSplit.maintenance + lastWeekSplit.maintenance + thisWeekSplit.maintenance;
 const financialHistory = [
   { period: "Opening balance", activity: "Existing doctor and home-care revenue", revenue: previousRevenue, split: previousSplit, runningRevenue: previousRevenue },
   { period: "Sep 21–27", activity: "10 doctor consultations · 3 home-care visits", revenue: olderWeekRevenue, split: olderWeekSplit, runningRevenue: previousRevenue + olderWeekRevenue },
   { period: "Sep 28–Oct 4", activity: "4 doctor consultations · 1 home-care visit", revenue: priorWeekRevenue, split: priorWeekSplit, runningRevenue: previousRevenue + olderWeekRevenue + priorWeekRevenue },
   { period: "Oct 5–11", activity: "5 doctor consultations · 1 home-care visit", revenue: oct5WeekRevenue, split: oct5WeekSplit, runningRevenue: previousRevenue + olderWeekRevenue + priorWeekRevenue + oct5WeekRevenue },
-  { period: "Oct 12–18", activity: "25 doctor consultations · 7 home-care visits", revenue: oct12WeekRevenue, split: oct12WeekSplit, runningRevenue: revenueBeforeLastWeek },
-  { period: "Oct 19–25", activity: "Doctor consultations · 6 home-care visits", revenue: oct19WeekRevenue, split: oct19WeekSplit, runningRevenue: revenueBeforeLastWeek },
-  { period: "Oct 26–Nov 1", activity: "3 free doctor consultations · 3 home-care visits", revenue: founderWeekRevenue, split: founderWeekSplit, runningRevenue: revenueBeforeLastWeek },
-  { period: "Nov 2–8", activity: "Doctor consultations · 1 home-care visit", revenue: lastWeekRevenue, split: lastWeekSplit, runningRevenue: revenueBeforeLastWeek + lastWeekRevenue },
-  { period: "Nov 9–15", activity: "125 doctor consultations · 10 home-care visits", revenue: thisWeekRevenue, split: thisWeekSplit, runningRevenue: totalRevenue },
+  { period: "Oct 12–18", activity: "25 doctor consultations · 7 home-care visits", revenue: oct12WeekRevenue, split: oct12WeekSplit, runningRevenue: revenueBeforeLastWeek - oct19WeekRevenue - founderWeekRevenue - nov2WeekRevenue - nov9WeekRevenue },
+  { period: "Oct 19–25", activity: "Doctor consultations · 6 home-care visits", revenue: oct19WeekRevenue, split: oct19WeekSplit, runningRevenue: revenueBeforeLastWeek - founderWeekRevenue - nov2WeekRevenue - nov9WeekRevenue },
+  { period: "Oct 26–Nov 1", activity: "3 free doctor consultations · 3 home-care visits", revenue: founderWeekRevenue, split: founderWeekSplit, runningRevenue: revenueBeforeLastWeek - nov2WeekRevenue - nov9WeekRevenue },
+  { period: "Nov 2–8", activity: "Doctor consultations · 1 home-care visit", revenue: nov2WeekRevenue, split: nov2WeekSplit, runningRevenue: revenueBeforeLastWeek - nov9WeekRevenue },
+  { period: "Nov 9–15", activity: "125 doctor consultations · 10 home-care visits", revenue: nov9WeekRevenue, split: nov9WeekSplit, runningRevenue: revenueBeforeLastWeek },
+  { period: "Nov 16–22", activity: "Free doctor campaign · Nursing home care", revenue: lastWeekRevenue, split: lastWeekSplit, runningRevenue: revenueBeforeLastWeek + lastWeekRevenue },
+  { period: "Nov 23–29", activity: "Free doctor campaign · Nursing home care", revenue: thisWeekRevenue, split: thisWeekSplit, runningRevenue: totalRevenue },
 ];
 
 function Metric({ label, value, icon: Icon, tone = "blue" }: {
@@ -119,7 +123,8 @@ export function TrainingDashboard() {
     action={<Badge tone="rose">Admin only</Badge>}
   >
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <Metric label="Users" value={users.length} icon={Users} />
+      <Metric label="Registered users" value={340} icon={Users} />
+      <Metric label="Patients" value={300} icon={Users} />
       <Metric label="Doctors" value={24} icon={Stethoscope} tone="cyan" />
       <Metric label="Nurses" value={16} icon={Home} tone="green" />
       <Metric label="Platform revenue" value={formatMoney(totalRevenue)} icon={Banknote} tone="green" />
@@ -135,11 +140,11 @@ export function TrainingDashboard() {
           <div className="mb-3 flex items-center justify-between gap-3"><h3 className="font-heading text-lg font-semibold text-[#1F2937]">Last week</h3><Badge tone="blue">{formatMoney(lastWeekRevenue)}</Badge></div>
           <div className="grid gap-3 sm:grid-cols-2">
             <article className="rounded-[18px] border border-cyan-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">Revenue recorded last week</p>
+              <p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">Free campaign consultations</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(lastWeekDoctorRevenue)}</p>
             </article>
             <article className="rounded-[18px] border border-emerald-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Home-care visit</p><p className="mt-1 text-xs text-slate-500">1 completed visit</p>
+              <p className="text-sm font-bold text-[#1F2937]">Home-care visit</p><p className="mt-1 text-xs text-slate-500">Home-care revenue</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(lastWeekNurseRevenue)}</p>
             </article>
           </div>
@@ -148,11 +153,11 @@ export function TrainingDashboard() {
           <div className="mb-3 flex items-center justify-between gap-3"><h3 className="font-heading text-lg font-semibold text-[#1F2937]">This week</h3><Badge tone="green">{formatMoney(thisWeekRevenue)}</Badge></div>
           <div className="grid gap-3 sm:grid-cols-2">
             <article className="rounded-[18px] border border-cyan-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">{thisWeekDoctorCount} consultations × {formatMoney(thisWeekDoctorRevenue / thisWeekDoctorCount)}</p>
+              <p className="text-sm font-bold text-[#1F2937]">Doctor consultations</p><p className="mt-1 text-xs text-slate-500">Free campaign consultations</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(thisWeekDoctorRevenue)}</p>
             </article>
             <article className="rounded-[18px] border border-emerald-100 bg-white p-4">
-              <p className="text-sm font-bold text-[#1F2937]">Home-care visits</p><p className="mt-1 text-xs text-slate-500">{thisWeekNurseCount} bookings × {formatMoney(thisWeekNurseRevenue / thisWeekNurseCount)}</p>
+              <p className="text-sm font-bold text-[#1F2937]">Home-care visits</p><p className="mt-1 text-xs text-slate-500">Home-care revenue</p>
               <p className="mt-4 font-heading text-2xl font-semibold text-[#1F2937]">{formatMoney(thisWeekNurseRevenue)}</p>
             </article>
           </div>
@@ -188,7 +193,7 @@ export function TrainingDashboard() {
       <Panel title="User management">
         <div className="mb-3 flex flex-wrap gap-2"><label className="text-sm font-semibold text-slate-500">Role <select aria-label="Filter users by role" value={filter} onChange={(event) => { setFilter(event.target.value); setPage(1); }} className="ml-2 min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-slate-700">{["All roles", "Patient", "Doctor", "Nurse"].map((role) => <option key={role}>{role}</option>)}</select></label><input aria-label="Search accounts" placeholder="Search email" value={search} onChange={(event) => { setSearch(event.target.value.toLowerCase()); setPage(1); }} className="min-h-10 rounded-[12px] border border-slate-200 bg-white px-3 text-sm text-slate-700" /></div>
         <div className="grid gap-3">{pagedUsers.map((item) => <article key={item.email} className="rounded-[20px] border border-slate-200 bg-slate-50 p-4"><p className="break-all text-sm font-bold text-[#1F2937]">{item.email}</p><div className="mt-2 flex gap-2"><Badge tone="blue">{item.role}</Badge><Badge tone={item.status === "Pending" ? "amber" : "green"}>{item.status}</Badge></div></article>)}</div>
-        <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500"><span>{visibleUsers.length} of {users.length} users · Page {page} of {pageCount}</span><div className="flex gap-2"><button type="button" disabled={page === 1} onClick={() => setPage(page - 1)} className="rounded-lg border border-slate-200 px-3 py-2 disabled:opacity-40">Previous</button><button type="button" disabled={page === pageCount} onClick={() => setPage(page + 1)} className="rounded-lg border border-slate-200 px-3 py-2 disabled:opacity-40">Next</button></div></div>
+        <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500"><span>{visibleUsers.length} of {users.length} listed users · Page {page} of {pageCount}</span><div className="flex gap-2"><button type="button" disabled={page === 1} onClick={() => setPage(page - 1)} className="rounded-lg border border-slate-200 px-3 py-2 disabled:opacity-40">Previous</button><button type="button" disabled={page === pageCount} onClick={() => setPage(page + 1)} className="rounded-lg border border-slate-200 px-3 py-2 disabled:opacity-40">Next</button></div></div>
       </Panel>
       <Panel title="Financial management">
         <div className="grid gap-3 sm:grid-cols-2"><Metric label="Cumulative provider earnings" value={formatMoney(cumulativeProviderEarnings)} icon={Activity} tone="amber" /><Metric label="Cumulative platform share" value={formatMoney(cumulativePlatformShare)} icon={Banknote} tone="green" /></div>
