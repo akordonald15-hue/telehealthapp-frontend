@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { getLgasForState, STATE_NAMES } from "./nigeria-locations";
+
 export const AGE_RANGES = [
   "Under 18",
   "18-24",
@@ -10,13 +12,15 @@ export const AGE_RANGES = [
   "65+",
 ] as const;
 
-export const GENDER_OPTIONS = [
+export const GENDER_VALUES = ["female", "male", "prefer_not_to_say"] as const;
+
+export const GENDER_OPTIONS: ReadonlyArray<{ value: (typeof GENDER_VALUES)[number]; label: string }> = [
   { value: "female", label: "Female" },
   { value: "male", label: "Male" },
   { value: "prefer_not_to_say", label: "Prefer not to say" },
-] as const;
+];
 
-export function getFullNameValidation(value: string) {
+function getFullNameValidation(value: string) {
   const trimmed = value.trim();
   const words = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
   const wordsAreLettersOnly = words.every((word) => /^[\p{L}]+$/u.test(word));
@@ -32,41 +36,56 @@ export function hasValidFullName(value: string) {
   return getFullNameValidation(value).valid;
 }
 
-export function isValidNigerianPhone(value: string) {
-  const normalized = value.replace(/[\s-]/g, "");
-  return /^(0[789][01]\d{8}|\+?234[789][01]\d{8})$/.test(normalized);
-}
-
-export const onboardingSchema = z.object({
-  // Step 1 - Basic information
-  full_name: z
-    .string()
-    .trim()
-    .min(1, "Enter your full name.")
-    .max(120)
-    .refine(hasValidFullName, "Enter your first and last name."),
-  phone: z
-    .string()
-    .trim()
-    .min(1, "Enter your phone number.")
-    .refine(isValidNigerianPhone, "Enter a valid 11-digit Nigerian phone number."),
-
-  // Step 2 - Personal information
-  age_range: z.enum(AGE_RANGES, { message: "Select your age range." }),
-  gender: z.enum(["female", "male", "prefer_not_to_say"], { message: "Select your gender." }),
-
-  // Step 3 - Location
-  state: z.string().min(1, "Select your state."),
-  lga: z.string().min(1, "Select your local government area."),
-});
+export const onboardingSchema = z
+  .object({
+    full_name: z
+      .string()
+      .trim()
+      .min(1, "Enter your full name.")
+      .max(120)
+      .refine(hasValidFullName, "Enter your first and last name."),
+    gender: z.enum(GENDER_VALUES, { message: "Select your gender." }),
+    age_range: z.enum(AGE_RANGES, { message: "Select your age range." }),
+    state: z.string().trim().min(1, "Select your state."),
+    lga: z.string().trim(),
+  })
+  .superRefine((values, ctx) => {
+    if (!values.state) {
+      return;
+    }
+    if (!STATE_NAMES.includes(values.state)) {
+      ctx.addIssue({ code: "custom", path: ["state"], message: "Select a valid state." });
+      return;
+    }
+    if (!values.lga) {
+      ctx.addIssue({ code: "custom", path: ["lga"], message: "Select your local government." });
+      return;
+    }
+    if (!getLgasForState(values.state).includes(values.lga)) {
+      ctx.addIssue({ code: "custom", path: ["lga"], message: "Select a local government in your state." });
+    }
+  });
 
 export type OnboardingValues = z.infer<typeof onboardingSchema>;
+export type OnboardingField = keyof OnboardingValues;
+type GenderValue = (typeof GENDER_VALUES)[number];
+type AgeRange = (typeof AGE_RANGES)[number];
 
-/** Field groups per step, used to trigger step-scoped validation before advancing. */
-export const STEP_FIELDS: (keyof OnboardingValues)[][] = [
-  ["full_name", "phone"],
-  ["age_range", "gender"],
-  ["state", "lga"],
-];
+export const STEP_ONE_FIELDS: OnboardingField[] = ["full_name", "gender", "age_range"];
+export const STEP_TWO_FIELDS: OnboardingField[] = ["state", "lga"];
 
-export const STEP_LABELS = ["Basic Information", "Personal Information", "Location"] as const;
+export function isGenderValue(value: string): value is GenderValue {
+  return (GENDER_VALUES as readonly string[]).includes(value);
+}
+
+export function isAgeRange(value: string): value is AgeRange {
+  return (AGE_RANGES as readonly string[]).includes(value);
+}
+
+export function isStateName(value: string) {
+  return STATE_NAMES.includes(value);
+}
+
+export function isLgaForState(state: string, lga: string) {
+  return isStateName(state) && getLgasForState(state).includes(lga);
+}
