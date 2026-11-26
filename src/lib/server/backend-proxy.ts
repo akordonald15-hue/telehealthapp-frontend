@@ -8,12 +8,16 @@ function normalizeBackendApiBaseUrl(value: string) {
   return trimmed.endsWith("/api/v1") ? trimmed : `${trimmed}/api/v1`;
 }
 
-const backendApiBaseUrl = normalizeBackendApiBaseUrl(
-  process.env.BACKEND_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "",
-);
+function getBackendApiBaseUrl() {
+  const baseUrl = normalizeBackendApiBaseUrl(
+    process.env.BACKEND_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "",
+  );
 
-if (!backendApiBaseUrl) {
-  throw new Error("A backend API base URL is required via BACKEND_API_BASE_URL or NEXT_PUBLIC_API_BASE_URL.");
+  if (!baseUrl) {
+    throw new Error("A backend API base URL is required via BACKEND_API_BASE_URL or NEXT_PUBLIC_API_BASE_URL.");
+  }
+
+  return baseUrl;
 }
 
 type RouteParams = Promise<{ path?: string[] }>;
@@ -41,7 +45,7 @@ async function getRequestBody(request: NextRequest, headers: Headers) {
 }
 
 export async function forwardBackendRequest(request: NextRequest, backendPath: string) {
-  const targetUrl = new URL(`${backendApiBaseUrl}${backendPath}${request.nextUrl.search}`);
+  const targetUrl = new URL(`${getBackendApiBaseUrl()}${backendPath}${request.nextUrl.search}`);
   const headers = new Headers(request.headers);
   const outgoingHost = targetUrl.host;
   const outgoingCookieExists = headers.has("cookie") && Boolean(headers.get("cookie")?.trim());

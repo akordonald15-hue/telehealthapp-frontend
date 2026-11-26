@@ -15,12 +15,16 @@ export class ApiError extends Error {
 }
 
 const configuredApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+const authMockEnabled =
+  process.env.NODE_ENV !== "production" &&
+  (process.env.NEXT_PUBLIC_AUTH_MOCK === "1" ||
+    process.env.NEXT_PUBLIC_AUTH_MOCK?.toLowerCase() === "true");
 
-if (!configuredApiBaseUrl) {
+if (!configuredApiBaseUrl && !authMockEnabled) {
   throw new Error("NEXT_PUBLIC_API_BASE_URL is required.");
 }
 
-export const API_BASE_URL = configuredApiBaseUrl.replace(/\/$/, "");
+export const API_BASE_URL = (configuredApiBaseUrl ?? "http://127.0.0.1:8000").replace(/\/$/, "");
 let authRedirectInFlight = false;
 
 type RequestOptions = Omit<RequestInit, "body"> & {
