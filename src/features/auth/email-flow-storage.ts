@@ -5,7 +5,12 @@ function getSessionStorage() {
   if (typeof window === "undefined") {
     return null;
   }
-  return window.sessionStorage;
+  try {
+    return window.sessionStorage;
+  } catch {
+    // Private mode or blocked storage: the journey still works, just without persistence.
+    return null;
+  }
 }
 
 export function savePendingVerificationEmail(email: string) {

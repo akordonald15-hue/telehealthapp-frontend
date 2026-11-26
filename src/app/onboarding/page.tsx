@@ -1,15 +1,24 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-
+import { RequireAuth } from "@/components/layout/require-auth";
 import { OnboardingFlow } from "@/features/onboarding/onboarding-flow";
+import { OnboardingPreview } from "@/features/onboarding/onboarding-preview";
 
-export default function OnboardingPage() {
-  const router = useRouter();
+type OnboardingPageProps = {
+  searchParams: Promise<{ preview?: string | string[] }>;
+};
+
+export default async function OnboardingPage({ searchParams }: OnboardingPageProps) {
+  const { preview } = await searchParams;
+
+  // QA-only visual surface: no session, no API calls. Keep it outside the gate
+  // so the Figma states can be reviewed on a clean machine. Not exposed in production.
+  if (preview && process.env.NODE_ENV !== "production") {
+    const previewKey = (Array.isArray(preview) ? preview[0] : preview) || "welcome-empty";
+    return <OnboardingPreview key={previewKey} initialPreview={preview} />;
+  }
 
   return (
-    <main className="relative min-h-[100dvh] bg-[radial-gradient(circle_at_top_left,_rgba(124,164,215,0.18),_transparent_28%),linear-gradient(180deg,#F8FBFF_0%,#F4F7FB_42%,#FFFFFF_100%)]">
-      <OnboardingFlow onComplete={() => router.replace("/dashboard")} />
-    </main>
+    <RequireAuth>
+      <OnboardingFlow />
+    </RequireAuth>
   );
 }

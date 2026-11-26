@@ -1,11 +1,14 @@
 "use client";
 
 import { Check } from "lucide-react";
-import type { InputHTMLAttributes, ReactNode } from "react";
+import type { InputHTMLAttributes, ReactNode, Ref } from "react";
 
 import { cn } from "@/lib/utils";
 
-type ChoiceProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & { label?: ReactNode };
+type ChoiceProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
+  label?: ReactNode;
+  ref?: Ref<HTMLInputElement>;
+};
 
 const labelStyles =
   "inline-flex cursor-pointer items-center gap-3 font-inter-tight text-base leading-6 text-black-500 has-[:disabled]:cursor-not-allowed has-[:disabled]:text-grey-400";
@@ -17,7 +20,7 @@ export function Checkbox({ label, className, ...props }: ChoiceProps) {
       <span className="relative inline-flex size-6 shrink-0">
         <input
           type="checkbox"
-          className="peer size-6 cursor-pointer appearance-none rounded-[6px] border-[1.5px] border-grey-400 bg-white transition hover:border-primary-500 hover:bg-primary-50 checked:border-primary-500 checked:bg-primary-500 checked:hover:bg-primary-600 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus disabled:cursor-not-allowed disabled:border-grey-200 disabled:bg-white"
+          className="peer size-6 cursor-pointer appearance-none rounded-[6px] border-[1.5px] border-grey-400 bg-white transition hover:border-primary-500 hover:bg-primary-50 checked:border-primary-500 checked:bg-primary-500 checked:hover:bg-primary-600 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus disabled:cursor-not-allowed disabled:border-grey-200 disabled:bg-white aria-[invalid=true]:border-danger-500 aria-[invalid=true]:bg-danger-50"
           {...props}
         />
         <Check

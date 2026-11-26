@@ -1,468 +1,372 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useWatch } from "react-hook-form";
 
-import { Button } from "@/components/ui/button";
-import { ErrorMessage } from "@/components/ui/error-message";
-import { ModalSheet } from "@/components/ui/modal-sheet";
-import { StepProgress } from "@/components/ui/step-progress";
-import { ApiError } from "@/lib/api/client";
+import { OnboardingScreen } from "@/components/layout/onboarding-screen";
+import { ApiError, extractErrorMessage } from "@/lib/api/client";
 import { authApi, profilesApi } from "@/lib/api/endpoints";
-import { authKeys, useCurrentUser } from "@/lib/auth/use-auth";
-import type { PatientProfile } from "@/lib/types/backend";
-import type { User } from "@/lib/types/backend";
-import { normalizeNigerianPhoneInput } from "@/lib/validation/phone";
+import { authKeys, readStoredAuthUser, useCurrentUser } from "@/lib/auth/use-auth";
+import type { BackendErrorPayload, PatientProfile, User } from "@/lib/types/backend";
 
-import { StepBasicInfo } from "./steps/step-basic-info";
-import { StepLocation } from "./steps/step-location";
-import { StepPersonal } from "./steps/step-personal";
+import { OnboardingFooter } from "./onboarding-footer";
 import {
-  getFullNameValidation,
-  isValidNigerianPhone,
-  onboardingSchema,
-  STEP_FIELDS,
-  STEP_LABELS,
+  hasValidFullName,
+  isAgeRange,
+  isGenderValue,
+  isLgaForState,
+  isStateName,
+  STEP_ONE_FIELDS,
+  STEP_TWO_FIELDS,
+  type OnboardingField,
   type OnboardingValues,
 } from "./onboarding-schema";
+import { StepBasicInfo } from "./steps/step-basic-info";
+import { StepWelcome, type StepWelcomeValues } from "./steps/step-welcome";
+import { useOnboardingForm, type OnboardingInitialValues } from "./use-onboarding-form";
 
-const TOTAL_STEPS = STEP_FIELDS.length;
-const FIELD_STEP_INDEX: Partial<Record<keyof OnboardingValues, number>> = {
-  full_name: 0,
-  phone: 0,
-  age_range: 1,
+type OnboardingFlowProps = {
+  onSubmit?: (values: OnboardingValues) => Promise<void> | void;
+};
+
+type StepNumber = 1 | 2;
+
+const WELCOME_FIELD_MAP: Record<keyof StepWelcomeValues, OnboardingField> = {
+  fullName: "full_name",
+  gender: "gender",
+  ageRange: "age_range",
+};
+
+const FIELD_IDS: Record<OnboardingField, string> = {
+  full_name: "onboarding-full-name",
+  gender: "onboarding-gender",
+  age_range: "onboarding-age-range",
+  state: "onboarding-state",
+  lga: "onboarding-lga",
+};
+
+const FIELD_STEP: Record<OnboardingField, StepNumber> = {
+  full_name: 1,
   gender: 1,
+  age_range: 1,
   state: 2,
   lga: 2,
 };
 
-const emptyValues: OnboardingValues = {
-  full_name: "",
-  phone: "",
-  age_range: "" as OnboardingValues["age_range"],
-  gender: "" as OnboardingValues["gender"],
-  state: "",
-  lga: "",
+const SERVER_FIELD_MAP: Record<string, OnboardingField> = {
+  full_name: "full_name",
+  fullName: "full_name",
+  gender: "gender",
+  age_range: "age_range",
+  ageRange: "age_range",
+  state: "state",
+  lga: "lga",
 };
 
-const STORED_AUTH_USER_KEY = "caretekk:auth-user";
-
-function getStoredAuthUser(): Partial<User> {
-  if (typeof window === "undefined") {
-    return {};
-  }
-  try {
-    return JSON.parse(window.sessionStorage.getItem(STORED_AUTH_USER_KEY) || "{}") as Partial<User>;
-  } catch {
-    return {};
-  }
-}
-
-function payloadMessage(value: unknown) {
+function toMessage(value: unknown): string {
   if (Array.isArray(value)) {
-    return value.filter((item): item is string => typeof item === "string").join(" ");
+    return value.map((item) => toMessage(item)).filter(Boolean).join(" ");
   }
   if (typeof value === "string") {
     return value;
   }
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return toMessage(record.detail ?? record.message ?? record.error ?? "");
+  }
   return "";
 }
 
-function firstMessage(messages: string[]) {
-  return messages.find(Boolean) || "Check this field and try again.";
+function extractFieldErrors(payload: BackendErrorPayload | null): Partial<Record<OnboardingField, string>> {
+  if (!payload) {
+    return {};
+  }
+
+  const sources: Record<string, unknown>[] = [];
+  if (payload.errors && typeof payload.errors === "object" && !Array.isArray(payload.errors)) {
+    sources.push(payload.errors as Record<string, unknown>);
+  }
+  if (payload.message && typeof payload.message === "object" && !Array.isArray(payload.message)) {
+    sources.push(payload.message as Record<string, unknown>);
+  }
+  sources.push(payload as unknown as Record<string, unknown>);
+
+  const fieldErrors: Partial<Record<OnboardingField, string>> = {};
+  for (const source of sources) {
+    for (const [key, value] of Object.entries(source)) {
+      const field = SERVER_FIELD_MAP[key];
+      if (!field || fieldErrors[field]) {
+        continue;
+      }
+      const message = toMessage(value);
+      if (message) {
+        fieldErrors[field] = message;
+      }
+    }
+  }
+  return fieldErrors;
 }
 
-type OnboardingFlowProps = {
-  open?: boolean;
-  /** Called after the profile is saved successfully. */
-  onComplete?: () => void;
-  /** Called when the user dismisses the flow (only used when `dismissible`). */
-  onClose?: () => void;
-  /** Onboarding is required by default; pass true to allow dismissal. */
-  dismissible?: boolean;
-};
+function isNetworkError(error: unknown) {
+  return error instanceof TypeError || (error instanceof Error && /fetch|network|offline/i.test(error.message));
+}
 
-export function OnboardingFlow({ open = true, onComplete, onClose, dismissible = false }: OnboardingFlowProps) {
+// Two-step patient onboarding (Figma 2545:2617). Prefills from the account and
+// patient profile, writes full_name to /auth/me/ and the remaining fields to
+// /profiles/me/, then refreshes the gate so RequireAuth sees profile_complete.
+export function OnboardingFlow({ onSubmit }: OnboardingFlowProps) {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const userQuery = useCurrentUser();
-  const accountQuery = useQuery({
-    queryKey: ["auth", "me", "onboarding"],
-    queryFn: authApi.me,
-    enabled: open,
-    retry: false,
-  });
-  const user = userQuery.data || accountQuery.data;
-
-  const profileQuery = useQuery({
-    queryKey: ["profile", "me", "patient"],
+  const patientProfile = useQuery({
+    queryKey: ["profile", "me", "patient", "gate"],
     queryFn: () => profilesApi.me<PatientProfile>(),
-    enabled: Boolean(user),
   });
+  const alreadyComplete = Boolean(patientProfile.data?.profile_complete);
+  const storedUser = useMemo(() => readStoredAuthUser(), []);
 
-  const [step, setStep] = useState(0);
-  const [direction, setDirection] = useState<"next" | "back">("next");
-  const [completed, setCompleted] = useState(false);
-  const [stepOneValues, setStepOneValues] = useState({ fullName: "", phoneNumber: "" });
-  const [accountFallback] = useState<Partial<User>>(() => {
-    if (typeof window === "undefined") {
-      return {};
+  const prefilledValues = useMemo<OnboardingInitialValues>(() => {
+    const profile = patientProfile.data;
+    const account = userQuery.data ?? storedUser;
+    const state = profile?.state && isStateName(profile.state) ? profile.state : "";
+    const lga = state && profile?.lga && isLgaForState(state, profile.lga) ? profile.lga : "";
+
+    return {
+      full_name: account?.full_name?.trim() || profile?.full_name?.trim() || "",
+      gender: isGenderValue(profile?.gender ?? "") ? profile?.gender : "",
+      age_range: isAgeRange(profile?.age_range ?? "") ? profile?.age_range : "",
+      state,
+      lga,
+    };
+  }, [patientProfile.data, storedUser, userQuery.data]);
+
+  useEffect(() => {
+    if (alreadyComplete) {
+      router.replace("/dashboard");
     }
-    const storedUser = getStoredAuthUser();
-    return storedUser;
-  });
-  const completeTimerRef = useRef<number | null>(null);
-  const form = useForm<OnboardingValues>({
-    resolver: zodResolver(onboardingSchema),
-    defaultValues: emptyValues,
-    mode: "onChange",
-    reValidateMode: "onChange",
-  });
-  // Prefill account fields as soon as auth is ready. The profile request can
-  // arrive later, but it should never block the first Continue action.
+  }, [alreadyComplete, router]);
+
+  const form = useOnboardingForm(prefilledValues);
+  const [step, setStep] = useState<StepNumber>(1);
+  const [pending, setPending] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [focusTarget, setFocusTarget] = useState<OnboardingField | null>(null);
+
+  // Focus a field after the step (and therefore its DOM) has committed. This
+  // handles server errors that belong to the other step without a same-handler
+  // requestAnimationFrame race.
   useEffect(() => {
-    const source = {
-      full_name: user?.full_name || accountFallback.full_name || "",
-      phone: user?.phone || accountFallback.phone || "",
-    };
-    if (!source.full_name && !source.phone) return;
-    const current = form.getValues();
-    const nextValues = {
-      ...current,
-      full_name: current.full_name || source.full_name,
-      phone: current.phone || source.phone,
-    };
-    form.reset(nextValues);
-    window.setTimeout(() => {
-      setStepOneValues({
-        fullName: nextValues.full_name || "",
-        phoneNumber: nextValues.phone || "",
-      });
-    }, 0);
-  }, [accountFallback.full_name, accountFallback.phone, form, user]);
-
-  useEffect(() => {
-    if (!accountQuery.data) return;
-    queryClient.setQueryData(authKeys.me, accountQuery.data);
-  }, [accountQuery.data, queryClient]);
-
-  const prefilledProfile = useRef(false);
-  useEffect(() => {
-    if (prefilledProfile.current || !profileQuery.data) return;
-    const profile = profileQuery.data;
-    const current = form.getValues();
-    const nextValues = {
-      ...current,
-      full_name: current.full_name || profile.full_name || "",
-      phone: current.phone || profile.phone || "",
-      age_range:
-        current.age_range || (profile.age_range as OnboardingValues["age_range"]) || ("" as OnboardingValues["age_range"]),
-      gender:
-        current.gender || (profile.gender as OnboardingValues["gender"]) || ("" as OnboardingValues["gender"]),
-      state: current.state || profile.state || "",
-      lga: current.lga || profile.lga || "",
-    };
-    form.reset(nextValues);
-    window.setTimeout(() => {
-      setStepOneValues({
-        fullName: nextValues.full_name || "",
-        phoneNumber: nextValues.phone || "",
-      });
-    }, 0);
-    prefilledProfile.current = true;
-  }, [profileQuery.data, form]);
-
-  useEffect(() => {
-    return () => {
-      if (completeTimerRef.current !== null) {
-        window.clearTimeout(completeTimerRef.current);
-      }
-    };
-  }, []);
-
-  const save = useMutation({
-    mutationFn: async (values: OnboardingValues) => {
-      const phone = normalizeNigerianPhoneInput(values.phone);
-      if (phone === null) {
-        form.setError("phone", { type: "validate", message: "Enter a valid phone number in 080... or +234... format." });
-        setDirection("back");
-        setStep(0);
-        throw new Error("Enter a valid phone number in 080... or +234... format.");
-      }
-
-      const account = await authApi.updateMe({ full_name: values.full_name.trim(), phone });
-      const profile = await profilesApi.updateMe<PatientProfile>({
-        gender: values.gender,
-        age_range: values.age_range,
-        state: values.state,
-        lga: values.lga,
-      });
-      return { account, profile };
-    },
-    onSuccess: async ({ account, profile }) => {
-      queryClient.setQueryData(authKeys.me, account);
-      queryClient.setQueryData(["auth", "me", "onboarding"], account);
-      queryClient.setQueryData(["profile", "me", "patient"], profile);
-      queryClient.setQueryData(["profile", "me", "patient", "gate"], profile);
-      await queryClient.invalidateQueries({ queryKey: authKeys.me });
-      await queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
-      setCompleted(true);
-      completeTimerRef.current = window.setTimeout(() => {
-        onComplete?.();
-      }, 1800);
-    },
-    onError: (error) => {
-      if (!(error instanceof ApiError) || !error.payload) {
-        return;
-      }
-
-      const payload = error.payload as Record<string, unknown>;
-      let firstInvalidStep: number | null = null;
-
-      (Object.keys(FIELD_STEP_INDEX) as Array<keyof OnboardingValues>).forEach((field) => {
-        const message = payloadMessage(payload[field]);
-        if (!message) {
-          return;
-        }
-        form.setError(field, { type: "server", message });
-        firstInvalidStep = firstInvalidStep ?? FIELD_STEP_INDEX[field] ?? null;
-      });
-
-      if (firstInvalidStep !== null) {
-        setDirection(firstInvalidStep < step ? "back" : "next");
-        setStep(firstInvalidStep);
-      }
-    },
-  });
-
-  const fullNameValue = stepOneValues.fullName;
-  const phoneNumberValue = stepOneValues.phoneNumber;
-  const fullNameValidation = useMemo(() => getFullNameValidation(fullNameValue), [fullNameValue]);
-  const fullNameComplete = fullNameValidation.valid;
-  const phoneComplete = isValidNigerianPhone(phoneNumberValue);
-  const canContinueStepOne = fullNameComplete && phoneComplete;
-  const stepOneDisabled = !canContinueStepOne;
-
-  const showFieldErrors = (messages: Partial<Record<keyof OnboardingValues, string>>) => {
-    let firstInvalidStep: number | null = null;
-
-    (Object.keys(messages) as Array<keyof OnboardingValues>).forEach((field) => {
-      const message = messages[field];
-      if (!message) {
-        return;
-      }
-      form.setError(field, { type: "validate", message });
-      firstInvalidStep = firstInvalidStep ?? FIELD_STEP_INDEX[field] ?? null;
+    if (!focusTarget) {
+      return;
+    }
+    const id = FIELD_IDS[focusTarget];
+    const raf = window.requestAnimationFrame(() => {
+      document.getElementById(id)?.focus();
+      setFocusTarget(null);
     });
+    return () => window.cancelAnimationFrame(raf);
+  }, [focusTarget]);
 
-    if (firstInvalidStep !== null) {
-      setDirection(firstInvalidStep < step ? "back" : "next");
-      setStep(firstInvalidStep);
+  const fullName = useWatch({ control: form.control, name: "full_name" }) ?? "";
+  const gender = useWatch({ control: form.control, name: "gender" }) ?? "";
+  const ageRange = useWatch({ control: form.control, name: "age_range" }) ?? "";
+  const state = useWatch({ control: form.control, name: "state" }) ?? "";
+  const lga = useWatch({ control: form.control, name: "lga" }) ?? "";
+  const { errors } = form.formState;
+
+  const stepOneValid = hasValidFullName(fullName) && isGenderValue(gender) && isAgeRange(ageRange);
+  const stepTwoValid = isLgaForState(state, lga);
+  const isStepOne = step === 1;
+
+  const setField = (field: OnboardingField, value: string) => {
+    setSubmitError(null);
+    // Validate only a field that is already showing an error so correcting it
+    // clears the message without surfacing new errors while the user types.
+    const hasError = Boolean(form.getFieldState(field, form.formState).error);
+    form.setValue(field, value, { shouldDirty: true, shouldTouch: true, shouldValidate: hasError });
+  };
+
+  const handleWelcomeChange = (field: keyof StepWelcomeValues, value: string) => {
+    setField(WELCOME_FIELD_MAP[field], value);
+  };
+
+  const handleWelcomeBlur = (field: keyof StepWelcomeValues) => {
+    void form.trigger(WELCOME_FIELD_MAP[field]);
+  };
+
+  const focusField = (field: OnboardingField) => {
+    window.requestAnimationFrame(() => {
+      document.getElementById(FIELD_IDS[field])?.focus();
+    });
+  };
+
+  const focusFirstInvalid = (fields: OnboardingField[]) => {
+    const firstInvalid = fields.find((field) => form.getFieldState(field, form.formState).error);
+    if (firstInvalid) {
+      focusField(firstInvalid);
     }
   };
 
-  const goNext = async () => {
-    if (step === 0) {
-      if (!canContinueStepOne) {
-        if (!fullNameComplete) {
-          form.setError("full_name", { type: "required", message: "Enter your first and last name." });
-        }
-        if (!phoneComplete) {
-          form.setError("phone", { type: "required", message: "Enter a valid 11-digit Nigerian phone number." });
-        }
+  const saveOnboarding = async (values: OnboardingValues) => {
+    const fullNameValue = values.full_name.trim();
+    const profilePayload = {
+      gender: values.gender,
+      age_range: values.age_range,
+      state: values.state,
+      lga: values.lga,
+    };
+
+    await authApi.updateMe({ full_name: fullNameValue });
+    const updatedProfile = await profilesApi.updateMe<PatientProfile>(profilePayload);
+
+    const account: User | undefined = userQuery.data ?? storedUser ?? undefined;
+    const nextAccount = account ? { ...account, full_name: fullNameValue } : undefined;
+    const nextProfile = {
+      ...(patientProfile.data ?? {}),
+      ...updatedProfile,
+      ...profilePayload,
+    } as PatientProfile;
+
+    if (nextAccount) {
+      queryClient.setQueryData(authKeys.me, nextAccount);
+      queryClient.setQueryData(["auth", "me", "onboarding"], nextAccount);
+    }
+    queryClient.setQueryData(["profile", "me", "patient"], nextProfile);
+    queryClient.setQueryData(["profile", "me", "patient", "gate"], nextProfile);
+
+    await queryClient.invalidateQueries({ queryKey: authKeys.me });
+    await queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
+
+    const refreshedProfile = queryClient.getQueryData<PatientProfile>(["profile", "me", "patient", "gate"]);
+    if (refreshedProfile && refreshedProfile.profile_complete === false) {
+      throw new Error(
+        "Your details were saved, but your profile is still incomplete. Please review the required fields and try again.",
+      );
+    }
+
+    router.replace("/dashboard");
+  };
+
+  const handleSaveError = (error: unknown) => {
+    if (error instanceof ApiError) {
+      const fieldErrors = extractFieldErrors(error.payload);
+      const entries = Object.entries(fieldErrors) as [OnboardingField, string][];
+      if (entries.length > 0) {
+        entries.forEach(([field, message]) => {
+          form.setError(field, { type: "server", message });
+        });
+        const firstField = entries[0][0];
+        setStep(FIELD_STEP[firstField]);
+        setFocusTarget(firstField);
         return;
       }
+      if (error.status === 401) {
+        setSubmitError("Your session has expired. Please sign in again.");
+        return;
+      }
+      setSubmitError(extractErrorMessage(error.payload) || "We could not save your details. Please try again.");
+      return;
+    }
+    if (isNetworkError(error)) {
+      setSubmitError("We couldn't reach Caretekk. Check your connection and try again.");
+      return;
+    }
+    setSubmitError(
+      error instanceof Error && error.message
+        ? error.message
+        : "We could not save your details. Please try again.",
+    );
+  };
 
-      form.clearErrors(["full_name", "phone"]);
-      form.setValue("full_name", fullNameValidation.trimmed, { shouldValidate: true, shouldDirty: true });
-      form.setValue("phone", phoneNumberValue, { shouldValidate: true, shouldDirty: true });
-      setDirection("next");
-      setStep((current) => current + 1);
+  const handleContinue = async () => {
+    if (pending) {
+      return;
+    }
+    setSubmitError(null);
+    const fields = isStepOne ? STEP_ONE_FIELDS : STEP_TWO_FIELDS;
+    const valid = await form.trigger(fields, { shouldFocus: false });
+    if (!valid) {
+      focusFirstInvalid(fields);
       return;
     }
 
-    const valid = await form.trigger(STEP_FIELDS[step], { shouldFocus: true });
-    if (!valid) return;
-    if (step < TOTAL_STEPS - 1) {
-      setDirection("next");
-      setStep((current) => current + 1);
-    } else {
-      const parsed = onboardingSchema.safeParse(form.getValues());
-      if (!parsed.success) {
-        const fieldMessages: Partial<Record<keyof OnboardingValues, string>> = {};
-        parsed.error.issues.forEach((issue) => {
-          const field = issue.path[0] as keyof OnboardingValues | undefined;
-          if (!field || !(field in FIELD_STEP_INDEX) || fieldMessages[field]) {
-            return;
-          }
-          fieldMessages[field] = firstMessage([issue.message]);
-        });
-        showFieldErrors(fieldMessages);
-        return;
-      }
-      save.mutate(parsed.data);
+    if (isStepOne) {
+      setStep(2);
+      return;
+    }
+
+    setPending(true);
+    try {
+      await (onSubmit ?? saveOnboarding)(form.getValues());
+    } catch (error) {
+      handleSaveError(error);
+    } finally {
+      setPending(false);
     }
   };
 
-  const goBack = () => {
-    if (step === 0) return;
-    setDirection("back");
-    setStep((current) => current - 1);
-  };
-
-  const isLastStep = step === TOTAL_STEPS - 1;
-
-  if (completed) {
-    return (
-      <ModalSheet
-        open={open}
-        dismissible={false}
-        title="Congratulations"
-        description="You have completed your profile."
-        className="sm:max-w-lg"
-      >
-        <div className="grid justify-items-center gap-5 py-4 text-center">
-          <div className="relative h-24 w-24 animate-pulse">
-            <span className="absolute left-1/2 top-0 h-10 w-10 -translate-x-1/2 rounded-full bg-[#DBEAFE]" />
-            <span className="absolute bottom-0 left-1/2 h-10 w-10 -translate-x-1/2 rounded-full bg-[#DBEAFE]" />
-            <span className="absolute left-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-[#EFF6FF]" />
-            <span className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-[#EFF6FF]" />
-            <span className="absolute left-1/2 top-1/2 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-[#2563EB] text-white shadow-[0_18px_42px_-26px_rgba(37,99,235,0.55)]">
-              <Check className="h-6 w-6" />
-            </span>
-          </div>
-          <p className="max-w-sm text-sm leading-6 text-slate-600">
-            Your care profile is ready. We are taking you to your dashboard now.
-          </p>
-        </div>
-      </ModalSheet>
-    );
+  if (alreadyComplete) {
+    return null;
   }
 
   return (
-    <ModalSheet
-      open={open}
-      dismissible={dismissible}
-      onClose={onClose}
-      header={<StepProgress current={step + 1} total={TOTAL_STEPS} labels={[...STEP_LABELS]} />}
-      title={STEP_LABELS[step]}
-      description={stepDescriptions[step]}
+    <OnboardingScreen
       footer={
-        <div className="grid gap-3">
-          {step === 0 ? (
-            <StepOneRequirements fullNameComplete={fullNameComplete} phoneComplete={phoneComplete} />
-          ) : null}
-          {step === 0 && stepOneDisabled ? (
-            <p className="text-center text-xs font-semibold text-ash-500">Complete all required fields to continue.</p>
-          ) : null}
-          <div className="flex items-center gap-3">
-            {step > 0 ? (
-              <Button type="button" variant="secondary" onClick={goBack} disabled={save.isPending}>
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Button>
-            ) : null}
-            <Button
-              type="button"
-              className={step === 0 && stepOneDisabled ? "flex-1 bg-ash-200 text-ash-500 shadow-none hover:bg-ash-200" : "flex-1"}
-              onClick={(event) => {
-                event.preventDefault();
-                void goNext();
-              }}
-              disabled={step === 0 ? stepOneDisabled : save.isPending}
-            >
-              {isLastStep ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  {save.isPending ? "Finishing..." : "Complete profile"}
-                </>
-              ) : (
-                <>
-                  Continue
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
+        <OnboardingFooter
+          showBack={!isStepOne}
+          onBack={() => {
+            setSubmitError(null);
+            setStep(1);
+          }}
+          submitFormId="onboarding-form"
+          continueDisabled={pending || (isStepOne ? !stepOneValid : !stepTwoValid)}
+          pending={pending}
+        />
       }
     >
-      <FormProvider {...form}>
-        <ErrorMessage error={save.error} context="profile" />
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            void goNext();
-          }}
-        >
-          <div key={step} className={direction === "next" ? "onboarding-step-next" : "onboarding-step-back"}>
-            {step === 0 ? (
-              <StepBasicInfo
-                onFullNameChange={(value) =>
-                  setStepOneValues((current) => ({
-                    ...current,
-                    fullName: value,
-                  }))
-                }
-                onPhoneChange={(value) =>
-                  setStepOneValues((current) => ({
-                    ...current,
-                    phoneNumber: value,
-                  }))
-                }
-              />
-            ) : step === 1 ? (
-              <StepPersonal />
-            ) : (
-              <StepLocation />
-            )}
+      <form
+        id="onboarding-form"
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleContinue();
+        }}
+      >
+        {submitError ? (
+          <div
+            role="alert"
+            className="mb-4 rounded-[12px] border border-danger-200 bg-danger-50 px-4 py-3 type-helper-text text-danger-700"
+          >
+            {submitError}
           </div>
-          {/* Allow Enter-to-submit without a visible button inside the scroll area */}
-          <button type="submit" className="hidden" aria-hidden="true" tabIndex={-1} />
-        </form>
-      </FormProvider>
-    </ModalSheet>
-  );
-}
+        ) : null}
 
-const stepDescriptions = [
-  "Let's confirm the basics so we can personalise your care.",
-  "A little about you to match you with the right care.",
-  "Where are you located? This helps us connect you with nearby providers.",
-];
-
-function StepOneRequirements({
-  fullNameComplete,
-  phoneComplete,
-}: {
-  fullNameComplete: boolean;
-  phoneComplete: boolean;
-}) {
-  return (
-    <div className="rounded-[8px] border border-ash-200 bg-ash-50 px-4 py-3 text-sm">
-      <p className="font-semibold text-ash-800">Complete the following to continue:</p>
-      <div className="mt-2 grid gap-1.5 text-ash-600">
-        <RequirementItem complete={fullNameComplete} completeText="Enter your first and last name" pendingText="Enter your first and last name" />
-        <RequirementItem complete={phoneComplete} completeText="Valid phone number" pendingText="Enter a valid phone number" />
-      </div>
-    </div>
-  );
-}
-
-function RequirementItem({
-  complete,
-  completeText,
-  pendingText,
-}: {
-  complete: boolean;
-  completeText: string;
-  pendingText: string;
-}) {
-  return (
-    <p className={complete ? "font-semibold text-primary" : "text-ash-600"}>
-      <span aria-hidden="true">{complete ? "[x]" : "[ ]"}</span> {complete ? completeText : pendingText}
-    </p>
+        {isStepOne ? (
+          <StepWelcome
+            values={{ fullName, gender, ageRange }}
+            errors={{
+              fullName: errors.full_name?.message,
+              gender: errors.gender?.message,
+              ageRange: errors.age_range?.message,
+            }}
+            onChange={handleWelcomeChange}
+            onBlur={handleWelcomeBlur}
+            disabled={pending}
+          />
+        ) : (
+          <StepBasicInfo
+            values={{ state, lga }}
+            errors={{ state: errors.state?.message, lga: errors.lga?.message }}
+            onChange={setField}
+            onBlur={(field) => {
+              void form.trigger(field);
+            }}
+            disabled={pending}
+          />
+        )}
+      </form>
+    </OnboardingScreen>
   );
 }

@@ -40,6 +40,8 @@ const nextConfig: NextConfig = {
       { source: "/audit", headers: protectedHeaders },
       { source: "/provider-ledger", headers: protectedHeaders },
       { source: "/provider-ledger/:path*", headers: protectedHeaders },
+      { source: "/onboarding", headers: protectedHeaders },
+      { source: "/onboarding/:path*", headers: protectedHeaders },
     ];
   },
 };

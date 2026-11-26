@@ -20,6 +20,20 @@ function storeAuthUser(user: User) {
   window.sessionStorage.setItem(STORED_AUTH_USER_KEY, JSON.stringify(user));
 }
 
+// Fallback for screens that mount before `authApi.me` resolves. The API
+// response is authoritative; this only fills a name the session already knows.
+export function readStoredAuthUser(): User | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const raw = window.sessionStorage.getItem(STORED_AUTH_USER_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function useCurrentUser() {
   return useQuery({
     queryKey: authKeys.me,

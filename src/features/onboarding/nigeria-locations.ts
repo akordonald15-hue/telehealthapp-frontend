@@ -2,7 +2,7 @@
 // and their Local Government Areas (774 LGAs total). Used by the onboarding
 // Location step to drive the State -> LGA dependent selects.
 
-export type NigeriaState = {
+type NigeriaState = {
   state: string;
   lgas: string[];
 };
