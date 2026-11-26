@@ -3,8 +3,9 @@
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import type { ReactNode } from "react";
+import { Controller, useForm } from "react-hook-form";
 
-import { Badge, Breadcrumbs, Button, Checkbox, Field, Input, PasswordInput, ProgressBar, Radio, Select, Textarea, Toggle } from "@/components/ds";
+import { Badge, Breadcrumbs, Button, Checkbox, Field, Input, PasswordInput, ProgressBar, Radio, Select, SelectMenu, Textarea, Toggle } from "@/components/ds";
 
 // Living reference for the Figma "DESIGN SYSTEM" page: every token and component in its states.
 // Compare this page with Figma when changing src/components/ds or the tokens in globals.css.
@@ -47,6 +48,13 @@ const textStyles = [
 
 const shadows = ["shadow-100", "shadow-200", "shadow-300", "shadow-400", "shadow-500", "shadow-600", "shadow-700", "shadow-800"] as const;
 
+const dropdownOptions = [
+  { value: "lagos", label: "Lagos" },
+  { value: "abia", label: "Abia" },
+  { value: "akwa-ibom", label: "Akwa Ibom" },
+  { value: "fct", label: "Federal Capital Territory" },
+];
+
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="grid gap-5 rounded-[24px] border border-grey-200 bg-white p-6 shadow-200">
@@ -59,6 +67,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export function DesignSystemShowcase() {
   const [toggleOn, setToggleOn] = useState(true);
   const [toggleOff, setToggleOff] = useState(false);
+  const [dropdownValue, setDropdownValue] = useState("akwa-ibom");
 
   return (
     <main className="mx-auto grid max-w-6xl gap-6 px-4 py-10">
@@ -114,7 +123,7 @@ export function DesignSystemShowcase() {
           <div key={variant} className="grid gap-3">
             <p className="type-body-sm capitalize text-grey-500">{variant}</p>
             <div className="flex flex-wrap items-center gap-3">
-              {(["xs", "sm", "compact", "md", "lg"] as const).map((size) => (
+              {(["xs", "sm", "compact", "md", "lg", "xl"] as const).map((size) => (
                 <Button key={size} variant={variant} size={size}>
                   Button <ArrowRight />
                 </Button>
@@ -137,6 +146,12 @@ export function DesignSystemShowcase() {
           </Field>
           <Field label="Error" error="Error text">
             <Input defaultValue="ada@" />
+          </Field>
+          <Field label="Valid" success="Success text">
+            <Input defaultValue="ada@example.com" />
+          </Field>
+          <Field label="Valid password" success="Success text">
+            <PasswordInput defaultValue="correct-horse" />
           </Field>
           <Field label="Disabled">
             <Input placeholder="Placeholder" disabled />
@@ -162,6 +177,24 @@ export function DesignSystemShowcase() {
         </div>
       </Section>
 
+      <Section title="Dropdown menu">
+        <div className="grid gap-5 md:grid-cols-2">
+          <Field label="Default" labelAs="div">
+            <SelectMenu options={dropdownOptions} placeholder="Select a state" />
+          </Field>
+          <Field label="Selected" labelAs="div">
+            <SelectMenu options={dropdownOptions} value={dropdownValue} onChange={setDropdownValue} />
+          </Field>
+          <Field label="Error" error="Select a state." labelAs="div">
+            <SelectMenu options={dropdownOptions} placeholder="Select a state" />
+          </Field>
+          <Field label="Disabled" labelAs="div">
+            <SelectMenu options={dropdownOptions} value="" disabled placeholder="Select a state" />
+          </Field>
+          <DropdownFormDemo />
+        </div>
+      </Section>
+
       <Section title="Badges">
         <div className="flex flex-wrap gap-2">
           <Badge tone="blue">Confirmed</Badge>
@@ -178,6 +211,7 @@ export function DesignSystemShowcase() {
           <div className="grid gap-3">
             <Checkbox label="Default" />
             <Checkbox label="Selected" defaultChecked />
+            <Checkbox label="Invalid" aria-invalid />
             <Checkbox label="Disabled" disabled />
           </div>
           <div className="grid gap-3">
@@ -198,5 +232,28 @@ export function DesignSystemShowcase() {
         <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Appointments", href: "/appointments" }, { label: "Details" }]} />
       </Section>
     </main>
+  );
+}
+
+function DropdownFormDemo() {
+  const { control } = useForm<{ state: string }>({ defaultValues: { state: "lagos" } });
+
+  return (
+    <Field label="React Hook Form" labelAs="div">
+      <Controller
+        control={control}
+        name="state"
+        render={({ field }) => (
+          <SelectMenu
+            options={dropdownOptions}
+            value={field.value}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            ref={field.ref}
+            placeholder="Select a state"
+          />
+        )}
+      />
+    </Field>
   );
 }

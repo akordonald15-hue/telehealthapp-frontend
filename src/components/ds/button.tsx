@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 // Figma "DESIGN SYSTEM" → Button. Styles: primary = Filled, secondary = Outline, ghost = Clear.
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "dark";
 // Figma sizes: xs = Tiny (24px), sm = Small (32px), md = Large (48px), lg = Giant (56px).
-// `compact` is Figma's Medium (40px).
-type ButtonSize = "xs" | "sm" | "compact" | "md" | "lg";
+// `compact` is Figma's Medium (40px). `xl` (64px, radius 16) is the sign-up primary action; Figma draws 65px.
+type ButtonSize = "xs" | "sm" | "compact" | "md" | "lg" | "xl";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -19,6 +19,7 @@ const sizeStyles: Record<ButtonSize, string> = {
   compact: "min-h-10 rounded-[12px] px-4 text-sm leading-4 [&_svg]:size-4",
   md: "min-h-12 rounded-[12px] px-5 text-base leading-5 [&_svg]:size-5",
   lg: "min-h-14 rounded-[12px] px-6 text-lg leading-6 [&_svg]:size-5",
+  xl: "min-h-16 rounded-[16px] px-[18px] text-lg leading-6 [&_svg]:size-5",
 };
 
 const variantStyles: Record<ButtonVariant, string> = {

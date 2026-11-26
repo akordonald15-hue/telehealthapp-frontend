@@ -1,13 +1,17 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import type { InputHTMLAttributes, Ref, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
 // Figma "DESIGN SYSTEM" → Input, Style=Filled. Hover and focus tint the field; aria-invalid shows the Error state.
+// `tone="success"` shows the Valid state (success-500 border, success-50 fill). Error always wins over success.
 // fieldSize "lg" (default) = the 56px field used on the app screens; "md" = Figma Medium (40px) for compact spots.
 type FieldSize = "md" | "lg";
+type FieldTone = "default" | "success";
 type SizeProp = { fieldSize?: FieldSize };
+type ToneProp = { tone?: FieldTone };
+type InputProps = InputHTMLAttributes<HTMLInputElement> & SizeProp & ToneProp & { ref?: Ref<HTMLInputElement> };
 
 const fieldSizes: Record<FieldSize, string> = {
   lg: "min-h-14 rounded-[16px] px-[18px] text-base leading-5",
@@ -17,22 +21,30 @@ const fieldSizes: Record<FieldSize, string> = {
 const baseField =
   "w-full border-[1.5px] border-grey-200 bg-grey-50 font-manrope text-black-500 outline-none transition placeholder:text-grey-400 hover:border-grey-400 hover:bg-primary-50 focus:border-primary-500 focus:bg-primary-50 disabled:cursor-not-allowed disabled:border-grey-300 disabled:bg-grey-200 disabled:text-grey-400 aria-[invalid=true]:border-danger-500 aria-[invalid=true]:bg-danger-50";
 
-export function Input({ className, fieldSize = "lg", ...props }: InputHTMLAttributes<HTMLInputElement> & SizeProp) {
+const successField = "border-success-500 bg-success-50 hover:border-success-500 focus:border-success-500";
+
+export function Input({
+  className,
+  fieldSize = "lg",
+  tone = "default",
+  ...props
+}: InputProps) {
   return (
     <input
-      className={cn(baseField, fieldSizes[fieldSize], className)}
+      className={cn(baseField, fieldSizes[fieldSize], tone === "success" && successField, className)}
       {...props}
     />
   );
 }
 
-export function PasswordInput({ className, ...props }: InputHTMLAttributes<HTMLInputElement> & SizeProp) {
+export function PasswordInput({ className, tone, ...props }: InputProps) {
   const [visible, setVisible] = useState(false);
 
   return (
     <div className="relative">
       <Input
         className={cn("pr-14", className)}
+        tone={tone}
         type={visible ? "text" : "password"}
         {...props}
       />

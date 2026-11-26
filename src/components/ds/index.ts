@@ -8,3 +8,4 @@ export { Checkbox, Radio, Toggle, radioInputClassName } from "./choice";
 export { Field } from "./field";
 export { Input, PasswordInput, Select, Textarea } from "./input";
 export { ProgressBar } from "./progress-bar";
+export { SelectMenu } from "./select-menu";
